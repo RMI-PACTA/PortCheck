@@ -363,6 +363,7 @@ comparisonlist <- function(noFunds, EQData,CBData){
 # ----------- Port Filter Funds ------------------ #
 Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName){
   
+  if (exists(FundList)==TRUE){
   FundsListData<- FundList
   FundsListData$InvestorName<- gsub(" ","",FundsListData$InvestorName)
   FundsListData$PortfolioName<- gsub(" ","",FundsListData$PortfolioName)
@@ -381,6 +382,8 @@ Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName){
      # FundsDataPort <- subset(FundsDataAll, FundsDataAll$PortName %in% FundsListPort$FundISINName)
     
   }else{
+    FundsDataPort <- "NoFunds"
+  }}else{
     FundsDataPort <- "NoFunds"
   }
   

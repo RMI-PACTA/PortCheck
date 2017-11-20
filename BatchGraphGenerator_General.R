@@ -96,9 +96,14 @@ OGCarbonBudget <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/
 # Batch related Portfolio & Fund-Data Results
 # PortfolioList <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"_PortfolioList.csv"),stringsAsFactors = FALSE)
 PortfolioBreakdown <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Portfolio_Overview_Piechart.csv"),stringsAsFactors = FALSE)
+
 FundList <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
-FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
-FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
+if ("FundList"==TRUE){
+  FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
+  FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
+  }else{
+  FundList <- "No Funds"
+}
 
 PortfolioBreakdown$InvestorName<- gsub("[ _.-]","",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$PortfolioName)
