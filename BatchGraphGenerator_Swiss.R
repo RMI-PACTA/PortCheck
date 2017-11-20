@@ -35,8 +35,9 @@ UserName <- sub("/.*","",sub(".*Users/","",getwd()))
 ResultsLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/")
 DataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
 CodeLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/03_ReportingCode/")
+GitHubLocation <- paste0("C:/Users/",UserName,"/Documents/GitHub/")
 
-source(paste0(CodeLocation, "CodeFunctions_v8.R"))
+source(paste0(GitHubLocation, "PortCheck/CodeFunctions.R"))
 
 # Read in Parameter File
 PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
@@ -245,7 +246,7 @@ if (BatchName %in% c("Swiss","SwissAll")){ResultsLocFolder <- "04_Swiss/CompanyR
 # ---------
 GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V11_extra.csv"), stringsAsFactors = FALSE)
-template <- (readLines(paste0(CodeLocation,"01_ReportTemplates/SwissTemplateInput.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GitHubLocation,"Templates/SwissTemplateInput_v2.tex"),encoding="UTF-8"))
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose, Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 

@@ -34,8 +34,9 @@ library(matrixStats)
 UserName <- sub("/.*","",sub(".*Users/","",getwd()))
 DataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
 CodeLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/03_ReportingCode/")
+GitHubLocation <- paste0("C:/Users/",UserName,"/Documents/GitHub/")
 
-source(paste0(CodeLocation, "CodeFunctions_v8.R"))
+source(paste0(GitHubLocation, "PortCheck/CodeFunctions.R"))
 
 # Read in Parameter File
 PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
@@ -276,7 +277,7 @@ ResultsLocFolder <- ResultsLocation
 # ---------
 GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralGraphTranslation_V1.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
-template <- (readLines(paste0(CodeLocation,"01_ReportTemplates/GeneralTemplateInput_V2.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GitHubLocation,"Templates/GeneralTemplateInput_v1.tex"),encoding="UTF-8"))
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 
