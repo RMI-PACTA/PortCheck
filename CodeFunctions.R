@@ -767,7 +767,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   PORTFOLIONAME <- toupper(ReportName)
   
   # Copy in the template for the report
-  text <- as.data.frame(template)  
+  text <- as.data.frame(template,stringsAsFactors = FALSE)  
   colnames(text) <- "text"
   
   # Add in numerics/conditionals
@@ -827,7 +827,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     endpage <- which(grepl(paste0(removesectors[i],"e"), text$text))
     
     removelist <- startpage:endpage
-    text <- as.data.frame(text[-removelist,])
+    text <- as.data.frame(text[-removelist,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
     }}
   
@@ -839,11 +839,11 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     
     removelist <- lapply(1:length(cbpages), function(x) c(cbpages[c(x)]:cbpageend[c(x)]))
     removelist <- melt(removelist[1:length(cbpages)])
-    text <- as.data.frame(text[-removelist$value,])
+    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
     
     piepage <- which(grepl("CBCoverage",text$text))
-    text <- as.data.frame(text[-piepage,])
+    text <- as.data.frame(text[-piepage,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
   }
   
@@ -855,21 +855,25 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     
     removelist <- lapply(1:length(cbpages), function(x) c(cbpages[c(x)]:cbpageend[c(x)]))
     removelist <- melt(removelist[1:length(cbpages)])
-    text <- as.data.frame(text[-removelist$value,])
+    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
     
     piepage <- which(grepl("EQCoverage",text$text))
-    text <- as.data.frame(text[-piepage,])
+    text <- as.data.frame(text[-piepage,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
     
-    # %REnewables page
+    # Renewables page
     repages <- which(grepl("RenewaddsOut",text$text))
     repageend <- which(grepl("RenewAddsOutEnd",text$text))
     
     removelist <- lapply(1:length(repages), function(x) c(repages[c(x)]:repageend[c(x)]))
     removelist <- melt(removelist[1:length(repages)])
-    text <- as.data.frame(text[-removelist$value,])
+    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
+    
+    renewvspace<- which(grepl("renewspacingworkaround",text$text))
+    text$text[renewvspace] <- "\t\\vspace{-2.9cm} %renewspacingworkaround"
+    
   }
   
   # removes renewable chart 
@@ -881,6 +885,9 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     removelist <- melt(removelist[1:length(repages)])
     text <- as.data.frame(text[-removelist$value,])
     colnames(text) <- "text"
+    
+    renewvspace<- which(grepl("renewspacingworkaround",text$text))
+    text$text[renewvspace] <- gsub(".9cm","2.9cm",text$text[renewvspace])
   }
   
   # removes Fund Page
