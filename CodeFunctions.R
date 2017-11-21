@@ -363,7 +363,7 @@ comparisonlist <- function(noFunds, EQData,CBData){
 # ----------- Port Filter Funds ------------------ #
 Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName){
   
-  if (exists(FundList)==TRUE){
+  if (typeof(FundList)=="list"){
   FundsListData<- FundList
   FundsListData$InvestorName<- gsub(" ","",FundsListData$InvestorName)
   FundsListData$PortfolioName<- gsub(" ","",FundsListData$PortfolioName)
@@ -402,8 +402,8 @@ filterports <- function(PortData, PortfolioInfo, BrandType){
 # ------------ Company Comparison Data ------ #
 company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose){
   
-  # ChartType <- "CB"
-  # BatchTestComparison <- CBPortfolioResultsRaw
+  # ChartType <- "EQ"
+  # BatchTestComparison <- EQPortfolioResultsRaw
 
   Results <- BatchTestComparison
   # Results <- subset(Results, Results$)
