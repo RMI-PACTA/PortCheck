@@ -770,6 +770,25 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   text <- as.data.frame(template,stringsAsFactors = FALSE)  
   colnames(text) <- "text"
   
+  
+  removetextlines <- function(handlename){
+    startpage <- which(grepl(paste0(handlename,"S"),text$text))
+    endpage <- which(grepl(paste0(handlename,"E"),text$text))
+       
+         if (length(startpage) >0 ){
+           
+             removelist <- lapply(1:length(startpage), function(x) c(startpage[c(x)]:endpage[c(x)]))
+             removelist <- melt(removelist[1:length(startpage)])
+             text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
+             colnames(text) <- "text"
+             }else{
+                 removeline <- which(grepl(handlename,text$text))
+                 text <- as.data.frame(text[-removeline,],stringsAsFactors =FALSE)
+                 colnames(text) <- "text"
+               }
+       return(text)
+     }
+  
   # Add in numerics/conditionals
   # Changes the more or less for each Technology
   if (nrow(EQReportData)>0){
@@ -823,102 +842,50 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   # removes the sectors  
   if(length(removesectors)>0){
     for (i in 1:length(removesectors)){
-    startpage <- which(grepl(paste0(removesectors[i],"s"), text$text))
-    endpage <- which(grepl(paste0(removesectors[i],"e"), text$text))
-    
-    removelist <- startpage:endpage
-    text <- as.data.frame(text[-removelist,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
+      text <- removetextlines(removesectors[i])
     }}
   
   # removes bond pages
   if (nrow(CBReportData)==0){
     # pages <- c(9,11,13,15)
-    cbpages <- which(grepl("CBPages",text$text))
-    cbpageend <- which(grepl("CBPageEnd",text$text))
-    
-    removelist <- lapply(1:length(cbpages), function(x) c(cbpages[c(x)]:cbpageend[c(x)]))
-    removelist <- melt(removelist[1:length(cbpages)])
-    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
-    
-    piepage <- which(grepl("CBCoverage",text$text))
-    text <- as.data.frame(text[-piepage,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
+    text <- removetextlines("CBPage")
+    text <- removetextlines("CBPie")
+    text <- removetextlines("CBCoverage")
   }
   
   # removes equity pages
   if (nrow(EQReportData)==0){
     # pages <- c(9,11,13,15)
-    cbpages <- which(grepl("EQPages",text$text))
-    cbpageend <- which(grepl("EQPageEnd",text$text))
-    
-    removelist <- lapply(1:length(cbpages), function(x) c(cbpages[c(x)]:cbpageend[c(x)]))
-    removelist <- melt(removelist[1:length(cbpages)])
-    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
-    
-    piepage <- which(grepl("EQCoverage",text$text))
-    text <- as.data.frame(text[-piepage,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
-    
-    # Renewables page
-    repages <- which(grepl("RenewaddsOut",text$text))
-    repageend <- which(grepl("RenewAddsOutEnd",text$text))
-    
-    removelist <- lapply(1:length(repages), function(x) c(repages[c(x)]:repageend[c(x)]))
-    removelist <- melt(removelist[1:length(repages)])
-    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
+    text <- removetextlines("EQPage")
+    text <- removetextlines("EQPie")
+    text <- removetextlines("EQCoverage")
+    text <- removetextlines("RenewAddsOut")
     
     renewvspace<- which(grepl("renewspacingworkaround",text$text))
     text$text[renewvspace] <- "\t\\vspace{-2.9cm} %renewspacingworkaround"
-    
   }
   
   # removes renewable chart 
   if (RenewAdds==0 & nrow(EQReportData)>0){
-    repages <- which(grepl("RenewaddsOut",text$text))
-    repageend <- which(grepl("RenewAddsOutEnd",text$text))
-    
-    removelist <- lapply(1:length(repages), function(x) c(repages[c(x)]:repageend[c(x)]))
-    removelist <- melt(removelist[1:length(repages)])
-    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-    colnames(text) <- "text"
-    
+    text <- removetextlines("RenewAddsOut")
+
     renewvspace<- which(grepl("renewspacingworkaround",text$text))
     text$text[renewvspace] <- gsub(".9cm","2.9cm",text$text[renewvspace])
   }
   
   # removes Fund Page
   if (typeof(FundsInPort)!="list"){
-    fundpages <- which(grepl(paste0("FundCHECK"), text$text))
-    fundpageend<-fundpages+10
-    
-    removelist <- lapply(1, function(x) c(fundpages[c(x)]:fundpageend[c(x)]))
-    removelist <- melt(removelist[1]) 
-    text <- as.data.frame(text[-removelist$value,])
-    colnames(text) <- "text"
+    text <- removetextlines("FundCheck")
   }
   
   # removes Other Sector Pages - materials
   if ((OtherSectors$Steel+OtherSectors$Cement==0)){
-    sectorpages <- which(grepl(paste0("StartOtherSectorsMaterial"), text$text))
-    sectorpagesend <- which(grepl(paste0("EndOtherSectorsMaterial"), text$text))
-    
-    removelist <- sectorpages:sectorpagesend
-    text <- as.data.frame(text[-removelist,])
-    colnames(text) <- "text"
+    text <- removetextlines("OtherSectorsMaterial")
   }
   
   # removes Other Sector Pages - transportation
   if ((OtherSectors$Aviation+OtherSectors$Shipping==0)){
-    sectorpages <- which(grepl(paste0("StartOtherSectorsTransport"), text$text))
-    sectorpagesend <- which(grepl(paste0("EndOtherSectorsTransport"), text$text))
-    
-    removelist <- sectorpages:sectorpagesend
-    text <- as.data.frame(text[-removelist,])
-    colnames(text) <- "text"
+    text <- removetextlines("OtherSectorsTransport")
   }  
   
   # Set Report Language
@@ -942,7 +909,6 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   text$text <- gsub("SAMPLEPORT",PORTFOLIONAME,text$text)
   text$text <- gsub("CO2","CO\\\\textsubscript{2}",text$text)
   text$text <- gsub("Â°","°",text$text)
-  # text$text <- gsub("Ã¤","?",text$text)
   
   if (Languagechoose == "DE"){
     text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÄGLICHKEITS-PILOTTEST"
