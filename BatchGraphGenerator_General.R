@@ -315,7 +315,7 @@ ToTest2 <- which(TestList$InvestorName %in% b)
 # Loop through Portfolios
 #--------
 # for (i in 6:nrow(TestList)){
-  for (i in 4:nrow(TestList)){
+  for (i in 1:nrow(TestList)){
   
   # ------
   # Setting Directory and Getting Results
@@ -378,6 +378,7 @@ ToTest2 <- which(TestList$InvestorName %in% b)
     if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
   
   
+  if (nrow(EQCombin)+nrow(CBCombin) >0){
   #------ Specify Language and Load Report ------ 
   Languagechoose =  ParameterFile$Languageselect
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
@@ -387,7 +388,8 @@ ToTest2 <- which(TestList$InvestorName %in% b)
   if(!dir.exists(file.path(LanguageDirectory))){dir.create(file.path(LanguageDirectory), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
   setwd(LanguageDirectory)
       
-  tryCatch({
+  
+tryCatch({
     
     # -------
     # Swiss Charts
@@ -495,7 +497,9 @@ ToTest2 <- which(TestList$InvestorName %in% b)
     CBReportData<-report_data("CB",CBCombin, CBExposureRange,CBAUMDatarange,CBRanks,CBPortSnapshot,CompanyDomicileRegionchoose, BenchmarkRegionchoose,Scenariochoose, Startyear,PortfolioName)
 
     report(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData,FundsInPort,OtherSectors,mini_chart_list,RenewAdds=plot_51,Languagechoose)
-  })
+})}else{
+    print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
+  }
   
   write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
   write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
