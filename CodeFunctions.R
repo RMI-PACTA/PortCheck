@@ -883,7 +883,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     
     removelist <- lapply(1:length(repages), function(x) c(repages[c(x)]:repageend[c(x)]))
     removelist <- melt(removelist[1:length(repages)])
-    text <- as.data.frame(text[-removelist$value,])
+    text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
     colnames(text) <- "text"
     
     renewvspace<- which(grepl("renewspacingworkaround",text$text))
@@ -971,12 +971,12 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   # Create the PDF
   knit2pdf(paste0(LanguageDirectory,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
   
-  # Delete remaining files and ReportGraphics Folder 
+  # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
   excessfileendings <- c(".log",".rnw",".tex",".aux")
   file.remove(paste0(TemplateNameNew,excessfileendings))
   file.remove("FigureList.txt")
-  
+
   # Rename output file
   if (InvestorName == PortfolioName){
     file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
@@ -3000,7 +3000,7 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
   
   # combin <- EQCombin
   # PortSnapshot <- EQPortSnapshot
-  # combin <-  CBCombin
+  # combin <-  EQCombin
   # PortSnapshot<-CBPortSnapshot
   
   if(ChartType=="EQ"){

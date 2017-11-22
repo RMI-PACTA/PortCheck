@@ -280,9 +280,16 @@ ResultsLocFolder <- ResultsLocation
 # ------
 # Translation and Report Inputs
 # ---------
-GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralGraphTranslation_V1.csv"), stringsAsFactors = FALSE)
-ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
+# GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralGraphTranslation_V1.csv"), stringsAsFactors = FALSE)
+# ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
+
+GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
+ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)
+
 template <- (readLines(paste0(GitHubLocation,"Templates/GeneralTemplateInput_v1.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GitHubLocation,"Templates/SwissTemplateInput_v2.tex"),encoding="UTF-8"))
+
+
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 
@@ -308,7 +315,7 @@ ToTest2 <- which(TestList$InvestorName %in% b)
 # Loop through Portfolios
 #--------
 # for (i in 6:nrow(TestList)){
-  for (i in 1:nrow(TestList)){
+  for (i in 4:nrow(TestList)){
   
   # ------
   # Setting Directory and Getting Results

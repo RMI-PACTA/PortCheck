@@ -109,6 +109,7 @@ PortsToTest <- unique(rbind(EQPortsToTest,CBPortsToTest))
 # List of all Investors and Portfolios, short and long
 TestList <- FundPortcheck(PortsToTest,PortfolioList)
 write.csv(TestList,paste0(ResultsLocation,"04_Swiss/TestList.csv"),row.names = FALSE)
+# TestList<- read.csv(paste0(ResultsLocation,"04_Swiss/TestList.csv"),stringsAsFactors = F)
 
 # Investor Information including Type (PK, V; In Switzerland, Outside)
 InvestorInfo <- read.csv(paste0(ResultsLocation,"04_Swiss/FolderNAME_CompanyNAME.csv"))#,stringsasFactors = FALSE)
@@ -160,6 +161,9 @@ PortfolioList <- TestList$PortName[TestList$Type %in% c("Investor","Portfolio")]
 InvestorList <- TestList$PortName[TestList$Type %in% c("Investor","InvestorMPs")]
 EQPortfolioResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% PortfolioList,]
 EQInvestorResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% InvestorList,]
+# 
+# EQPortfolioResultsRaw <- EQBatchTest
+# EQInvestorResultsRaw <- EQBatchTest
 
 EQPortfolioResults <- company_comparison("EQ",EQPortfolioResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
 EQPortfolioRanks <- EQPortfolioResults[[1]]
@@ -190,6 +194,10 @@ EQWMPortfolioCoverageWeight <- EQInvestorCoverageWeights[EQInvestorCoverageWeigh
 
 CBPortfolioResultsRaw <- CBBatchTest[CBBatchTest$PortName %in% PortfolioList,]
 CBInvestorResultsRaw <- CBBatchTest[CBBatchTest$PortName %in% InvestorList,]
+# 
+# CBPortfolioResultsRaw <- CBBatchTest
+# CBInvestorResultsRaw <- CBBatchTest
+
 
 CBPortfolioResults <- company_comparison("CB",CBPortfolioResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
 CBPortfolioRanks <- CBPortfolioResults[[1]]
@@ -245,7 +253,7 @@ if (BatchName %in% c("Swiss","SwissAll")){ResultsLocFolder <- "04_Swiss/CompanyR
 # Translation and Report Inputs
 # ---------
 GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
-ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V11_extra.csv"), stringsAsFactors = FALSE)
+ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)
 template <- (readLines(paste0(GitHubLocation,"Templates/SwissTemplateInput_v2.tex"),encoding="UTF-8"))
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose, Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
@@ -256,12 +264,12 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # Select Portfolio to Run
 #------
 
-portnames <- c("SwissLife")
+portnames <- c("SIX MFP")
 
 ToTest2 <- which(TestList$InvestorName %in% portnames)
 # ToTest2 <- c(107)
 
-i=162
+i=146
 
 #-------
 # Loop through Portfolios
