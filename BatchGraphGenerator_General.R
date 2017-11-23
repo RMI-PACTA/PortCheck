@@ -317,7 +317,7 @@ ToTest2 <- which(TestList$InvestorName %in% b)
 # Loop through Portfolios
 #--------
 # for (i in 6:nrow(TestList)){
-for (i in 19:nrow(TestList)){
+for (i in 1:nrow(TestList)){
   
   # ------
   # Setting Directory and Getting Results
