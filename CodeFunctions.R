@@ -191,6 +191,7 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
     
     dfall <- subset(BatchTest, Type %in% PortfolioType & Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose)
     dfall <- subset(dfall, !dfall$PortName %in% c("Market_Benchmark","GlobalBondUniverse","MetaPortfolio","MetaPortfolio_MetaPortfolio"))
+    if (nrow(dfall)>0){
     # Fossil Fuels
     dfFF <- subset(dfall, Sector %in% c("Oil&Gas","Coal"))
     
@@ -252,6 +253,9 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
     
     Results <- subset(dfallsectors, select = c("PortName","Technology","CoverageWeight","SectorWeight", "PortfolioAUMAnalyzed"))
     Results <- rename(Results, c("PortfolioAUMAnalyzed"="PortAUM"))
+    }else{
+      Results <- "NoResults"
+    }
     
   }
   
@@ -273,14 +277,16 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
   
   
   # Weighted mean with port AUM 
-  
+  if (Results != "NoResults"){
   WeightedResults <- ddply(Results, .(Technology),summarise, CoverageWeight= weighted.mean(CoverageWeight,PortAUM,na.rm = TRUE))
   WeightedResults$CoverageWeight <- WeightedResults$CoverageWeight/sum(WeightedResults$CoverageWeight)  
   WeightedResults$PortName <- "WeightedResults" 
   
   ResultsDF <- subset(Results, select = c("PortName","Technology","CoverageWeight"))
   ResultsDF <- rbind(ResultsDF,WeightedResults)
-  
+  }else{
+    ResultsDF<- "NoResults"
+  }
   
   
   
@@ -628,7 +634,24 @@ matchOS <- function(OSdata, PortSnapshot){
 }
 
 
-
+# ------------ Sector Selector
+SectorSelect <- function(TechToPlot){
+  SectorToPlot <- "None"
+  if (TechToPlot %in% c("RenewablesCap","HydroCap", "NuclearCap","CoalCap","GasCap")){
+    SectorToPlot <- "Power" 
+  }
+  if (TechToPlot %in% c("ICE","Hybrid", "Electric")){
+    SectorToPlot <- "Automotive" 
+  }
+  if (TechToPlot %in% c("Coal","Oil","Gas")){
+    SectorToPlot <- "Fossil Fuels"
+  }
+  if(TechToPlot %in% c("Fossil Fuels","Automotive","Power")){
+    SectorToPlot <- TechToPlot
+  }
+  
+  return(SectorToPlot) 
+}
 
 #-------- Top 5 companies -------
 top5s <- function(ProdSnapshot,PortSnapshot){
@@ -648,6 +671,108 @@ top5s <- function(ProdSnapshot,PortSnapshot){
   dfPortProd <- dfPortProd[dfPortProd$Production != 0, ]
 
 
+}
+
+
+#-------- Graph List --------
+# Need a check to see which graphs should be plotted and therefore incorporated into the report
+# GraphList <- function(EQCombin,CBCombin){
+#   # Output is a check list that reads whether a graph should be printed or not... 
+#   
+#   TechList <- c("RenewablesCap","HydroCap", "NuclearCap","CoalCap","GasCap","ICE","Hybrid", "Electric","Coal","Oil","Gas")
+#   SectorList <- c("Power","Automotive","Fossil Fuels")
+#   
+#   
+#   
+#   
+#   
+#   
+#   
+#   
+#   # Line Charts
+#   # If there is production in the sector - print the graphs
+#   # If no production, don't print any graphs
+#   # Data Frame - Graph Type; Sector; Technology;EQProduction;Print
+#   # df <- as.data.frame(TechList)
+#   # df$Sector <- lapply(df$TechList, function(x) SectorSelect(x))
+#   # df$GraphType <- "LineGraph"
+#   # 
+#   # #EQ Checks
+#   # prodcheck <- function(combin){
+#   #   combin <- rename(combin, c("WtProduction"="Production"),warn_missing = F)
+#   #   combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose & combin$CompanyDomicileRegion == CompanyDomicileRegionchoose, select = c("Sector","Technology","Production")) 
+#   #   # prodsectors <- ddply(combinsector, .(Sector),summarise, Production=sum(Production,na.rm = TRUE))
+#   #   combinsector <- combinsector %>% complete(Technology = TechList, fill = list(Production = 0))
+#   #   combinsector$Sector <- t(data.frame(lapply(combinsector$Technology, function(x) SectorSelect(x))))
+#   #   prodsectors <- aggregate(Production ~ Sector, data = combinsector, function(x) sum(x, na.rm = T))
+#   # 
+#   #   prodsectors <- lapply(prodsectors, colnames(prodsectors),function(x))
+#   #   
+#   #   return (prodsectors)   
+#   # }
+#   # 
+#   # EQSecprod <- prodcheck(EQCombin)
+#   # EQSecprod$ChartType <- "EQ"
+#   # CBSecprod <- prodcheck(CBCombin)
+#   # CBSecprod$ChartType <- "CB"
+#   # 
+#   # SectorProduction <- rbind(EQSecprod,CBSecprod)
+#   # 
+#   # 
+#   # dfEQ <- df 
+#   # dfEQ$ChartType <- "EQ"
+#   # 
+#   # dfEQ$Plot <- 0
+#   # dfEQ <- merge(dfEQ,EQSecprod, by= "Sector")
+#   
+#   
+#   
+#   
+#   # EQ/CB Pie charts 
+#   # Delete the section if there is no chart
+#   
+#   
+#   # Renewable Energy Additions 
+#   
+#   return(SectorProduction)
+#   
+# }
+
+# ----Sector Productions
+
+SectorProduction <- function(combin,ChartType){
+  
+  TechList <- c("RenewablesCap","HydroCap", "NuclearCap","CoalCap","GasCap","ICE","Hybrid", "Electric","Coal","Oil","Gas")
+  
+  
+  if (ChartType == "CB"){
+    combin <- rename(combin, c("WtProduction"="Production"),warn_missing = F)
+    combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose, select = c("Sector","Technology","Production")) 
+  }else{
+    combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose & combin$CompanyDomicileRegion == CompanyDomicileRegionchoose, select = c("Sector","Technology","Production")) 
+    
+  }
+  
+  combinsector <- combinsector %>% complete(Technology = TechList, fill = list(Production = 0))
+  combinsector$Sector <- t(data.frame(lapply(combinsector$Technology, function(x) SectorSelect(x))))
+  prodsectors <- aggregate(Production ~ Sector, data = combinsector, function(x) sum(x, na.rm = T))
+  
+  return(prodsectors)
+}
+
+SectorPrint <- function(SectorToPlot,SectorProd){
+  
+  # TechToPlot <- "Coal"
+  # SectorProd <- EQSectorProd  
+  
+  # SectorToPlot <- SectorSelect(TechToPlot)
+  SectorProduction <- SectorProd$Production[SectorProd$Sector %in% SectorToPlot]
+  
+  PlotFlag <- 1
+  if (SectorToPlot %in% c("Automotive","Power") & SectorProduction == 0){PlotFlag <- 0}
+    
+  return(PlotFlag)
+  
 }
 
 
@@ -762,7 +887,7 @@ report_data <- function(ChartType,combin, Exposures,AUMData,Ranks,PortSnapshot,C
 }
 
 # ------------ Report Generator ------------- #
-report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData, FundsInPort,OtherSectors,mini_chart_list,RenewAdds,Languagechoose){
+report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData, FundsInPort,OtherSectors,EQSectorProd,CBSectorProd,RenewAdds,Languagechoose){
   
   PORTFOLIONAME <- toupper(ReportName)
   
@@ -828,17 +953,14 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   RT$Languagechoose <- Languagechoose
   
   # Check for each technology, 
-  # mini_chart_list
-  techpageremoval <- data.frame("PowerEQ"=sum(mini_chart_list[1:3]),"PowerCB"=sum(mini_chart_list[4:6]),"AutomotiveEQ"=sum(mini_chart_list[7:9]),"AutomotiveCB"=sum(mini_chart_list[10:12]),"FossilFuelsEQ"=sum(mini_chart_list[13:15]),"FossilFuelsCB"=sum(mini_chart_list[16:18]))
+  techpageremoval <- data.frame("PowerEQ"=EQSectorProd$Production[EQSectorProd$Sector == "Power"],
+                                "PowerCB"=CBSectorProd$Production[CBSectorProd$Sector == "Power"],
+                                "AutomotiveEQ"=EQSectorProd$Production[EQSectorProd$Sector == "Automotive"],
+                                "AutomotiveCB"=CBSectorProd$Production[CBSectorProd$Sector == "Automotive"],
+                                "FossilFuelsEQ"=1,
+                                "FossilFuelsCB"=1)
   removesectors <- colnames(techpageremoval[which(techpageremoval == 0)]) 
-  removecaptions <- colnames(mini_chart_list[which(mini_chart_list == 0)])
-
-  # removes mini line chart captions
-  if(length(removecaptions)>0){
-    for (i in 1:length(removecaptions)){
-    text$text[grepl(removecaptions[i],text$text)]<- ""
-  }}
-
+  
   # removes the sectors  
   if(length(removesectors)>0){
     for (i in 1:length(removesectors)){
@@ -847,10 +969,8 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   
   # removes bond pages
   if (nrow(CBReportData)==0){
-    # pages <- c(9,11,13,15)
     text <- removetextlines("CBPage")
     text <- removetextlines("CBPie")
-    text <- removetextlines("CBCoverage")
   }
   
   # removes equity pages
@@ -858,7 +978,6 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
     # pages <- c(9,11,13,15)
     text <- removetextlines("EQPage")
     text <- removetextlines("EQPie")
-    text <- removetextlines("EQCoverage")
     text <- removetextlines("RenewAddsOut")
     
     renewvspace<- which(grepl("renewspacingworkaround",text$text))
@@ -1601,10 +1720,10 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
 # ------------- MINI LINE CHARTS ------------ #
 mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlot, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose,figuredirectoy, PortfolioName){
   
-  # combin <- CBCombin
-  # TechToPlot <- "Oil"
-  # SectorToPlot <- "Fossil Fuels"
-  # ChartType <- "CB"
+  # combin <- EQCombin
+  # TechToPlot <- "CoalCap"
+  # SectorToPlot <- "Power"
+  # ChartType <- "EQ"
 
   
   theme_linecharts <- function(base_size = textsize, base_family = "") {
@@ -1637,9 +1756,9 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
   
   production <- rename(production, c("WtProduction"="Production"),warn_missing = FALSE)
   
-  if ((sum(production$Production, na.rm = TRUE)>0 | SectorToPlot == "Fossil Fuels") & nrow(combin)>0){
+  # if ((sum(production$Production, na.rm = TRUE)>0 | SectorToPlot == "Fossil Fuels") & nrow(combin)>0){
     
-    
+  if (nrow(combin)>0){
     
     if (ChartType == "EQ"){
       LineData <- subset(combin, Technology %in% TechToPlot & BenchmarkRegion %in% BenchmarkRegionchoose & CompanyDomicileRegion %in% CompanyDomicileRegionchoose & Scenario %in% Scenariochoose)  
@@ -3129,7 +3248,7 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
       
       ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_RenewableAdditions.png"),bg="transparent",height=plotheight,width=plotwidth,plot=RenAddBar,dpi=ppi)
       RenewAdds<-1
-    }else{
+    }}else{
       
       Label <- GT["NoRenewInPort"][[1]]
       
@@ -3159,7 +3278,7 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
       ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_RenewableAdditions.png"),bg="transparent",height=2,width=7.5,plot=RenAddBar,dpi=ppi)
       RenewAdds <-0
     }
-  }
+  
   return(RenewAdds)
 }
 
