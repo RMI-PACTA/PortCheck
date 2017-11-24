@@ -110,8 +110,9 @@ PortfolioBreakdown$InvestorName<- gsub("[ _.-]","",PortfolioBreakdown$InvestorNa
 PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$PortfolioName)
 
 # Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
-# CompanyNames <- unique(subset(AllCompanyData, select=c("EQY_FUND_TICKER","Name")))
-# EQBatchTest_PortSnapshots <- merge(CompanyNames, EQBatchTest_PortSnapshots, by = "EQY_FUND_TICKER", all.y = TRUE)
+if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
+  CompanyNames <- unique(subset(AllCompanyData, select=c("EQY_FUND_TICKER","Name")))
+  EQBatchTest_PortSnapshots <- merge(CompanyNames, EQBatchTest_PortSnapshots, by = "EQY_FUND_TICKER", all.y = TRUE)}
 
 # For the Funds Heat Map
 FundsDataAll <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
@@ -587,7 +588,6 @@ for (i in 1:nrow(TestList)){
   
   write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
   write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
-  write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
   write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
 }
 
