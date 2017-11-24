@@ -13,29 +13,59 @@ library(reshape2)
 # 2017 - 04 - 21 |        KH        |          1           | First version - loading all fund holdings and aditional information and binding it with input data (ISINs)
 
 
-#------------
-# Set up Folders and Inputs
-#------------
-UserName <- sub("/.*","",sub(".*Users/","",getwd()))
-source(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/02_AlignmentTest/GlobalPortCheckFunctions.R"))
-PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
 
-ParameterFile <- ReadParameterFile(PortfolioDataFolder)
+#------------
+# Set up 2DII Dev Environment Folders and Locations
+#------------
+
+if (!exists("INIT.CONSTS")) {
+  ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
+  print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run 2dii-init.R and try again.")
+} else {
+  ### all set up.
+  print("*** STARTING SCRIPT with 2DII Constants:")
+  print(INIT.CONSTS)
+}
+
+#------------
+# Set up PortCheck-Specific Constants and Functions
+#------------
+
+### these two files sourced at top of all PortCheck scripts
+source(paste0(PORTCHECK.CODE.PATH, "PortCheck-init.R"))
+source(paste0(ALIGNMENT.CODE.PATH, "GlobalPortCheckFunctions.R"))
+
+#------------
+# REad in Parameter File and Set Variables
+#------------
+
+### define these vars so we know they will be important
+### makes the code easier to understand - they're not a surprise later
+BatchName <- NA
+BenchmarkRegionchoose <- NA
+CompanyDomicileRegion <- NA
+Scenario <- NA
+Startyear <- NA
+
+ParameterFile <- ReadParameterFile(PORT.DATA.PATH)
+### fill up those variables
 SetParameters(ParameterFile)              # Sets BAtchName, Scenario, BenchmarkRegion etc. 
+print("*** STARTING SCRIPT with PARAMETERS:")
+print(ParameterFile)
 
 
 #-------------
-# All Input parameters & make the code interactive
+# Set Input / OUtput Locations Based on parameter File Input
 #------------
-# Please select the input parameters here
-FundDataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/02_FundData/")
-FinancialDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/02_FinancialData/2016Q4/PORT/")
-OutputLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ParameterFile$ProjektName,"/") #Output-folder for the results
-PortfolioLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ParameterFile$ProjektName,"/")
-DataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
+
+### Finish setting up paths based on what was in the Parameter file
+FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
+OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
+PortfolioLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
 BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
 
 if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+
 
 
 #-------------
@@ -271,8 +301,9 @@ OverviewPiechartDataFinal <- rbind(OverviewPiechartDataFinal, OverviewPiechartDa
 #------------
 # Print Results To PortfolioData
 #------------
-setwd(paste0(BatchLocation))
 
+### In general we should try avoid doing this, and use paths instead below - CHANGE
+setwd(paste0(BatchLocation))
 
 write.csv(OverviewPiechartDataFinal,paste0(BatchName,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
 write.csv(MissingISINs,paste0(BatchName,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
@@ -284,7 +315,7 @@ write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALS
 write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
 
 # Temp save for bonds
-bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
+bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2? Investing)/2? Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
 write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
 
 
