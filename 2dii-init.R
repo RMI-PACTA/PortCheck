@@ -1,12 +1,13 @@
 
-
-### Name of GitHub Code Repository
 USER.NAME <- sub("/.*","",sub(".*Users/","",getwd()))
+### local path to DropBox
 DROPBOX.PATH <- paste0("C:/Users/",USER.NAME,"/Dropbox (2° Investing)/")
 
 ### This is where we should each clone GitHub to.
-### If your path is different, comment out the standard line and put in the correct 
-### value for "CODE.PATH"...
+### This assumes that the username on your computer locally is the same as the 
+### name of the folder under the "People" directory on Dropbox. 
+### If your path is different, override with the correct value for 
+### CODE.PATH
 ### example: CODE.PATH <- "C:/SomeOtherPath/toSomeCode/"
 CODE.PATH <- paste0(DROPBOX.PATH, "2° Investing Team/People/",USER.NAME,"/GitHub/")
 

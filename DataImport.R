@@ -34,6 +34,7 @@ if (!exists("INIT.CONSTS")) {
 ### these two files sourced at top of all PortCheck scripts
 source(paste0(PORTCHECK.CODE.PATH, "PortCheck-init.R"))
 source(paste0(ALIGNMENT.CODE.PATH, "GlobalPortCheckFunctions.R"))
+source(paste0(PORTCHECK.CODE.PATH, "user-overrides.R"))
 
 #------------
 # REad in Parameter File and Set Variables
