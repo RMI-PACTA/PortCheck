@@ -48,6 +48,7 @@ BatchName <- ParameterFile$BatchName
 Languagechoose <- ParameterFile$Language
 BatchToTest <- ParameterFile$AssessmentDate
 ComparisonFile <- ParameterFile$ComparisonFile                        # Defines whether the comparative graphs are to be produced
+ReportTemplate <- ParameterFile$ReportStyle
 ImportNewComparisonList <- FALSE
 
 Startyear <- ParameterFile$Startyear                                  # Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
@@ -213,34 +214,74 @@ write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FA
 #____________Comparison Companies_____________________
 # Provides the ranking table for each company, Global benchmarkregion
 # Currently takes the BatchTest inputs, but this should be changed to the results for specified companies
-# PortfolioList <- TestList$PortName[TestList$Type %in% c("Investor","Portfolio")]
-# InvestorList <- TestList$PortName[TestList$Type %in% c("Investor","InvestorMPs")]
-# EQPortfolioResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% PortfolioList,]
-# EQInvestorResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% InvestorList,]
 
 # Batch Test Results 
 # Only require the exposure, AUM, ranking needs to happen compared to the Comparison Results
-EQComparisonResults <- company_comparison("EQ",EQComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
-EQComparisonExposures <- EQComparisonResults[[2]]
-EQComparisonAUMs <- EQComparisonResults[[4]]
-EQComparisonCoverageWeights <- CoverageWeight_data("EQ","Portfolio",EQComparisonPortSS, EQComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
-EQWMCoverageWeight <- EQComparisonCoverageWeights[EQComparisonCoverageWeights$PortName %in% "WeightedResults",]
+# Fund Comparison vs BatchComparison (ie - comparison internally within the batch with differentiation between Investors and Portfolio)
+# Otherwise allows for differentiation within a Batch for Investors vs Portfolios
 
-CBComparisonResults <- company_comparison("CB",CBComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
-CBComparisonExposures <- CBComparisonResults[[2]]
-CBComparisonAUMs <- CBComparisonResults[[4]]
-CBComparisonCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBComparisonPortSS, CBComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
-CBWMCoverageWeight <- CBComparisonCoverageWeights[CBComparisonCoverageWeights$PortName %in% "WeightedResults",]
+if (ComparisonFile == "FundComparison"){
+  EQComparisonResults <- company_comparison("EQ",EQComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  EQComparisonExposures <- EQComparisonResults[[2]]
+  EQComparisonAUMs <- EQComparisonResults[[4]]
+  EQComparisonCoverageWeights <- CoverageWeight_data("EQ","Portfolio",EQComparisonPortSS, EQComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  EQWMCoverageWeight <- EQComparisonCoverageWeights[EQComparisonCoverageWeights$PortName %in% "WeightedResults",]
+  
+  CBComparisonResults <- company_comparison("CB",CBComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  CBComparisonExposures <- CBComparisonResults[[2]]
+  CBComparisonAUMs <- CBComparisonResults[[4]]
+  CBComparisonCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBComparisonPortSS, CBComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  CBWMCoverageWeight <- CBComparisonCoverageWeights[CBComparisonCoverageWeights$PortName %in% "WeightedResults",]
+  
+  EQBatchResults <- company_comparison("EQ",EQBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  EQExposures <- EQBatchResults[[2]]
+  EQAUMs <- EQBatchResults[[4]]
+  EQCoverageWeights <- CoverageWeight_data("EQ","Portfolio",EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  
+  CBBatchResults <- company_comparison("CB",CBBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  CBExposures <- CBBatchResults[[2]]
+  CBAUMs <- CBBatchResults[[4]]
+  CBCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+}else{
+  PortfolioList <- TestList$PortName[TestList$PortfolioType %in% c("Investor","Portfolio")]
+  InvestorList <- TestList$PortName[TestList$PortfolioType %in% c("Investor","InvestorMPs")]
+  EQPortfolioResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% PortfolioList,]
+  EQInvestorResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% InvestorList,]
+  
+  EQPortfolioResults <- company_comparison("EQ",EQPortfolioResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  EQPortfolioRanks <- EQPortfolioResults[[1]]
+  EQPortfolioExposures <- EQPortfolioResults[[2]]
+  EQPortfolioAUMs <- EQPortfolioResults[[4]]
+  
+  EQInvestorResults <- company_comparison("EQ",EQInvestorResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  EQInvestorRanks <- EQInvestorResults[[1]]
+  EQInvestorExposures <- EQInvestorResults[[2]]
+  EQInvestorAUMs <- EQInvestorResults[[4]]
+  
+  EQPortfolioCoverageWeights <- CoverageWeight_data("EQ","Fund",EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  EQInvestorCoverageWeights <- CoverageWeight_data("EQ","Brand",EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  EQWMInvestorCoverageWeight <- EQPortfolioCoverageWeights[EQPortfolioCoverageWeights$PortName %in% "WeightedResults",]
+  EQWMPortfolioCoverageWeight <- EQInvestorCoverageWeights[EQInvestorCoverageWeights$PortName %in% "WeightedResults",]
+  
+  CBPortfolioResultsRaw <- CBBatchTest[CBBatchTest$PortName %in% PortfolioList,]
+  CBInvestorResultsRaw <- CBBatchTest[CBBatchTest$PortName %in% InvestorList,]
+  
+  CBPortfolioResults <- company_comparison("CB",CBPortfolioResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  CBPortfolioRanks <- CBPortfolioResults[[1]]
+  CBPortfolioExposures <- CBPortfolioResults[[2]]
+  CBPortfolioAUMs <- CBPortfolioResults[[4]]
+  
+  CBInvestorResults <- company_comparison("CB",CBInvestorResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  CBInvestorRanks <- CBInvestorResults[[1]]
+  CBInvestorExposures <- CBInvestorResults[[2]]
+  CBInvestorAUMs <- CBInvestorResults[[4]]
+  
+  CBInvestorCoverageWeights <- CoverageWeight_data("CB","Investor",CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  CBPortfolioCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  CBWMPortfolioCoverageWeight <- CBPortfolioCoverageWeights[CBPortfolioCoverageWeights$PortName %in% "WeightedResults",]  
+  CBWMInvestorCoverageWeight <- CBInvestorCoverageWeights[CBInvestorCoverageWeights$PortName %in% "WeightedResults",]  
+}
 
-EQBatchResults <- company_comparison("EQ",EQBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
-EQExposures <- EQBatchResults[[2]]
-EQAUMs <- EQBatchResults[[4]]
-EQCoverageWeights <- CoverageWeight_data("EQ","Portfolio",EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
-
-CBBatchResults <- company_comparison("CB",CBBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
-CBExposures <- CBBatchResults[[2]]
-CBAUMs <- CBBatchResults[[4]]
-CBCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
 
 # ------
 # Graph Inputs
@@ -283,14 +324,11 @@ ResultsLocFolder <- ResultsLocation
 # GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralGraphTranslation_V1.csv"), stringsAsFactors = FALSE)
 # ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
 
+template <- (readLines(paste0(GitHubLocation,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
+
 GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
-# ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)
-
 ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
-
-template <- (readLines(paste0(GitHubLocation,"Templates/GeneralTemplateInput_v1.tex"),encoding="UTF-8"))
-# template <- (readLines(paste0(GitHubLocation,"Templates/SwissTemplateInput_v2.tex"),encoding="UTF-8"))
-
+if (ProjectName == "Swiss"){ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
 
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
@@ -348,7 +386,7 @@ for (i in 1:nrow(TestList)){
   
   #--------Load Inputs-----------
   PortData <- PortfolioBreakdown[PortfolioBreakdown$InvestorName %in% InvestorName & PortfolioBreakdown$PortfolioName %in% PortfolioName & PortfolioBreakdown$HoldingType == "All",]
-  
+
   # Batch Results
   EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
   EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
@@ -357,24 +395,59 @@ for (i in 1:nrow(TestList)){
   CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
   
-  # Comparative Results
-  EQExposure <- EQExposures[EQExposures$PortName %in% PortName,]
-  CBExposure <- CBExposures[CBExposures$PortName %in% PortName,]  
-  EQAUMData <- EQAUMs[EQAUMs$PortName %in% PortName,]
-  CBAUMData <- CBAUMs[CBAUMs$PortName %in% PortName,]  
   
-  EQCoverageWeight <- EQCoverageWeights[EQCoverageWeights$PortName == PortName,]
-  if (CBCoverageWeights != "NoResults"){
-    CBCoverageWeight <- CBCoverageWeights[CBCoverageWeights$PortName == PortName,]
-  }else{CBCoverageWeight <- "NoResults"}
+  if (ProjectName == "FundComparison"){
+
+    # Comparative Results
+    EQExposure <- EQExposures[EQExposures$PortName %in% PortName,]
+    CBExposure <- CBExposures[CBExposures$PortName %in% PortName,]  
+    EQAUMData <- EQAUMs[EQAUMs$PortName %in% PortName,]
+    CBAUMData <- CBAUMs[CBAUMs$PortName %in% PortName,]  
     
-  EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
-  CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
+    EQCoverageWeight <- EQCoverageWeights[EQCoverageWeights$PortName == PortName,]
+    if (CBCoverageWeights != "NoResults"){
+      CBCoverageWeight <- CBCoverageWeights[CBCoverageWeights$PortName == PortName,]
+    }else{CBCoverageWeight <- "NoResults"}
+    
+    EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
+    CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
+    
+    EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
+    CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
+    EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
+    CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs)
+    
+  }else{
+    
+    if(TestType == "Portfolio"){
+      EQRanks <- EQPortfolioRanks
+      EQExposures <- EQPortfolioExposures
+      EQAUMData <- EQPortfolioAUMs
+      CBRanks <- CBPortfolioRanks
+      CBExposures <- CBPortfolioExposures
+      CBAUMData <- CBPortfolioAUMs
+      EQWMCoverageWeight <- EQWMPortfolioCoverageWeight
+      CBWMCoverageWeight <- CBWMPortfolioCoverageWeight
+      EQCoverageWeight <- EQPortfolioCoverageWeights[EQPortfolioCoverageWeights$PortName %in% PortfolioNameLong,]
+      CBCoverageWeight <- CBPortfolioCoverageWeights[CBPortfolioCoverageWeights$PortName %in% PortfolioNameLong,]
+    }else{
+      EQRanks <- EQInvestorRanks
+      EQExposures <- EQInvestorExposures
+      EQAUMData <- EQInvestorAUMs
+      CBRanks <- CBInvestorRanks
+      CBExposures <- CBInvestorExposures
+      CBAUMData <- CBInvestorAUMs
+      EQWMCoverageWeight <- EQWMInvestorCoverageWeight
+      CBWMCoverageWeight <- CBWMInvestorCoverageWeight
+      EQCoverageWeight <- EQInvestorCoverageWeights[EQInvestorCoverageWeights$PortName %in% PortfolioNameLong,]
+      CBCoverageWeight <- CBInvestorCoverageWeights[CBInvestorCoverageWeights$PortName %in% PortfolioNameLong,]}
+    
+    EQExposureRange <-EQExposures
+    CBExposureRange <- CBExposures
+    EQAUMDatarange <- EQAUMData
+    CBAUMDatarange <- CBAUMData
+  }
   
-  EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
-  CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
-  EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
-  CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs)
   
   
   # Fund Results
