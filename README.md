@@ -1,6 +1,6 @@
 # PortCheck
 
-This code tests the alignment of Portfolios against cliamite scenarios.
+This code tests the alignment of Portfolios against climite scenarios.
 
 ### Steps to run a PortCheck:
 
@@ -26,11 +26,13 @@ DataImport.R
 ```
 Note: This runs ```PortCheck-init.R``` (project-specific constants and file locations), ```GlobalPortCheckFunctions.R``` (project-specific functions), and ```user-overrides.R``` (if your file paths are different, change the constants here)
 
-5) Run PortCheck_Equity.R (runs with Parameter File)
+5) Run ```PortCheck_Equity.R``` (runs with Parameter File)
 
-6) Run PortCheck_Debt.R (change the BatchName to NovPortChecks in the first lines of code)
+6) Run ```PortCheck_Debt.R``` (change the BatchName to NovPortChecks in the first lines of code)
 
-7) Run BatchGraphGenerator_v6_KH (runs with Parameter File)
+7) Run ```BatchGraphGenerator_v6_KH.R``` (runs with Parameter File)
 
-8) Check the reports: C:\Users\Clare\Dropbox (2° Investing)\PortCheck\03_Results\05_Reports\04_Others\BatchName
-
+8) Check the reports: 
+```
+PORT.DATA.PATH\03_Results\05_Reports\04_Others\BatchName
+```
