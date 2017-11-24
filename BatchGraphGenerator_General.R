@@ -101,6 +101,9 @@ PortfolioBreakdown$PortfolioNameLong <- PortfolioBreakdown$PortfolioName
 
 PortfolioBreakdown$InvestorName<- gsub("[ _.-]","",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$PortfolioName)
+PortfolioBreakdown$InvestorName<- gsub("[()]","",PortfolioBreakdown$InvestorName)
+PortfolioBreakdown$PortfolioName<- gsub("[()]","",PortfolioBreakdown$PortfolioName)
+
 
 PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
@@ -346,19 +349,20 @@ for (i in 1:nrow(TestList)){
   # ------
   # Setting Directory and Getting Results
   # ------
-  PortfolioNameLong <- TestList[i,"PortfolioName"]
+  PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
   TestType <- TestList[i,"PortfolioType"]
+  InvestorNameLong <-  TestList[i,"InvestorNameLong"]
   InvestorName <-  TestList[i,"InvestorName"]
   PortfolioName <- TestList[i,"PortfolioName"]
   PortName <- TestList[i,"PortName"]
   if(TestType %in% c("Investor","InvestorMPs")){
-    ReportName <- PortfolioName
-    ReportName <- InvestorName
+    ReportName <- PortfolioNameLong
+    # ReportName <- InvestorNameLong
   }else{
-    ReportName <- paste0(InvestorName,": ", PortfolioName)
+    ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
   
-  print(PortfolioNameLong)
+  print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
   
   InvestorDirectory <- paste0(ResultsLocFolder,InvestorName,"/")  
   PortfolioDirectory <- paste0(InvestorDirectory,PortfolioName,"/")
