@@ -95,9 +95,19 @@ IndexUniverses <- read.csv("IndexRegions.csv")
 OGCarbonBudget <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/04_Other/CarbonCapexUpstream.csv"),stringsAsFactors = FALSE)
 
 # Batch related Portfolio & Fund-Data Results
-# PortfolioList <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"_PortfolioList.csv"),stringsAsFactors = FALSE)
 PortfolioBreakdown <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Portfolio_Overview_Piechart.csv"),stringsAsFactors = FALSE)
+PortfolioBreakdown$InvestorNameLong <- PortfolioBreakdown$InvestorName
+PortfolioBreakdown$PortfolioNameLong <- PortfolioBreakdown$PortfolioName
 
+PortfolioBreakdown$InvestorName<- gsub("[ _.-]","",PortfolioBreakdown$InvestorName)
+PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$PortfolioName)
+
+PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
+PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
+TestList<-PortfolioBreakdown
+
+
+# Funds within the Portfolios
 FundList <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
 if ("FundList"==TRUE){
   FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
@@ -106,8 +116,6 @@ if ("FundList"==TRUE){
   FundList <- "No Funds"
 }
 
-PortfolioBreakdown$InvestorName<- gsub("[ _.-]","",PortfolioBreakdown$InvestorName)
-PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$PortfolioName)
 
 # Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
@@ -148,25 +156,6 @@ if (ImportNewComparisonList == TRUE){
   CBComparisonPortSS <- read.csv(paste0(FundLocation,"CBComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
 }
 
-
-# ------
-# Portfolio List
-# ------
-# CBBatchTest <- CBBatchTest_Long
-# EQPortsToTest <- unique(EQBatchTest[,c("PortName", "Type")])
-# CBPortsToTest <- unique(CBBatchTest[,c("PortName", "Type")])
-# PortsToTest <- unique(rbind(EQPortsToTest,CBPortsToTest))
-
-# List of all Investors and Portfolios, short and long
-PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
-PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
-TestList<-PortfolioBreakdown
-# TestList <- FundPortcheck(PortsToTest,PortfolioBreakdown)
-
-
-# # Investor Information including Type (PK, V; In Switzerland, Outside)
-# InvestorInfo <- read.csv(paste0(ResultsLocation,"04_Swiss/FolderNAME_CompanyNAME.csv"))#,stringsasFactors = FALSE)
-
 # ------
 # Bench Regions and Indicies and Sector Classifications
 # ------
@@ -190,13 +179,14 @@ IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(
 IEATargetsAll <- IEATargetsAll[!IEATargetsAll$Technology %in% "OilCap",]
 
 
-#Bind Sector Classification from BBG - ICB Subsector Name
+# Bind Sector Classification from BBG - ICB Subsector Name
 CleanedBBGData <- cleanBBGData(BBGData_CompanyLevel,AllCompanyData,Startyear,Scenariochoose,CompanyDomicileRegionchoose,BenchmarkRegionchoose)
 Companies <- CleanedBBGData[[1]]
 UtilityCompanies <- CleanedBBGData[[2]]
 AutoCompanies <- CleanedBBGData[[3]]
 OilData <- cleanOGData(OGData,AllCompanyData,Startyear)
 
+# Other Sector Data
 OSTargets <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/04_Other/SDA_Targets.csv"), stringsAsFactors = FALSE)
 OSdata <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/00_RawData/99_SampleDataSets/OSmaster_2017-10-07.csv"), stringsAsFactors = FALSE)
 ShippingData <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/00_RawData/07_Shipping/ShippingData.csv"), stringsAsFactors = FALSE,strip.white = TRUE)
@@ -205,14 +195,9 @@ write.csv(EQ_OS_WEM,paste0(BatchName,"_EQ_OtherSectorOutput.csv"),row.names = FA
 CB_OS_WEM <- matchOS(OSdata, CBBatchTest_PortSnapshots)
 write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FALSE)
 
-
-
-
-
 # ---------
 # Comparison Companies
 # ---------
-#____________Comparison Companies_____________________
 # Provides the ranking table for each company, Global benchmarkregion
 # Currently takes the BatchTest inputs, but this should be changed to the results for specified companies
 
@@ -329,7 +314,7 @@ template <- (readLines(paste0(GitHubLocation,"Templates/",ReportTemplate,".tex")
 
 GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
-if (ProjectName == "Swiss"){ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
+if (length(grep("Swiss",ReportTemplate))==1){ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
 
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
@@ -368,7 +353,7 @@ for (i in 1:nrow(TestList)){
   PortName <- TestList[i,"PortName"]
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioName
-    PortName <- InvestorName
+    ReportName <- InvestorName
   }else{
     ReportName <- paste0(InvestorName,": ", PortfolioName)
   }
@@ -397,7 +382,7 @@ for (i in 1:nrow(TestList)){
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
   
   
-  if (ProjectName == "FundComparison"){
+  if (ComparisonFile == "FundComparison"){
 
     # Comparative Results
     EQExposure <- EQExposures[EQExposures$PortName %in% PortName,]
@@ -570,7 +555,7 @@ for (i in 1:nrow(TestList)){
       # Page 24
       if(nrow(EQCombin)!=0){
         plot_51 <- renewablesadditions_chart(51,"EQ",EQCombin, EQPortSnapshot, Scenariochoose, MasterData, AllIEATargets, RegionCountries,PortfolioName)
-      }else{plot_51<-0}
+      }
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
@@ -581,7 +566,7 @@ for (i in 1:nrow(TestList)){
       EQReportData<-report_data("EQ",EQCombin, EQExposureRange,EQAUMDatarange,EQRanks,EQPortSnapshot,CompanyDomicileRegionchoose, BenchmarkRegionchoose,Scenariochoose, Startyear,PortfolioName)
       CBReportData<-report_data("CB",CBCombin, CBExposureRange,CBAUMDatarange,CBRanks,CBPortSnapshot,CompanyDomicileRegionchoose, BenchmarkRegionchoose,Scenariochoose, Startyear,PortfolioName)
       
-      report(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData,FundsInPort,OtherSectors,EQSectorProd,CBSectorProd,RenewAdds=plot_51,Languagechoose)
+      report(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData,FundsInPort,OtherSectors,EQSectorProd,CBSectorProd,Languagechoose)
     })}else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
