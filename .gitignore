@@ -4,6 +4,7 @@
 # Session Data files
 .RData
 # RStudio files
+*.Rproj
 .Rproj.user/
 
 # GitHub files
