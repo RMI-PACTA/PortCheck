@@ -22,10 +22,10 @@ PORT.DATA.PATH\04_Others\BatchName\BatchName_Input.csv
 ```
 DataImport.R  
 ```
-Note: This runs 
-* ```PortCheck-init.R``` (project-specific constants and file locations)
-* ```GlobalPortCheckFunctions.R``` (project-specific functions)
-* ```user-overrides.R``` (if your file paths are different, change the constants here)
+  Note: This runs 
+  * ```PortCheck-init.R``` (project-specific constants and file locations)
+  * ```GlobalPortCheckFunctions.R``` (project-specific functions)
+  * ```user-overrides.R``` (if your file paths are different, change the constants here)
 
 6. Run ```PortCheck_Equity.R``` (runs with Parameter File)
 
