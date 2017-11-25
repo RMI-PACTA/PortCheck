@@ -32,7 +32,7 @@ source(paste0(PORTCHECK.CODE.PATH, "GlobalPortCheckFunctions.R"))
 source(paste0(PORTCHECK.CODE.PATH, "user-overrides.R"))
 
 imp("Data-Import_TAJ.R Starting")
-lp(PROJ.CONSTS)
+p(PROJ.CONSTS)
 
 
 #------------
