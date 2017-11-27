@@ -1045,7 +1045,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   }
   
   # Copy in the graphics folder for the report
-  originalloc <- paste0(CodeLocation,"01_ReportTemplates/", "ReportGraphics/")
+  originalloc <- paste0(TemplatePath,"ReportGraphics/")
   graphicsloc <- paste0(LanguageDirectory ,"/","ReportGraphics/")
   flist <- list.files(originalloc, full.names = TRUE)
   

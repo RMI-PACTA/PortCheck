@@ -28,7 +28,7 @@ FundDataLocation <- FUND.DATA.PATH
 ### ###########################################################################
 
 ### if there are shared functions, source them here
-source(paste0(PROJECT.CODE.PATH, "GlobalPortCheckFunctions.R"))
+source(paste0(PROJ.CODE.PATH, "GlobalPortCheckFunctions.R"))
 
 
 ### ###########################################################################
