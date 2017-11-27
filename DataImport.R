@@ -30,7 +30,7 @@ if (!exists("TWODII.CONSTS")) {
 ### this file sourced at top of all PortCheck scripts
 ### this defines any project constants and functions
 ### and will also source an override file if it exists
-source(paste0(PORTCHECK.CODE.PATH, "PortCheck-init.R"))
+source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
 print("*** Starting DataImport.R Script")
 print(show.consts())
 
