@@ -11,4 +11,4 @@
 ### After I checked it into gitHub I included it in the .gitignore 
 ### file so once you clone it you will not see it in GitHub Desktop
 
-### example: CODE.PATH <- "C:/SomeOtherPath/toSomeCode/"
+### example: PROJ.CODE.PATH <- "C:/SomeOtherPath/toSomeCode/"
