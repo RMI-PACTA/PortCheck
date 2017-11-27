@@ -16,7 +16,6 @@ library(reshape2)
 # Set up 2DII Dev Environment Folders and Locations
 #------------
 
-
 if (!exists("TWODII.CONSTS")) {
   ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
   print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run Common/2dii-init.R and try again.")
@@ -26,10 +25,10 @@ if (!exists("TWODII.CONSTS")) {
 # Set up PortCheck-Specific Constants and Functions
 #------------
 
-### these files sourced at top of all PortCheck scripts
+### this file sourced at top of all PortCheck scripts
+### this defines any project constants and functions
+### and will also source an override file if it exists
 source(paste0(PORTCHECK.CODE.PATH, "PortCheck-init.R"))
-source(paste0(PORTCHECK.CODE.PATH, "GlobalPortCheckFunctions.R"))
-source(paste0(PORTCHECK.CODE.PATH, "user-overrides.R"))
 
 imp("Data-Import_TAJ.R Starting")
 p(PROJ.CONSTS)
