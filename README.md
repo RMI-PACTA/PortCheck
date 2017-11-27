@@ -4,28 +4,28 @@ This code tests the alignment of Portfolios against climite scenarios.
 
 ### Steps to run a PortCheck:
 
-Note: ```PORT.DATA.PATH``` is currently ```Dropbox (2 Investing)\PortCheck\02_PortfolioData```.
+1. Set up the 2dii Dev environment.  First clone the ```Common``` repository and then run ```Common/2dii-init.R```.  Note: this currently defines ```PORTS.PATH```  as ```Dropbox (2 Investing)\PortCheck\02_PortfolioData```
 
-1. Set up the 2dii Dev environment.  First clone the ```Common``` repository and then run ```Common/2dii-init.R```.
-
-2. Decide on a BatchName. Use it wherever you see "BatchName" below.
+2. Decide on a ```BatchName```. Use it wherever you see "BatchName" below.
 
 3. Make a Parameter File.  Put it here: 
 ```
-PORT.DATA.PATH\99_ParameterFiles\BatchName_ParameterFile.csv
+PORTS.PATH\99_ParameterFiles\BatchName_ParameterFile.csv
 ```
+
 4. Put the portfolio data file in 
 ```
-PORT.DATA.PATH\04_Others\BatchName\BatchName_Input.csv
+PORTS.PATH\04_Others\BatchName\BatchName_Input.csv
 ```
+
 5. Prepare the portfolio data.  Run:
 ```
 DataImport.R  
 ```
   Note: This runs 
-  * ```PortCheck-init.R``` (project-specific constants and file locations)
+  * ```proj-init.R``` (project-specific constants and file locations)
   * ```GlobalPortCheckFunctions.R``` (project-specific functions)
-  * ```user-overrides.R``` (if your file paths are different, change the constants here)
+  * ```proj-init-overrides.R``` (if your file paths are different, change the constants here)
 
 6. Run ```PortCheck_Equity.R``` (runs with Parameter File)
 
@@ -35,5 +35,5 @@ DataImport.R
 
 9. Check the reports: 
 ```
-PORT.DATA.PATH\03_Results\05_Reports\04_Others\BatchName
+PORTS.PATH\03_Results\05_Reports\04_Others\BatchName
 ```
