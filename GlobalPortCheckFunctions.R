@@ -18,11 +18,17 @@ ReadParameterFile <- function(PortfolioDataFolder){
 
 SetParameters <- function(ParameterFile){
   BenchmarkRegionchoose <<- as.character(ParameterFile$BenchmarkRegion)
-  CompanyDomicileRegion <<- as.character(ParameterFile$CompanyDomicileRegion)
+  CompanyDomicileRegionchoose <<- as.character(ParameterFile$CompanyDomicileRegion)
+  Indexchoose <<- as.character(ParameterFile$Index) 
   Scenario <<- as.character(ParameterFile$Scenario)
+  Scenariochoose <<- as.character(ParameterFile$Scenario)
+  
   Startyear <<- as.numeric(format(Sys.time(), "%Y")) #as.numeric(ParameterFile$Startyear)
   BatchName <<- as.character(ParameterFile$BatchName)
-  
+  ComparisonFile <<- ParameterFile$ComparisonFile                        # Defines whether the comparative graphs are to be produced
+  ReportTemplate <<- ParameterFile$ReportStyle
+  ProjectName <<- ParameterFile$ProjektName
+  BatchToTest <<- ParameterFile$AssessmentDate
 }
 
 

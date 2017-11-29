@@ -290,8 +290,9 @@ OverviewPiechartDataFinal$PortfolioType[OverviewPiechartDataFinal$InvestorName %
 
 #create file at investor level
 OverviewPiechartDataFinalMPS <- ddply(subset(OverviewPiechartDataFinal, !InvestorName %in% SinglePorts$Var1),.(InvestorName, HoldingType),summarize,PortfolioSizeUSD = sum(PortfolioSizeUSD,na.rm = TRUE), Bonds = sum(Bonds,na.rm = TRUE), Equity = sum(Equity,na.rm = TRUE), Others = sum(Others,na.rm = TRUE))
+if(nrow(OverviewPiechartDataFinalMPS)>0){
 OverviewPiechartDataFinalMPS$PortfolioName <- OverviewPiechartDataFinalMPS$InvestorName
-OverviewPiechartDataFinalMPS$PortfolioType <- "InvestorMPs"
+OverviewPiechartDataFinalMPS$PortfolioType <- "InvestorMPs"}
 
 OverviewPiechartDataFinal <- OverviewPiechartDataFinal[,colnames(OverviewPiechartDataFinalMPS)]
 OverviewPiechartDataFinal <- rbind(OverviewPiechartDataFinal, OverviewPiechartDataFinalMPS)
