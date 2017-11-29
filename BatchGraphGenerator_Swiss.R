@@ -264,7 +264,7 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # Select Portfolio to Run
 #------
 
-portnames <- c("SIX MFP")
+portnames <- c("Novartis")
 
 ToTest2 <- which(TestList$InvestorName %in% portnames)
 # ToTest2 <- c(107)
