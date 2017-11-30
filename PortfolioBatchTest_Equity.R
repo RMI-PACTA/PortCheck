@@ -461,8 +461,9 @@ EquityBridgeSub <- unique(EquityBridge)
 PortfolioAllPorts <- merge(PortfolioAllPorts,EquityBridgeSub, by.x = "Ticker", by.y = "TICKER_AND_EXCH_CODE",all.x = TRUE)
 
 MissingBBGInfo <- unique(subset(PortfolioAllPorts, is.na(SharePrice) | SharePrice == 0, select = "ISIN"))
-MissingBBGInfo$QTY <- 1
-MissingBBGInfo$Date <- BBGDataDate
+if(nrow(MissingBBGInfo) > 0) {
+  MissingBBGInfo$QTY <- 1
+  MissingBBGInfo$Date <- BBGDataDate}
 
 
 # PortfolioAllPorts <- rename(PortfolioAllPorts, c("NumberofShares"="Number.of.shares")) 
