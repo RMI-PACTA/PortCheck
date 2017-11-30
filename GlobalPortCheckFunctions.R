@@ -1,6 +1,6 @@
 # Global Functions
 
- 
+
 
 
 #-----
@@ -29,6 +29,10 @@ SetParameters <- function(ParameterFile){
   ReportTemplate <<- ParameterFile$ReportStyle
   ProjectName <<- ParameterFile$ProjektName
   BatchToTest <<- ParameterFile$AssessmentDate
+  Languagechoose <<- ParameterFile$Languageselect
+  
+  BBGDataDate <<- ParameterFile$DateofFinancialData
+  AssessmentDate <<- ParameterFile$DateofFinancialData
 }
 
 
@@ -39,7 +43,7 @@ SetParameters <- function(ParameterFile){
 
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
-datacompletion <- function (Data){
+datacompletioneqy <- function (Data){
   Data <- subset(Data, Technology %in% AllLists$TechList)
   Data <- Data %>% complete(BenchmarkRegion = subset(BenchmarkRegionList, !BenchmarkRegion %in% c("NonOECDRest"), select = "BenchmarkRegion"), 
                             Year = full_seq(c(Startyear,Startyear+10),1), 
@@ -54,6 +58,39 @@ datacompletion <- function (Data){
   
   return(Data)
 }
+
+datacompletiondebt <- function (Data){
+  Data <- subset(Data, Technology %in% AllLists$TechList)
+  Data <- Data %>% complete(Technology = AllLists$TechList, Year = full_seq(c(Startyear,Startyear+10),1), fill = list(CompanyLvlProd = 0, Wt = 0, WtProduction = 0, CarstenMetric_Port = 0))
+  Data$Sector <- "Power"
+  Data$Sector[Data$Technology %in% c("Oil","Gas")] <- "Oil&Gas" 
+  Data$Sector[Data$Technology %in% c("Coal")] <- "Coal" 
+  Data$Sector[Data$Technology %in%c("Electric","Hybrid","ICE")] <-"Automotive"
+  return(Data)
+}
+
+Regiondatacompletion <- function (Data){
+  Data <- Data %>% complete(BenchmarkRegion = subset(BenchmarkRegionList, !BenchmarkRegion %in% c("NonOECDRest"), select = "BenchmarkRegion"), 
+                            Sector = SectorList, 
+                            fill = list(RegionalWtPortfolioWt = 0))
+  Data <- subset(Data, (Sector == "Power" & BenchmarkRegion %in% AllLists$PowerBenchmarkRegionGlobal) | (Sector %in% c("Oil&Gas") & BenchmarkRegion %in% AllLists$FossilFuelBenchmarkRegions) | (Sector %in% c("Automotive","Coal") & BenchmarkRegion == "Global"))
+  Data$RegionalWtPortfolioWt[Data$Sector %in% c("Coal","Automotive")] <- 1
+  return(Data)
+}
+
+datacompletionSub <- function (Data){
+  Data <- subset(Data, Technology %in% AllLists$TechList)
+  Data <- Data %>% complete(DebtTicker = DebtTickerList$DebtTicker,
+                            BenchmarkRegion = subset(BenchmarkRegionList, !BenchmarkRegion %in% c("NonOECDRest"), select = "BenchmarkRegion"),
+                            Technology = AllLists$TechList)
+  Data$Sector <- "Power"
+  Data$Sector[Data$Technology %in% c("Oil","Gas")] <- "Oil&Gas"
+  Data$Sector[Data$Technology %in%c("Electric","Hybrid","ICE")] <-"Automotive"
+  Data$Sector[Data$Technology %in% c("Coal")] <- "Coal" 
+  #Data <- subset(Data,!is.na(CompanyDomicileRegion) & (Sector == "Power" | (Sector == "Fossil Fuels" & BenchmarkRegion %in% c(FossilFuelBenchmarkRegions,"Global")) | (Sector == "Automotive" & BenchmarkRegion == "Global")))
+  return(Data)
+}
+
 
 MultipleDataBind <- function(List,Headers){
   for (k in 1:length(List)){
