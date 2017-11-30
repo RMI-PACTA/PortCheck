@@ -1,7 +1,7 @@
 # Fund-Look Through for portfolio data (Using output of Fund-Look-through_preparation)
 # 17/04/21 Klaus Hagedorn
 
-rm(list=ls())
+# rm(list=ls())
 
 #Load packages
 library(plyr)
@@ -36,7 +36,7 @@ print(show.consts())
 
 
 #------------
-# REad in Parameter File and Set Variables
+# Read in Parameter File and Set Variables
 #------------
 
 ### define these vars so we know they will be important
@@ -47,7 +47,7 @@ CompanyDomicileRegion <- NA
 Scenario <- NA
 Startyear <- NA
 
-ParameterFile <- ReadParameterFile(PORT.DATA.PATH)
+ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
 ### fill up those variables
 SetParameters(ParameterFile)              # Sets BAtchName, Scenario, BenchmarkRegion etc. 
 print("*** STARTING SCRIPT with PARAMETERS:")
@@ -60,8 +60,9 @@ print(ParameterFile)
 
 ### Finish setting up paths based on what was in the Parameter file
 FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
-OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
-PortfolioLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
+# OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
+DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
+PortfolioLocation <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
 BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
 
 if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
@@ -263,6 +264,14 @@ TotalPortfolio$InstrumentType[TotalPortfolio$ISIN  %in% TotalPortfolio_Bonds$ISI
 
 PortSizeCheck3 <- sum(TotalPortfolio$ValueUSD, na.rm = TRUE)
 
+# Add the InstrumentType to the PortfolioData_w_BBG
+PortfolioData_w_BBG$InstrumentType <- "Others"
+PortfolioData_w_BBG$InstrumentType[PortfolioData_w_BBG$ISIN  %in% TotalPortfolio_EQY$ISIN] <- "Equity"
+PortfolioData_w_BBG$InstrumentType[PortfolioData_w_BBG$ISIN  %in% TotalPortfolio_Bonds$ISIN] <- "Bonds"
+
+
+
+
 
 #------------
 # Data for the Overview Pie Chart
@@ -316,7 +325,8 @@ write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALS
 write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
 
 # Temp save for bonds
-bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2? Investing)/2? Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
+UserName <- Clare
+bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
 write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
 
 

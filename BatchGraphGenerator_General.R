@@ -10,7 +10,7 @@
 # ------
 
 
-rm(list=ls())
+# rm(list=ls())
 
 library(grid)
 library(ggplot2)
@@ -28,43 +28,102 @@ library(RColorBrewer)
 library(matrixStats)
 
 
+#------------
+# Set up 2DII Dev Environment Folders and Locations
+#------------
+
+if (!exists("TWODII.CONSTS")) {
+  ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
+  print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run Common/2dii-init.R and try again.")
+} 
+
+#------------
+# Set up PortCheck-Specific Constants and Functions
+#------------
+
+### this file sourced at top of all PortCheck scripts
+### this defines any project constants and functions
+### and will also source an override file if it exists
+source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
+print("*** Starting DataImport.R Script")
+print(show.consts())
+
+
+#------------
+# Read in Parameter File and Set Variables
+#------------
+
+### define these vars so we know they will be important
+### makes the code easier to understand - they're not a surprise later
+BatchName <- NA
+BenchmarkRegionchoose <- NA
+CompanyDomicileRegion <- NA
+Indexchoose <- NA
+Scenario <- NA
+Startyear <- NA
+
+ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+### fill up those variables
+SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkRegion etc. 
+print("*** STARTING SCRIPT with PARAMETERS:")
+print(ParameterFile)
+
+
+#-------------
+# Set Input / OUtput Locations Based on parameter File Input
+#------------
+
+### Finish setting up paths based on what was in the Parameter file
+FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
+TemplatePath <- paste0(CODE.PATH,"03_ReportingCode/01_ReportTemplates/")
+# OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
+DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
+PortfolioLocation <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
+BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
+
+if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+
+
+
+
+
 # ------
 # Read in Results and Inputs
 # ------- 
-UserName <- sub("/.*","",sub(".*Users/","",getwd()))
-DataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
-CodeLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/03_ReportingCode/")
-GitHubLocation <- paste0("C:/Users/",UserName,"/Documents/GitHub/")
+# UserName <- sub("/.*","",sub(".*Users/","",getwd()))
+# DataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
+# CodeLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/03_ReportingCode/")
+# GitHubLocation <- paste0("C:/Users/",UserName,"/Documents/GitHub/")
 
-source(paste0(GitHubLocation, "PortCheck/CodeFunctions.R"))
+source(paste0(GIT.PATH, "PortCheck/CodeFunctions.R"))
 
 # Read in Parameter File
-PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
-ParameterFileName <- choose.files(default = paste0(PortfolioDataFolder,"99_ParameterFiles/","*_ParameterFile.csv"),caption = "Select a parameter file", multi = FALSE)
-ParameterFileInfo <- file.info(ParameterFileName, extra_cols = TRUE)
-ParameterFile <- read.csv(ParameterFileName, stringsAsFactors = FALSE, strip.white = TRUE)
-ProjectName <- ParameterFile$ProjektName
-BatchName <- ParameterFile$BatchName
-Languagechoose <- ParameterFile$Language
-BatchToTest <- ParameterFile$AssessmentDate
+# PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
+# ParameterFileName <- choose.files(default = paste0(PortfolioDataFolder,"99_ParameterFiles/","*_ParameterFile.csv"),caption = "Select a parameter file", multi = FALSE)
+# ParameterFileInfo <- file.info(ParameterFileName, extra_cols = TRUE)
+# ParameterFile <- read.csv(ParameterFileName, stringsAsFactors = FALSE, strip.white = TRUE)
+# ProjectName <- ParameterFile$ProjektName
+# BatchName <- ParameterFile$BatchName
+# Languagechoose <- ParameterFile$Language
+# BatchToTest <- ParameterFile$AssessmentDate
 ComparisonFile <- ParameterFile$ComparisonFile                        # Defines whether the comparative graphs are to be produced
 ReportTemplate <- ParameterFile$ReportStyle
 ImportNewComparisonList <- FALSE
 
-Startyear <- ParameterFile$Startyear                                  # Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
-CompanyDomicileRegionchoose <- ParameterFile$CompanyDomicileRegion    # "MSCIWorld" # Select one of the following: "Global","MSCIWorld", "MSCIACWI", "STOXX600", "SP500" (for the S&P 500) or "MSCIEM" (for emerging markets)
-Indexchoose <- ParameterFile$Index                                    # "MSCIWorld_MSCI"
-BenchmarkRegionchoose <-ParameterFile$BenchmarkRegion                 # "OECD"      # OECD, DEV, Global, GlobalAggregate, NonOECD, EU, US, JP, ...      Need an IndexGeography for each of these
-Scenariochoose <- ParameterFile$Scenario                              # "450S" # 450S, NPS, NPS+ or CPS
+# Startyear <- ParameterFile$Startyear                                  # Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
+# CompanyDomicileRegionchoose <- ParameterFile$CompanyDomicileRegion    # "MSCIWorld" # Select one of the following: "Global","MSCIWorld", "MSCIACWI", "STOXX600", "SP500" (for the S&P 500) or "MSCIEM" (for emerging markets)
+# Indexchoose <- ParameterFile$Index                                    # "MSCIWorld_MSCI"
+# BenchmarkRegionchoose <-ParameterFile$BenchmarkRegion                 # "OECD"      # OECD, DEV, Global, GlobalAggregate, NonOECD, EU, US, JP, ...      Need an IndexGeography for each of these
+# Scenariochoose <- ParameterFile$Scenario                              # "450S" # 450S, NPS, NPS+ or CPS
 
 
 
 # Get Equity Batch Results
-ResultsLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/05_Reports/",ProjectName,"/")
+ResultsLocation <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/")
 if(!dir.exists(file.path(ResultsLocation))){dir.create(file.path(ResultsLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-ResultsLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/05_Reports/",ProjectName,"/",BatchName,"/")
+ResultsLocation <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(ResultsLocation))){dir.create(file.path(ResultsLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-BatchResultsLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/",BatchName,"/",BatchToTest,"/")
+BatchResultsLocation <- paste0(RESULTS.PATH,"/01_BatchResults/",BatchName,"/",BatchToTest,"/")
 setwd(BatchResultsLocation)
 
 if (file.exists(paste0(BatchResultsLocation,BatchName,"/",BatchToTest,"/",BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
@@ -83,7 +142,7 @@ CBCompProdSnapshots <- read.csv(paste0(BatchResultsLocation,BatchName,"_DebtProd
 
 
 # External Data Results
-setwd(DataLocation)
+setwd(paste0(DATA.PATH,"/01_ProcessedData/"))
 Index <- read.csv("2017-07-20_IndexAnalysis5_EquityAnalysisResults.csv",stringsAsFactors = FALSE)
 AllIEATargets <- read.csv("IEATargets2016_AllRegions.csv", stringsAsFactors=FALSE)
 AllCompanyData <- read.csv("CompanyLevelData_2017-08-21.csv",stringsAsFactors = FALSE)
@@ -92,10 +151,10 @@ MasterData <- read.csv(paste0("MasterData",ParameterFile$DateofFinancialData,".c
 OGData <- read.csv(paste0("01_SectorMasters/",ParameterFile$GDYearMonth,"/OGMaster_",ParameterFile$GDYearMonth,".csv"),stringsAsFactors = FALSE)
 BenchmarkRegionList <- read.csv("BenchRegions.csv")
 IndexUniverses <- read.csv("IndexRegions.csv")
-OGCarbonBudget <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/04_Other/CarbonCapexUpstream.csv"),stringsAsFactors = FALSE)
+OGCarbonBudget <- read.csv(paste0(DATA.PATH,"/04_Other/CarbonCapexUpstream.csv"),stringsAsFactors = FALSE)
 
 # Batch related Portfolio & Fund-Data Results
-PortfolioBreakdown <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Portfolio_Overview_Piechart.csv"),stringsAsFactors = FALSE)
+PortfolioBreakdown <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"Portfolio_Overview_Piechart.csv"),stringsAsFactors = FALSE)
 PortfolioBreakdown$InvestorNameLong <- PortfolioBreakdown$InvestorName
 PortfolioBreakdown$PortfolioNameLong <- PortfolioBreakdown$PortfolioName
 
@@ -111,7 +170,7 @@ TestList<-PortfolioBreakdown
 
 
 # Funds within the Portfolios
-FundList <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/",ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
+FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
 if ("FundList"==TRUE){
   FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
   FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
@@ -126,11 +185,11 @@ if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
   EQBatchTest_PortSnapshots <- merge(CompanyNames, EQBatchTest_PortSnapshots, by = "EQY_FUND_TICKER", all.y = TRUE)}
 
 # For the Funds Heat Map
-FundsDataAll <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
+FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
 
 # Add Funds for comparison charts 
 # Add a code to update the Index resutls
-FundLocation<-paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/",ComparisonFile,"/2016Q4/")
+FundLocation<-paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/2016Q4/")
 if (ImportNewComparisonList == TRUE){
   
   EQComparisonBatchTestLong <- read.csv(paste0(FundLocation,ComparisonFile,"_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"),stringsAsFactors = FALSE)
@@ -190,9 +249,9 @@ AutoCompanies <- CleanedBBGData[[3]]
 OilData <- cleanOGData(OGData,AllCompanyData,Startyear)
 
 # Other Sector Data
-OSTargets <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/04_Other/SDA_Targets.csv"), stringsAsFactors = FALSE)
-OSdata <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/00_RawData/99_SampleDataSets/OSmaster_2017-10-07.csv"), stringsAsFactors = FALSE)
-ShippingData <- read.csv(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/00_RawData/07_Shipping/ShippingData.csv"), stringsAsFactors = FALSE,strip.white = TRUE)
+OSTargets <- read.csv(paste0(DATA.PATH,"/04_Other/SDA_Targets.csv"), stringsAsFactors = FALSE)
+OSdata <- read.csv(paste0(DATA.PATH,"/00_RawData/99_SampleDataSets/OSmaster_2017-10-07.csv"), stringsAsFactors = FALSE)
+ShippingData <- read.csv(paste0(DATA.PATH,"/00_RawData/07_Shipping/ShippingData.csv"), stringsAsFactors = FALSE,strip.white = TRUE)
 EQ_OS_WEM <- matchOS(OSdata, EQBatchTest_PortSnapshots)
 write.csv(EQ_OS_WEM,paste0(BatchName,"_EQ_OtherSectorOutput.csv"),row.names = FALSE)
 CB_OS_WEM <- matchOS(OSdata, CBBatchTest_PortSnapshots)
@@ -299,7 +358,9 @@ CurrCapColour = "grey75"
 AxisColour = "#17375e" #"#274F80"
 
 ColourPalette <- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
-figuredirectory <- paste0(CodeLocation,"01_ReportTemplates/ReportGraphics/Icons/")
+# figuredirectory <- paste0(CodeLocation,"01_ReportTemplates/ReportGraphics/Icons/")
+figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
+
 
 textsize = 8
 ppi <- 600 #resolution of plots
@@ -313,11 +374,11 @@ ResultsLocFolder <- ResultsLocation
 # GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralGraphTranslation_V1.csv"), stringsAsFactors = FALSE)
 # ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
 
-template <- (readLines(paste0(GitHubLocation,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
-GraphTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
-ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
-if (length(grep("Swiss",ReportTemplate))==1){ReportTranslation <- read.csv(paste0(CodeLocation,"01_ReportTemplates/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
+GraphTranslation <- read.csv(paste0(TemplatePath,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
+ReportTranslation <- read.csv(paste0(TemplatePath,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
+if (length(grep("Swiss",ReportTemplate))==1){ReportTranslation <- read.csv(paste0(TemplatePath,"/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
 
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
 RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
@@ -357,6 +418,7 @@ for (i in 1:nrow(TestList)){
   PortName <- TestList[i,"PortName"]
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioNameLong
+    PortName <- InvestorName
     # ReportName <- InvestorNameLong
   }else{
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)

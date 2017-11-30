@@ -22,6 +22,9 @@ PROJ.CODE.PATH <- paste0(GIT.PATH, PROJ.NAME, "/")
 DataFolder <- PROC.DATA.PATH
 FundDataLocation <- FUND.DATA.PATH
 
+Date <<- Sys.Date()
+BBGPORTOutput <<- "FinancialData_20171127"
+
 
 ### ###########################################################################
 ### PROJECT FUNCTIONS
