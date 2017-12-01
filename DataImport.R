@@ -1,159 +1,263 @@
-# Fund-Look Through for portfolio data (Using output of Fund-Look-through_preparation)
-# 17/04/21 Klaus Hagedorn
-
-# rm(list=ls())
-
 #Load packages
-library(plyr)
+library(dplyr)
 library(reshape2)
 
-#Version - Control
 
 # --- DATE ---   |  --- Editor ---  | --- Version Name --- | --- Edits / Adds / Changes / Bugfixes ---
 # 2017 - 04 - 21 |        KH        |          1           | First version - loading all fund holdings and aditional information and binding it with input data (ISINs)
 
 
 
-#------------
-# Set up 2DII Dev Environment Folders and Locations
-#------------
+### ###########################################################################
+### Set up 2DII Env 
+### ###########################################################################
 
 if (!exists("TWODII.CONSTS")) {
   ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
   print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run Common/2dii-init.R and try again.")
 } 
 
-#------------
-# Set up PortCheck-Specific Constants and Functions
-#------------
+### ###########################################################################
+### Set up Project Env 
+### ###########################################################################
 
 ### this file sourced at top of all PortCheck scripts
 ### this defines any project constants and functions
 ### and will also source an override file if it exists
 source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
-print("*** Starting DataImport.R Script")
-print(show.consts())
+imp("Starting DataImport.R Script")
 
 
-#------------
-# Read in Parameter File and Set Variables
-#------------
+### ###########################################################################
+### PARAMETERS
+### ###########################################################################
 
-### define these vars so we know they will be important
+### declare these vars so we know they will be important
 ### makes the code easier to understand - they're not a surprise later
-BatchName <- NA
-BenchmarkRegionchoose <- NA
-CompanyDomicileRegion <- NA
-Scenario <- NA
-Startyear <- NA
 
-ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
-### fill up those variables
-SetParameters(ParameterFile)              # Sets BAtchName, Scenario, BenchmarkRegion etc. 
-print("*** STARTING SCRIPT with PARAMETERS:")
-print(ParameterFile)
+param.list <- c("BATCH.NAME","BENCHMARK.REGION",
+                "COMPANYDOM.REGION","SCENARIO","START.YEAR",
+                "FIN.DATA.DATE", "CLIENT.NAME")
+
+### sets as NA initially
+ignore <- sapply(param.list, function(x) assign(x, NA, envir = globalenv()))
+#params <- sapply(param.list, function(x) eval(parse(text=x)))
+
+### pick the file and set the params
+ParameterFile <- ReadParameterFile()
+SetParameters(ParameterFile)              
+
+### save the values so we can see them
+imp("Loaded Parameters")
+params <- sapply(param.list, function(x) eval(parse(text=x)))
+lp(params)
+
+### If you want to skip look through, set this to 0
+FUND.LOOK.THROUGH <- 1
+### financial data fields used
+FIN.FIELDS <- c("ISIN","Ticker", "Security.Type", "SharePrice","ICB.Subsector.Name","Group", "Subgroup","Name")
+### one way to classify asset class
+GROUPS.NOT.EQUITY <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS Other","CMBS Subordinated" ,"Municipal-City" ,"Municipal-County","Debt Fund","Multi-National","Commodity Fund", "Real Estate Fund","Alternative Fund","Money Market Fund", "","Other ABS","Sovereign","Sovereign Agency","WL Collat CMO Mezzanine","WL Collat CMO Other","WL Collat CMO Sequential")
 
 
-#-------------
-# Set Input / OUtput Locations Based on parameter File Input
-#------------
+### ###########################################################################
+### SET UP ANY OTHER VARS BASED ON PARAMS
+### ###########################################################################
 
 ### Finish setting up paths based on what was in the Parameter file
-FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
-# OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
-DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
-PortfolioLocation <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
-BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
+BATCH.FIN.DATA.PATH <- paste0(FIN.DATA.PATH,FIN.DATA.DATE,"/PORT/")
+CLIENT.PORTS.PATH <- paste0(PORTS.PATH,CLIENT.NAME,"/")
+BATCH.PORTS.PATH <- paste0(CLIENT.PORTS.PATH,BATCH.NAME,"/")
 
-if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-
-
-
-#-------------
-# Read in all data (Fund data, portfolio data and financial data)
-#------------
-#-#Read in portfolio data (including Fund-ISINs)
-PortfolioData <- read.csv(paste0(BatchLocation,BatchName,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-
-MissingColnames <- setdiff(c("MarketValue","Currency","NumberofShares"), colnames(PortfolioData))
-if(length(MissingColnames) > 0){PortfolioData[,MissingColnames] <- NA}
-
-PortfolioData$MarketValue <- as.numeric(PortfolioData$MarketValue)
-PortfolioData$NumberofShares <- as.numeric(PortfolioData$NumberofShares)
-
-PortInput <- PortfolioData
-
-ExchRates <- read.csv(paste0(DataFolder,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-MissingCurrencies <- data.frame(MissingCurrencies = setdiff(unique(PortfolioData$Currency), ExchRates$Currency_abbr))
-PortfolioData <- merge(PortfolioData, subset(ExchRates, select = c("Currency_abbr","ExchangeRate_31122016")), by.x = "Currency", by.y = "Currency_abbr", all.x = TRUE, all.y = FALSE)
-PortfolioData$ValueUSD <- PortfolioData$MarketValue * PortfolioData$ExchangeRate_31122016
-
-PortSizeCheck0USD <- sum(PortfolioData$ValueUSD, na.rm = TRUE)
-
-NegativeValues <- subset(PortfolioData, !(!(MarketValue < 0 & (is.na(NumberofShares) | NumberofShares == 0)) & !(NumberofShares < 0 & (is.na(MarketValue) | MarketValue == 0 ))))
-NegativeValues <- ddply(NegativeValues,.(ISIN, Currency, PortfolioName, InvestorName),summarize, NumberofShares = sum(NumberofShares,na.rm = TRUE), MarketValue = sum(MarketValue,na.rm = TRUE), ValueUSD = sum(ValueUSD,na.rm = TRUE))
-
-PortfolioData <- subset(PortfolioData, !(MarketValue <= 0 & (is.na(NumberofShares) | NumberofShares == 0)) & !(NumberofShares <= 0 & (is.na(MarketValue) | MarketValue == 0 )))
-
-# PortfolioData <- subset(PortfolioData, !(MarketValue == 0 & is.na(NumberofShares)) & !(NumberofShares == 0 & is.na(MarketValue)))
-PortfolioData <- ddply(PortfolioData,.(ISIN, Currency, PortfolioName, InvestorName),summarize, NumberofShares = sum(NumberofShares,na.rm = TRUE), MarketValue = sum(MarketValue,na.rm = TRUE), ValueUSD = sum(ValueUSD,na.rm = TRUE))
-PortInputPositiveValuesOnly <- PortfolioData
-
-PortSizeCheck0 <- sum(PortfolioData$MarketValue, na.rm = TRUE)
-
-# 3) create overview file for meta analysis (a)AUM total, negative values total, AUM without ISIN vs with ISINs, AUM False ISINs (position without valueUSD vs positions with valueUSD (sum this) vs AUM assessable (b) Financial instrumetn split, (c) funds vs direct, etc.
-PortInputNAISINs <- subset(PortfolioData, ISIN %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(ISIN))
-PortfolioData$ISIN [PortfolioData$ISIN  %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(PortfolioData$ISIN) ] <- "NA_ISIN_Input"
+if(!dir.exists(file.path(BATCH.PORTS.PATH))){
+  dir.create(file.path(BATCH.PORTS.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")
+}  
+lp(show.consts())
 
 
-PortSizeCheck01 <- sum(PortfolioData$ValueUSD, na.rm = TRUE)
+### ###########################################################################
+### LOAD EXTERNAL DATA
+### ###########################################################################
 
-if("Name" %in% colnames(PortfolioData)){PortfolioData <- rename(PortfolioData,c("Name" = "Name_InputPort"))}
-#Read in fund look-through data
+ExchRates <- read.csv(paste0(PROC.DATA.PATH,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+names(ExchRates) <- c("Currency","Abbr","Rate")
+
+### financial data from bloomberg
+### when we call this function we assume NO DUPLICATE ISINs
+fin.data <- load.financial.data()
+assert(!any(duplicated(fin.data$ISIN)), "Duplicate ISINs in financial data")
+
+### this select_ notation with ".dots" is jsut the dplyr way that you select fields that
+### are stored in a vector
+fin.data <- fin.data %>% select_(.dots=FIN.FIELDS)
+
+### fund database
 Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),stringsAsFactors=FALSE,strip.white=TRUE) 
+assert(!any(is.na(Fund_Data$ValueUnit)), "NAs in Fund_Data ValueUnit")
 Fund_Data_EQY <- read.csv(paste0(FundDataLocation,"FundLookThroughData_EQY.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
-#Read in financial data
-# BBG_Data <- read.csv(paste0(FinancialDataFolder,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-BBG_Data <- read.csv(paste0(FinancialDataFolder,"FinancialData_20170925.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
-BBG_Data_sub <- subset(BBG_Data, ! is.na(BBG_Data$ISIN) & ISIN != "")
 
-#Test if there are duplicates left in the financial database
-ISINCount <- as.data.frame(table(BBG_Data_sub$ISIN))
-DupsInBBGDataBETTERCHECK <- subset(ISINCount, Freq > 1, select = "Var1")
-BBG_Data_sub <- BBG_Data_sub[!duplicated(BBG_Data_sub),]
+### ###########################################################################
+### LOAD PORTFOLIO DATA
+### ###########################################################################
+
+port <- read.csv(paste0(BATCH.PORTS.PATH,BATCH.NAME,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+check.rows <- nrow(port)
+### tag each row with a unique ID so we make sure we don't lose any
+port$Import.ID <- rownames(port)
+REQUIRED.PORT.COLS <- c("Import.ID", "InvestorName", "PortfolioName", "ISIN", 
+                        "NumberofShares", "MarketValue", "Currency")
+
+### check for required input fields
+### if they don't exist, this script stops
+if (length(setdiff(REQUIRED.PORT.COLS, names(port))) != 0) {
+  warn("Missing Required Columns:")
+  lp(paste0(REQUIRED.PORT.COLS))
+  stop("XXX Missing Required Columns")
+}
+
+### save for later
+init.cols <- names(port)
+extra.cols <- setdiff(init.cols, REQUIRED.PORT.COLS)
+
+### ###########################################################################
+### MARK INVALID DATA
+### ###########################################################################
+
+### clean the data
+### any non-numbers will be NA
+port$MarketValue <- as.numeric(port$MarketValue)
+port$NumberofShares <- as.numeric(port$NumberofShares)
+
+### if we have neither Number of Shares nor MarketValue
+port$err.noHolding <- ifelse(is.na(port$NumberofShares), 
+                              ifelse(is.na(port$MarketValue), 1, 0), 0)
+### missing currency
+port$err.noCurr <- ifelse(is.na(port$Currency) | port$Currency=="", 1, 0)
+### Get exchange rates
+port <- left_join(port, ExchRates %>% select(Abbr, Rate),
+                  by=c("Currency"="Abbr"))
+assert(nrow(port)==check.rows, "Duplicates added when merging with currency rates")
+
+### missing rate
+port$err.noExRate <- ifelse(is.na(port$Rate), 1, 0)
+
+### missing ISINs
+port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
+
+### negative values
+port$err.negMV <- ifelse(!is.na(port$MarketValue) & port$MarketValue < 0, 1, 0)
+port$err.negShares <- ifelse(!is.na(port$NumberofShares) & port$NumberofShares < 0, 1, 0)
+
+### this could be NA based on either MarketValue or Rate
+port$ValueUSD.Init <- port$MarketValue * port$Rate
+check.valueUSD <- sum(port$ValueUSD.Init, na.rm=TRUE)
+
+
+### ###########################################################################
+### MERGE WITH FINANCIAL DATA
+### ###########################################################################
+
+port.fin <- left_join(port, fin.data, by=("ISIN"))
+assert(nrow(port.fin)==check.rows, "Duplicates added when merging with financial data")
+
+### one kind of invalid data
+port.fin$err.noFinData <- ifelse(is.na(port.fin$Name), 1,0) 
+
+### calculate a ValueUSD in case we don't have one
+port.fin$ValueUSD.Calc <- port.fin$SharePrice * port.fin$NumberofShares
+port.fin$ValueUSD <- ifelse(is.na(port.fin$ValueUSD.Init), 
+                                  port.fin$ValueUSD.Calc, 
+                                  port.fin$ValueUSD.Init)
+
+### one more kind of invalid data
+port.fin$err.noValue <- ifelse(is.na(port.fin$ValueUSD),1,0)
+
+### add a column that sums the error columns - we can just check this one
+### to see if row is invalid
+### this says to select the error columns and put their sum into "err.invalid"
+port.fin <- port.fin %>% mutate(err.invalid=rowSums(.[grep("err",names(port))]))
+
+table(port.fin$err.invalid)
+table(port.fin$err.noISIN)
+table(port.fin$err.noValue)
+table(port.fin$err.noValue, port.fin$err.noISIN)
+
+
+### ###########################################################################
+### CLASSIFY PORT
+### ###########################################################################
+
+
+
+
+init.cols <- c("ISIN", subset(names(port.fin), !(names(port.fin) %in% FIN.FIELDS)))
+
+### ###########################################################################
+### FUND LOOK THROUGH IF NEEDED
+### ###########################################################################
+
+if (FUND.LOOK.THROUGH == 1) {
+  
+  #All Instruments (R-pull with Port-Weight for both EQY & CBonds):
+  #### inner join only returns the matching rows
+  port.lt <- inner_join(port.fin %>% select_(.dots=init.cols), Fund_Data, 
+                                     by=c("ISIN"="FundISIN"))
+  funds.check.rows <- nrow(port.lt)
+  
+  ### add financial data
+  port.lt <- left_join(port.lt, fin.data, by=c("HoldingISIN"="ISIN"))
+  assert(nrow(port.lt)==funds.check.rows, "Duplicates added when merging funds with financial data")
+
+  ### in some downloads the type of value downloaded was different   
+  port.lt$Position <- ifelse(port.lt$ValueUnit=="PortWeight",
+                             port.lt$ValueUSD * port.lt$value / 100,
+                             port.lt$ValueUSD * port.lt$value * port.lt$SharePrice)
+  ### !!! or NA??
+  port.lt$err.fundCov <- ifelse(port.lt$FundCoverage > 100, 1,0)
+  port.lt$err.fundNoFinData <- ifelse(is.na(port.lt$Name), 1,0)
+  
+}
+
+
+# 3) create overview file for meta analysis (a)AUM total, negative values total, AUM without ISIN vs with ISINs, AUM False ISINs (position without valueUSD vs positions with valueUSD (sum this) vs AUM assessable (b) Financial instrumetn split, (c) funds vs direct, etc.
+#PortInputNAISINs <- subset(port, ISIN %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(ISIN))
+#port$ISIN [port$ISIN  %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(port$ISIN) ] <- "NA_ISIN_Input"
+
+
+
 #------------
 # Merge portfolio with financial data and prepare for fund-look-through (e.g. calculate USD-Value held of each security)
 #------------
 
-PortfolioData_w_BBG <- merge(BBG_Data_sub,PortfolioData, by = "ISIN", all.x = FALSE, all.y = TRUE)
-PortfolioData_wo_BBG <- unique(subset(PortfolioData_w_BBG,is.na(Name), select = c("ISIN")))
-PortfolioData_wo_BBG2 <- subset(PortfolioData_w_BBG,is.na(Name))
+# PortfolioData_w_BBG <- merge(BBG_Data_sub,PortfolioData, by = "ISIN", all.x = FALSE, all.y = TRUE)
+# PortfolioData_wo_BBG <- unique(subset(PortfolioData_w_BBG,is.na(Name), select = c("ISIN")))
+# PortfolioData_wo_BBG2 <- subset(PortfolioData_w_BBG,is.na(Name))
 
-PortfolioData_w_BBG$ValueType <- "NumberofShares"
-PortfolioData_w_BBG$ValueType[PortfolioData_w_BBG$MarketValue != 0 & !is.na(PortfolioData_w_BBG$MarketValue)] <- "MarketValue"
+# PortfolioData_w_BBG$ValueType <- "NumberofShares"
+# PortfolioData_w_BBG$ValueType[PortfolioData_w_BBG$MarketValue != 0 & !is.na(PortfolioData_w_BBG$MarketValue)] <- "MarketValue"
 
 # # Calculate ValueUSD (AUMs in each single fund)
 # PortfolioData_w_BBG$Position <- PortfolioData_w_BBG$ValueUSD
 # PortfolioData_w_BBG$Position[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] <- PortfolioData_w_BBG$NumberofShares[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] 
-PortfolioData_w_BBG$ValueUSD[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] <- PortfolioData_w_BBG$SharePrice[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] * PortfolioData_w_BBG$NumberofShares[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0]
-
-Test <- subset(PortfolioData_w_BBG, is.na(ValueUSD))
+# PortfolioData_w_BBG$ValueUSD[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] <- 
+#   PortfolioData_w_BBG$SharePrice[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] * PortfolioData_w_BBG$NumberofShares[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0]
+# 
+# Test <- subset(PortfolioData_w_BBG, is.na(ValueUSD))
 # write.csv(Test, "InputWithoutBBGInformation_missingPorts.csv", row.names = FALSE)
 
 # PortfolioData_w_BBG$ISIN[PortfolioData_w_BBG$ISIN %in% Test$ISIN & PortfolioData_w_BBG$ISIN != "NA_ISIN_Input" & (is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0)] <- "NA_ISIN_BBG_Data"
-PortSizeCheck1 <- sum(PortfolioData_w_BBG$ValueUSD, na.rm = TRUE)
+# PortSizeCheck1 <- sum(PortfolioData_w_BBG$ValueUSD, na.rm = TRUE)
 
 # Portfolio Meta Analysis
-PortfolioEntries <- aggregate(ISIN ~ InvestorName + PortfolioName, data = PortfolioData_w_BBG, FUN = length)
-PortfolioEntries <- rename(PortfolioEntries, c("ISIN" = "NrOfPosition"))
-PortfolioSizes <- aggregate(PortfolioData_w_BBG["ValueUSD"], by  = PortfolioData_w_BBG[,c("InvestorName","PortfolioName")],FUN = sum, na.rm = TRUE)
-PortfolioSizes <- rename(PortfolioSizes, c("ValueUSD" = "PortfolioSizeUSD"))
-Test <- aggregate(ISIN ~ InvestorName + PortfolioName, data = Test, FUN = length)
-Test <- rename(Test,c("ISIN" = "NrOfPositionsWOValueUSD"))
-PortfolioSizes <- merge(merge(PortfolioSizes, PortfolioEntries, by = c("InvestorName","PortfolioName"), all.x = TRUE),Test,by = c("InvestorName","PortfolioName"), all.x = TRUE)
+# PortfolioEntries <- aggregate(ISIN ~ InvestorName + PortfolioName, data = PortfolioData_w_BBG, FUN = length)
+# PortfolioEntries <- rename(PortfolioEntries, c("ISIN" = "NrOfPosition"))
+# PortfolioSizes <- aggregate(PortfolioData_w_BBG["ValueUSD"], by  = PortfolioData_w_BBG[,c("InvestorName","PortfolioName")],FUN = sum, na.rm = TRUE)
+# PortfolioSizes <- rename(PortfolioSizes, c("ValueUSD" = "PortfolioSizeUSD"))
+# Test <- aggregate(ISIN ~ InvestorName + PortfolioName, data = Test, FUN = length)
+# Test <- rename(Test,c("ISIN" = "NrOfPositionsWOValueUSD"))
+# PortfolioSizes <- merge(merge(PortfolioSizes, PortfolioEntries, by = c("InvestorName","PortfolioName"), all.x = TRUE),Test,by = c("InvestorName","PortfolioName"), all.x = TRUE)
 
 #-------------
 # # Merge Portfolio Data with fund data for the lookthrough and calculate owned holdings of Portfolios
@@ -240,14 +344,14 @@ TotalPortfolio_EQY <- subset(TotalPortfolio_EQY , select = c("InvestorName", "Po
 # Sort Debt Data
 #------------
 # Create the Cbond portfolio input files for the fund analysis
-DebtData <- read.csv(paste0(FinancialDataFolder,"Cbonds_Issuer&Subs_DebtTicker_BICS_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+DebtData <- read.csv(paste0(BATCH.FIN.DATA.PATH,"Cbonds_Issuer&Subs_DebtTicker_BICS_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 # Rename Total row as to not confuse it with TOTAL SA...
 DebtData$Co..Corp.TKR[DebtData$Co..Corp.TKR == "Total"] <- "TotalDebt"
 GovBanksSupraNat <- subset(DebtData, (DebtData$Government.Development.Banks !=0 | DebtData$Supranationals != 0) & DebtData$Co..Corp.TKR != "TotalDebt") 
 DebtData <- subset(DebtData, !DebtData$Co..Corp.TKR %in% GovBanksSupraNat$Co..Corp.TKR)
 
 
-# TotalPortfolio <- read.csv(paste0(FinancialDataFolder,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+# TotalPortfolio <- read.csv(paste0(BATCH.FIN.DATA.PATH,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
 CorpDebtTicker <- colsplit(TotalPortfolio$Ticker, pattern = " ", names = c("COMPANY_CORP_TICKER",2,3))[1]
 TotalPortfolio <- cbind(TotalPortfolio,CorpDebtTicker)
@@ -315,18 +419,18 @@ OverviewPiechartDataFinal <- rbind(OverviewPiechartDataFinal, OverviewPiechartDa
 ### In general we should try avoid doing this, and use paths instead below - CHANGE
 setwd(paste0(BatchLocation))
 
-write.csv(OverviewPiechartDataFinal,paste0(BatchName,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
-write.csv(MissingISINs,paste0(BatchName,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
-write.csv(PortfolioData_w_BBG,paste0(BatchName,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio,paste0(BatchName,"Port.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio_EQY,paste0(BatchName,"Port_EQY.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio_Bonds,paste0(BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
-write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALSE, na = "")
-write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
+write.csv(OverviewPiechartDataFinal,paste0(BATCH.NAME,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
+write.csv(MissingISINs,paste0(BATCH.NAME,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
+write.csv(PortfolioData_w_BBG,paste0(BATCH.NAME,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio,paste0(BATCH.NAME,"Port.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio_EQY,paste0(BATCH.NAME,"Port_EQY.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio_Bonds,paste0(BATCH.NAME,"Port_Bonds.csv"),row.names = FALSE, na = "")
+write.csv(FundCoverage,paste0(BATCH.NAME,"Port_ListofFunds.csv"),row.names = FALSE, na = "")
+write.csv(PortfolioMetaAnalysis,paste0(BATCH.NAME,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
 
 # Temp save for bonds
 UserName <- Clare
 bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
-write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BATCH.NAME,"Port_Bonds.csv"),row.names = FALSE, na = "")
 
 

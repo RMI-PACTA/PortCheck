@@ -13,9 +13,10 @@ PROJ.CODE.PATH <- paste0(GIT.PATH, PROJ.NAME, "/")
 ### ###########################################################################
 
 ### Remember - 2dii-init has been run, so this scipt has access to 
-### PROJ.CODE.PATH, DATA.PATH, PORTS.PATH, etc...
+### DATA.PATH, PORTS.PATH, etc...
 ### Define any other project-specific constants that might be useful here
 
+PARAM.PATH <- paste0(PORTS.PATH, "99_ParameterFiles/")
 
 ### These are In here for backwards compatibility
 ### Eventually should change the code to use the upper case constants
@@ -26,12 +27,13 @@ Date <<- Sys.Date()
 BBGPORTOutput <<- "FinancialData_20171127"
 
 
+
 ### ###########################################################################
 ### PROJECT FUNCTIONS
 ### ###########################################################################
 
 ### if there are shared functions, source them here
-source(paste0(PROJ.CODE.PATH, "GlobalPortCheckFunctions.R"))
+source(paste0(PROJ.CODE.PATH, "proj-functions.R"))
 
 
 ### ###########################################################################
@@ -40,8 +42,8 @@ source(paste0(PROJ.CODE.PATH, "GlobalPortCheckFunctions.R"))
 
 ### Uncomment if you want to use logging
 
-### LOG.PATH <- paste0("SomeFolderWhereYouWriteLogs/")
-### source(paste0(COMMON.CODE.PATH,"/log.R"))
+LOG.PATH <- paste0(PORTCHECK.CODE.PATH)
+source(paste0(COMMON.CODE.PATH,"/log.R"))
 ### init.log()
 
 
