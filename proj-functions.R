@@ -45,6 +45,8 @@ load.financial.data <- function() {
   
 }
 
-is.equity() <- function() {
-  
+load.fund.data <- function() {
+  Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),stringsAsFactors=FALSE,strip.white=TRUE) 
+  Fund_Data <- subset(Fund_Data, FundCoverage <= 100)  
+  Fund_Data
 }

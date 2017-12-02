@@ -29,7 +29,7 @@ imp("Starting DataImport.R Script")
 
 
 ### ###########################################################################
-### PARAMETERS
+### READ BATCH-SPECIFIC PARAMETERS 
 ### ###########################################################################
 
 ### declare these vars so we know they will be important
@@ -41,23 +41,15 @@ param.list <- c("BATCH.NAME","BENCHMARK.REGION",
 
 ### sets as NA initially
 ignore <- sapply(param.list, function(x) assign(x, NA, envir = globalenv()))
-#params <- sapply(param.list, function(x) eval(parse(text=x)))
 
 ### pick the file and set the params
 ParameterFile <- ReadParameterFile()
 SetParameters(ParameterFile)              
 
 ### save the values so we can see them
-imp("Loaded Parameters")
 params <- sapply(param.list, function(x) eval(parse(text=x)))
+imp("Loaded Parameters")
 lp(params)
-
-### If you want to skip look through, set this to 0
-FUND.LOOK.THROUGH <- 1
-### financial data fields used
-FIN.FIELDS <- c("ISIN","Ticker", "Security.Type", "SharePrice","ICB.Subsector.Name","Group", "Subgroup","Name")
-### one way to classify asset class
-GROUPS.NOT.EQUITY <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS Other","CMBS Subordinated" ,"Municipal-City" ,"Municipal-County","Debt Fund","Multi-National","Commodity Fund", "Real Estate Fund","Alternative Fund","Money Market Fund", "","Other ABS","Sovereign","Sovereign Agency","WL Collat CMO Mezzanine","WL Collat CMO Other","WL Collat CMO Sequential")
 
 
 ### ###########################################################################
@@ -65,9 +57,14 @@ GROUPS.NOT.EQUITY <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS 
 ### ###########################################################################
 
 ### Finish setting up paths based on what was in the Parameter file
-BATCH.FIN.DATA.PATH <- paste0(FIN.DATA.PATH,FIN.DATA.DATE,"/PORT/")
+
+
+### ClientName / BatchName / RunNumber -- Three levels of ways to save a POrtCheck output
 CLIENT.PORTS.PATH <- paste0(PORTS.PATH,CLIENT.NAME,"/")
 BATCH.PORTS.PATH <- paste0(CLIENT.PORTS.PATH,BATCH.NAME,"/")
+
+### which financial data to use based on date
+BATCH.FIN.DATA.PATH <- paste0(FIN.DATA.PATH,FIN.DATA.DATE,"/PORT/")
 
 if(!dir.exists(file.path(BATCH.PORTS.PATH))){
   dir.create(file.path(BATCH.PORTS.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")
@@ -76,26 +73,38 @@ lp(show.consts())
 
 
 ### ###########################################################################
+### CONSTANTS USED IN THIS FILE
+### ###########################################################################
+
+### If you want to skip look through, set this to 0
+FUND.LOOK.THROUGH <- 1
+
+### financial data fields used
+FIN.FIELDS <- c("ISIN","Ticker", "Security.Type", "SharePrice","ICB.Subsector.Name","Group", "Subgroup","Name")
+
+### one way to classify asset class
+GROUPS.NOT.EQUITY <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS Other","CMBS Subordinated" ,"Municipal-City" ,"Municipal-County","Debt Fund","Multi-National","Commodity Fund", "Real Estate Fund","Alternative Fund","Money Market Fund", "","Other ABS","Sovereign","Sovereign Agency","WL Collat CMO Mezzanine","WL Collat CMO Other","WL Collat CMO Sequential")
+Subgroups_notBonds <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS Other","CMBS Subordinated" ,"Municipal-City" ,"Municipal-County","Supranational Bank","US Municipals","FGLMC Single Family 30yr","FGLMC Single Family 15yr","GNMA Single Family 30yr","FNMA Single Family 30yr","FNMA Single Family 15yr","Export/Import Bank","Regional Authority","Regional Agencies", "Other ABS","Sovereign","Sovereign Agency","WL Collat CMO Mezzanine","WL Collat CMO Other","WL Collat CMO Sequential")
+
+
+### ###########################################################################
 ### LOAD EXTERNAL DATA
 ### ###########################################################################
 
 ExchRates <- read.csv(paste0(PROC.DATA.PATH,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-names(ExchRates) <- c("Currency","Abbr","Rate")
+names(ExchRates) <- c("Currency","Abbr","Ex.Rate")
 
 ### financial data from bloomberg
 ### when we call this function we assume NO DUPLICATE ISINs
-fin.data <- load.financial.data()
-assert(!any(duplicated(fin.data$ISIN)), "Duplicate ISINs in financial data")
-
+Fin.Data <- load.financial.data()
+assert(!any(duplicated(Fin.Data$ISIN)), "Duplicate ISINs in financial data")
 ### this select_ notation with ".dots" is jsut the dplyr way that you select fields that
 ### are stored in a vector
-fin.data <- fin.data %>% select_(.dots=FIN.FIELDS)
+Fin.Data <- Fin.Data %>% select_(.dots=FIN.FIELDS)
 
 ### fund database
-Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),stringsAsFactors=FALSE,strip.white=TRUE) 
-assert(!any(is.na(Fund_Data$ValueUnit)), "NAs in Fund_Data ValueUnit")
-Fund_Data_EQY <- read.csv(paste0(FundDataLocation,"FundLookThroughData_EQY.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+Fund.Data <- load.fund.data()
+assert(!any(Fund.Data$FundCoverage > 100), "Fund Coverage > 100")
 
 
 ### ###########################################################################
@@ -104,6 +113,7 @@ Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.
 
 port <- read.csv(paste0(BATCH.PORTS.PATH,BATCH.NAME,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 check.rows <- nrow(port)
+check.ISINs <- length(unique(port$ISIN))
 ### tag each row with a unique ID so we make sure we don't lose any
 port$Import.ID <- rownames(port)
 REQUIRED.PORT.COLS <- c("Import.ID", "InvestorName", "PortfolioName", "ISIN", 
@@ -136,12 +146,12 @@ port$err.noHolding <- ifelse(is.na(port$NumberofShares),
 ### missing currency
 port$err.noCurr <- ifelse(is.na(port$Currency) | port$Currency=="", 1, 0)
 ### Get exchange rates
-port <- left_join(port, ExchRates %>% select(Abbr, Rate),
+port <- left_join(port, ExchRates %>% select(Abbr, Ex.Rate),
                   by=c("Currency"="Abbr"))
 assert(nrow(port)==check.rows, "Duplicates added when merging with currency rates")
 
 ### missing rate
-port$err.noExRate <- ifelse(is.na(port$Rate), 1, 0)
+port$err.noExRate <- ifelse(is.na(port$Ex.Rate), 1, 0)
 
 ### missing ISINs
 port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
@@ -150,8 +160,13 @@ port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
 port$err.negMV <- ifelse(!is.na(port$MarketValue) & port$MarketValue < 0, 1, 0)
 port$err.negShares <- ifelse(!is.na(port$NumberofShares) & port$NumberofShares < 0, 1, 0)
 
+
+### ###########################################################################
+### INITIAL CALCULATIONS
+### ###########################################################################
+
 ### this could be NA based on either MarketValue or Rate
-port$ValueUSD.Init <- port$MarketValue * port$Rate
+port$ValueUSD.Init <- port$MarketValue * port$Ex.Rate
 check.valueUSD <- sum(port$ValueUSD.Init, na.rm=TRUE)
 
 
@@ -159,7 +174,7 @@ check.valueUSD <- sum(port$ValueUSD.Init, na.rm=TRUE)
 ### MERGE WITH FINANCIAL DATA
 ### ###########################################################################
 
-port.fin <- left_join(port, fin.data, by=("ISIN"))
+port.fin <- left_join(port, Fin.Data, by=("ISIN"))
 assert(nrow(port.fin)==check.rows, "Duplicates added when merging with financial data")
 
 ### one kind of invalid data
@@ -189,20 +204,54 @@ table(port.fin$err.noValue, port.fin$err.noISIN)
 ### CLASSIFY PORT
 ### ###########################################################################
 
+GROUPS.DEBT <- c("Sovereign", "Agency CMBS", "Automobile ABS Other","CMBS Other","CMBS Subordinated" ,
+                 "Municipal-City" ,"Municipal-County","Supranational Bank","US Municipals",
+                 "FGLMC Single Family 30yr","FGLMC Single Family 15yr","GNMA Single Family 30yr",
+                 "FNMA Single Family 30yr","FNMA Single Family 15yr","Export/Import Bank","Regional Authority",
+                 "Regional Agencies", "Other ABS","Sovereign","Sovereign Agency","WL Collat CMO Mezzanine",
+                 "WL Collat CMO Other","WL Collat CMO Sequential","Automobile ABS","WL Collateral CMO",
+                 "Regional(state/provnc)","Commercial MBS")
+
+SEC.TYPE.FUNDS <- c("ETF", "Closed End Fund", "Mutual Fund")
 
 
+### if we didn't match with Financial Data, we can't make this decision 
+### about what it is, we have no basis.  So those rows are NA
+### If we have financial data, then we start with default of Unknown and classify
+### based on "positive" signals from there
+port.fin$Fin.Asset.Type <- ifelse(port.fin$err.noFin==1, NA, "Unknown")
+### equity indicators - if these exist, we maark it as Equity
+### if not, leave as "Unknown"
+port.fin$Fin.Asset.Type <- ifelse(port.fin$ICB.Subsector.Name != "" | 
+                                      port.fin$Security.Type=="Common Stock" |
+                                        port.fin$Security.Type=="Global Depositary Receipt",  
+                                      "EQUITY", port.fin$Fin.Asset.Type)
+### debt indicators
+port.fin$Fin.Asset.Type <- ifelse(port.fin$Name==port.fin$Ticker, 
+                                      "DEBT", port.fin$Fin.Asset.Type)
+port.fin$Fin.Asset.Type <- ifelse(port.fin$Group %in% GROUPS.DEBT, 
+                                      "DEBT", port.fin$Fin.Asset.Type)
 
-init.cols <- c("ISIN", subset(names(port.fin), !(names(port.fin) %in% FIN.FIELDS)))
+### fund indicators
+port.fin$Fin.Asset.Type <- ifelse(port.fin$Security.Type %in% SEC.TYPE.FUNDS, 
+                                      paste0(port.fin$Fin.Asset.Type, " FUND"), 
+                                      port.fin$Fin.Asset.Type)
+
+### mark that this is a direct holding
+port.fin$Holding.Type <- "Direct Holding"
+
 
 ### ###########################################################################
 ### FUND LOOK THROUGH IF NEEDED
 ### ###########################################################################
 
+non.fin.cols <- c("ISIN", subset(names(port.fin), !(names(port.fin) %in% FIN.FIELDS)))
+
 if (FUND.LOOK.THROUGH == 1) {
   
   #All Instruments (R-pull with Port-Weight for both EQY & CBonds):
   #### inner join only returns the matching rows
-  port.lt <- inner_join(port.fin %>% select_(.dots=init.cols), Fund_Data, 
+  port.lt <- inner_join(port.fin %>% select_(.dots=non.fin.cols), Fund.Data, 
                                      by=c("ISIN"="FundISIN"))
   funds.check.rows <- nrow(port.lt)
   
@@ -210,15 +259,42 @@ if (FUND.LOOK.THROUGH == 1) {
   port.lt <- left_join(port.lt, fin.data, by=c("HoldingISIN"="ISIN"))
   assert(nrow(port.lt)==funds.check.rows, "Duplicates added when merging funds with financial data")
 
-  ### in some downloads the type of value downloaded was different   
-  port.lt$Position <- ifelse(port.lt$ValueUnit=="PortWeight",
+  ### Figure out the ValueUSD - that is the outut of the look-through
+  ### based on "ValueUnit", two ways to possibly do this
+  ### because Value could be either a PortWeight or SharesUSD
+  port.lt$Fund.ValueUSD <- ifelse(port.lt$ValueUnit=="PortWeight",
                              port.lt$ValueUSD * port.lt$value / 100,
                              port.lt$ValueUSD * port.lt$value * port.lt$SharePrice)
-  ### !!! or NA??
+  ### !!! or NA?? TAJ Don't understand what FundCoverage is.  Some is NA.
   port.lt$err.fundCov <- ifelse(port.lt$FundCoverage > 100, 1,0)
   port.lt$err.fundNoFinData <- ifelse(is.na(port.lt$Name), 1,0)
   
+  matchFunds <- unique(port.lt$ISIN)
+  port.fin.noMatchFunds <- subset(port.fin, !ISIN %in% matchFunds)
+  assert(check.ISINs==(length(unique(port.fin.noMatchFunds$ISIN)) + length(matchFunds)))
+  
+  ### if we have matched fund holdings, use the holding ISIN and calcualted value
+  port.lt$Holding.Type <- "Fund Holding"
+  port.lt$ISIN <- port.lt$HoldingISIN
+  port.lt$ValueUSD <- port.lt$Fund.ValueUSD
+  port.lt <- port.lt %>% select(-HoldingISIN, -Fund.ValueUSD, -value, -ValueUnit, -FundCoverage)
+  
+  #setdiff(names(port.lt), names(port.fin))
+  
+  ### put them together -- port.lt has 2 additional fund error columns
+  ### these cols will be NA for the port.fin rows
+  port.all <- bind_rows(port.fin.noMatchFunds, port.lt)
+  assert(length(unique(port$Import.ID))==length(unique(port.all$Import.ID)))
+
+} else {
+  
+  ### no look through; assume already done
+  
+  
 }
+
+sum(port.all$ValueUSD, na.rm=TRUE)
+sum(port$ValueUSD, na.rm=TRUE)
 
 
 # 3) create overview file for meta analysis (a)AUM total, negative values total, AUM without ISIN vs with ISINs, AUM False ISINs (position without valueUSD vs positions with valueUSD (sum this) vs AUM assessable (b) Financial instrumetn split, (c) funds vs direct, etc.
