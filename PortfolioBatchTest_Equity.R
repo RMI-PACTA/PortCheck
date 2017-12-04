@@ -520,7 +520,11 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
   
     if (ListAllPorts$Type[i] == "Portfolio"){
       Portfolio = subset(PortfolioAllPorts, PortfolioName == ListAllPorts$PortfolioName[i] & InvestorName == ListAllPorts$InvestorName[i])
+      if (ListAllPorts$PortfolioName[i] != ListAllPorts$InvestorName[i]){
       PortfolioName <- paste0(ListAllPorts$PortfolioName[i],"_",ListAllPorts$InvestorName[i])
+      }else{
+        PortfolioName <- ListAllPorts$InvestorName[i]
+      }
       # } else if(ListAllPorts$Type[i] == "FundType"){
       #Portfolio = subset(PortfolioAllPorts, PortfolioName == ListAllPorts$PortfolioName[i])
       #PortfolioName <- ListAllPorts$PortfolioName[i]
@@ -528,7 +532,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       Portfolio = subset(PortfolioAllPorts, InvestorName == ListAllPorts$InvestorName[i])
       PortfolioName <- ListAllPorts$InvestorName[i]
     }
-    
+    PortfolioName <- paste0(ListAllPorts$PortfolioName[i],"_",ListAllPorts$InvestorName[i])
     
     Portfolio <- subset(Portfolio, select = c("EQY_FUND_TICKER" , "Position", "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
     
