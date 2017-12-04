@@ -12,4 +12,4 @@
 .gitattributes
 
 # 2dII files
-user-overrides.R
+.proj-init-overrides.R

@@ -365,13 +365,22 @@ OverviewPiechartDataFinal$PortfolioType[OverviewPiechartDataFinal$InvestorName %
 BatchPath = paste0(BatchLocation, BatchName)
 
 write.csv(OverviewPiechartDataFinal,paste0(BatchPath,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
-write.csv(MissingISINs,paste0(BatchPath,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
-write.csv(PortfolioData_w_BBG,paste0(BatchPath,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
 write.csv(TotalPortfolio,paste0(BatchPath,"Port.csv"),row.names = FALSE, na = "")
 write.csv(TotalPortfolio_EQY,paste0(BatchPath,"Port_EQY.csv"),row.names = FALSE, na = "")
 write.csv(TotalPortfolio_Bonds,paste0(BatchPath,"Port_Bonds.csv"),row.names = FALSE, na = "")
-#write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALSE, na = "")
-#write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
+
+
+#write.csv(MissingISINs,paste0(BatchPath,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
+#write.csv(PortfolioData_w_BBG,paste0(BatchPath,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
+
+
+#write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALSE, na = "") # Fund List
+
+### AGGREGATED FOR EACH FILE
+### More information on each holding info for Jakob
+
+#write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "") # that is something else
+
 
 # Temp save for bonds
 bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2? Investing)/2? Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
