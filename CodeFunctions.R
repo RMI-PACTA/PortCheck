@@ -384,8 +384,7 @@ Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName){
       FundsListPort <- FundsListPort[rev(order(FundsListPort$ValueUSD)),]
       
       FundsListPort <- FundsListPort[1:min(maxno, nrow(FundsListPort)),]
-      FundsDataPort <- subset(FundsDataAll,FundsDataAll$ISIN %in% FundsListPort$FundISIN)  
-      # FundsDataPort <- subset(FundsDataAll, FundsDataAll$PortName %in% FundsListPort$FundISINName)
+      FundsDataPort <- FundsDataAll[FundsDataAll$ISIN %in% FundsListPort$FundISIN,]
       
     }else{
       FundsDataPort <- "NoFunds"
