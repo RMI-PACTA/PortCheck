@@ -76,7 +76,6 @@ print(ParameterFile)
 ### Finish setting up paths based on what was in the Parameter file
 FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
 TemplatePath <- paste0(CODE.PATH,"03_ReportingCode/01_ReportTemplates/")
-# OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
 DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
 PortfolioLocation <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
 BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
@@ -84,41 +83,18 @@ BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
 if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
 
 
-
-
-
 # ------
 # Read in Results and Inputs
 # ------- 
-# UserName <- sub("/.*","",sub(".*Users/","",getwd()))
-# DataLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
-# CodeLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/03_ReportingCode/")
-# GitHubLocation <- paste0("C:/Users/",UserName,"/Documents/GitHub/")
 
 source(paste0(GIT.PATH, "PortCheck/CodeFunctions.R"))
 
 # Read in Parameter File
-# PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
-# ParameterFileName <- choose.files(default = paste0(PortfolioDataFolder,"99_ParameterFiles/","*_ParameterFile.csv"),caption = "Select a parameter file", multi = FALSE)
-# ParameterFileInfo <- file.info(ParameterFileName, extra_cols = TRUE)
-# ParameterFile <- read.csv(ParameterFileName, stringsAsFactors = FALSE, strip.white = TRUE)
-# ProjectName <- ParameterFile$ProjektName
-# BatchName <- ParameterFile$BatchName
-# Languagechoose <- ParameterFile$Language
-# BatchToTest <- ParameterFile$AssessmentDate
 ComparisonFile <- ParameterFile$ComparisonFile                        # Defines whether the comparative graphs are to be produced
 ReportTemplate <- ParameterFile$ReportStyle
 ImportNewComparisonList <- FALSE
 
-# Startyear <- ParameterFile$Startyear                                  # Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
-# CompanyDomicileRegionchoose <- ParameterFile$CompanyDomicileRegion    # "MSCIWorld" # Select one of the following: "Global","MSCIWorld", "MSCIACWI", "STOXX600", "SP500" (for the S&P 500) or "MSCIEM" (for emerging markets)
-# Indexchoose <- ParameterFile$Index                                    # "MSCIWorld_MSCI"
-# BenchmarkRegionchoose <-ParameterFile$BenchmarkRegion                 # "OECD"      # OECD, DEV, Global, GlobalAggregate, NonOECD, EU, US, JP, ...      Need an IndexGeography for each of these
-# Scenariochoose <- ParameterFile$Scenario                              # "450S" # 450S, NPS, NPS+ or CPS
-
-
-
-# Get Equity Batch Results
+# Set Results Location
 ResultsLocation <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/")
 if(!dir.exists(file.path(ResultsLocation))){dir.create(file.path(ResultsLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
 ResultsLocation <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/",BatchName,"/")
@@ -126,6 +102,7 @@ if(!dir.exists(file.path(ResultsLocation))){dir.create(file.path(ResultsLocation
 BatchResultsLocation <- paste0(RESULTS.PATH,"/01_BatchResults/",BatchName,"/",BatchToTest,"/")
 setwd(BatchResultsLocation)
 
+# Get Equity Batch Results
 if (file.exists(paste0(BatchResultsLocation,BatchName,"/",BatchToTest,"/",BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
   EQBatchTest <- read.csv(paste0(BatchResultsLocation,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 }else{
@@ -139,9 +116,7 @@ CBBatchTest <- read.csv(paste0(BatchResultsLocation,BatchName,"_DebtAnalysisResu
 CBBatchTest_PortSnapshots <- read.csv(paste0(BatchResultsLocation,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE)
 CBCompProdSnapshots <- read.csv(paste0(BatchResultsLocation,BatchName,"_DebtProductionCompanies_Snapshot2022.csv"),stringsAsFactors = FALSE)
 
-
-
-# External Data Results
+# External Data Read In
 setwd(paste0(DATA.PATH,"/01_ProcessedData/"))
 Index <- read.csv("2017-07-20_IndexAnalysis5_EquityAnalysisResults.csv",stringsAsFactors = FALSE)
 AllIEATargets <- read.csv("IEATargets2016_AllRegions.csv", stringsAsFactors=FALSE)
@@ -163,7 +138,6 @@ PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$Portfolio
 PortfolioBreakdown$InvestorName<- gsub("[()]","",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortfolioName<- gsub("[()]","",PortfolioBreakdown$PortfolioName)
 
-
 PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
 TestList<-PortfolioBreakdown
@@ -171,7 +145,7 @@ TestList<-PortfolioBreakdown
 
 # Funds within the Portfolios
 FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
-if ("FundList"==TRUE){
+if (exists("FundList")){
   FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
   FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
 }else{
@@ -188,7 +162,8 @@ if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
 FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
 
 # Add Funds for comparison charts 
-# Add a code to update the Index resutls
+# Add a code to update the Index results
+if (ComparisonFile == "FundsComparison"){
 FundLocation<-paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/2016Q4/")
 if (ImportNewComparisonList == TRUE){
   
@@ -216,6 +191,7 @@ if (ImportNewComparisonList == TRUE){
   EQComparisonPortSS <- read.csv(paste0(FundLocation,"EQComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
   CBComparisonBatchTest<- read.csv(paste0(FundLocation,"CBComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
   CBComparisonPortSS <- read.csv(paste0(FundLocation,"CBComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
+}
 }
 
 # ------
@@ -295,7 +271,8 @@ if (ComparisonFile == "FundComparison"){
   InvestorList <- TestList$PortName[TestList$PortfolioType %in% c("Investor","InvestorMPs")]
   EQPortfolioResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% PortfolioList,]
   EQInvestorResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% InvestorList,]
-  
+  EQInvestorResultsRaw <- EQBatchTest[EQBatchTest$Type %in% "Brand",]
+    
   EQPortfolioResults <- company_comparison("EQ",EQPortfolioResultsRaw, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   EQPortfolioRanks <- EQPortfolioResults[[1]]
   EQPortfolioExposures <- EQPortfolioResults[[2]]
@@ -396,7 +373,7 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # fundmap_chart(0,FundsData, Startyear, Scenariochoose, PortfolioName)
 
 
-b<- c("")
+b<- c("PKUBS")
 
 # 
 ToTest2 <- which(TestList$InvestorName %in% b)
@@ -418,11 +395,13 @@ for (i in 1:nrow(TestList)){
   PortName <- TestList[i,"PortName"]
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioNameLong
-    PortName <- InvestorName
+    # PortName <- InvestorName
     # ReportName <- InvestorNameLong
   }else{
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
+  
+   
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
   
@@ -542,6 +521,7 @@ for (i in 1:nrow(TestList)){
       plot_5 <- mini_line_chart("05","EQ",EQCombin,"CoalCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_6 <- mini_line_chart("06","EQ",EQCombin,"GasCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       }
       
       # Page 9
@@ -559,6 +539,7 @@ for (i in 1:nrow(TestList)){
       plot_15 <- mini_line_chart(15,"EQ",EQCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
       plot_16 <- mini_line_chart(16,"EQ",EQCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
       plot_17 <- ranking_chart_alignment(17,"EQ",Startyear,"Automotive",EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_17 <- ranking_chart_alignment(17,"EQ",Startyear,"Automotive",EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       }
       # Page 11
       if (SectorPrint("Automotive",CBSectorProd)==1){
@@ -574,6 +555,7 @@ for (i in 1:nrow(TestList)){
       plot_25 <- mini_line_chart(25,"EQ",EQCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_26 <- mini_line_chart(26,"EQ",EQCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       
       # Page 13
       plot_28 <- stacked_bar_chart(28,"CB",CBCombin,CBWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
@@ -584,6 +566,7 @@ for (i in 1:nrow(TestList)){
       
       # Page 14
       plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       
       # Page 15
       plot_34 <- ranking_chart_alignment(34,"CB",Startyear,"All", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)
