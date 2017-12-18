@@ -107,17 +107,15 @@ setwd(DataFolder)
 # ------
 # a) Read in asset level data
 # ------
-MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+#MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
-# ADD NEW COAL DATA
-# MasterData <- read.csv(paste0(FolderLocation,"Data/MasterData31.12.2016.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+MasterData <- read.csv(paste0(DataFolder,"MasterData31.12.2016.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 ##Add coal edits
-# NewCoalData <- read.csv(paste0(DataFolder,"CoalEquityMaster_201706_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-# #Clear old Coal data
-# MasterData <- subset(MasterData, MasterData$Technology != "Coal")
-# #Bind new Coal data
-# MasterData <- rbind(MasterData, NewCoalData)
-
+NewCoalData <- read.csv(paste0(DataFolder,"CoalEquityMaster_201706_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+#Clear old Coal data
+MasterData <- subset(MasterData, MasterData$Technology != "Coal")
+#Bind new Coal data
+MasterData <- rbind(MasterData, NewCoalData)
 
 #Trim Masterdata to startyear
 MasterData<-subset(MasterData, MasterData$Year >= Startyear)
@@ -132,7 +130,7 @@ EquityBridge <- read.csv(paste0(DataFolder,"EquityBridge_2017-06-27.csv"),string
 # ------
 # c) Read in stored company level financial data (Data retrieved from API and PORT function) 
 # ------
-CompanylvlBBGEquityData <- read.csv(paste0(DataFolder,"CompanylvlBBGData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+CompanylvlBBGEquityData <- read.csv(paste0(DataFolder,"CompanylvlBBGData_2017-10-26.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
 CompanylvlBBGEquityData$FFperc <- as.numeric(CompanylvlBBGEquityData$FFperc)/100
 CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # CompanylvlBBGEquityData$TotalEqyOut <- as.numeric(CompanylvlBBGEquityData$TotalEqyOut)
@@ -142,7 +140,7 @@ CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # ------
 # d) Read in financial data (Data retrieved from BBG PORT function)
 # ------
-BBG_Data <- read.csv(paste0(FinancialDataFolder,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20170925.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+BBG_Data <- read.csv(paste0(DataFolder,"FinancialData_20171127.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBGPORTOutput <- BBG_Data
 CompNames <- unique(subset(BBGPORTOutput, select = c("Ticker","Issuer")))
@@ -151,7 +149,7 @@ CompNames <- rename(CompNames, c("Issuer" = "Name"))
 # ------
 # e) Read in portfolio holdings (Portfolio holdings data given by Regulator or Instituion)
 # ------
-PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
+#PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 # PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 # PortfolioAllPorts <- subset(PortfolioAllPorts, InvestorName == "GEPABU")
 
@@ -331,9 +329,10 @@ MarketRef <- subset(MarketRef)
 # ------
 #Calculate fair share ratios
 
-if (ParameterFile$CalculateIEATArgets == TRUE){
+#if (ParameterFile$CalculateIEATArgets == TRUE){
   
   # IEATargets <- read.csv(paste0(DataFolder,"IEATargets_linear",ParameterFile$IEAScenarioYear,".csv"),stringsAsFactors=FALSE)
+  #IEATargets <- read.csv(paste0(DataFolder,"IEATargets_linear_2016_fix2.csv"),stringsAsFactors=FALSE)
   
   IEATargetsNew <- read.csv(paste0(DataFolder,"IEATargets_WEO2016+ETP2017.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
   IEATargets <- subset(IEATargetsNew, (Source == "WEO2016" & Sector %in% c("Power","Fossil Fuels")) | Source == "ETP2017" & Sector == "Automotive", select = -c(Source))
@@ -425,64 +424,78 @@ if (ParameterFile$CalculateIEATArgets == TRUE){
     # file.copy(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(DataFolder,"Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
     file.rename(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(DataFolder,"00_Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
   }
-  write.csv(IEATargets, paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), row.names = FALSE, na = "")
-}else{
-  IEATargets <-  read.csv(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
-  IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
-}
+#  write.csv(IEATargets, paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), row.names = FALSE, na = "")
+#}else{
+#  IEATargets <-  read.csv(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
+#  IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
+#}
 
 # ------
 # h) Read in portfolio data
 # ------
 
-#Get List of portfolios either from folder or from 1 file (fund-check format) depending on Bulk-Methode
-#Clean Holdingds data
-MissingISIN <- subset(PortfolioAllPorts, ISIN == "")
-PortfolioAllPorts <- subset(PortfolioAllPorts, ISIN != "")
-saveAllPorts <- PortfolioAllPorts
-PortfolioAllPorts <- saveAllPorts
+init.port <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),
+                                           stringsAsFactors=FALSE, strip.white = TRUE)
+PortfolioAllPorts <- subset(init.port, Valid.2DCheck == 1 & (!is.na(EQY_FUND_TICKER) & EQY_FUND_TICKER != "#N/A Invalid Security"))
+PortfolioAllPorts$CNTRY_OF_DOMICILE <- PortfolioAllPorts$Cnty.of.Dom
+PortfolioAllPorts$Position <- PortfolioAllPorts$NumberofShares
 
-if("Cnty.of.Dom" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
-  BBGPORTOutput <- rename(BBGPORTOutput, c("Cnty.of.Dom" = "CNTRY_OF_DOMICILE"))
-}else if("Country.ISO.Code" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
-  BBGPORTOutput <- rename(BBGPORTOutput, c("Country.ISO.Code" = "CNTRY_OF_DOMICILE"))
-}
-
-#Merge Funds with BBG Data, ADR data (for foreign companies issued in the US through ADRs)
-# BBGPORTOutput <- subset(BBG_Data, !ISIN %in% c("#N/A N/A","") | !is.na(BBG_Data$ISIN)) # use this when using BBG-Data-Bind_v2
-BBGPORTOutput <- subset(BBGPORTOutput, !(ISIN %in% c("#N/A N/A","") | is.na(BBGPORTOutput$ISIN)), c("Ticker" , "Subgroup", "Group" , "ICB.Subsector.Name", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
-PortfolioAllPorts <- merge(PortfolioAllPorts, BBGPORTOutput, by = c("ISIN"),all.x = TRUE)
-
-# Filter for funds
-PortfolioAllPorts <- subset(PortfolioAllPorts, !Group %in% grep("Fund",unique(PortfolioAllPorts$Group), value = TRUE) & SharePrice != "" & Group != "Alternative Investment")
-
-###Change this to the new Bridge file
-EquityBridgeSub <- unique(EquityBridge)
-PortfolioAllPorts <- merge(PortfolioAllPorts,EquityBridgeSub, by.x = "Ticker", by.y = "TICKER_AND_EXCH_CODE",all.x = TRUE)
-
-MissingBBGInfo <- unique(subset(PortfolioAllPorts, is.na(SharePrice) | SharePrice == 0, select = "ISIN"))
-if(nrow(MissingBBGInfo) > 0) {
-  MissingBBGInfo$QTY <- 1
-  MissingBBGInfo$Date <- BBGDataDate}
+comma(sum(init.port$ValueUSD))
+comma(sum(PortfolioAllPorts$ValueUSD))
+PortfolioAllPorts %>% dplyr::group_by(PortfolioName, Asset.Type) %>% dplyr::summarise(sum(ValueUSD))
+init.port %>% dplyr::group_by(PortfolioName, Valid.2DCheck) %>% dplyr::summarise(comma(sum(ValueUSD)))
 
 
-# PortfolioAllPorts <- rename(PortfolioAllPorts, c("NumberofShares"="Number.of.shares")) 
+# table(PortfolioAllPorts$Cnty.of.Dom, useNA="always")
 
-if(!"Position" %in% colnames(PortfolioAllPorts)){
-  if("ValueUSD" %in% colnames(PortfolioAllPorts)){
-    PortfolioAllPorts <- subset(PortfolioAllPorts, !is.na(SharePrice) & SharePrice != 0)
-    PortfolioAllPorts$Position <- PortfolioAllPorts$ValueUSD / PortfolioAllPorts$SharePrice
-  }else  if("Number.of.shares" %in% colnames(PortfolioAllPorts)){
-    PortfolioAllPorts$Position <- PortfolioAllPorts$Number.of.shares
-  }else{
-    print("Check portfolio input: No position input or value given")
-  }
-}
-
-#Get rid of NA?s and negative or NAN values in Number of shares
-PortfolioAllPorts$Position <- as.numeric(PortfolioAllPorts$Position)
-PortfolioAllPorts$Position[PortfolioAllPorts$Position <= 0] <- 0
-PortfolioAllPorts <- subset(PortfolioAllPorts, !is.na(Position))
+# #Get List of portfolios either from folder or from 1 file (fund-check format) depending on Bulk-Methode
+# #Clean Holdingds data
+# MissingISIN <- subset(PortfolioAllPorts, ISIN == "")
+# PortfolioAllPorts <- subset(PortfolioAllPorts, ISIN != "")
+# saveAllPorts <- PortfolioAllPorts
+# PortfolioAllPorts <- saveAllPorts
+# 
+# if("Cnty.of.Dom" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
+#   BBGPORTOutput <- rename(BBGPORTOutput, c("Cnty.of.Dom" = "CNTRY_OF_DOMICILE"))
+# }else if("Country.ISO.Code" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
+#   BBGPORTOutput <- rename(BBGPORTOutput, c("Country.ISO.Code" = "CNTRY_OF_DOMICILE"))
+# }
+# 
+# #Merge Funds with BBG Data, ADR data (for foreign companies issued in the US through ADRs)
+# # BBGPORTOutput <- subset(BBG_Data, !ISIN %in% c("#N/A N/A","") | !is.na(BBG_Data$ISIN)) # use this when using BBG-Data-Bind_v2
+# BBGPORTOutput <- subset(BBGPORTOutput, !(ISIN %in% c("#N/A N/A","") | is.na(BBGPORTOutput$ISIN)), c("Ticker" , "Subgroup", "Group" , "ICB.Subsector.Name", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
+# PortfolioAllPorts <- merge(PortfolioAllPorts, BBGPORTOutput, by = c("ISIN"),all.x = TRUE)
+# 
+# # Filter for funds
+# PortfolioAllPorts <- subset(PortfolioAllPorts, !Group %in% grep("Fund",unique(PortfolioAllPorts$Group), value = TRUE) & SharePrice != "" & Group != "Alternative Investment")
+# 
+# ###Change this to the new Bridge file
+# EquityBridgeSub <- unique(EquityBridge)
+# PortfolioAllPorts <- merge(PortfolioAllPorts,EquityBridgeSub, by.x = "Ticker", by.y = "TICKER_AND_EXCH_CODE",all.x = TRUE)
+# 
+# MissingBBGInfo <- unique(subset(PortfolioAllPorts, is.na(SharePrice) | SharePrice == 0, select = "ISIN"))
+# if(nrow(MissingBBGInfo) > 0) {
+#   MissingBBGInfo$QTY <- 1
+#   MissingBBGInfo$Date <- BBGDataDate}
+# 
+# 
+# # PortfolioAllPorts <- rename(PortfolioAllPorts, c("NumberofShares"="Number.of.shares")) 
+# 
+# if(!"Position" %in% colnames(PortfolioAllPorts)){
+#   if("ValueUSD" %in% colnames(PortfolioAllPorts)){
+#     PortfolioAllPorts <- subset(PortfolioAllPorts, !is.na(SharePrice) & SharePrice != 0)
+#     PortfolioAllPorts$Position <- PortfolioAllPorts$ValueUSD / PortfolioAllPorts$SharePrice
+#   }else  if("Number.of.shares" %in% colnames(PortfolioAllPorts)){
+#     PortfolioAllPorts$Position <- PortfolioAllPorts$Number.of.shares
+#   }else{
+#     print("Check portfolio input: No position input or value given")
+#   }
+# }
+# 
+# #Get rid of NA?s and negative or NAN values in Number of shares
+# PortfolioAllPorts$Position <- as.numeric(PortfolioAllPorts$Position)
+# PortfolioAllPorts$Position[PortfolioAllPorts$Position <= 0] <- 0
+# PortfolioAllPorts <- subset(PortfolioAllPorts, !is.na(Position))
 PortfolioAllPorts$PortfolioName <- str_replace_all(PortfolioAllPorts$PortfolioName, "[[:punct:]]", "")
 PortfolioAllPorts$InvestorName <- str_replace_all(PortfolioAllPorts$InvestorName, "[[:punct:]]", "")
 PortfolioAllPorts$PortfolioName <- str_replace_all(PortfolioAllPorts$PortfolioName, "", "")
@@ -530,14 +543,19 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     }
     
     
-    Portfolio <- subset(Portfolio, select = c("EQY_FUND_TICKER" , "Position", "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
-    
+    Portfolio <- subset(Portfolio, select = c("EQY_FUND_TICKER" , "Position", "ValueUSD", "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
+    Portfolio$ID <- rownames(Portfolio)
     #Sum over same ISIN in one Brand
     # use ddply or tapply/faster ddply version for this and save duplicates in sanity check file
     ISINCount <- as.data.frame(table(Portfolio$ISIN))
     
     if (dim(Portfolio)[1]>0){
-    Portfolio <- aggregate(Portfolio["Position"], by = Portfolio[, c("EQY_FUND_TICKER" , "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE")], FUN=sum)
+      
+      #Portfolio <- aggregate(Portfolio["Position"], by = Portfolio[, c("EQY_FUND_TICKER" , "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE")], FUN=sum)
+      
+      Portfolio <- Portfolio %>% dplyr::group_by(ID, EQY_FUND_TICKER, Subgroup, ICB.Subsector.Name, Ticker, ISIN, SharePrice, CNTRY_OF_DOMICILE) %>%
+        dplyr::summarise(Position=sum(Position), ValueUSD=sum(ValueUSD))
+      
     }
     # if (length(ISINCount)>1){
     # system.time({
@@ -551,7 +569,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
 
     #Calculate assets under management and total number of shares if there is no given toal number of shares
     #Clean price list
-    Portfolio$SharePrice[Portfolio$SharePrice == "#N/A N/A"] <- 0
+    #Portfolio$SharePrice[Portfolio$SharePrice == "#N/A N/A"] <- 0
     
     ##if there is no price information or if the asset is outside fo the region
     Portfolio$SharePrice <- as.numeric(Portfolio$SharePrice)
@@ -559,12 +577,12 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     
     if (sum(Portfolio$Position[Portfolio$SharePrice != 0 & !is.na(Portfolio$SharePrice)], na.rm = TRUE) != 0) {
       # Subset the portfolio by securities that cannot be assessed, i.e. with missing price or country information
-      PortMissingInfo <- subset(Portfolio, SharePrice == "#N/A N/A" | CNTRY_OF_DOMICILE == "#N/A Invalid Security")
-      Portfolio <-  subset(Portfolio, SharePrice != "#N/A N/A" & CNTRY_OF_DOMICILE != "#N/A Invalid Security")
-      Portfolio$AUM <- Portfolio$Position * Portfolio$SharePrice
-      # ClimateWorks-line to include securities without all: Add line to include lines without Position information
-      # Portfolio$AUM[is.na(Portfolio$Position) & !is.na(Portfolio$ValueUSD)] <- Portfolio$ValueUSD[is.na(Portfolio$Position) & !is.na(Portfolio$ValueUSD)] 
+      #PortMissingInfo <- subset(Portfolio, SharePrice == "#N/A N/A" | CNTRY_OF_DOMICILE == "#N/A Invalid Security")
+      #Portfolio <-  subset(Portfolio, SharePrice != "#N/A N/A" & CNTRY_OF_DOMICILE != "#N/A Invalid Security")
+      #Portfolio$AUM <- Portfolio$Position * Portfolio$SharePrice
+      Portfolio$AUM <- Portfolio$ValueUSD
       PortAUM <- sum(Portfolio$AUM, na.rm = TRUE)
+
       Portfolio$PortWeight <- Portfolio$AUM / PortAUM
       
       # Introduce regional split up of Portfolio AUM!!!
@@ -587,6 +605,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       # Add sector to the Portfolio
       SectorProduction <- unique(subset(MasterData, select = c("EQY_FUND_TICKER","Sector")))
       Portfolio <- merge(Portfolio, SectorProduction, by = "EQY_FUND_TICKER", all.x = TRUE, all.y = FALSE)
+      Portfolio$ID2 <- rownames(Portfolio)
       
       #Meta-Analysis for piechart & Moodys Risk map
       # Sector exposure merging
@@ -605,7 +624,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
         Portfolio$PortWeight[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
         Portfolio$AUM[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
         Portfolio$Position[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
-        }
+        Portfolio$ValueUSD[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
+      }
       
       Portfolio$piesector[Portfolio$ICB.Subsector.Name %in% FuturesecsICB] <- Portfolio$ICB.Subsector.Name[Portfolio$ICB.Subsector.Name %in% FuturesecsICB]
       
@@ -795,7 +815,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       # Combin <- subset(Combin, BenchmarkRegion %in% c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate")  & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
       BenchmarkRegionstoPrint <- c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate")
       # BenchmarkRegionstoPrint <- c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate", "Africa","EU","China","India","Japan","US","Brazil","MiddleEast","LatinAmerica","Russia","OECDAsiaOceaniaWoJP")
-      Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & Scenario == ParameterFile$Scenario & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
+      Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
+      #Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & Scenario == ParameterFile$Scenario & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
       # 
       if (i > 1){
         CombinAll <- rbind(CombinAll,Combin)

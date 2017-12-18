@@ -45,7 +45,7 @@ BatchToTest <- NA
 BBGDataDate <- NA
 AssessmentDate <- NA
 
-ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+ParameterFile <- ReadParameterFile()
 ### fill up those variables
 SetParameters(ParameterFile)              # Sets BAtchName, Scenario, BenchmarkRegion etc. 
 print("*** STARTING SCRIPT with PARAMETERS:")
@@ -100,6 +100,7 @@ PowerDebtData$Sector <- "Power"
 MasterData <- rbind(PowerDebtData, OGCDebtData)
 MasterData <- rbind(MasterData, AutoDebtData)
 
+
 MasterData <- rename(MasterData, c("Production" = "CompanyLvlProd"))
 
 #Trim Masterdata to startyear
@@ -118,14 +119,13 @@ ALDBridge <- read.csv(paste0(PROC.DATA.PATH,"/ALDEquityBridge_2017-10-27.csv"),s
 
 # ------
 # c) Read in financial data (Data retrieved from BBG PORT function)
-
 BBGPORTOutput <- read.csv(paste0(PROC.DATA.PATH,BBGPORTOutput,".csv"),stringsAsFactors=FALSE)
 #drop duplicate ISINs due to position-based variables
 BBGPORTOutput <- BBGPORTOutput[!duplicated(BBGPORTOutput$ISIN),]
 
 # ------
 # d) Read in portoflio holdings (Portfolio holdings data given by Regulator or Instituion)
-PortfolioAllPorts <- read.csv(paste0(FolderLocation,BatchName,"Port_Bonds.csv"),stringsAsFactors=FALSE)
+PortfolioAllPorts <- read.csv(paste0(FolderLocation,BATCH.NAME,"Port_Bonds.csv"),stringsAsFactors=FALSE)
 
 # PortfolioAllPorts2 <- read.csv(paste0(FolderLocation,"PortfolioData/",BatchName2,".csv"),stringsAsFactors=FALSE)
 # PortfolioAllPorts <- subset(PortfolioAllPorts, !PortfolioAllPorts$PortfolioName %in% PortfolioAllPorts2$PortfolioName)
@@ -1006,6 +1006,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
           ReducedListDebt <- subset (ReducedListDebt, Year <= (Startyear + 10))
           
           # Allocate production to the portfolio based on Portfolio Wt 
+          # whatever your 
           ReducedListDebt$WtProduction <- ReducedListDebt$CompanyLvlProd * ReducedListDebt$PortWeightDebtlvl
 
           # Calculate Carsten Metric
