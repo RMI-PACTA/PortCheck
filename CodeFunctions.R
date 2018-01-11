@@ -137,7 +137,7 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
   
   # BatchTest_PortSnapshots<-CBBatchTest_PortSnapshots
   # BatchTest<-CBBatchTest
-  # ChartType<- "CB"
+  # ChartType<- "EQ"
   # PortfolioType <- "Investor"
   # PortfolioType <- c("Portfolio","Investor","InvestorMPs")
   
@@ -351,14 +351,14 @@ comparisonlist <- function(noFunds, EQData,CBData){
   EQDataShort <- unique(subset(EQData, select=c("PortName","PortAUM")))
   EQDataShort <- subset(EQDataShort, !EQDataShort$PortName %in% c("ListedMarket_ListedMarket","Fund"))
   EQDataShort <- EQDataShort[order(EQDataShort, decreasing = TRUE),]
-  EQlist <- as.data.frame(unique(EQDataShort$PortName)[1:nofunds])
+  EQlist <- as.data.frame(unique(EQDataShort$PortName)[1:noFunds])
   colnames(EQlist) <- "PortName" 
   EQlist$Type <- "EQ"
   
   CBDataShort <- unique(subset(CBData, select=c("PortName","PortfolioAUMAnalyzed")))
   CBDataShort <- subset(CBDataShort, !CBDataShort$PortName %in% c("ListedMarket_ListedMarket","Fund"))
   CBDataShort <- CBDataShort[order(CBDataShort, decreasing = TRUE),]
-  CBlist <- as.data.frame(unique(CBDataShort$PortName)[1:nofunds])
+  CBlist <- as.data.frame(unique(CBDataShort$PortName)[1:noFunds])
   colnames(CBlist) <- "PortName" 
   CBlist$Type <- "CB"
   
@@ -407,15 +407,16 @@ filterports <- function(PortData, PortfolioInfo, BrandType){
 # ------------ Company Comparison Data ------ #
 company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose){
   
-  # ChartType <- "EQ"
-  # BatchTestComparison <- EQPortfolioResultsRaw
-  
+  # ChartType <- "CB"
+  # BatchTestComparison <- CBBatchTest
+  # BatchTestComparison <- EQBatchTest
   Results <- BatchTestComparison
   # Results <- subset(Results, Results$)
   
   if (ChartType == "EQ"){
     AUMData<-Results[Results$PortName %in% Results$PortName,]
-    AUMs <- ddply(Results, .(PortName),summarise, AUM = sum(PortAUM, na.rm=FALSE))
+    # AUMs <- unique(subset(Results, select=c("PortName","PortAUM"))) ## CORRECT
+    AUMs <- ddply(Results, .(PortName),summarise, AUM = sum(PortAUM, na.rm=FALSE))  # WRONG BUT USED IN SWISS
     
     Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
     
@@ -1074,28 +1075,6 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   return()
 }
 
-# ------------ Output File ------------------ #
-summaryout <- function(BenchmarkRegionchoose,CompanyDomicileRegionchoose,Startyear,FundsToTest, UserName){
-  # This doc prints a short summary file
-  
-  bmrc <- c("Benchmark Region:", BenchmarkRegionchoose)
-  cdrc <- c("Company Domicile Region:", CompanyDomicileRegionchoose)
-  sy <- c("Start Year:",Startyear)
-  datetoday <- c("Date:",date())
-  
-  if (UserName == "work"){UserName <- "Klaus"}
-  tester <- c("Who ran the code:", UserName)
-  
-  messageinput <- c("Have a great day!", "I hope the results are to your liking","")
-  message <- c(messageinput[sample(1:length(messageinput),1)],"")
-  
-  outputs <- rbind(datetoday,tester,bmrc,cdrc,sy, FundsToTest,message)
-  
-  write.csv(outputs,file = "BatchSummary.csv", row.names=FALSE)
-  
-  return()
-}
-
 # --------
 # SWISS PLOT FUNCTIONS
 # --------
@@ -1654,7 +1633,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     PlotData <- ProductionMix_5yrs
     
-    # PlotData <- subset(PlotData, !PlotData$variable == "SamplePort")
+    # PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
     
     PlotData <- merge(PlotData,colourdf, by="Technology")
     orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
@@ -2108,7 +2087,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
       annotate(geom="rect",xmin =0,xmax=2,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
       
       # Weighted Mean
-      annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
+      # annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
       
       # Company Circles
       geom_point(data=PlotData,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
@@ -2222,8 +2201,8 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
   
   # ChartType<- "EQ"
   # SectorToPlot<-"Automotive"
-  # AlloftheCompanies <- AutoCompanies
-  # # AlloftheCompanies <- OGCarbonBudget
+  # AlloftheCompanies <- UtilityCompanies
+  # AlloftheCompanies <- OGCarbonBudget
   # combin <- EQCombin
   # PortSnapshot <- EQPortSnapshot
   # companiestoprint<-20
