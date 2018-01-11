@@ -23,7 +23,7 @@ SetParameters <- function(ParameterFile){
   Scenario <<- as.character(ParameterFile$Scenario)
   Scenariochoose <<- as.character(ParameterFile$Scenario)
   
-  Startyear <<- as.numeric(format(Sys.time(), "%Y")) #as.numeric(ParameterFile$Startyear)
+  Startyear <<- as.numeric(ParameterFile$Startyear) #as.numeric(ParameterFile$Startyear)
   BatchName <<- as.character(ParameterFile$BatchName)
   ComparisonFile <<- ParameterFile$ComparisonFile                        # Defines whether the comparative graphs are to be produced
   ReportTemplate <<- ParameterFile$ReportStyle
