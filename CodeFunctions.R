@@ -429,14 +429,14 @@ company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenari
     AUMs <- unique(subset(Results, select = c("PortName","PortfolioAUMAnalyzed")))
     AUMs <- rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
     
-    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
+    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","Technology","BenchmarkRegion","Exposure_CarstensMetric", "Exposure_OGCMetric"))
     
     # After getting the AUM values, remove that vector from the dataframe
     
-    Heatmap$MarketExposure <- as.numeric(Heatmap$Exposure_WtTechShareTechShare)
-    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- as.numeric(Heatmap$Exposure_OGCMetrik[Heatmap$Technology %in% c("Oil", "Gas", "Coal")])
-    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_WtTechShareTechShare']
-    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_OGCMetrik']
+    Heatmap$MarketExposure <- as.numeric(Heatmap$Exposure_CarstensMetric)
+    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- as.numeric(Heatmap$Exposure_OGCMetric[Heatmap$Technology %in% c("Oil", "Gas", "Coal")])
+    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_CarstensMetric']
+    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_OGCMetric']
     
   }
   
@@ -826,11 +826,11 @@ report_data <- function(ChartType,combin, Exposures,AUMData,Ranks,PortSnapshot,C
       
     }else{
       LineData <- subset(combin, Year %in% (Startyear+5) & BenchmarkRegion %in% BenchmarkRegionchoose  & Scenario %in% Scenariochoose)    
-      LineData <- subset(LineData, select = c("Sector","Technology","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare","Benchmark_OGC","OGCMetrik_Portfolio")) 
-      LineData$Check <- LineData$WtTechShareTechShare - LineData$Benchmark_WtTechShareTechShare
-      LineData$Check[LineData$Sector %in% c("Oil&Gas","Coal")]<- LineData$OGCMetrik_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")] - LineData$Benchmark_OGC[LineData$Sector %in% c("Oil&Gas","Coal")]
+      LineData <- subset(LineData, select = c("Sector","Technology","Year","WtTechShareTechShare","CarstenMetric_ProjMarket","Benchmark_OGC","OGCMetric_Portfolio")) 
+      LineData$Check <- LineData$WtTechShareTechShare - LineData$CarstenMetric_ProjMarket
+      LineData$Check[LineData$Sector %in% c("Oil&Gas","Coal")]<- LineData$OGCMetric_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")] - LineData$Benchmark_OGC[LineData$Sector %in% c("Oil&Gas","Coal")]
       LineData$Production <- LineData$WtTechShareTechShare
-      LineData$Production[LineData$Sector %in% c("Oil&Gas","Coal")] <-LineData$OGCMetrik_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")]
+      LineData$Production[LineData$Sector %in% c("Oil&Gas","Coal")] <-LineData$OGCMetric_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")]
     } 
     
     LineData$Technology <- revalue(LineData$Technology, c("Coal"="CoalProd","Gas"="GasProd","Oil"="OilProd"))
@@ -1585,9 +1585,9 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
         
       }else{
         ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% SectorToPlot)
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
+        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","CarstenMetric_ProjMarket"))
         ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"CarstenMetric_ProjMarket"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
         ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Sector","Technology"))
         ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value
         ProductionMix_5yrs$value <- NULL
@@ -1801,16 +1801,16 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
       LineData <- subset(combin, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot)#  & Scenario %in% Scenariochoose)    
       
       if (SectorToPlot == "Fossil Fuels"){
-        LineData <- subset(LineData, select = c("Sector","Year","OGCMetrik_Portfolio","Benchmark_OGC"))
+        LineData <- subset(LineData, select = c("Sector","Year","OGCMetric_Portfolio","Benchmark_OGC"))
         names(LineData)[names(LineData)=="Benchmark_OGC"] <- "Target"
-        names(LineData)[names(LineData)== "OGCMetrik_Portfolio"] <- "Portfolio"      
+        names(LineData)[names(LineData)== "OGCMetric_Portfolio"] <- "Portfolio"      
         
         LineData$Portfolio <- LineData$Portfolio/100
         LineData$Target <- LineData$Target/100  
       }else{
         
-        LineData <- subset(LineData, select = c("Sector","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-        names(LineData)[names(LineData)=="Benchmark_WtTechShareTechShare"] <- "Target"
+        LineData <- subset(LineData, select = c("Sector","Year","WtTechShareTechShare","CarstenMetric_ProjMarket"))
+        names(LineData)[names(LineData)=="CarstenMetric_ProjMarket"] <- "Target"
         names(LineData)[names(LineData)== "WtTechShareTechShare"] <- "Portfolio"}
       
       max_magnitude <- 100
@@ -2933,8 +2933,8 @@ buildout_chart <- function(plotnumber,ChartType, combin,  SectorToPlot,Benchmark
     ProdData$Production[ProdData$Technology == "Gas"]<- ProdData$Production[ProdData$Technology == "Gas"]*0.0372
   }else{
     
-    ProdData <- subset(ProdData, select = c("Sector","Technology","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-    names(ProdData)[names(ProdData) %in% c("WtTechShareTechShare","Benchmark_WtTechShareTechShare")] <- c("Production","TargetProductionAlignment")
+    ProdData <- subset(ProdData, select = c("Sector","Technology","Year","WtTechShareTechShare","CarstenMetric_ProjMarket"))
+    names(ProdData)[names(ProdData) %in% c("WtTechShareTechShare","CarstenMetric_ProjMarket")] <- c("Production","TargetProductionAlignment")
   }
   
   ProdData$NextYear <- 0
