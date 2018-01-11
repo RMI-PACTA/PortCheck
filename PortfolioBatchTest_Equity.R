@@ -107,7 +107,9 @@ setwd(DataFolder)
 # ------
 # a) Read in asset level data
 # ------
-MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+# For the Swiss Project use the wrong coal data... 
+MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,"_WrongCoalData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+# MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
 # ADD NEW COAL DATA
 # MasterData <- read.csv(paste0(FolderLocation,"Data/MasterData31.12.2016.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
@@ -795,7 +797,11 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       # Combin <- subset(Combin, BenchmarkRegion %in% c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate")  & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
       BenchmarkRegionstoPrint <- c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate")
       # BenchmarkRegionstoPrint <- c("GlobalAggregate", "OECDAggregate", "NonOECDAggregate", "Africa","EU","China","India","Japan","US","Brazil","MiddleEast","LatinAmerica","Russia","OECDAsiaOceaniaWoJP")
-      Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & Scenario == ParameterFile$Scenario & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
+      # Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & Scenario == ParameterFile$Scenario & CompanyDomicileRegion %in% ParameterFile$CompanyDomicileRegion, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
+      
+      CompanyDomicileRegionsToPrint <- c("MSCIWorld","Global","MSCIEmergingMarkets")
+      Combin <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionstoPrint & Scenario == ParameterFile$Scenario & CompanyDomicileRegion %in% CompanyDomicileRegionsToPrint, select = c("InvestorName","PortName", "Type", "Year",	"Sector",	"Technology",	"Scenario",	"CompanyDomicileRegion",	"BenchmarkRegion",	"PortAUM",	"MarketAUM",	"Production",		"FairSharePerc",	"Direction",	"TargetProductionAlignment",	"TargetProductionAUMIntensity",	"ScenarioTrajectoryProd",	"MarketExposure",	"AUMExposure",	"TrajectoryExposure"))
+      
       # 
       if (i > 1){
         CombinAll <- rbind(CombinAll,Combin)
