@@ -180,7 +180,7 @@ CountryISOList$GDPlantLocation<-as.character(CountryISOList$GDPlantLocation)
 
 # merge with ALD
 if (ParameterFile$CalculateMarketData == TRUE){
-
+  
   #First only take one FUND ticker per company in BBGdata
   BBGEquityDataSub <- CompanylvlBBGEquityData[!duplicated(CompanylvlBBGEquityData[,c("EQY_FUND_TICKER")]),]
   EconomyData <- merge(MasterData, BBGEquityDataSub, by = c("EQY_FUND_TICKER"), all.x=TRUE)
@@ -197,7 +197,7 @@ if (ParameterFile$CalculateMarketData == TRUE){
   EconomyData$FFperc[is.na(EconomyData$FFperc)]<- 1
   EconomyData$CompLvlProduction <- EconomyData$CompLvlProduction* EconomyData$FFperc
   EconomyData <- EconomyData[,!names(EconomyData) %in% c("FFperc")]
-
+  
   g <- with(EconomyData, paste(EQY_FUND_TICKER, CNTRY_OF_DOMICILE,	PlantLocation,	Sector,	Year,	Technology, StockRegion, Listed))
   x <- with(EconomyData, c(tapply(CompLvlProduction, g, sum) ))
   EconomyData <- EconomyData[match(names(x), g), c("EQY_FUND_TICKER", "CNTRY_OF_DOMICILE",	"PlantLocation", "Sector",	"Year",	"Technology", "StockRegion", "Listed")]
@@ -211,8 +211,8 @@ if (ParameterFile$CalculateMarketData == TRUE){
   EconomyData <- subset(EconomyData, EconomyData$Production != 0)
   SaveEconomyData <- merge(EconomyData, CompNames, by.x = "EQY_FUND_TICKER", by.y = "Ticker", all.x = TRUE, all.y = FALSE)
   write.csv(SaveEconomyData, paste0(DataFolder,"EconomyData_",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
-
-
+  
+  
   CountryISOListUniqueISO <- CountryISOList[!duplicated(CountryISOList$COUNTRY_ISO),]
   EconomyData<-merge(EconomyData, CountryISOListUniqueISO, by.x = "CNTRY_OF_DOMICILE", by.y = "COUNTRY_ISO", all.x = TRUE)
   EconomyData$GDPlantLocation<-as.character(EconomyData$GDPlantLocation)
@@ -236,8 +236,8 @@ if (ParameterFile$CalculateMarketData == TRUE){
   }
   EconomyDataAllBenchmarkRegions <- ddply(EcoDataAllBenchmarkRegions,.(BenchmarkRegion, Sector, Technology, Year),summarize,Production = sum(Production,na.rm=TRUE))
   write.csv(EconomyDataAllBenchmarkRegions, paste0(DataFolder,"/EconomyDataAllBenchmarkRegions",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
-
-
+  
+  
   # Calculate the total regional production owned by listed companies for calculating the benchmark-starting point (Market exposure) for global portfolios
   EconomyDatasub <- subset(EconomyDataSmall, ! EQY_FUND_TICKER %in% c("NonListedProduction", "govt","PrivateProduction"))
   EconomyDatasub <- subset(EconomyDataSmall, EconomyDataSmall$Listed == "Y")
@@ -246,16 +246,16 @@ if (ParameterFile$CalculateMarketData == TRUE){
   EconomyDatasub$StockRegion <- EconomyDatasub$COUNTRY_ISO
   
   EconomyDataAllBenchmarkRegionsCompLvl <- merge(EconomyDatasub, CompNames, by.x = "EQY_FUND_TICKER", by.y = "Ticker", all.x = TRUE, all.y = FALSE)
-
+  
   system.time({
-  g <- with(EconomyDataAllBenchmarkRegionsCompLvl, paste(EQY_FUND_TICKER, Name, Sector,Technology, Year, PlantLocation_ISO, StockRegion))
-  x <- with(EconomyDataAllBenchmarkRegionsCompLvl, c(tapply(Production, g, sum) ))
-  Marketmix <- EconomyDataAllBenchmarkRegionsCompLvl[match(names(x), g), c("EQY_FUND_TICKER", "Name", "Sector","Technology", "Year", "PlantLocation_ISO", "StockRegion")]
-  Marketmix$Production <- x
+    g <- with(EconomyDataAllBenchmarkRegionsCompLvl, paste(EQY_FUND_TICKER, Name, Sector,Technology, Year, PlantLocation_ISO, StockRegion))
+    x <- with(EconomyDataAllBenchmarkRegionsCompLvl, c(tapply(Production, g, sum) ))
+    Marketmix <- EconomyDataAllBenchmarkRegionsCompLvl[match(names(x), g), c("EQY_FUND_TICKER", "Name", "Sector","Technology", "Year", "PlantLocation_ISO", "StockRegion")]
+    Marketmix$Production <- x
   })
   
   rm(g,x)
-
+  
   
   
   Marketmix <- Marketmix %>% complete(PlantLocation_ISO, StockRegion)
@@ -280,8 +280,8 @@ if (ParameterFile$CalculateMarketData == TRUE){
     }
     rm(MarketData)
   }
-
-
+  
+  
   #A faster version of ddply 22s vs 246s
   system.time({
     g <- with(MarketDataAll, paste(BenchmarkRegion, Sector, Name, EQY_FUND_TICKER, Technology, Year, CompanyDomicileRegion))
@@ -461,8 +461,9 @@ EquityBridgeSub <- unique(EquityBridge)
 PortfolioAllPorts <- merge(PortfolioAllPorts,EquityBridgeSub, by.x = "Ticker", by.y = "TICKER_AND_EXCH_CODE",all.x = TRUE)
 
 MissingBBGInfo <- unique(subset(PortfolioAllPorts, is.na(SharePrice) | SharePrice == 0, select = "ISIN"))
-MissingBBGInfo$QTY <- 1
-MissingBBGInfo$Date <- BBGDataDate
+if(nrow(MissingBBGInfo) > 0) {
+  MissingBBGInfo$QTY <- 1
+  MissingBBGInfo$Date <- BBGDataDate}
 
 
 # PortfolioAllPorts <- rename(PortfolioAllPorts, c("NumberofShares"="Number.of.shares")) 
@@ -516,18 +517,18 @@ ListAllPorts <- rbind(BrandList, UniquePortList, data.frame("InvestorName" = "Li
 for (i in  1:length(ListAllPorts$PortfolioName)) {
   tryCatch({
     print(i)
-  
+    
     if (ListAllPorts$Type[i] == "Portfolio"){
       Portfolio = subset(PortfolioAllPorts, PortfolioName == ListAllPorts$PortfolioName[i] & InvestorName == ListAllPorts$InvestorName[i])
-      PortfolioName <- paste0(ListAllPorts$PortfolioName[i],"_",ListAllPorts$InvestorName[i])
-      # } else if(ListAllPorts$Type[i] == "FundType"){
-      #Portfolio = subset(PortfolioAllPorts, PortfolioName == ListAllPorts$PortfolioName[i])
-      #PortfolioName <- ListAllPorts$PortfolioName[i]
+      if (ListAllPorts$PortfolioName[i] != ListAllPorts$InvestorName[i]){
+        PortfolioName <- paste0(ListAllPorts$PortfolioName[i],"_",ListAllPorts$InvestorName[i])
+      }else{
+        PortfolioName <- ListAllPorts$InvestorName[i]
+      }
     }else{
       Portfolio = subset(PortfolioAllPorts, InvestorName == ListAllPorts$InvestorName[i])
       PortfolioName <- ListAllPorts$InvestorName[i]
     }
-    
     
     Portfolio <- subset(Portfolio, select = c("EQY_FUND_TICKER" , "Position", "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE"))
     
@@ -536,7 +537,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     ISINCount <- as.data.frame(table(Portfolio$ISIN))
     
     if (dim(Portfolio)[1]>0){
-    Portfolio <- aggregate(Portfolio["Position"], by = Portfolio[, c("EQY_FUND_TICKER" , "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE")], FUN=sum)
+      Portfolio <- aggregate(Portfolio["Position"], by = Portfolio[, c("EQY_FUND_TICKER" , "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE")], FUN=sum)
     }
     # if (length(ISINCount)>1){
     # system.time({
@@ -547,7 +548,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     #   Portfolio <- Portfolio[match(names(x), g), c("EQY_FUND_TICKER" , "Subgroup" , "ICB.Subsector.Name", "Ticker", "ISIN", "SharePrice", "CNTRY_OF_DOMICILE")]
     #   Portfolio$Position <- x
     # })}
-
+    
     #Calculate assets under management and total number of shares if there is no given toal number of shares
     #Clean price list
     Portfolio$SharePrice[Portfolio$SharePrice == "#N/A N/A"] <- 0
@@ -604,7 +605,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
         Portfolio$PortWeight[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
         Portfolio$AUM[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
         Portfolio$Position[Portfolio$piesector != Portfolio$Sector & Portfolio$ISIN %in% temp$Var1 & !(Portfolio$piesector == "Utility Power" & Portfolio$Sector == "Power") & !(Portfolio$piesector == "NonUtility Power" & Portfolio$ISIN %in% temp2$Var1)] <- 0
-        }
+      }
       
       Portfolio$piesector[Portfolio$ICB.Subsector.Name %in% FuturesecsICB] <- Portfolio$ICB.Subsector.Name[Portfolio$ICB.Subsector.Name %in% FuturesecsICB]
       
@@ -676,7 +677,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     if(ListAllPorts$InvestorName[i] == "ListedMarket"){
       Portmix <- subset(MarketData, select = -c(RefProdMarketTech, RefProdMarketSector))
       AUMmix <- rename(MarketSizeData, c("MarketRegion" = "Region", "MarketSize" = "AUM"))
-      }
+    }
     
     if(sum(Portfolio$Position[Portfolio$SharePrice != 0 & !is.na(Portfolio$SharePrice)] & dim(ReducedList)[1]>0 , na.rm = TRUE) != 0 | ListAllPorts$InvestorName[i] == "ListedMarket"){
       
