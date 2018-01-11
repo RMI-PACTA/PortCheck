@@ -168,7 +168,7 @@ FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/20
 
 # Add Funds for comparison charts 
 # Add a code to update the Index results
-if (ComparisonFile == "FundsComparison"){
+if (ComparisonFile == "FundComparison"){
   FundLocation<-paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/2016Q4/")
 
   if (ImportNewComparisonList == TRUE){
@@ -284,8 +284,8 @@ write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FA
 
 # For Swiss Comparison ONLY
 if (ComparisonFile ==  "Swiss"){
-EQComparisonBatchTest <- subset(EQComparisonBatchTest, EQComparisonBatchTest$Type == "Brand")
-CBComparisonBatchTest <- subset(CBComparisonBatchTest, CBComparisonBatchTest$Type == "Investor")
+  EQComparisonBatchTest <- subset(EQComparisonBatchTest, EQComparisonBatchTest$Type == "Brand")
+  CBComparisonBatchTest <- subset(CBComparisonBatchTest, CBComparisonBatchTest$Type == "Investor")
 }
 
 if (ComparisonFile %in%  c("FundComparison","Swiss")){
@@ -422,7 +422,7 @@ ToTest2 <- which(TestList$PortfolioName %in% b)
 #-------
 # Loop through Portfolios
 #--------
-for (i in 1:nrow(TestList)){
+for (i in 1:4){
   # ------
   # Setting Directory and Getting Results
   # ------
