@@ -325,7 +325,7 @@ write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALS
 write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
 
 # Temp save for bonds
-UserName <- Clare
+UserName <- "Clare"
 bondlocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
 write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
 
