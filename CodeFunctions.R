@@ -367,14 +367,25 @@ comparisonlist <- function(noFunds, EQData,CBData){
 }
 
 # ----------- Port Filter Funds ------------------ #
-Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName){
+Portfunds <- function(maxno,FundList,FundsDataAll, PortfolioName,InvestorName, TestType){
   
   if (typeof(FundList)=="list"){
     FundsListData<- FundList
     FundsListData$InvestorName<- gsub(" ","",FundsListData$InvestorName)
     FundsListData$PortfolioName<- gsub(" ","",FundsListData$PortfolioName)
     
-    FundsListPort <- FundsListData[FundsListData$InvestorName == InvestorName & FundsListData$PortfolioName == PortfolioName,]
+    if (TestType == "Portfolio"){
+      FundsListPort <- FundsListData[FundsListData$InvestorName == InvestorName & FundsListData$PortfolioName == PortfolioName,]
+    }
+    
+    if (TestType %in%  c("Investor", "InvestorMPs")){
+      FundsListPort <- FundsListData[FundsListData$InvestorName == InvestorName,]
+    }
+    
+    if (!TestType %in% c("Investor","Portfolio", "InvestorMPs")){
+      print("Test Type no Investor or Portfolio; check PortFunds function for error" )
+    }
+    
     if (nrow(FundsListPort) >0 ){
       
       # FundsDataAll$ISIN <- str_split(FundsDataAll$PortName,"[01]_AllFunds",simplify = TRUE)[,1]
@@ -632,7 +643,6 @@ matchOS <- function(OSdata, PortSnapshot){
   # Returns the WEF for each company by sector
   return(WEF)    
 }
-
 
 # ------------ Sector Selector
 SectorSelect <- function(TechToPlot){
@@ -1642,6 +1652,8 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     PlotData <- PlotData[order(PlotData$Technology,PlotData$variable),]
     PlotData$variable <- wrap.labels(PlotData$variable,20)
     
+    # PlotData$variable <- revalue(PlotData$variable,c("AggregiertesPortfolio" = GT["AggregatedPortName"][[1]]))
+    
     # write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
     PlotData$Sector <- NULL
     
@@ -2212,7 +2224,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
   # SectorToPlot <-"OG"
   
   # ChartType<- "CB"
-  # SectorToPlot<-"OG"
+  # SectorToPlot<-"Power"
   # AlloftheCompanies <- OGCarbonBudget
   # PortSnapshot <- CBPortSnapshot
   # companiestoprint<-20
@@ -2594,6 +2606,9 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
       labelling <- data.frame(values = c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour), labels = TechLabels, name = techorder)
       labelling$values <- as.character(labelling$values)
       labelling$name <- factor(labelling$name, techorder)
+      
+      # labelling$item <- revalue(labelling$item,c(Pensionskassen = GT["Pensionfunds"][[1]]))
+      
       
       Plot<- WheelofFortune(AllCompanies, family = NULL, columnNames = NULL, binSize = 1, spaceItem = 0.22,techorder=techorder,PortFirmY=PortFirmY,OtherFirmY=OtherFirmY,
                             spaceFamily = spaceFamily, innerRadius = 0.18, outerRadius = 1, guides = seq(0,100,by = 25), alphaStart = alphaStart,
@@ -5163,6 +5178,8 @@ flat_wheel_chartOG <- function(plotnumber,companiestoprint,ChartType,PortSnapsho
       Portfoliomix$value <- as.numeric(Portfoliomix$value)
       Portfoliomix$value <- (Portfoliomix$value/sum(Portfoliomix$value))*100
     }
+    Portfoliomix$Name <- revalue(Portfoliomix$Name, c(PortGraphName = GT["Pensionfunds"][[1]]))
+    
     
     Targetmix <- subset(combin, Sector == SectorToPlot & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose & BenchmarkRegion == BenchmarkRegionchoose & Year == Startyear+5, select = c("Technology", "TargetProductionAlignment"))
     Targetmix$Classification<-"Portfolio"
