@@ -422,7 +422,7 @@ ToTest2 <- which(TestList$PortfolioName %in% b)
 #-------
 # Loop through Portfolios
 #--------
-for (i in 1:4){
+for (i in 1:2){
   # ------
   # Setting Directory and Getting Results
   # ------
@@ -440,7 +440,7 @@ for (i in 1:4){
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
   
-  if (PortName == "AggregiertesPortfolio_AggregiertesPortfolio"){PortName <- "AggregiertesPortfolio"}
+  if (PortName == "Helvetia_Helvetia"){PortName <- "Helvetia"}
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
   
@@ -517,10 +517,8 @@ for (i in 1:4){
     CBAUMDatarange <- CBAUMData
   }
   
-  
-  
   # Fund Results
-  FundsInPort <- Portfunds(20,FundList,FundsDataAll, PortfolioName,InvestorName)
+  FundsInPort <- Portfunds(20,FundList,FundsDataAll, PortfolioName,InvestorName, TestType)
   if (typeof(FundsInPort)=="list"){
     if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
   
