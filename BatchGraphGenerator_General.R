@@ -79,9 +79,6 @@ TEMPLATE.PATH <- paste0(CODE.PATH,"03_ReportingCode/01_ReportTemplates/")
 PROC.DATA.PATH <- paste0(DATA.PATH,"/01_ProcessedData/")
 PROJ.PATH <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
 BATCH.PATH <- paste0(PROJ.PATH,BatchName,"/")
-#BATCH.PATH <- BATCH.PATH
-#PortfolioLocation <- PROJ.PATH
-
 if(!dir.exists(file.path(BATCH.PATH))){dir.create(file.path(BATCH.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
 
 
@@ -95,11 +92,11 @@ ReportTemplate <- ParameterFile$ReportStyle
 ImportNewComparisonList <- FALSE
 
 # Set Results Location
-REPORT.PATH <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/")
+REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-REPORT.PATH <- paste0(RESULTS.PATH,"/05_Reports/",ProjectName,"/",BatchName,"/")
-if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-BATCH.RES.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",BatchName,"/",BatchToTest,"/")
+# REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
+# if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 # setwd(BATCH.RES.PATH)
 
 # Get Equity Batch Results
@@ -289,28 +286,33 @@ if (ComparisonFile ==  "Swiss"){
 }
 
 if (ComparisonFile %in%  c("FundComparison","Swiss")){
+  # Processes the Comparison Portfolios ie - should be applied when not comparing to other funds within the
+  
+  # Loads in the results to compare ie. 100 Funds or Swiss Overall Results
   EQComparisonResults <- company_comparison("EQ",EQComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   EQComparisonExposures <- EQComparisonResults[[2]]
   EQComparisonAUMs <- EQComparisonResults[[4]]
-  EQComparisonCoverageWeights <- CoverageWeight_data("EQ","Brand",EQComparisonPortSS, EQComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  EQComparisonCoverageWeights <- CoverageWeight_data("EQ","Portfolio",EQComparisonPortSS, EQComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
   EQWMCoverageWeight <- EQComparisonCoverageWeights[EQComparisonCoverageWeights$PortName %in% "WeightedResults",]
   
   CBComparisonResults <- company_comparison("CB",CBComparisonBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   CBComparisonExposures <- CBComparisonResults[[2]]
   CBComparisonAUMs <- CBComparisonResults[[4]]
-  CBComparisonCoverageWeights <- CoverageWeight_data("CB","Investor",CBComparisonPortSS, CBComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  CBComparisonCoverageWeights <- CoverageWeight_data("CB","Portfolio",CBComparisonPortSS, CBComparisonBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
   CBWMCoverageWeight <- CBComparisonCoverageWeights[CBComparisonCoverageWeights$PortName %in% "WeightedResults",]
   
+  # Loads in the Batch Test Results
   EQBatchResults <- company_comparison("EQ",EQBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   EQExposures <- EQBatchResults[[2]]
   EQAUMs <- EQBatchResults[[4]]
-  EQCoverageWeights <- CoverageWeight_data("EQ","Investor",EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+  EQCoverageWeights <- CoverageWeight_data("EQ",c("Portfolio","Investor"),EQBatchTest_PortSnapshots, EQBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
   
   CBBatchResults <- company_comparison("CB",CBBatchTest, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   CBExposures <- CBBatchResults[[2]]
   CBAUMs <- CBBatchResults[[4]]
-  CBCoverageWeights <- CoverageWeight_data("CB","Investor",CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
-}else{
+  CBCoverageWeights <- CoverageWeight_data("CB",c("Portfolio","Investor"),CBBatchTest_PortSnapshots, CBBatchTest, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose)
+
+  }else{
   PortfolioList <- TestList$PortName[TestList$PortfolioType %in% c("Investor","Portfolio")]
   InvestorList <- TestList$PortName[TestList$PortfolioType %in% c("Investor","InvestorMPs")]
   EQPortfolioResultsRaw <- EQBatchTest[EQBatchTest$PortName %in% PortfolioList,]
@@ -360,7 +362,7 @@ if (ComparisonFile %in%  c("FundComparison","Swiss")){
 SetGraphInputs()
 figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 
-ResultsLocFolder <- ResultsLocation
+# ResultsLocFolder <- ResultsLocation
 
 # ------
 # Translation and Report Inputs
@@ -407,20 +409,18 @@ for (i in 1:nrow(TestList)){
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
   
-  InvestorDirectory <- paste0(ResultsLocFolder,InvestorName,"/")  
-  PortfolioDirectory <- paste0(InvestorDirectory,PortfolioName,"/")
-  RegionDirectory <-PortfolioDirectory
+  INVESTOR.PATH <- paste0(REPORT.PATH,InvestorName,"/")  
+  PORTFOLIO.PATH <- paste0(INVESTOR.PATH,PortfolioName,"/")
   
   #Definitely need to check for these
-  if(!dir.exists(file.path(InvestorDirectory))){dir.create(file.path(InvestorDirectory), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-  if(!dir.exists(file.path(PortfolioDirectory))){dir.create(file.path(PortfolioDirectory), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
-  
-  setwd(RegionDirectory)
+  if(!dir.exists(file.path(INVESTOR.PATH))){dir.create(file.path(INVESTOR.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+  if(!dir.exists(file.path(PORTFOLIO.PATH))){dir.create(file.path(PORTFOLIO.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
+  # setwd(PORTFOLIO.PATH)
   
   #--------Load Inputs-----------
   PortData <- PortfolioBreakdown[PortfolioBreakdown$InvestorName %in% InvestorName & PortfolioBreakdown$PortfolioName %in% PortfolioName & PortfolioBreakdown$HoldingType == "All",]
   
-  # Batch Results
+  ### Batch Results
   EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
   EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
@@ -430,7 +430,8 @@ for (i in 1:nrow(TestList)){
   
   
   if (ComparisonFile %in% c("Swiss","FundComparison")){
-    # Comparative Results
+    
+    ### Comparative Results
     EQExposure <- EQExposures[EQExposures$PortName %in% PortName,]
     CBExposure <- CBExposures[CBExposures$PortName %in% PortName,]  
     EQAUMData <- EQAUMs[EQAUMs$PortName %in% PortName,]
@@ -441,8 +442,7 @@ for (i in 1:nrow(TestList)){
       CBCoverageWeight <- CBCoverageWeights[CBCoverageWeights$PortName == PortName,]
     }else{CBCoverageWeight <- "NoResults"}
     
-    # EQComparisonExposures <- subset(EQComparisonExposures, EQComparisonExposures$PortName != "Helvetia")
-    # CBComparisonExposures <- subset(CBComparisonExposures, CBComparisonExposures$PortName != "Helvetia")
+    ### Checks if the Investor is in the comparison list already and removes it if so.  
     if (PortName %in% EQComparisonExposures$PortName){
       EQComparisonExposures <- EQComparisonExposures[which(EQComparisonExposures$PortName != PortName),]
     }
@@ -513,9 +513,9 @@ for (i in 1:nrow(TestList)){
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
   RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
-  LanguageDirectory <- paste0(RegionDirectory,Languagechoose,"/")
-  if(!dir.exists(file.path(LanguageDirectory))){dir.create(file.path(LanguageDirectory), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
-  setwd(LanguageDirectory)
+  LANGUAGE.PATH <- paste0(PORTFOLIO.PATH,Languagechoose,"/")
+  if(!dir.exists(file.path(LANGUAGE.PATH))){dir.create(file.path(LANGUAGE.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
+  setwd(LANGUAGE.PATH)
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
