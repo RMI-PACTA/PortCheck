@@ -137,13 +137,17 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
   
   # BatchTest_PortSnapshots<-CBBatchTest_PortSnapshots
   # BatchTest<-CBBatchTest
-  # ChartType<- "EQ"
-  # PortfolioType <- "Investor"
+  # ChartType<- "CB"
+  # PortfolioType <- "Portfolio"
   # PortfolioType <- c("Portfolio","Investor","InvestorMPs")
   
+  # PortfolioType <- c("Investor","Portfolio")
   
   if (ChartType == "EQ"){
-    Results <- subset(BatchTest,Type %in% PortfolioType & Scenario %in% Scenariochoose & Year == Startyear+5 & BenchmarkRegion == BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose)#,select= c("PortName","Sector","Technology","MarketExposure","AUMExposure","Production","PortAUM")) 
+    Results <- subset(BatchTest,Type %in% PortfolioType & Scenario %in% Scenariochoose & Year == Startyear+5 & BenchmarkRegion == BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose)#,select= c("PortName","Sector","Technology","MarketExposure","AUMExposure","Production","PortAUM"))
+    # Results <- subset(BatchTest,Type %in% PortfolioType & Scenario %in% Scenariochoose & Year == Startyear+5 & BenchmarkRegion == BenchmarkRegionchoose )    
+    # Without Company Dom Region for Stoxx600
+    
     
     Results <- subset(Results, !Technology %in% c("OilCap"))
     
@@ -431,6 +435,10 @@ company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenari
     
     Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
     
+    # Without Company Dom Region, for Stoxx600 
+    # Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
+    
+    
     Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- Heatmap$AUMExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")]
     # After getting the AUM values, remove that vector from the dataframe
     Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
@@ -683,6 +691,40 @@ top5s <- function(ProdSnapshot,PortSnapshot){
   
 }
 
+#-------- Graph Inputs ----------
+SetGraphInputs <- function(){
+  #Saturated colours
+  RenewablesColour <<- "#b3de69"
+  HydroColour <<- "#428bbd"
+  NuclearColour <<- "#827ab8"
+  GasCapColour<<-"grey75"
+  CoalCapColour <<- "#252525"
+  ElectricColour<<- "#69c454"
+  HybridColour<<- "#00b7be"
+  ICEColour<<- "#2F4F4F"   #"#ed1c24" #"#f93620"
+  GasProdColour <<- "#ffb861"
+  OilProdColour <<- "#c88450"
+  CoalProdColour <<- "#835834"
+  
+  YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
+  IndexColour <<-  "grey85"
+  Tar2DColourBar <<- "#b3de69"
+  Tar2DColour <<- "#a1c75e"
+  goodexpColour <<- "#1F891F"
+  badexpColour <<- "#ed1c24" #"#fb8072"
+  ReqCapColour <<- "grey55"
+  CurrCapColour <<- "grey75"
+  AxisColour <<- "#17375e" #"#274F80"
+  
+  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  
+  textsize <<- 8
+  ppi <<- 600
+  
+  
+  
+}
+
 
 #-------- Graph List --------
 # Need a check to see which graphs should be plotted and therefore incorporated into the report
@@ -824,7 +866,7 @@ report_data <- function(ChartType,combin, Exposures,AUMData,Ranks,PortSnapshot,C
     piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
     pieshares <- ddply(piesub_tech, .(piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
     # Numbers to print
-    PieAssessedShare <- round((1-pieshares$Portfolio_weight[pieshares$piesector %in% "Not Assessed"]),2)*100
+    PieAssessedShare <- round((sum(pieshares$Portfolio_weight)-pieshares$Portfolio_weight[pieshares$piesector %in% "Not Assessed"]),2)*100
     if(length(pieshares$Portfolio_weight[pieshares$piesector%in% "Not Assessed"])==0){PieAssessedShare<-100}
     
     # Line Chart Data
@@ -1055,8 +1097,8 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   }
   
   # Copy in the graphics folder for the report
-  originalloc <- paste0(TemplatePath,"ReportGraphics/")
-  graphicsloc <- paste0(LanguageDirectory ,"/","ReportGraphics/")
+  originalloc <- paste0(TEMPLATE.PATH,"ReportGraphics/")
+  graphicsloc <- paste0(LANGUAGE.PATH ,"/","ReportGraphics/")
   flist <- list.files(originalloc, full.names = TRUE)
   
   if(!dir.exists(file.path(graphicsloc))){
@@ -1069,7 +1111,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
   
   # Create the PDF
-  knit2pdf(paste0(LanguageDirectory,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
+  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
   
   # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
@@ -1432,8 +1474,6 @@ pie_chart <- function(plotnumber,ChartType,PortSnapshot, PortfolioName, CompanyD
     
     pieshares$piesector <- revalue(pieshares$piesector, c("Utility Power"=GT["PS_UP"][[1]],"Automotive"=GT["PS_Aut"][[1]],"Fossil Fuels"=GT["PS_FF"][[1]],"Non-Utility Power"=GT["PS_NUP"][[1]],"Airlines"=GT["PS_Air"][[1]],"Building Materials"=GT["PS_BM"][[1]],"Iron & Steel"=GT["PS_IS"][[1]],"Marine Transportation"=GT["PS_MT"][[1]],"Not Assessed"=GT["PS_NA"][[1]]),warn_missing = FALSE) 
     
-    
-    
     PieChart<- ggplot(pieshares, aes(x="", y=Portfolio_weight, fill=piesector))+
       geom_bar(stat = "identity",color=NA, width = 0.5)+
       geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
@@ -1643,7 +1683,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     PlotData <- ProductionMix_5yrs
     
-    # PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
+    PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
     
     PlotData <- merge(PlotData,colourdf, by="Technology")
     orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
@@ -1654,7 +1694,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     # PlotData$variable <- revalue(PlotData$variable,c("AggregiertesPortfolio" = GT["AggregatedPortName"][[1]]))
     
-    # write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
+    write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
     PlotData$Sector <- NULL
     
     
@@ -2099,7 +2139,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
       annotate(geom="rect",xmin =0,xmax=2,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
       
       # Weighted Mean
-      # annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
+      annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
       
       # Company Circles
       geom_point(data=PlotData,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
@@ -2729,6 +2769,10 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       
       #Select subset of results: Year, Scenario, Where the companies are located/the investment universe, and just funds, not brands. 
       Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
+      # No Companydomregion for Stoxx600
+      # Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
+      
+      
       # # Rename the Brand FTSE to the fund FTSE350
       # Heatmap$PortName[Heatmap$PortName == "FTSE"] <- "FTSE350"
       
