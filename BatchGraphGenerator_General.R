@@ -387,9 +387,8 @@ ToTest2 <- which(TestList$PortfolioName %in% b)
 # Loop through Portfolios
 #--------
 for (i in 1:nrow(TestList)){
-  # ------
-  # Setting Directory and Getting Results
-  # ------
+  
+  ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
   TestType <- TestList[i,"PortfolioType"]
   InvestorNameLong <-  TestList[i,"InvestorNameLong"]
@@ -399,28 +398,22 @@ for (i in 1:nrow(TestList)){
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioNameLong
     PortName <- InvestorName
-    # ReportName <- InvestorNameLong
   }else{
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
   
-  if (PortName == "AggregiertesPortfolio_AggregiertesPortfolio"){PortName <- "AggregiertesPortfolio"}
-  if (PortName == "Helvetia_Helvetia"){PortName <- "Helvetia"}
-  
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
   
+  ### Creates working directory
   INVESTOR.PATH <- paste0(REPORT.PATH,InvestorName,"/")  
   PORTFOLIO.PATH <- paste0(INVESTOR.PATH,PortfolioName,"/")
-  
-  #Definitely need to check for these
   if(!dir.exists(file.path(INVESTOR.PATH))){dir.create(file.path(INVESTOR.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
   if(!dir.exists(file.path(PORTFOLIO.PATH))){dir.create(file.path(PORTFOLIO.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
-  # setwd(PORTFOLIO.PATH)
   
-  #--------Load Inputs-----------
+  ### Loads Summary Inputs
   PortData <- PortfolioBreakdown[PortfolioBreakdown$InvestorName %in% InvestorName & PortfolioBreakdown$PortfolioName %in% PortfolioName & PortfolioBreakdown$HoldingType == "All",]
   
-  ### Batch Results
+  ### Subsets results for this portfolio
   EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
   EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
@@ -428,10 +421,9 @@ for (i in 1:nrow(TestList)){
   CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
   
-  
   if (ComparisonFile %in% c("Swiss","FundComparison")){
     
-    ### Comparative Results
+    ### Selects the current portfolio from the Comparative Results
     EQExposure <- EQExposures[EQExposures$PortName %in% PortName,]
     CBExposure <- CBExposures[CBExposures$PortName %in% PortName,]  
     EQAUMData <- EQAUMs[EQAUMs$PortName %in% PortName,]
@@ -451,15 +443,19 @@ for (i in 1:nrow(TestList)){
       CBComparisonExposures <- CBComparisonExposures[which(CBComparisonExposures$PortName != PortName),]
     }
     
+    ### Ranks the Current portfolio to those in the list 
     EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
     CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
     
     EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
     CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
+    
     EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
     CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs)
     
   }else{
+    
+    ### Selects either the Portfolio or Investor results
     
     if(TestType == "Portfolio"){
       EQRanks <- EQPortfolioRanks
@@ -495,27 +491,28 @@ for (i in 1:nrow(TestList)){
     CBAUMDatarange <- CBAUMData
   }
   
-  # Fund Results
+  ### Fund Results
+  ### Choose the top 20 funds in the results to present
   FundsInPort <- Portfunds(20,FundList,FundsDataAll, PortfolioName,InvestorName, TestType)
-  if (typeof(FundsInPort)=="list"){
+  if (typeof(FundsInPort) == "list"){
     if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
   
-  # Sectors with Production
-  # Used to check whether a Line Graph, Ranking, and BarChart should be printed
+  ### Sectors with Production
+  ### Used to check whether a Line Graph, Ranking, and BarChart should be printed
   EQSectorProd <- SectorProduction(EQCombin,"EQ")
   CBSectorProd <- SectorProduction(CBCombin,"CB")
   
-  # PortfolioNameLong <<- "PORTEFEUILLE MOYEN"  # I don't think this works. 
-  
-  #------ Specify Language and Load Report ------ 
-  Languagechoose =  ParameterFile$Languageselect
-  Languagechoose <- "EN"
+  ### Specify Language and Load Report 
+  Languagechoose <-  ParameterFile$Languageselect
+  # Languagechoose <- "EN"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
   RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
   LANGUAGE.PATH <- paste0(PORTFOLIO.PATH,Languagechoose,"/")
   if(!dir.exists(file.path(LANGUAGE.PATH))){dir.create(file.path(LANGUAGE.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
   setwd(LANGUAGE.PATH)
+  
+  ### Loops through graphs and report generation
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
@@ -554,7 +551,6 @@ for (i in 1:nrow(TestList)){
         plot_15 <- mini_line_chart(15,"EQ",EQCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_16 <- mini_line_chart(16,"EQ",EQCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_17 <- ranking_chart_alignment(17,"EQ",Startyear,"Automotive",EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-        # plot_17 <- ranking_chart_alignment(17,"EQ",Startyear,"Automotive",EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       }
       # Page 11
       if (SectorPrint("Automotive",CBSectorProd)==1){
@@ -562,15 +558,14 @@ for (i in 1:nrow(TestList)){
         plot_19 <- mini_line_chart(19,"CB",CBCombin,"ICE","Automotive",BenchmarkRegionchoose,  CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_20 <- mini_line_chart(20,"CB",CBCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_21 <- mini_line_chart(21,"CB",CBCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_22 <- ranking_chart_alignment(22,"CB",Startyear,"Automotive", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)
-      }
+        plot_22 <- ranking_chart_alignment(22,"CB",Startyear,"Automotive", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)}
+      
       # Page 12
       plot_23 <- stacked_bar_chart(23,"EQ",EQCombin,EQWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
       plot_24 <- mini_line_chart(24,"EQ",EQCombin,"Oil","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_25 <- mini_line_chart(25,"EQ",EQCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_26 <- mini_line_chart(26,"EQ",EQCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-      # plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       
       # Page 13
       if (nrow(CBPortSnapshot)>0){
@@ -582,7 +577,6 @@ for (i in 1:nrow(TestList)){
       
       # Page 14
       plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-      # plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       
       # Page 15
       if (nrow(CBPortSnapshot)>0){
