@@ -20,7 +20,7 @@ PROJ.CODE.PATH <- paste0(GIT.PATH, PROJ.NAME, "/")
 ### These are In here for backwards compatibility
 ### Eventually should change the code to use the upper case constants
 DataFolder <- PROC.DATA.PATH
-# FundDataLocation <- FUND.DATA.PATH
+FundDataLocation <- FUND.DATA.PATH
 
 Date <<- Sys.Date()
 BBGPORTOutput <<- "FinancialData_20171127"
@@ -32,7 +32,10 @@ BBGPORTOutput <<- "FinancialData_20171127"
 
 ### if there are shared functions, source them here
 source(paste0(PROJ.CODE.PATH, "GlobalPortCheckFunctions.R"))
-source(paste0(GIT.PATH, "PortCheck/CodeFunctions.R"))
+# source(paste0(GIT.PATH, "PortCheck/CodeFunctions.R"))
+source(paste0(GIT.PATH, "PortCheck/DataFunctions.R"))
+source(paste0(GIT.PATH, "PortCheck/GraphFunctions.R"))
+
 
 ### ###########################################################################
 ### LOGGING
