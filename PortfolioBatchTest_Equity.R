@@ -470,11 +470,6 @@ if(nrow(MissingBBGInfo) > 0) {
   MissingBBGInfo$QTY <- 1
   MissingBBGInfo$Date <- BBGDataDate}
 
-########################
-# Filter for Stoxx600 Company Domicile Companies
-PortfolioAllPorts <- subset(PortfolioAllPorts, CNTRY_OF_DOMICILE %in% CompanyDomicileRegion$Stoxx600_ISO)
-##### REMOVE AFTER#####
-
 
 # PortfolioAllPorts <- rename(PortfolioAllPorts, c("NumberofShares"="Number.of.shares")) 
 
