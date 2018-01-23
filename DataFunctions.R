@@ -404,7 +404,7 @@ filterports <- function(PortData, PortfolioInfo, BrandType){
 }
 
 # ------------ Company Comparison Data ------ #
-company.comparison <- function(ChartType,BatchTestComparison, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose){
+company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose){
   
   # ChartType <- "CB"
   # BatchTestComparison <- CBBatchTest
@@ -653,6 +653,44 @@ SectorSelect <- function(TechToPlot){
   return(SectorToPlot) 
 }
 
+# ----Sector Productions
+
+SectorProduction <- function(combin,ChartType){
+  
+  TechList <- c("RenewablesCap","HydroCap", "NuclearCap","CoalCap","GasCap","ICE","Hybrid", "Electric","Coal","Oil","Gas")
+  
+  
+  if (ChartType == "CB"){
+    combin <- rename(combin, c("WtProduction"="Production"),warn_missing = F)
+    combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose, select = c("Sector","Technology","Production")) 
+  }else{
+    combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose & combin$CompanyDomicileRegion == CompanyDomicileRegionchoose, select = c("Sector","Technology","Production")) 
+    
+  }
+  
+  combinsector <- combinsector %>% complete(Technology = TechList, fill = list(Production = 0))
+  combinsector$Sector <- t(data.frame(lapply(combinsector$Technology, function(x) SectorSelect(x))))
+  prodsectors <- aggregate(Production ~ Sector, data = combinsector, function(x) sum(x, na.rm = T))
+  
+  return(prodsectors)
+}
+
+SectorPrint <- function(SectorToPlot,SectorProd){
+  
+  # TechToPlot <- "Coal"
+  # SectorProd <- EQSectorProd  
+  
+  # SectorToPlot <- SectorSelect(TechToPlot)
+  SectorProduction <- SectorProd$Production[SectorProd$Sector %in% SectorToPlot]
+  
+  PlotFlag <- 1
+  if (SectorToPlot %in% c("Automotive","Power") & SectorProduction == 0){PlotFlag <- 0}
+  
+  return(PlotFlag)
+  
+}
+
+
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
   #Saturated colours
@@ -684,3 +722,18 @@ SetGraphInputs <- function(){
   ppi <<- 600
   
 }
+
+#-------- 246 Inputs------------- #
+Inputs246 <- function(){
+  
+  ### Inputs to the 246 chart. 
+  
+  # Production Inputs - normalised to the start year
+  
+  
+  
+  
+  
+  
+}
+
