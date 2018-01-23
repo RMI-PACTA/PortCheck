@@ -76,7 +76,7 @@ if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), s
 PortfolioData <- read.csv(paste0(BatchLocation,BatchName,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
 PortfolioData <- rename(PortfolioData, c("Num.Shares"= "NumberofShares","Market.Value"="MarketValue", "Portfolio.Name"="PortfolioName"),warn_missing = F)
-PortfolioData$InvestorName <- "California Insurances"
+# PortfolioData$InvestorName <- "California Insurances"
 
 MissingColnames <- setdiff(c("MarketValue","Currency","NumberofShares"), colnames(PortfolioData))
 if(length(MissingColnames) > 0){PortfolioData[,MissingColnames] <- NA}
