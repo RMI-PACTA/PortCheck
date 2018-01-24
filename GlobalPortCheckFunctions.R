@@ -114,6 +114,23 @@ MultipleDataBind <- function(List,Headers){
   return(AllData)
 }
 
+AddMissingColumns <- function(dfa, dfb){
+  missingcols <- setdiff(colnames(dfb),colnames(dfa))
+  tempdf <- data.frame(matrix(ncol = length(missingcols), nrow = nrow(dfa)))
+  names(tempdf) <- missingcols
+  dfa <- cbind(dfa,tempdf)
+}
+
+
+ChangeFundPort <- function(BatchTest){
+  
+  BatchTest$Type <- revalue(BatchTest$Type, c("Fund" = "Portfolio","Brand"="Investor"))
+  return(BatchTest)
+  
+}
+
+
+
 addcompanyeqy <- function(BatchName, BatchFolder, CombinAll, ReducedListAll,PortfolioAll,PortfolioListAll,InvestorToRemove){
   setwd(paste0(OutputFolder,"/Swiss/2016Q4"))
   CombinAllLong <- read.csv(paste(BatchName,"_EquityAnalysisResults.csv",sep = ""),stringsAsFactors = FALSE)
