@@ -74,11 +74,16 @@ report_data <- function(ChartType,combin, Exposures,AUMData,Ranks,PortSnapshot,C
     
     
     # Ranking Chart
+    TechList <- c("Electric","Hybrid","ICE","Coal","Oil","Gas","RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap")
+    
+    AUMData <- subset(AUMData, select = c("PortName","PortAUM"))
+    Exposures <- Exposures[, -which(colnames(Exposures) %in% c("ComparisonType","Type"))]
+    
     df <- Exposures
     df <- merge(df,AUMData, by= "PortName")
     df <- rename(x = df, c("PortAUM"="AUM"),warn_missing = FALSE)
     
-    WM<- as.data.frame(lapply(df[ , 2:12], weighted.mean, na.rm=TRUE,  w = df$AUM))
+    WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
     WM$PortName <- "WeightedMean"
     df$AUM <- NULL
     df <- df[df$PortName %in% PortfolioNameLong,]
@@ -696,6 +701,11 @@ pie_chart <- function(plotnumber,ChartType,PortSnapshot, PortfolioName, CompanyD
 # ------------- STACKED BAR CHARTS ---------- #
 stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,SectorToPlot,BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
   
+  # combin <- EQCombin
+  # ChartType <- "EQ"
+  # WeightedResults <- EQWMCoverageWeight
+  
+  
   # combin <- CBCombin
   # ChartType <- "CB"
   # WeightedResults <- CBWMCoverageWeight
@@ -736,6 +746,8 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   if(cbondsgo>0){
     
     combin <- combin[!combin$Technology %in% "OilCap",]
+    combin <- combin[, -which(colnames(combin) %in% c("ComparisonType","Type"))]
+    WeightedResults <- WeightedResults[, -which(colnames(WeightedResults) %in% c("ComparisonType","Type","PortName"))]
     
     if (ChartType=="EQ"){
       ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose & Sector == SectorToPlot)
@@ -756,7 +768,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
                                     RefProduction = sum(TargetProductionAlignment))}
       
       ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-      
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
       ProductionMix_5yrs <- melt(ProductionMix_5yrs, id = c( "Year","Technology","Scenario","Sector"))
       SectorTotals <- ddply(ProductionMix_5yrs,.(Year,Sector,variable), summarise,SectorTotal = sum(value))
       ProductionMix_5yrs <- merge(ProductionMix_5yrs,SectorTotals)
@@ -788,15 +800,16 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
         TSSUMMarket  <- sum(ProductionMix_5yrs$TechShareMarket, na.rm = TRUE)
         ProductionMix_5yrs$TechShareMarket <-ProductionMix_5yrs$TechShareMarket/TSSUMMarket 
         
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Technology","TechShare","TechShareMarket"))
+        ProductionMix_5yrs <- unique(subset(ProductionMix_5yrs, select = c("Technology","TechShare","TechShareMarket")))
         
         WeightedResults <- subset(WeightedResults, Technology %in% ProductionMix_5yrs$Technology)
         sumWR <- sum(WeightedResults$CoverageWeight, na.rm = TRUE)
         WeightedResults$CoverageWeight <- WeightedResults$CoverageWeight/sumWR
-        WeightedResults$PortName<- NULL
         
         ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
         ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],"TechShare"=PortfolioNameLong,"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+        # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+        
         ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Technology"))
         ProductionMix_5yrs$Sector <- "Fossil Fuels"
         ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("value"="TechShare"))
@@ -809,6 +822,9 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
         ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
         ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
         ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+        # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+        
+        
         ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Sector","Technology"))
         ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value
         ProductionMix_5yrs$value <- NULL
@@ -892,9 +908,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     
   }else{
-    wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
+  
     Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
     Label <- GT[Label][[1]]
     
@@ -1148,6 +1162,11 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
 # ------------- RANKING CHART - ALIGNMENT ----#
 ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot, Exposures, AUMData,Ranks,figuredirectory,PortfolioNameLong){
   # 
+  # ChartType <- "EQ"
+  # Exposures <- EQExposureRange
+  # AUMData <- EQAUMDatarange
+  # Ranks <-EQRanks
+  
   # ChartType <- "CB"
   # SectorToPlot <- "Power"
   # plotnumber=99
@@ -1155,6 +1174,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
   # AUMData <- CBAUMData
   # Ranks <-CBRanks
   # PortfolioNameLong<- PortName
+  
+  TechList <- c("Electric","Hybrid","ICE","Coal","Oil","Gas","RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap")
   
   
   if(PortfolioNameLong %in% c(Exposures$PortName, "PK","V") ){
@@ -1174,8 +1195,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
       df <- merge(df,AUMData, by= "PortName")
       df <- rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
       
-      
-      WM<- as.data.frame(lapply(df[ , 2:12], weighted.mean, na.rm=TRUE,  w = df$AUM))
+      WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
       WM$PortName <- PortfolioNameLong
       
       Rank <- Ranks[1,]
@@ -1184,10 +1204,13 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
       maxrank <- 1
       
     }else{
+      # AUMData <- 
+      AUMData <- AUMData[,colnames(AUMData) %in% c("PortName","PortAUM") ]
+      
       df <- merge(df,AUMData, by= "PortName")
       df <- rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
       
-      WM<- as.data.frame(lapply(df[ , 2:12], weighted.mean, na.rm=TRUE,  w = df$AUM))
+      WM<- as.data.frame(lapply(df[ colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
       WM$PortName <- "WeightedMean" 
       
       Rank <- Ranks[Ranks$PortName %in% PortfolioNameLong,]
@@ -1207,11 +1230,15 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
     
     df$AUM <- NULL
     
-    Mins <- colMins(as.matrix(df[2:12]),na.rm = TRUE)
-    Maxs <- colMaxs(as.matrix(df[2:12]),na.rm = TRUE)
+    Mins <- colMins(as.matrix(df[colnames(df) %in% TechList]),na.rm = TRUE)
+    Maxs <- colMaxs(as.matrix(df[colnames(df) %in% TechList]),na.rm = TRUE)
     MinMax <- as.data.frame(t(cbind(Mins,Maxs)))
-    colnames(MinMax) <- colnames(df[2:12])
+    colnames(MinMax) <- colnames(df[colnames(df) %in% TechList])
     MinMax$PortName <- c("Minimum","Maximum")
+    
+    # row.names(WM) <- "WeightedMean"
+    df$ComparisonType <- df$Type <- NULL
+    
     df <- rbind(df,MinMax,WM,Rank)
     df <- df[df$PortName %in% c(PortfolioNameLong,"Minimum","Maximum","WeightedMean","Rank"),]
     
@@ -1310,7 +1337,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,Startyear,SectorToPlot,
       annotate(geom="rect",xmin =0,xmax=2,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
       
       # Weighted Mean
-      annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
+      # annotate(xmin=PlotData$WMloc-barwidth/2,xmax=PlotData$WMloc+barwidth/2,ymin=-bh/2+locations,ymax=bh/2+locations,geom = "rect", fill="darkgrey")+
       
       # Company Circles
       geom_point(data=PlotData,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
