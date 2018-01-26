@@ -39,7 +39,7 @@ load.financial.data <- function() {
   
 }
 
-load.CA.financial.data <- function() {  
+load.full.financial.data <- function() {  
   
   base.bridge <- load.financial.data()
   base.bridge <- base.bridge %>% select(Name, Ticker, ISIN, CUSIP, Security.Type, 

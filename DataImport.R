@@ -21,7 +21,7 @@ if (!exists("TWODII.CONSTS")) {
 ### this defines any project constants and functions
 ### and will also source an override file if it exists
 source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
-imp("Starting DataImport.R Script")
+lp("Starting DataImport.R Script")
 
 
 ### ###########################################################################
@@ -44,22 +44,27 @@ ParameterFile <- ReadParameterFile()
 SetParameters(ParameterFile)              # Sets BATCH.NAME, SCENARIO, BenchmarkRegion etc. 
 params <- sapply(param.list, function(x) eval(parse(text=x)))
 
-imp("Loaded Parameters")
+lp("Loaded Parameters")
 lp(params)
 
-### If we want to skip look through, set to 0
-FUND.LOOK.THROUGH <- 0
+### If we want to skip look through, set to 0.
+### if this is the case we assume fund look through has already been done, and
+### there is a field called "Holding.Level" (direct or indirect).
+DO.FUND.LOOK.THROUGH <- 0
+
+### CAN BE CUSIP or ISIN, or others.
+SEC.ID.TYPE <- "ISIN"
 
 
 ### ###########################################################################
-### SET UP VARS BASED ON PARAMS
+### SET UP VARS BASED ON PARAMS USEr JUST GAVE US
 ### ###########################################################################
 
 ### Finish setting up paths based on what was in the Parameter file - date of 
 ### financial data and batch name
 BATCH.FIN.DATA.PATH <- paste0(FIN.DATA.PATH,FIN.DATA.DATE,"/PORT/")
-CLIENT.PORTS.PATH <- paste0(PORTS.PATH,CLIENT.NAME,"/")
-BATCH.PORTS.PATH <- paste0(CLIENT.PORTS.PATH,BATCH.NAME,"/")
+BATCH.PORTS.PATH <- paste0(PORTS.PATH,CLIENT.NAME,"/", BATCH.NAME,"/")
+#BATCH.PORTS.PATH <- paste0(CLIENT.PORTS.PATH,BATCH.NAME,"/")
 
 if(!dir.exists(file.path(BATCH.PORTS.PATH))){
   dir.create(file.path(BATCH.PORTS.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")
@@ -69,14 +74,18 @@ lp(show.consts())
 
 
 ### ###########################################################################
-### CONSTANTS
+### OTHER CONSTANTS
 ### ###########################################################################
-KEEP.BBG.OUTPUT.COLS <- c("Name", "SharePrice", "Cnty.of.Dom", "Security.Type","ICB.Subsector.Name","Sector", "Group","Subgroup","Ticker","TICKER_AND_EXCH_CODE", "COMPANY_CORP_TICKER")
+
+
+### ICB Classification
 
 UtilitiesICB <- c("Alternative Electricity","Conventional Electricity","Multiutilities")
 OilGasICB <- c("Integrated Oil & Gas","Oil Equipment & Services","Coal", "General Mining", "Exploration & Production")
 FuturesecsICB <- c("Building Materials & Fixtures","Iron & Steel","Aluminum","Airlines","Marine Transportation")
 AutoICB <- c("Automobiles","Commercial Vehicles & Trucks")
+
+### BICS Classification
 
 PowerBIC <- c("Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
 PowerBICdf <- data.frame("BIClvl2" = PowerBIC, "Sector" = "Power")
@@ -91,36 +100,50 @@ FuturesecsBICdf <- data.frame("BIClvl2" = FuturesecsBIC, "Sector" = "Futuresecs"
 BICSectors <- rbind(PowerBICdf,OilGasBICdf,AutoBICdf,FuturesecsBICdf,CoalBICdf)
 
 
+### Government Group Classification
+GROUPS.GOVT <- c("Sovereign","Sovereign Agency", "Municipal", "Municipal-City","Municipal-County","Multi-National","Regional","Regional(state/provnc)",
+                 "Export/Import Bank","Regional Authority","Regional Agencies")
+
+### Mortgage Sector Classification
+SECTOR.MORT <- c("Mortgage Securities")
+
+
+### there may be additional fields in the input file, but ones below are required
+### if its a bond row, Num.Shares will be NA
+### if its an equity row, MarketValue may or may not have data
+REQUIRED.PORT.COLS <- c("Sec.ID", "Num.Shares", "MarketValue", "Currency")
+
+### the important BBG cols for PortCHeck
+KEEP.BBG.OUTPUT.COLS <- c("Name", "SharePrice", "Cnty.of.Dom", "Security.Type","ICB.Subsector.Name","Sector", "Group","Subgroup","Ticker","TICKER_AND_EXCH_CODE", "COMPANY_CORP_TICKER")
+
+
 
 ### ###########################################################################
-### LOAD EXTERNAL DATA
+### LOAD EXTERNAL DATA (non-portfolio)
 ### ###########################################################################
 
-ExchRates <- read.csv(paste0(PROC.DATA.PATH,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-names(ExchRates) <- c("Currency","Abbr","Rate")
+Exch.Rates <- read.csv(paste0(PROC.DATA.PATH,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+names(Exch.Rates) <- c("Currency","Abbr","Rate")
 
 ### financial data from bloomberg
-fin.data <- load.CA.financial.data()
-fin.data <- fin.data[!duplicated(fin.data$ISIN),]
-fin.data$Mapped.Flag <- 1
-dim(fin.data)
+Fin.Data <- load.full.financial.data()
+Fin.Data <- Fin.Data[!duplicated(Fin.Data$ISIN),]
+Fin.Data$Mapped.Flag <- 1
+### we could just hard code these, but can also get on the fly from Fin.Data
+GROUPS.ABS <- grep("(ABS|MBS|CMO)", unique(Fin.Data$Group), value = TRUE)
+GROUPS.FUNDS <- grep("(Fund|ETF)", unique(Fin.Data$Group), value = TRUE)
 
-### fund database
-#Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),stringsAsFactors=FALSE,strip.white=TRUE) 
-#Fund_Data_EQY <- read.csv(paste0(FundDataLocation,"FundLookThroughData_EQY.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-#Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+### equity bridge from Bloomberg
+Equity.Bridge <- read.csv(paste0(PROC.DATA.PATH,"EquityBridge_2017-06-27.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+Equity.Bridge <- Equity.Bridge[!duplicated(Equity.Bridge$TICKER_AND_EXCH_CODE),]
 
 
 ### ###########################################################################
 ### LOAD PORTFOLIO DATA
 ### ###########################################################################
 
-### if its a bond portfolio, NumberofShares will be NA
-### if its an equity portfolio
-
-REQUIRED.PORT.COLS <- c("ISIN", "NumberofShares", "MarketValue", "Currency")
 port <- read.csv(paste0(BATCH.PORTS.PATH,BATCH.NAME,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-check.rows <- nrow(port)
+rows.in <- nrow(port)
 cols.in <- names(port)
 
 ### check for required input fields
@@ -130,29 +153,37 @@ if (length(setdiff(REQUIRED.PORT.COLS, cols.in)) != 0) {
   stop("XXX Missing Required Columns")
 }
 
+### OTHER FIELDS 
+### If DO.FUND.LOOK.THROUGH == 0 (ie don't do the look through) {
+###   then we assume it is already done and these fields are required.  
+###   1) Asset.Type.Init must exist, and at a minimum indicate when an input row is a "Fund"
+###   2) Holding.Level --> Must say "Direct" or "Indirect"
+
+if (DO.FUND.LOOK.THROUGH == 0) {
+  ### check if Asset.Type.Init and Holding.Level are there.  IF not, stop script.
+}
+
+
+
 ### clean the data
-### any non-numbers will be NA
+### any non-numbers will be made NA
 port$MarketValue <- as.numeric(port$MarketValue)
-port$NumberofShares <- as.numeric(port$NumberofShares)
+port$Num.Shares.Init <- as.numeric(port$Num.Shares)
 
 
 ### ###########################################################################
 ### MARK INVALID DATA
 ### ###########################################################################
 
+### this goes through all the potential conditions that might make a row "invalid"
+### to enter portCheck, and then flags the invalid rows.  Each "invalid" condition
+### has its own column (error columns are prefixed with "err"); 
+### we can check this in Excel to see what data is bad or
+### getting dropped.
+
 ### if we have neither Number of Shares nor MarketValue
-port$err.noHolding <- ifelse(is.na(port$NumberofShares), 
+port$err.noHolding <- ifelse(is.na(port$Num.Shares.Init), 
                               ifelse(is.na(port$MarketValue), 1, 0), 0)
-### missing currency
-port$err.noCurr <- ifelse(is.na(port$Currency) | port$Currency=="", 1, 0)
-### Get exchange rates
-port <- left_join(port, ExchRates %>% select(Abbr, Rate),
-                  by=c("Currency"="Abbr"))
-assert(nrow(port)==check.rows, "Duplicates added when merging with currency rates")
-
-### missing rate
-port$err.noExRate <- ifelse(is.na(port$Rate), 1, 0)
-
 ### missing ISINs
 port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
 
@@ -160,43 +191,55 @@ port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
 port$err.negMV <- ifelse(!is.na(port$MarketValue) & port$MarketValue < 0, 1, 0)
 port$err.negShares <- ifelse(!is.na(port$NumberofShares) & port$NumberofShares < 0, 1, 0)
 
+### missing currency
+port$err.noCurr <- ifelse(is.na(port$Currency) | port$Currency=="", 1, 0)
+
+### Add exchange rates
+port <- left_join(port, Exch.Rates %>% select(Abbr, Rate),
+                  by=c("Currency"="Abbr"))
+assert(nrow(port)==rows.in, "Duplicates added when merging with currency rates")
+
+### missing exchange rate
+port$err.noExRate <- ifelse(is.na(port$Rate), 1, 0)
+
 ### this could be NA based on either MarketValue or Rate
 port$ValueUSD.Init <- port$MarketValue * port$Rate
-check.valueUSD <- sum(port$ValueUSD.Init, na.rm=TRUE)
+valueUSD.in <- sum(port$ValueUSD.Init, na.rm=TRUE)
 
 
-port %>% group_by(PortfolioName, Asset.Type) %>% 
-  summarise(tot=sum(MarketValue), comma(tot)) %>% arrange(Asset.Type)
+#port %>% group_by(PortfolioName, Asset.Type) %>% 
+#  summarise(tot=sum(MarketValue), comma(tot)) %>% arrange(Asset.Type)
 
 
 ### ###########################################################################
-### MERGE WIHT NEW FIN DATA to match more CUSIPS - HACK !!!
+### MERGE WITH NEW FIN DATA to match more CUSIPS - TEMP HACK !!!
 ### ###########################################################################
 
-### I am doing this because I had a bridging file from CUSIP--> ISIN
-### which has more ISINs in it than the fin.data.
-### this is temporary
-### we should all use he same merging file so I won't have to do this
+### I am doing this because the current FIn.Data file had more CUSIP--> ISIN
+### than the one I used originally - using new file allows us to map more
+### CUSIPS to ISINs
+### Will update to all use the same Fin.Data file and then remove this code.
 
-cusip.data <- fin.data[!duplicated(fin.data$CUSIP),]
+Cusip.Data <- Fin.Data[!duplicated(Fin.Data$CUSIP),]
 
-port.fin <- left_join(port, cusip.data %>% select(CUSIP, ISIN), by ="CUSIP")
-table(is.na(port.fin$ISIN.x), !is.na(port.fin$ISIN.y))
-port.fin$ISIN <- ifelse(is.na(port.fin$ISIN.x), port.fin$ISIN.y, port.fin$ISIN.x)
-port.fin <- port.fin %>% select(-ISIN.x, -ISIN.y)
-assert(nrow(port.fin)==check.rows, "Duplicates added when merging with cUSIP data")
+port <- left_join(port, Cusip.Data %>% select(CUSIP, ISIN), by ="CUSIP")
+table(is.na(port$ISIN.x), !is.na(port$ISIN.y))
+port$ISIN <- ifelse(is.na(port$ISIN.x), port$ISIN.y, port$ISIN.x)
+port <- port %>% select(-ISIN.x, -ISIN.y)
+assert(nrow(port)==rows.in, "Duplicates added when merging with cUSIP data")
 
-### update
-port.fin$err.noISIN <- ifelse(is.na(port.fin$ISIN) | port.fin$ISIN=="", 1,0)
+### update the err.noISIN field
+port$err.noISIN <- ifelse(is.na(port$ISIN) | port$ISIN=="", 1,0)
 
-### at this point, we have all the ISINs we can get
+### after this point, we have all the ISINs we will be able to get
+
 
 ### ###########################################################################
 ### MERGE WITH FINANCIAL DATA
 ### ###########################################################################
 
-port.fin <- left_join(port.fin, fin.data, by=("ISIN"))
-assert(nrow(port.fin)==check.rows, "Duplicates added when merging with financial data")
+port.fin <- left_join(port, Fin.Data, by=("ISIN"))
+assert(nrow(port.fin)==rows.in, "Duplicates added when merging with financial data")
 port.fin <- port.fin %>% rename(CUSIP=CUSIP.x)
 port.fin <- port.fin %>% select(-CUSIP.y)
 
@@ -207,72 +250,69 @@ port.fin$err.noBBG <- ifelse(is.na(port.fin$Mapped.Flag), 1,0)
 ### pull out the company debt ticker
 port.fin <- port.fin %>% separate(Ticker, sep=" ", into="COMPANY_CORP_TICKER", remove=FALSE, extra="drop")
 
-### calculate a ValueUSD in case we don't have one
+### missing Country of Domicile
+###!! hack for right now - we can get actual Country Doms from BBG
+port.fin$Cnty.of.Dom <- ifelse(port.fin$err.noBBG==0 & is.na(port.fin$Cnty.of.Dom), "US", port.fin$Cnty.of.Dom)
+port.fin$err.noCountry <- ifelse(is.na(port.fin$Cnty.of.Dom), 1, 0)
+
+### missing SharePrice
+port.fin$err.noSharePrice <- ifelse(is.na(port.fin$SharePrice), 1, 0)
+
+### try to calculate a ValueUSD in case we don't have one
 port.fin$ValueUSD.Calc <- port.fin$SharePrice * port.fin$NumberofShares
 port.fin$ValueUSD <- ifelse(is.na(port.fin$ValueUSD.Init), 
                                   port.fin$ValueUSD.Calc, 
                                   port.fin$ValueUSD.Init)
 
+### try to calculate a Num.Shares in case we don't have one
+port.fin$Num.Shares.Calc <- port.fin$ValueUSD / port.fin$Share.Price
+port.fin$Num.Shares <- ifelse(is.na(port.fin$Num.Shares.Init), 
+                            port.fin$Num.Shares.Calc, 
+                            port.fin$Num.Shares.Init)
+
 ### if we still don't have ValueUSD
 port.fin$err.noValue <- ifelse(is.na(port.fin$ValueUSD),1,0)
-### missing Country of Domicile
-###!! hack for right now - we can get actual Country Doms from BBG
-port.fin$Cnty.of.Dom <- ifelse(port.fin$err.noBBG==0 & is.na(port.fin$Cnty.of.Dom), "US", port.fin$Cnty.of.Dom)
-port.fin$err.noCountry <- ifelse(is.na(port.fin$Cnty.of.Dom), 1, 0)
-### missing SharePrice
-##port.fin$err.noSharePrice <- ifelse(is.na(port.fin$SharePrice), 1, 0)
+### if we still don't have Num.Shares
+port.fin$err.noShares <- ifelse(is.na(port.fin$Num.Shares),1,0)
 
-
-### Group Classification
-GROUPS.GOVT <- c("Sovereign","Sovereign Agency", "Municipal", "Municipal-City","Municipal-County","Multi-National","Regional","Regional(state/provnc)",
-                 "Export/Import Bank","Regional Authority","Regional Agencies")
-
-GROUPS.ABS <- grep("(ABS|MBS|CMO)", unique(port.fin$Group), value = TRUE)
-GROUPS.FUNDS <- grep("(Fund|ETF)", unique(port.fin$Group), value = TRUE)
-SECTOR.MORT <- c("Mortgage Securities")
-
-### PortCheck does not take government bonds
-port.fin$err.Gov <- ifelse(port.fin$Group %in% GROUPS.GOVT | port.fin$Group1=="Government", 1, 0)
-port.fin$err.Mort <- ifelse(port.fin$Sector %in% SECTOR.MORT, 1, 0)
-port.fin$err.ABS <- ifelse(port.fin$Group %in% GROUPS.ABS, 1, 0)
-
-
-### add a column that sums the error columns - we can just check this one
-### to see if row is invalid
-### this says to select the error columns and put their sum into "err.invalid"
-#port.fin <- port.fin %>% mutate(err.invalid=rowSums(.[grep("err",names(port.fin))]))
-
-table(port.fin$err.noBBG, port.fin$err.noISIN)
-#subset(port.fin, err.noBBG==1 & err.noISIN==0)
-#subset(port.fin, err.noBBG==0 & err.noCountry==1)
-table(port.fin$err.Gov==1)
-table(port.fin$err.ABS==1)
-
-
-port.fin %>% group_by(PortfolioName, Asset.Type) %>% 
-  summarise(tot=sum(MarketValue), comma(tot)) %>% arrange(Asset.Type)
-
-port.fin %>% group_by(PortfolioName, Asset.Type, err.Gov) %>% 
-  summarise(tot=sum(MarketValue), comma(tot)) 
-port.fin %>% group_by(PortfolioName, Asset.Type, err.ABS) %>% 
-  summarise(tot=sum(MarketValue), comma(tot)) 
 
 ### ###########################################################################
 ### MERGE WITH EQUITY BRIDGE
 ### ###########################################################################
 
-# ###Change this to the new Bridge file
-# EquityBridgeSub <- unique(EquityBridge)
-# PortfolioAllPorts <- merge(PortfolioAllPorts,EquityBridgeSub, by.x = "Ticker", by.y = "TICKER_AND_EXCH_CODE",all.x = TRUE)
-equity.bridge <- read.csv(paste0(PROC.DATA.PATH,"EquityBridge_2017-06-27.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-equity.bridge <- equity.bridge[!duplicated(equity.bridge$TICKER_AND_EXCH_CODE),]
-assert(nrow(port.fin)==check.rows, "Duplicates added when merging with financial data")
+port.fin <- left_join(port.fin, Equity.Bridge, by=c("Ticker"="TICKER_AND_EXCH_CODE"))
+assert(nrow(port.fin)==rows.in, "Duplicates added when merging with financial data")
 
-port.fin <- left_join(port.fin, equity.bridge, by=c("Ticker"="TICKER_AND_EXCH_CODE"))
-
-#port.fin$err.noFundTicker <- ifelse(port.fin$Asset.Type=="EQUITY" & (is.na(port.fin$EQY_FUND_TICKER) | port.fin$EQY_FUND_TICKER==""), 1, 0)
+### no equity ticker
+port.fin$err.noEquityTicker <- ifelse(is.na(port.fin$EQY_FUND_TICKER) | port.fin$EQY_FUND_TICKER=="", 1, 0)
 
 
+# ### PortCheck does not take government bonds
+# port.fin$err.Gov <- ifelse(port.fin$Group %in% GROUPS.GOVT | port.fin$Group1=="Government", 1, 0)
+# port.fin$err.Mort <- ifelse(port.fin$Sector %in% SECTOR.MORT, 1, 0)
+# port.fin$err.ABS <- ifelse(port.fin$Group %in% GROUPS.ABS, 1, 0)
+# 
+# 
+# ### add a column that sums the error columns - we can just check this one
+# ### to see if row is invalid
+# ### this says to select the error columns and put their sum into "err.invalid"
+# #port.fin <- port.fin %>% mutate(err.invalid=rowSums(.[grep("err",names(port.fin))]))
+# 
+# table(port.fin$err.noBBG, port.fin$err.noISIN)
+# #subset(port.fin, err.noBBG==1 & err.noISIN==0)
+# #subset(port.fin, err.noBBG==0 & err.noCountry==1)
+# table(port.fin$err.Gov==1)
+# table(port.fin$err.ABS==1)
+# 
+# 
+# port.fin %>% group_by(PortfolioName, Asset.Type) %>% 
+#   summarise(tot=sum(MarketValue), comma(tot)) %>% arrange(Asset.Type)
+# 
+# port.fin %>% group_by(PortfolioName, Asset.Type, err.Gov) %>% 
+#   summarise(tot=sum(MarketValue), comma(tot)) 
+# port.fin %>% group_by(PortfolioName, Asset.Type, err.ABS) %>% 
+#   summarise(tot=sum(MarketValue), comma(tot)) 
+# 
 
 ### ###########################################################################
 ### FUND LOOK THROUGH IF NEEDED
@@ -321,7 +361,7 @@ port.fin <- left_join(port.fin, equity.bridge, by=c("Ticker"="TICKER_AND_EXCH_CO
 
 
 ### Neaten things up
-REMOVE.COLS <- names(fin.data)[!names(fin.data) %in% KEEP.BBG.OUTPUT.COLS]
+REMOVE.COLS <- names(Fin.Data)[!names(Fin.Data) %in% KEEP.BBG.OUTPUT.COLS]
 REMOVE.COLS <- REMOVE.COLS[!REMOVE.COLS %in% names(port)]
 KEEP.COLS <- names(port.fin)[!names(port.fin) %in% REMOVE.COLS]
 port.fin <- port.fin %>% select_(.dots=KEEP.COLS)
