@@ -66,6 +66,9 @@ SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkR
 print("*** STARTING SCRIPT with PARAMETERS:")
 print(ParameterFile)
 
+SamplePortfolio <- FALSE
+
+
 #-------------
 # Set Input / OUtput Locations Based on parameter File Input
 #------------
@@ -85,8 +88,8 @@ ImportNewComparisonList <- F
 ### Set Results Location
 REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-# REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
-# if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
+if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
 ### Get Equity Batch Results
@@ -247,16 +250,8 @@ write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FA
 
 ###### NEW SECTION
 
-# For Swiss Comparison ONLY
-# if (ComparisonFile ==  "Swiss"){
-#   EQComparisonBatchTest <- subset(EQComparisonBatchTest, EQComparisonBatchTest$Type == "Investor")
-#   CBComparisonBatchTest <- subset(CBComparisonBatchTest, CBComparisonBatchTest$Type == "Investor")
-# }
-
-# Merge in all results
-
 # Define this is the parameter file. CompareBatch or Name of File to compare to.  
-ComparisonType <- "Swiss"
+ComparisonType <- ComparisonFile
 
 # EQBatchTest is read in - if you want additional files to compare to, these are then bound to the original results
 EQBatchTest$ComparisonType <- "BatchResults"
@@ -331,13 +326,13 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # Meta Analysis Charts
 #--------
 
-b<- c("Pensionskassen")
-ToTest2 <- which(TestList$PortfolioName %in% b)
+# b<- c("Pensionskassen")
+# ToTest2 <- which(TestList$PortfolioName %in% b)
 
 #-------
 # Loop through Portfolios
 #--------
-for (i in 9:nrow(TestList)){
+for (i in 1:nrow(TestList)){
   
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
@@ -348,27 +343,45 @@ for (i in 9:nrow(TestList)){
   PortName <- TestList[i,"PortName"]
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioNameLong
-    PortName <- InvestorName
+    TestType <- "Investor"
+    PortName <-  InvestorName
+    # # if there is only one Portfolio
+    # if (PortfolioName == InvestorName){
+    #   PortName <-  InvestorName
+    # }    
   }else{
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
   
-  print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i))
+  # TestType <- "Portfolio"
+  
+  print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
+  
+  ### Loads Summary Inputs
+  PortData <- PortfolioBreakdown[PortfolioBreakdown$InvestorName %in% InvestorName & PortfolioBreakdown$PortfolioName %in% PortfolioName & PortfolioBreakdown$HoldingType == "All",]
+  
+  
+  ### Inputs to print a Sample Template
+  if (SamplePortfolio == TRUE){
+    PortfolioName <- "SamplePortfolio"
+    InvestorName <- "Sample Investor"
+    ReportName <- "Sample Report"
+    REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/06_Sample/")
+  }  
   
   ### Creates working directory
   INVESTOR.PATH <- paste0(REPORT.PATH,InvestorName,"/")  
   PORTFOLIO.PATH <- paste0(INVESTOR.PATH,PortfolioName,"/")
   if(!dir.exists(file.path(INVESTOR.PATH))){dir.create(file.path(INVESTOR.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
   if(!dir.exists(file.path(PORTFOLIO.PATH))){dir.create(file.path(PORTFOLIO.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
-  
-  ### Loads Summary Inputs
-  PortData <- PortfolioBreakdown[PortfolioBreakdown$InvestorName %in% InvestorName & PortfolioBreakdown$PortfolioName %in% PortfolioName & PortfolioBreakdown$HoldingType == "All",]
+
+
   
   ### Subsets results for this portfolio
-  EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
+  EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName & EQBatchTest$ComparisonType == "BatchResults",]
   EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
-  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
+  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName & CBBatchTest$ComparisonType == "BatchResults",]
   CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
   
@@ -389,8 +402,8 @@ for (i in 9:nrow(TestList)){
     EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
   }
   
-  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == "ComparisonResults" & CBExposures$PortName != PortName)),]
-  CBComparisonAUMs <- CBAUMs[which(CBAUMs$Type == TestType & CBAUMs$ComparisonType == "ComparisonResults"),]
+  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == "ComparisonResults" & CBExposures$PortName != PortName),]
+  CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == "ComparisonResults"),]
   CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
   ### Could add additional filter in at this point. 
   
@@ -439,10 +452,10 @@ for (i in 9:nrow(TestList)){
       # -------
       # Page 4
       plot_0 <- port_pie("00", PortData)
-      # 
+      #
       plot_1 <- pie_chart("01","EQ",EQPortSnapshot, PortfolioName, CompanyDomicileRegionchoose)
       plot_2 <- pie_chart("02","CB",CBPortSnapshot, PortfolioName, CompanyDomicileRegionchoose)
-      
+
       # Page 8
       if (SectorPrint("Power",EQSectorProd)==1){
         plot_3 <- stacked_bar_chart("03","EQ",EQCombin,EQWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
@@ -452,7 +465,7 @@ for (i in 9:nrow(TestList)){
         plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
         # plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       }
-      
+
       # Page 9
       if (SectorPrint("Power",CBSectorProd)==1){
         plot_08 <- stacked_bar_chart("08","CB",CBCombin,CBWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
@@ -476,33 +489,33 @@ for (i in 9:nrow(TestList)){
         plot_20 <- mini_line_chart(20,"CB",CBCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_21 <- mini_line_chart(21,"CB",CBCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
         plot_22 <- ranking_chart_alignment(22,"CB",Startyear,"Automotive", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)}
-      
+
       # Page 12
       plot_23 <- stacked_bar_chart(23,"EQ",EQCombin,EQWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
       plot_24 <- mini_line_chart(24,"EQ",EQCombin,"Oil","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_25 <- mini_line_chart(25,"EQ",EQCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_26 <- mini_line_chart(26,"EQ",EQCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
       plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-      
+
       # Page 13
-      if (nrow(CBPortSnapshot)>0){
+      if (SectorPrint("Fossil Fuels",CBSectorProd)==1){
         plot_28 <- stacked_bar_chart(28,"CB",CBCombin,CBWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
         plot_29 <- mini_line_chart(29,"CB",CBCombin,"Oil","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
         plot_30 <- mini_line_chart(30,"CB",CBCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
         plot_31 <- mini_line_chart(31,"CB",CBCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
         plot_32 <- ranking_chart_alignment(32,"CB",Startyear,"Fossil Fuels", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)}
-      
+
       # Page 14
       plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-      
+
       # Page 15
       if (nrow(CBPortSnapshot)>0){
         plot_34 <- ranking_chart_alignment(34,"CB",Startyear,"All", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)
       }
-      
+
       # Page 16
       plot_35 <- fundmap_chart(35,FundsInPort, Startyear, Scenariochoose, PortfolioName)
-      
+
       # Page 17
       plot_36 <- other_sector_chart(36, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Cement",PortName)
       plot_37 <- other_sector_chart(37, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Steel",PortName)
@@ -516,25 +529,25 @@ for (i in 9:nrow(TestList)){
       }else{
         plot_43 <- flat_wheel_chart(43,10,"EQ",EQPortSnapshot,EQCombin, UtilityCompanies,SectorToPlot = "Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
       }
-      
+
       # Page 22
       if(nrow(EQCombin)==0){
         plot_44 <- flat_wheel_chart(44,10,"CB",CBPortSnapshot,CBCombin, AutoCompanies,SectorToPlot = "Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
       }else{
         plot_44 <- flat_wheel_chart(44,10,"EQ",EQPortSnapshot,EQCombin, AutoCompanies,SectorToPlot = "Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
       }
-      
+
       if (nrow(EQCombin)==0){
         plot_46 <- flat_wheel_chart(46,20,"CB",CBPortSnapshot,CBCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
       }else{
         plot_46 <- flat_wheel_chart(46,20,"EQ",EQPortSnapshot,EQCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
       }
-      
+
       # Page 24
       if(nrow(EQCombin)!=0){
         plot_51 <- renewablesadditions_chart(51,"EQ",EQCombin, EQPortSnapshot, Scenariochoose, MasterData, AllIEATargets, RegionCountries,PortfolioName)
       }
-      
+
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
       
@@ -552,5 +565,6 @@ for (i in 9:nrow(TestList)){
   write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
   write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
   write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
 }
 
