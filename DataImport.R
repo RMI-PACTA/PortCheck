@@ -59,13 +59,15 @@ print(ParameterFile)
 #------------
 
 ### Finish setting up paths based on what was in the Parameter file
-FinancialDataFolder <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
+PORT.FIN.DATA.PATH <- paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/PORT/")
 # OutputLocation <- paste0(PORT.DATA.PATH,ParameterFile$ProjektName,"/")
-DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
-PortfolioLocation <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
-BatchLocation <- paste0(PortfolioLocation,BatchName,"/")
+# DataFolder <- paste0(DATA.PATH,"/01_ProcessedData/")
 
-if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+PROJECT.PATH <- paste0(PORTS.PATH,ParameterFile$ProjektName,"/")
+if(!dir.exists(file.path(PROJECT.PATH))){dir.create(file.path(PROJECT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
+
+BATCH.PATH <- paste0(PROJECT.PATH,BatchName,"/")
+if(!dir.exists(file.path(BATCH.PATH))){dir.create(file.path(BATCH.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
 
 
 
@@ -73,7 +75,7 @@ if(!dir.exists(file.path(BatchLocation))){dir.create(file.path(BatchLocation), s
 # Read in all data (Fund data, portfolio data and financial data)
 #------------
 #-#Read in portfolio data (including Fund-ISINs)
-PortfolioData <- read.csv(paste0(BatchLocation,BatchName,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+PortfolioData <- read.csv(paste0(BATCH.PATH,BatchName,"_Input.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
 PortfolioData <- rename(PortfolioData, c("Num.Shares"= "NumberofShares","Market.Value"="MarketValue", "Portfolio.Name"="PortfolioName"),warn_missing = F)
 # PortfolioData$InvestorName <- "California Insurances"
@@ -86,13 +88,15 @@ PortfolioData$NumberofShares <- as.numeric(PortfolioData$NumberofShares)
 
 PortInput <- PortfolioData
 
-ExchRates <- read.csv(paste0(DataFolder,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+### Bind in Currencies 
+ExchRates <- read.csv(paste0(PROC.DATA.PATH,"Currencies.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
 MissingCurrencies <- data.frame(MissingCurrencies = setdiff(unique(PortfolioData$Currency), ExchRates$Currency_abbr))
 PortfolioData <- merge(PortfolioData, subset(ExchRates, select = c("Currency_abbr","ExchangeRate_31122016")), by.x = "Currency", by.y = "Currency_abbr", all.x = TRUE, all.y = FALSE)
 PortfolioData$ValueUSD <- PortfolioData$MarketValue * PortfolioData$ExchangeRate_31122016
 
 PortSizeCheck0USD <- sum(PortfolioData$ValueUSD, na.rm = TRUE)
 
+### Remove Negative Values
 NegativeValues <- subset(PortfolioData, !(!(MarketValue < 0 & (is.na(NumberofShares) | NumberofShares == 0)) & !(NumberofShares < 0 & (is.na(MarketValue) | MarketValue == 0 ))))
 NegativeValues <- ddply(NegativeValues,.(ISIN, Currency, PortfolioName, InvestorName),summarize, NumberofShares = sum(NumberofShares,na.rm = TRUE), MarketValue = sum(MarketValue,na.rm = TRUE), ValueUSD = sum(ValueUSD,na.rm = TRUE))
 
@@ -108,39 +112,38 @@ PortSizeCheck0 <- sum(PortfolioData$MarketValue, na.rm = TRUE)
 PortInputNAISINs <- subset(PortfolioData, ISIN %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(ISIN))
 PortfolioData$ISIN [PortfolioData$ISIN  %in% c("n.a. (diverse Cash)", "n.a. (diverse HFoFs)", "n.a. (diverse Hypotheken)", "n.a. (diverse Immobilien Ausland)", "n.a. (diverse Immobilien CH)", "n.a. (diverse PE)", "N/A", "-", "0") | is.na(PortfolioData$ISIN) ] <- "NA_ISIN_Input"
 
-
 PortSizeCheck01 <- sum(PortfolioData$ValueUSD, na.rm = TRUE)
 
 if("Name" %in% colnames(PortfolioData)){PortfolioData <- rename(PortfolioData,c("Name" = "Name_InputPort"))}
-#Read in fund look-through data
+
+### Read in fund look-through data
 Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),stringsAsFactors=FALSE,strip.white=TRUE) 
 Fund_Data_EQY <- read.csv(paste0(FundDataLocation,"FundLookThroughData_EQY.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
-#Read in financial data
-# BBG_Data <- read.csv(paste0(FinancialDataFolder,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-BBG_Data <- read.csv(paste0(FinancialDataFolder,"FinancialData_20170925.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+### Read in financial data
+# BBG_Data <- read.csv(paste0(FinancialPROC.DATA.PATH,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+BBG_Data <- read.csv(paste0(PORT.FIN.DATA.PATH,"FinancialData_20170925.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBG_Data_sub <- subset(BBG_Data, ! is.na(BBG_Data$ISIN) & ISIN != "")
 
-#Test if there are duplicates left in the financial database
+### Test if there are duplicates left in the financial database
 ISINCount <- as.data.frame(table(BBG_Data_sub$ISIN))
 DupsInBBGDataBETTERCHECK <- subset(ISINCount, Freq > 1, select = "Var1")
 BBG_Data_sub <- BBG_Data_sub[!duplicated(BBG_Data_sub),]
+
 #------------
 # Merge portfolio with financial data and prepare for fund-look-through (e.g. calculate USD-Value held of each security)
 #------------
 
 PortfolioData_w_BBG <- merge(BBG_Data_sub,PortfolioData, by = "ISIN", all.x = FALSE, all.y = TRUE)
 PortfolioData_wo_BBG <- unique(subset(PortfolioData_w_BBG,is.na(Name), select = c("ISIN")))
-PortfolioData_wo_BBG2 <- subset(PortfolioData_w_BBG,is.na(Name))
+PortfolioData_wo_BBG2 <- subset(PortfolioData_w_BBG, is.na(Name))
 
 PortfolioData_w_BBG$ValueType <- "NumberofShares"
 PortfolioData_w_BBG$ValueType[PortfolioData_w_BBG$MarketValue != 0 & !is.na(PortfolioData_w_BBG$MarketValue)] <- "MarketValue"
 
-# # Calculate ValueUSD (AUMs in each single fund)
-# PortfolioData_w_BBG$Position <- PortfolioData_w_BBG$ValueUSD
-# PortfolioData_w_BBG$Position[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] <- PortfolioData_w_BBG$NumberofShares[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] 
+### Calculate ValueUSD (AUMs in each single fund)
 PortfolioData_w_BBG$ValueUSD[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] <- PortfolioData_w_BBG$SharePrice[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0] * PortfolioData_w_BBG$NumberofShares[is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0]
 
 Test <- subset(PortfolioData_w_BBG, is.na(ValueUSD))
@@ -149,7 +152,7 @@ Test <- subset(PortfolioData_w_BBG, is.na(ValueUSD))
 # PortfolioData_w_BBG$ISIN[PortfolioData_w_BBG$ISIN %in% Test$ISIN & PortfolioData_w_BBG$ISIN != "NA_ISIN_Input" & (is.na(PortfolioData_w_BBG$ValueUSD) | PortfolioData_w_BBG$ValueUSD == 0)] <- "NA_ISIN_BBG_Data"
 PortSizeCheck1 <- sum(PortfolioData_w_BBG$ValueUSD, na.rm = TRUE)
 
-# Portfolio Meta Analysis
+### Portfolio Meta Analysis
 PortfolioEntries <- aggregate(ISIN ~ InvestorName + PortfolioName, data = PortfolioData_w_BBG, FUN = length)
 PortfolioEntries <- rename(PortfolioEntries, c("ISIN" = "NrOfPosition"))
 PortfolioSizes <- aggregate(PortfolioData_w_BBG["ValueUSD"], by  = PortfolioData_w_BBG[,c("InvestorName","PortfolioName")],FUN = sum, na.rm = TRUE)
@@ -161,20 +164,27 @@ PortfolioSizes <- merge(merge(PortfolioSizes, PortfolioEntries, by = c("Investor
 #-------------
 # # Merge Portfolio Data with fund data for the lookthrough and calculate owned holdings of Portfolios
 #------------
-#All Instruments (R-pull with Port-Weight for both EQY & CBonds):
-Portfolio_LookThrough <- merge(Fund_Data, subset(PortfolioData_w_BBG, select = c("ISIN", "ValueUSD", "PortfolioName","InvestorName")),  by.y = "ISIN", by.x = "FundISIN")
-# FundCoverage <- rename(unique(subset(Portfolio_LookThrough, select = c("InvestorName", "PortfolioName", "FundISIN", "ValueUSD", "FundCoverage"))), c("FundCoverage" = "FundCoverageMS"))
-Portfolio_LookThrough <- merge(Portfolio_LookThrough, unique(subset(BBG_Data_sub, select = c("ISIN", "Security.Type", "Name","SharePrice"))),by.x = "HoldingISIN", by.y = "ISIN", all.x = TRUE, all.y = FALSE)
-Portfolio_LookThrough$Position <- Portfolio_LookThrough$ValueUSD * Portfolio_LookThrough$value / 100
-Portfolio_LookThrough$Position[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] <- Portfolio_LookThrough$ValueUSD[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$value[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$SharePrice[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"]
-Portfolio_LookThrough <- subset(Portfolio_LookThrough, FundCoverage <= 100)
-# Portfolio_LookThrough <- merge(subset(Portfolio_LookThrough, select = -c (value,ValueUnit)), unique(subset(BBG_Data_sub, select = c("ISIN", "Security.Type", "Name"))),by.x = "HoldingISIN", by.y = "ISIN", all.x = TRUE, all.y = FALSE)
-Portfolio_LookThroughCovered <- subset(Portfolio_LookThrough, !is.na(Name))
-FundCoverage <- rename(aggregate(Portfolio_LookThroughCovered["Position"], by = Portfolio_LookThroughCovered[,c("InvestorName", "PortfolioName", "FundISIN", "ValueUSD", "FundCoverage")],FUN = sum, na.rm = TRUE),c("FundCoverage" = "FundCoverageMS"))
-FundCoverage$FundCoverageBBG <- FundCoverage$Position / FundCoverage$ValueUSD
-FundCoveragePortfolioLevel <- ddply(FundCoverage,.(InvestorName,PortfolioName),summarize, USDinFunds = sum(ValueUSD,na.rm = TRUE), USDcovered = sum(Position,na.rm = TRUE))
-FundCoveragePortfolioLevel$Coverage <- FundCoveragePortfolioLevel$USDcovered / FundCoveragePortfolioLevel$USDinFunds
 
+### Merge Portfolio with Fund Dat
+Portfolio_LookThrough <- merge(Fund_Data, subset(PortfolioData_w_BBG, select = c("ISIN", "ValueUSD", "PortfolioName","InvestorName")),  by.y = "ISIN", by.x = "FundISIN")
+
+FundsInPort <- unique(Portfolio_LookThrough$FundISIN)
+
+### If there are funds in the Portfolio - merge in BBG data
+if (!is.null(nrow(FundsInPort))){
+  Portfolio_LookThrough <- merge(Portfolio_LookThrough, unique(subset(BBG_Data_sub, select = c("ISIN", "Security.Type", "Name","SharePrice"))),by.x = "HoldingISIN", by.y = "ISIN", all.x = TRUE, all.y = FALSE)
+  Portfolio_LookThrough$Position <- Portfolio_LookThrough$ValueUSD * Portfolio_LookThrough$value / 100
+  Portfolio_LookThrough$Position[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] <- Portfolio_LookThrough$ValueUSD[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$value[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"] * Portfolio_LookThrough$SharePrice[Portfolio_LookThrough$ValueUnit == "SharesPerUSD"]
+  Portfolio_LookThrough <- subset(Portfolio_LookThrough, FundCoverage <= 100)
+  Portfolio_LookThroughCovered <- subset(Portfolio_LookThrough, !is.na(Name))
+  
+  FundCoverage <- rename(aggregate(Portfolio_LookThroughCovered["Position"], by = Portfolio_LookThroughCovered[,c("InvestorName", "PortfolioName", "FundISIN", "ValueUSD", "FundCoverage")],FUN = sum, na.rm = TRUE),c("FundCoverage" = "FundCoverageMS"))
+  FundCoverage$FundCoverageBBG <- FundCoverage$Position / FundCoverage$ValueUSD
+  FundCoveragePortfolioLevel <- ddply(FundCoverage,.(InvestorName,PortfolioName),summarize, USDinFunds = sum(ValueUSD,na.rm = TRUE), USDcovered = sum(Position,na.rm = TRUE))
+  FundCoveragePortfolioLevel$Coverage <- FundCoveragePortfolioLevel$USDcovered / FundCoveragePortfolioLevel$USDinFunds
+}
+
+### Identify holdings with missing BBG info
 PortfolioData_wo_BBG <- subset(PortfolioData_wo_BBG, !ISIN %in% Portfolio_LookThrough$FundISIN)
 PortfolioData_wo_BBG2 <- subset(PortfolioData_wo_BBG2, !ISIN %in% Portfolio_LookThrough$FundISIN)
 Test <- aggregate(ISIN ~ InvestorName + PortfolioName, data = PortfolioData_wo_BBG2, FUN = length)
@@ -186,26 +196,43 @@ PortfolioSizes <- merge(PortfolioSizes,Test,by = c("InvestorName","PortfolioName
 
 PortfolioData_wo_BBG$Type <- "MissingISINsPortfolio"
 MissingISINsLookThrough <- rename(subset(Portfolio_LookThrough, is.na(Position), select = "HoldingISIN"),c("HoldingISIN" = "ISIN"))
-if(nrow(MissingISINsLookThrough) > 0){MissingISINsLookThrough$Type <- "MissingISINsFundsLookThrough"
 
-MissingISINs <- rbind(PortfolioData_wo_BBG, MissingISINsLookThrough)}else{MissingISINs <- PortfolioData_wo_BBG}
+if(nrow(MissingISINsLookThrough) > 0){
+  MissingISINsLookThrough$Type <- "MissingISINsFundsLookThrough"
+  MissingISINs <- rbind(PortfolioData_wo_BBG, MissingISINsLookThrough)
+}else{
+  MissingISINs <- PortfolioData_wo_BBG
+}
+
+MissingISINs$QTY <- 1
+MissingISINs$Date <- "31-12-2016"
+
 
 PortfolioData_Funds <- subset(PortfolioData_w_BBG, ISIN %in% Portfolio_LookThrough$FundISIN)
 FundsBBG <- subset(PortfolioData_w_BBG, Security.Type %in% c("ETF", "Closed End Fund", "Mutual Fund") | Sector == "Funds", select = c("ISIN", "SharePrice","PortfolioName", "InvestorName", "NumberofShares", "ValueUSD", "Security.Type", "ICB.Subsector.Name", "Group"))  
 
-FundMetaanalysis <- merge(FundsBBG, rename(subset(FundCoverage,select = c("InvestorName", "PortfolioName", "FundISIN", "FundCoverageMS", "Position", "FundCoverageBBG")), c("Position" = "PositionsCovered")), by.x = c("InvestorName", "PortfolioName", "ISIN"), by.y = c("InvestorName", "PortfolioName", "FundISIN"), all = TRUE)
-FundMetaanalysisPortLevel <- ddply(FundMetaanalysis,.(InvestorName,PortfolioName),summarize, FundsUSD = sum(ValueUSD,na.rm = TRUE), FundsCoveredUSD = sum(PositionsCovered, na.rm = TRUE))
-FundMetaanalysisPortLevel$Coverage <- FundMetaanalysisPortLevel$FundsCoveredUSD / FundMetaanalysisPortLevel$FundsUSD
-PortfolioMetaAnalysis <- merge(PortfolioSizes,FundMetaanalysisPortLevel, by = c("InvestorName", "PortfolioName"), all = TRUE)
+if (!is.null(nrow(FundsInPort))){
+  FundMetaanalysis <- merge(FundsBBG, rename(subset(FundCoverage,select = c("InvestorName", "PortfolioName", "FundISIN", "FundCoverageMS", "Position", "FundCoverageBBG")), c("Position" = "PositionsCovered")), by.x = c("InvestorName", "PortfolioName", "ISIN"), by.y = c("InvestorName", "PortfolioName", "FundISIN"), all = TRUE)
+  FundMetaanalysisPortLevel <- ddply(FundMetaanalysis,.(InvestorName,PortfolioName),summarize, FundsUSD = sum(ValueUSD,na.rm = TRUE), FundsCoveredUSD = sum(PositionsCovered, na.rm = TRUE))
+  FundMetaanalysisPortLevel$Coverage <- FundMetaanalysisPortLevel$FundsCoveredUSD / FundMetaanalysisPortLevel$FundsUSD
+  PortfolioMetaAnalysis <- merge(PortfolioSizes,FundMetaanalysisPortLevel, by = c("InvestorName", "PortfolioName"), all = TRUE)
 
-FundsCovered <- subset(PortfolioData_Funds, select = c("ISIN", "SharePrice","PortfolioName", "InvestorName", "NumberofShares", "ValueUSD", "Security.Type", "ICB.Subsector.Name"))
-
-FundsWithMissingBBGData <- subset(FundsCovered, is.na(ValueUSD), select = c("ISIN"))
-if(nrow(FundsWithMissingBBGData) > 0){
-  FundsWithMissingBBGData$QTY <- 1
-  FundsWithMissingBBGData$Date <- "31-12-2016"
-  # write.csv(FundsWithMissingBBGData, "BBG-Look-up-needed.csv",row.names = FALSE)
+  FundsCovered <- subset(PortfolioData_Funds, select = c("ISIN", "SharePrice","PortfolioName", "InvestorName", "NumberofShares", "ValueUSD", "Security.Type", "ICB.Subsector.Name"))
+  FundsWithMissingBBGData <- subset(FundsCovered, is.na(ValueUSD), select = c("ISIN"))
+  if(nrow(FundsWithMissingBBGData) > 0){
+    FundsWithMissingBBGData$Type <- "FundswithMissingBBGData"
+    FundsWithMissingBBGData$QTY <- 1
+    FundsWithMissingBBGData$Date <- "31-12-2016"
+    MissingISINs <- rbind(MissingISINs,FundsWithMissingBBGData)
+    # write.csv(FundsWithMissingBBGData, "BBG-Look-up-needed.csv",row.names = FALSE)
+  }
+  
+  
+}else{
+  PortfolioMetaAnalysis<- PortfolioSizes
 }
+
+
 
 PortfolioData_w_BBG_test <- subset(PortfolioData_w_BBG,!is.na(Name) & !ISIN %in% Portfolio_LookThrough$FundISIN)
 
@@ -219,15 +246,18 @@ PortfolioData_w_BBG <- subset(PortfolioData_w_BBG, !is.na(Name) & !ISIN %in% Por
 # Create the equity portfolio input files for the fund analysis
 Portfolio <- subset(PortfolioData_w_BBG, select = c("ISIN", "Name", "Security.Type", "ValueUSD", "PortfolioName","InvestorName"))
 Portfolio$HoldingType <- "Direct Holding"
-Portfolio_Funds <- subset(Portfolio_LookThrough, select = c("HoldingISIN", "Name", "Security.Type", "Position", "PortfolioName","InvestorName"))
-Portfolio_Funds <- rename(Portfolio_Funds, c("HoldingISIN" = "ISIN", "Position" = "ValueUSD"))
-# Portfolio_Funds_summed <- ddply(Portfolio_Funds,.(ISIN, Name, Security.Type, PortfolioName, InvestorName), summarise, Position = sum(Position, na.rm = TRUE))
-Portfolio_Funds_summed <- aggregate(Portfolio_Funds["ValueUSD"], by=Portfolio_Funds[,c("ISIN", "Name", "Security.Type", "PortfolioName", "InvestorName")], FUN=sum, na.rm = TRUE)
-Portfolio_Funds_summed$HoldingType <- "Fund Holding"
+
+if (!is.null(nrow(FundsInPort))){
+  Portfolio_Funds <- subset(Portfolio_LookThrough, select = c("HoldingISIN", "Name", "Security.Type", "Position", "PortfolioName","InvestorName"))
+  Portfolio_Funds <- rename(Portfolio_Funds, c("HoldingISIN" = "ISIN", "Position" = "ValueUSD"))
+  # Portfolio_Funds_summed <- ddply(Portfolio_Funds,.(ISIN, Name, Security.Type, PortfolioName, InvestorName), summarise, Position = sum(Position, na.rm = TRUE))
+  Portfolio_Funds_summed <- aggregate(Portfolio_Funds["ValueUSD"], by=Portfolio_Funds[,c("ISIN", "Name", "Security.Type", "PortfolioName", "InvestorName")], FUN=sum, na.rm = TRUE)
+  Portfolio_Funds_summed$HoldingType <- "Fund Holding"
+}
 
 TotalPortfolio <- Portfolio
 if (exists("Portfolio_Funds_summed")==TRUE){
-TotalPortfolio <- rbind(TotalPortfolio,Portfolio_Funds_summed)}
+  TotalPortfolio <- rbind(TotalPortfolio,Portfolio_Funds_summed)}
 PortSizeCheck2 <- sum(TotalPortfolio$ValueUSD, na.rm = TRUE)
 
 TotalPortfolio <- merge(TotalPortfolio, subset(BBG_Data_sub, select = c("ISIN","ICB.Subsector.Name","Group", "Ticker", "Subgroup")), by = "ISIN", all.x = TRUE, all.y = FALSE)
@@ -243,7 +273,7 @@ TotalPortfolio_EQY <- subset(TotalPortfolio_EQY , select = c("InvestorName", "Po
 # Sort Debt Data
 #------------
 # Create the Cbond portfolio input files for the fund analysis
-DebtData <- read.csv(paste0(FinancialDataFolder,"Cbonds_Issuer&Subs_DebtTicker_BICS_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+DebtData <- read.csv(paste0(PORT.FIN.DATA.PATH,"Cbonds_Issuer&Subs_DebtTicker_BICS_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 # Rename Total row as to not confuse it with TOTAL SA...
 DebtData$Co..Corp.TKR[DebtData$Co..Corp.TKR == "Total"] <- "TotalDebt"
 GovBanksSupraNat <- subset(DebtData, (DebtData$Government.Development.Banks !=0 | DebtData$Supranationals != 0) & DebtData$Co..Corp.TKR != "TotalDebt") 
@@ -273,9 +303,6 @@ PortfolioData_w_BBG$InstrumentType[PortfolioData_w_BBG$ISIN  %in% TotalPortfolio
 PortfolioData_w_BBG$InstrumentType[PortfolioData_w_BBG$ISIN  %in% TotalPortfolio_Bonds$ISIN] <- "Bonds"
 
 
-
-
-
 #------------
 # Data for the Overview Pie Chart
 #------------
@@ -287,7 +314,7 @@ MissingColumns <-setdiff(c("Equity","Bonds","Others"),colnames(OverviewPiechartD
 if(length(MissingColumns) > 0){OverviewPiechartDatawide[,MissingColumns] <- 0}
 
 OverviewPiechartDatawideTotal <- ddply(OverviewPiechartDatawide,.(InvestorName, PortfolioName),summarize, Equity = sum(Equity,na.rm = TRUE),Bonds = sum(Bonds,na.rm = TRUE),Others = sum(Others,na.rm = TRUE))
-  
+
 OverviewPiechartDatawideTotal$HoldingType <- "All"
 OverviewPiechartDatawide <- rbind(OverviewPiechartDatawide,OverviewPiechartDatawideTotal)
 OverviewPiechartDataFinal <- merge(OverviewPiechartDatawide,subset(PortfolioSizes, select =c("InvestorName", "PortfolioName", "PortfolioSizeUSD", "ValueUSDOfPositionsWOBBGWValueUSDInformation")),by = c("InvestorName","PortfolioName"), all.x = TRUE)
@@ -303,8 +330,8 @@ OverviewPiechartDataFinal$PortfolioType[OverviewPiechartDataFinal$InvestorName %
 #create file at investor level
 OverviewPiechartDataFinalMPS <- ddply(subset(OverviewPiechartDataFinal, !InvestorName %in% SinglePorts$Var1),.(InvestorName, HoldingType),summarize,PortfolioSizeUSD = sum(PortfolioSizeUSD,na.rm = TRUE), Bonds = sum(Bonds,na.rm = TRUE), Equity = sum(Equity,na.rm = TRUE), Others = sum(Others,na.rm = TRUE))
 if(nrow(OverviewPiechartDataFinalMPS)>0){
-OverviewPiechartDataFinalMPS$PortfolioName <- OverviewPiechartDataFinalMPS$InvestorName
-OverviewPiechartDataFinalMPS$PortfolioType <- "InvestorMPs"}
+  OverviewPiechartDataFinalMPS$PortfolioName <- OverviewPiechartDataFinalMPS$InvestorName
+  OverviewPiechartDataFinalMPS$PortfolioType <- "InvestorMPs"}
 
 OverviewPiechartDataFinal <- OverviewPiechartDataFinal[,colnames(OverviewPiechartDataFinalMPS)]
 OverviewPiechartDataFinal <- rbind(OverviewPiechartDataFinal, OverviewPiechartDataFinalMPS)
@@ -316,16 +343,22 @@ OverviewPiechartDataFinal <- rbind(OverviewPiechartDataFinal, OverviewPiechartDa
 #------------
 
 ### In general we should try avoid doing this, and use paths instead below - CHANGE
-setwd(paste0(BatchLocation))
+# setwd(paste0(BatchLocation))
 
-write.csv(OverviewPiechartDataFinal,paste0(BatchName,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
-write.csv(MissingISINs,paste0(BatchName,"Missing_BBG-Data.csv"), row.names = FALSE, na = "")
-write.csv(PortfolioData_w_BBG,paste0(BatchName,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio,paste0(BatchName,"Port.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio_EQY,paste0(BatchName,"Port_EQY.csv"),row.names = FALSE, na = "")
-write.csv(TotalPortfolio_Bonds,paste0(BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
-write.csv(FundCoverage,paste0(BatchName,"Port_ListofFunds.csv"),row.names = FALSE, na = "")
-write.csv(PortfolioMetaAnalysis,paste0(BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
+write.csv(OverviewPiechartDataFinal,paste0(BATCH.PATH,BatchName,"Portfolio_Overview_Piechart.csv"),row.names = FALSE, na = "")
+write.csv(PortfolioData_w_BBG,paste0(BATCH.PATH,BatchName,"PortfolioData_w_BBG-Info.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio,paste0(BATCH.PATH,BatchName,"Port.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio_EQY,paste0(BATCH.PATH,BatchName,"Port_EQY.csv"),row.names = FALSE, na = "")
+write.csv(TotalPortfolio_Bonds,paste0(BATCH.PATH,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
+write.csv(PortfolioMetaAnalysis,paste0(BATCH.PATH,BatchName,"Portfolio_Metaanalysis.csv"),row.names = FALSE, na = "")
+
+if(!is.null(nrow(MissingISINs))){
+  write.csv(MissingISINs,paste0(BATCH.PATH,BatchName,"_",nrow(MissingISINs)-1,"_Missing_BBG-Data.csv"), row.names = FALSE, na = "")
+}
+
+if (!is.null(nrow(FundsInPort))){
+  write.csv(FundCoverage,paste0(BATCH.PATH,BatchName,"Port_ListofFunds.csv"),row.names = FALSE, na = "")
+}
 
 # Temp save for bonds
 UserName <- "Clare"
