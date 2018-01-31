@@ -216,8 +216,10 @@ if (BenchmarkRegionchoose != "Global"){
 }
 if (Indexchoose == "MSCIWorld_MSCI"){Indexchoose <- "MSCIWorld"}
 
-IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(Startyear,Startyear+5,Startyear+10,Startyear+15)  & Scenario == Scenariochoose, select = c("Sector","Technology","AnnualvalIEAtech","Year")) 
+IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(Startyear, Startyear+5, Startyear+10,Startyear+15)  & Scenario == Scenariochoose, select = c("Sector","Technology","AnnualvalIEAtech","Year")) 
 IEATargetsAll <- IEATargetsAll[!IEATargetsAll$Technology %in% "OilCap",]
+
+IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% Startyear:(Startyear+5)  & Scenario %in% c("450S","NPS","CPS"), select = c("Sector","Technology","Scenario","Year","AnnualvalIEAtech")) 
 
 
 ### Bind Sector Classification from BBG - ICB Subsector Name
@@ -353,7 +355,7 @@ for (i in 1:nrow(TestList)){
     ReportName <- paste0(InvestorNameLong,": ", PortfolioNameLong)
   }
   
-  # TestType <- "Portfolio"
+  TestType <- "Portfolio"
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
   
@@ -434,7 +436,7 @@ for (i in 1:nrow(TestList)){
   
   ### Specify Language and Load Report 
   Languagechoose <-  ParameterFile$Languageselect
-  # Languagechoose <- "EN"
+  Languagechoose <- "FR"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
   RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
