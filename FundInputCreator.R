@@ -28,7 +28,7 @@ print(show.consts())
 # Read in Data
 #----------
 
-TestName <- "HelvetiaFunds"
+TestName <- "BCVFunds"
 
 FundList <- read.csv(paste0(PORTS.PATH,"/06_Funds/FundISINsToTest/",TestName,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 
@@ -37,8 +37,10 @@ Fund_Data <- read.csv(paste0(FundDataLocation,"FundLookThroughData.csv"),strings
 FundFound_Data <- merge(FundList, Fund_Data, by = "FundISIN")
 FundFound_Data$MarketValue <- FundFound_Data$TestValue* FundFound_Data$value/100
 
+
 FundDataPrint <- subset(FundFound_Data,select = c("FundISIN","HoldingISIN", "MarketValue" ))
 FundDataPrint$InvestorName <- "Fund"
+FundDataPrint$Currency <- "USD"
 FundDataPrint <- rename(FundDataPrint, c("FundISIN"="PortfolioName", "HoldingISIN"="ISIN"))
 
 write.csv(FundDataPrint,paste0(PORTS.PATH,"/06_Funds/FundISINsToTest/",TestName,"_Input.csv"),row.names = FALSE)
