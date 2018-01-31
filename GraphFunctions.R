@@ -198,7 +198,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
                                 "AutomotiveEQ"=EQSectorProd$Production[EQSectorProd$Sector == "Automotive"],
                                 "AutomotiveCB"=CBSectorProd$Production[CBSectorProd$Sector == "Automotive"],
                                 "FossilFuelsEQ"=1,
-                                "FossilFuelsCB"=1)
+                                "FossilFuelsCB"=CBSectorProd$Production[CBSectorProd$Sector == "Fossil Fuels"])
   removesectors <- colnames(techpageremoval[which(techpageremoval == 0)]) 
   
   # removes the sectors  
@@ -870,7 +870,12 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     PlotData <- ProductionMix_5yrs
     
+    
+    
+    ### Add or Remove Average Portfolio Results ####
     PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
+    ################################################
+    
     
     PlotData <- merge(PlotData,colourdf, by="Technology")
     orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
@@ -881,7 +886,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     # PlotData$variable <- revalue(PlotData$variable,c("AggregiertesPortfolio" = GT["AggregatedPortName"][[1]]))
     
-    write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
+    # write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
     PlotData$Sector <- NULL
     
     
@@ -2483,5 +2488,242 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
   
   return()
 }
+
+
+Inputs246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
+  # Combin <- EQCombin
+  
+  ### Production Inputs - normalised to the start year
+  Production <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
+  Production <- subset(Production, select = c("Year","Production"))
+  Production$Value <- Production$Production / Production$Production[Production$Year == Startyear]
+  Production$Label <- "PortfolioProduction"
+  Production$Production <- NULL
+  
+  ### Inputs to the 246 chart. 
+  IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
+  
+  IEATargetsRef <- IEATargets[IEATargets$Year == Startyear,]
+  IEATargetsRef <- subset(IEATargetsRef, select = c("Scenario","AnnualvalIEAtech"))
+  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="StartValue"))
+  
+  IEATargets <- merge(IEATargets, IEATargetsRef, by = "Scenario")
+  IEATargets$Value <- IEATargets$AnnualvalIEAtech / IEATargets$StartValue
+  
+  IEATargets <- subset(IEATargets, select = c("Scenario","Year","Value"))
+  IEATargets <- rename(IEATargets, c("Scenario"="Label"))
+  
+  
+  ###   
+  df <- rbind(Production,IEATargets)
+  
+  ### Add in additional Comparisons.   
+  
+  return(df)
+}
+
+Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
+  
+  # Combin <- EQCombin
+  TechToPlot <- "RenewablesCap"
+  
+  
+  df <- Inputs246(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName)
+  
+  IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
+  IEATargetMax$Value <- max(df$Value)+.1
+  IEATargetMax$Label <- "MaxValue"
+  
+  df <- rbind(df,IEATargetMax)
+  
+  dfwide <- dcast(df,Year~Label, value.var="Value")
+  
+  dfwide$level1 <- dfwide$`450S`
+  dfwide$level2 <- dfwide$NPS-dfwide$`450S`
+  dfwide$level3 <- dfwide$CPS - dfwide$NPS
+  dfwide$level4 <- dfwide$MaxValue - dfwide$CPS
+  
+  dflong <- subset(dfwide, select = c("Year","level4","level3","level2","level1"))
+  dflong <- melt(dflong, id.vars = "Year")
+  
+  ### Portfolio, Economy Data
+  dfline <- subset(dfwide, select = c("Year","PortfolioProduction"))
+  
+  
+  ### Green Technologies
+  
+  ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
+  ColourSet$Colours <-as.character(ColourSet$Colours)
+  levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
+  levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  
+  
+  ymin <- min(df$Value,na.rm = T)-0.1
+  ymax <- max(df$Value,na.rm = T)
+  year_lab <- GT["Year"][[1]]
+  ylabel <- paste0( Startyear, "= 1")
+  # 
+  outputplot <- ggplot(dflong, aes(x=Year, y=value,fill=variable))+
+    geom_area()+
+    geom_line(data = dfline, aes(x=Year,y=PortfolioProduction))+
+    xlab(year_lab) + ylab(ylabel) +
+    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+    scale_fill_manual(values = ColourSet$Colours,
+                      labels = ColourSet$GradLabel)+
+  
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(), 
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  ###  
+    
+  
+  
+  
+  
+  
+  
+  ### Background colour settings, including switch for Brown technologies
+  ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
+  ColourSet$Colours <-as.character(ColourSet$Colours)
+  levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
+  levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
+
+  GoodBad <- GreenBrown(TechToPlot)
+  
+  if (GoodBad == "Brown"){
+    ColourSet$Colours <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+    levels(ColourSet$Colours) <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+    ColourSet$GradLabel <- c("> 6°C","4-6°C","2-4°C","< 2°C")
+    levels(ColourSet$GradLabel) <- c("> 6°C","4-6°C","2-4°C","< 2°C")  
+  }
+  Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
+  
+  
+  ymin <- min(df$Value,na.rm = T)-0.1
+  ymax <- max(df$Value,na.rm = T)
+  year_lab <- GT["Year"][[1]]
+  ylabel <- paste0( Startyear, "= 1")
+  
+  outputplot <- ggplot(dfwide, aes(x=Year))+
+    geom_area(aes(y= MaxValue,fill= "A"))+
+    geom_area(aes(y= CPS, fill= "B"))+
+    geom_area(aes(y= NPS, fill= "C"))+
+    geom_area(aes(y=`450S`,fill= "D"))+ 
+    
+    geom_line(aes(x=Year,y=PortfolioProduction))+
+    
+    xlab(year_lab) + ylab(ylabel) +
+    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+    scale_fill_manual(values = ColourSet$Colours,
+                       labels = ColourSet$GradLabel)+
+    # scale_color_discrete(name = "Portfolio Production")+
+    # guides(guide_legend(reverse=T))+   
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(), 
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  
+  ####################################################
+  
+  ColourSet <- data.frame(Colours=c(DarkGreen,DarkRed,LightRed,LightGreen))
+  ColourSet$Colours <-as.character(ColourSet$Colours)
+  levels(ColourSet$Colours) <- c(DarkGreen,DarkRed,LightRed,LightGreen)
+  ColourSet$GradLabel <- c("< 2°C","> 6°C","4-6°C","2-4°C")
+  levels(ColourSet$GradLabel) <- c("< 2°C","> 6°C","4-6°C","2-4°C")#c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  
+  
+  ### Good Tech
+  #-----
+  outputplot <- ggplot(dfwide, aes(x=Year))+
+    geom_area(aes(y= MaxValue,fill= "A"))+
+    geom_area(aes(y=`450S`,fill= "D"))+ 
+    geom_area(aes(y= NPS, fill= "C"))+
+    geom_area(aes(y= CPS, fill= "B"))+
+    
+    geom_line(aes(x=Year,y=PortfolioProduction))+
+    
+    xlab(year_lab) + ylab(ylabel) +
+    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+    scale_colour_manual("",values = Colourvals)+
+    # scale_color_discrete(name = "Portfolio Production")+
+    # guides(guide_legend(reverse=T))+   
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(), 
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  
+  
+  #-------
+  
+  
+  
+  
+  # labelling <- data.frame(values = c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour), labels = TechLabels, name = techorder)
+  # scale_fill_manual(values = labelling$values, labels = labelling$labels)
+  # 
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
+  
+  library(grid)
+  
+  a <- gtable(unit(c(1,3,1,3,1,3,1,3),c("cm")),unit(c(1,.5,1),c("cm")))
+  # b <- gtable(unit(6,"cm"),unit(6,"cm"))
+  # a <- combine(a,b)
+  gtable_show_layout(a)
+  
+  rectDG <- rectGrob(gp = gpar(fill = DarkGreen))
+  rectLG <- rectGrob(gp = gpar(fill = LightGreen))
+  rectDR <- rectGrob(gp = gpar(fill = DarkRed))
+  rectLR <- rectGrob(gp = gpar(fill = LightRed))
+  
+  textDG <- textGrob("< 2°C")
+  textLG <- textGrob("2-4°C")
+  textLR <- textGrob("4-6°C")
+  textDR <- textGrob("> 6°C")
+  
+  textPP <- textGrob("Portfolio")
+  
+  plotitem <- ggplotGrob(outputplot)
+  
+  linePP <- linesGrob(x=unit(c(0,1),"cm"), y=unit(c(0.5,.5),"cm"))
+  
+  a <- gtable_add_grob(a,rectDG,1,1)
+  a <- gtable_add_grob(a,rectLG,1,3)
+  a <- gtable_add_grob(a,rectLR,1,5)
+  a <- gtable_add_grob(a,rectDR,1,7)
+  
+  a <- gtable_add_grob(a,textDG,1,2)
+  a <- gtable_add_grob(a,textLG,1,4)
+  a <- gtable_add_grob(a,textLR,1,6)
+  a <- gtable_add_grob(a,textDR,1,8)
+  
+  a <- gtable_add_grob(a,linePP,3,1)
+  
+  a <- gtable_add_grob(a,textPP,3,2)
+  
+  plot(a)
+  
+  # Out246Plot <- ggplot_gtable(ggplot_build(outputplot))
+  # Out246Plot$layout$clip[Out246Plot$layout$name == "panel"] <- "off"
+  # grid.draw(Out246Plot)
+  
+  
+}
+
+
 
 
