@@ -123,7 +123,7 @@ Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.
 
 ### Read in financial data
 # BBG_Data <- read.csv(paste0(FinancialPROC.DATA.PATH,"FinancialData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-BBG_Data <- read.csv(paste0(PORT.FIN.DATA.PATH,"FinancialData_20170925.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+BBG_Data <- read.csv(paste0(PORT.FIN.DATA.PATH,"FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBG_Data_sub <- subset(BBG_Data, ! is.na(BBG_Data$ISIN) & ISIN != "")
 
