@@ -812,7 +812,6 @@ SectorSelect <- function(TechToPlot){
 }
 
 # ----Sector Productions
-
 SectorProduction <- function(combin,ChartType){
   
   TechList <- c("RenewablesCap","HydroCap", "NuclearCap","CoalCap","GasCap","ICE","Hybrid", "Electric","Coal","Oil","Gas")
@@ -842,7 +841,7 @@ SectorPrint <- function(SectorToPlot,SectorProd){
   SectorProduction <- SectorProd$Production[SectorProd$Sector %in% SectorToPlot]
   
   PlotFlag <- 1
-  if (SectorToPlot %in% c("Automotive","Power") & SectorProduction == 0){PlotFlag <- 0}
+  if (SectorToPlot %in% c("Automotive","Power", "Fossil Fuels") & SectorProduction == 0){PlotFlag <- 0}
   
   return(PlotFlag)
   
@@ -874,6 +873,14 @@ SetGraphInputs <- function(){
   CurrCapColour <<- "grey75"
   AxisColour <<- "#17375e" #"#274F80"
   
+  DarkGreen <<- "#1E7B1E"
+  LightGreen <<- "#C3FDB8"
+  LightRed <<- "#FFFFC2"
+  DarkRed <<- "#C11B17"
+  
+  
+  
+  
   ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
   textsize <<- 8
@@ -881,17 +888,14 @@ SetGraphInputs <- function(){
   
 }
 
-#-------- 246 Inputs------------- #
-Inputs246 <- function(){
-  
-  ### Inputs to the 246 chart. 
-  
-  # Production Inputs - normalised to the start year
-  
-  
-  
-  
-  
-  
-}
+#-------- Green/Brown Tech ------------- #
 
+GreenBrown <- function(Tech){
+  GreenTechs <- c("Electric","Hybrid","RenewablesCap","HydroCap","NuclearCap")
+  
+  if(Tech %in% GreenTechs){
+    TechIs <- "Green"}else{
+      TechIs <- "Brown"  }
+  
+  return(TechIs)
+}
