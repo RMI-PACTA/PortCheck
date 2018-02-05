@@ -2527,6 +2527,8 @@ Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Sce
   # Combin <- EQCombin
   TechToPlot <- "RenewablesCap"
   
+  # Check whether the tech is a green or brown technology
+  GoodBad <- GreenBrown(TechToPlot)
   
   df <- Inputs246(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName)
   
@@ -2538,93 +2540,103 @@ Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Sce
   
   dfwide <- dcast(df,Year~Label, value.var="Value")
   
-  dfwide$level1 <- dfwide$`450S`
-  dfwide$level2 <- dfwide$NPS-dfwide$`450S`
-  dfwide$level3 <- dfwide$CPS - dfwide$NPS
-  dfwide$level4 <- dfwide$MaxValue - dfwide$CPS
   
-  dflong <- subset(dfwide, select = c("Year","level4","level3","level2","level1"))
-  dflong <- melt(dflong, id.vars = "Year")
+  # if(GoodBad == "Brown"){}
+  
+  # dfwide$level1 <- dfwide$CPS
+  # dfwide$level2 <- dfwide$NPS-dfwide$CPS
+  # dfwide$level3 <- dfwide$`450S` - dfwide$NPS
+  # dfwide$level4 <- dfwide$MaxValue - dfwide$`450S`
+  
+  # dflong <- subset(dfwide, select = c("Year","level4","level3","level2","level1"))
+  # dflong <- melt(dflong, id.vars = "Year")
   
   ### Portfolio, Economy Data
   dfline <- subset(dfwide, select = c("Year","PortfolioProduction"))
   
-  
-  ### Green Technologies
-  
-  ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
-  ColourSet$Colours <-as.character(ColourSet$Colours)
-  levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
-  levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
-  
-  
-  ymin <- min(df$Value,na.rm = T)-0.1
-  ymax <- max(df$Value,na.rm = T)
-  year_lab <- GT["Year"][[1]]
-  ylabel <- paste0( Startyear, "= 1")
-  # 
-  outputplot <- ggplot(dflong, aes(x=Year, y=value,fill=variable))+
-    geom_area()+
-    geom_line(data = dfline, aes(x=Year,y=PortfolioProduction))+
-    xlab(year_lab) + ylab(ylabel) +
-    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-    scale_fill_manual(values = ColourSet$Colours,
-                      labels = ColourSet$GradLabel)+
-  
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          axis.ticks=element_blank(), 
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  ###  
-    
-  
-  
-  
-  
-  
-  
-  ### Background colour settings, including switch for Brown technologies
-  ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
-  ColourSet$Colours <-as.character(ColourSet$Colours)
-  levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
-  levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
+  # ColourSet$Colours <-as.character(ColourSet$Colours)
+  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
+  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
 
-  GoodBad <- GreenBrown(TechToPlot)
-  
-  if (GoodBad == "Brown"){
-    ColourSet$Colours <- c(DarkRed,LightRed,LightGreen,DarkGreen)
-    levels(ColourSet$Colours) <- c(DarkRed,LightRed,LightGreen,DarkGreen)
-    ColourSet$GradLabel <- c("> 6°C","4-6°C","2-4°C","< 2°C")
-    levels(ColourSet$GradLabel) <- c("> 6°C","4-6°C","2-4°C","< 2°C")  
-  }
   Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
+  # Colourvals <- factor(Colourvals, levels = c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed ))
+
+  # Colourvals <- data.frame( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed )
+  # factors(Colourvals) <- c("A","B","C","D")
+  
+  #Create a custom color scale
+  # library(RColorBrewer)
+  # myColors <- brewer.pal(5,"Set1")
+  # names(myColors) <- levels(dat$grp)
+  # colScale <- scale_colour_manual(name = "grp",values = myColors)
   
   
+  # myColors <- c("black",DarkGreen,LightGreen,LightRed,DarkRed)
+  # names(myColors)<- levels(c("PortfolioProduction","< 2°C","2-4°C","4-6°C","> 6°C"))
+  # colScale <- scale_color_manual(name = c("PortfolioProduction","< 2°C","2-4°C","4-6°C","> 6°C"), values = myColors)
+  
+  
+  
+  
+  # Colourvals2 <- c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed )
+  # Colourvals2 <- factor(Colourvals2, levels = c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed ))
+  
+      
   ymin <- min(df$Value,na.rm = T)-0.1
   ymax <- max(df$Value,na.rm = T)
   year_lab <- GT["Year"][[1]]
   ylabel <- paste0( Startyear, "= 1")
+
   
+  if(GoodBad == "Brown"){
+  ### Brown Tech  
+  # Works, need to edit legend order
   outputplot <- ggplot(dfwide, aes(x=Year))+
-    geom_area(aes(y= MaxValue,fill= "A"))+
-    geom_area(aes(y= CPS, fill= "B"))+
-    geom_area(aes(y= NPS, fill= "C"))+
-    geom_area(aes(y=`450S`,fill= "D"))+ 
+    geom_area(aes(y= MaxValue,fill= "> 6°C"))+
+    geom_area(aes(y= CPS, fill= "4-6°C"))+
+    geom_area(aes(y= NPS, fill= "2-4°C"))+
+    geom_area(aes(y= `450S`, fill= "< 2°C"))+ 
     
-    geom_line(aes(x=Year,y=PortfolioProduction))+
+    geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
     
     xlab(year_lab) + ylab(ylabel) +
     coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-    scale_fill_manual(values = ColourSet$Colours,
-                       labels = ColourSet$GradLabel)+
-    # scale_color_discrete(name = "Portfolio Production")+
-    # guides(guide_legend(reverse=T))+   
+    scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 1))+
+    scale_color_manual(name = "Portfolio Production",
+                       values = "black")+
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(), 
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  }
+  
+  if(GoodBad == "Green"){
+  ### Green Tech  
+  # Works, need to edit legend order
+  outputplot <- ggplot(dfwide, aes(x=Year))+
+    geom_area(aes(y= MaxValue,fill= "< 2°C"))+
+    geom_area(aes(y= `450S`, fill= "2-4°C"))+
+    geom_area(aes(y= NPS, fill= "4-6°C"))+
+    geom_area(aes(y= CPS, fill= "> 6°C"))+
+    # geom_area(aes(y= MaxValue,fill= "A"))+
+    # geom_area(aes(y= `450S`, fill= "B"))+
+    # geom_area(aes(y= NPS, fill= "C"))+
+    # geom_area(aes(y= CPS, fill= "D"))+ 
+    
+    geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
+    
+    xlab(year_lab) + ylab(ylabel) +
+    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+    scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 2))+
+    scale_color_manual(name = "Portfolio Production",
+                       values = "black")+
+    
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           axis.ticks=element_blank(), 
@@ -2634,88 +2646,198 @@ Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Sce
           legend.title = element_blank(),
           plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   
-  ####################################################
-  
-  ColourSet <- data.frame(Colours=c(DarkGreen,DarkRed,LightRed,LightGreen))
-  ColourSet$Colours <-as.character(ColourSet$Colours)
-  levels(ColourSet$Colours) <- c(DarkGreen,DarkRed,LightRed,LightGreen)
-  ColourSet$GradLabel <- c("< 2°C","> 6°C","4-6°C","2-4°C")
-  levels(ColourSet$GradLabel) <- c("< 2°C","> 6°C","4-6°C","2-4°C")#c("< 2°C","2-4°C","4-6°C","> 6°C")  
-  
-  
-  ### Good Tech
-  #-----
-  outputplot <- ggplot(dfwide, aes(x=Year))+
-    geom_area(aes(y= MaxValue,fill= "A"))+
-    geom_area(aes(y=`450S`,fill= "D"))+ 
-    geom_area(aes(y= NPS, fill= "C"))+
-    geom_area(aes(y= CPS, fill= "B"))+
-    
-    geom_line(aes(x=Year,y=PortfolioProduction))+
-    
-    xlab(year_lab) + ylab(ylabel) +
-    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-    scale_colour_manual("",values = Colourvals)+
-    # scale_color_discrete(name = "Portfolio Production")+
-    # guides(guide_legend(reverse=T))+   
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          axis.ticks=element_blank(), 
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  
-  
-  #-------
+  }
   
   
   
+  # Green Technologies
   
-  # labelling <- data.frame(values = c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour), labels = TechLabels, name = techorder)
-  # scale_fill_manual(values = labelling$values, labels = labelling$labels)
+  # if(GoodBad == "Green"){}
+  
+  
+  
+  # outputplot <- ggplot(dfwide, aes(x=Year))+
+  #   geom_area(aes(y= MaxValue,fill= "< 2°C"))+
+  #   geom_area(aes(y= CPS, fill= "2-4°C"))+
+  #   geom_area(aes(y= NPS, fill= "4-6°C"))+
+  #   geom_area(aes(y=`450S`,fill= "> 6°C"))+ 
+  #   
+  #   geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
   # 
+  ### Green Technologies
+  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
+  # ColourSet$Colours <-as.character(ColourSet$Colours)
+  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
+  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  # 
+  # 
+  # ymin <- min(df$Value,na.rm = T)-0.1
+  # ymax <- max(df$Value,na.rm = T)
+  # year_lab <- GT["Year"][[1]]
+  # ylabel <- paste0( Startyear, "= 1")
+  # # 
+  # outputplot <- ggplot(dflong, aes(x=Year, y=value,fill=variable))+
+  #   geom_area()+
+  #   geom_line(data = dfline, aes(x=Year,y=PortfolioProduction))+
+  #   xlab(year_lab) + ylab(ylabel) +
+  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+  #   scale_fill_manual(values = ColourSet$Colours,
+  #                     labels = ColourSet$GradLabel)+
+  # 
+  #   theme(panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         axis.ticks=element_blank(), 
+  #         panel.border = element_blank(),
+  #         panel.grid = element_blank(),
+  #         legend.position = "bottom",
+  #         legend.title = element_blank(),
+  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  # ###  
+  #   
+  # 
+  # 
+  # 
+  # 
+  # 
+  # 
+  # ### Background colour settings, including switch for Brown technologies
+  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
+  # ColourSet$Colours <-as.character(ColourSet$Colours)
+  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
+  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  # 
+  # 
+  # 
+  # if (GoodBad == "Brown"){
+  #   ColourSet$Colours <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+  #   levels(ColourSet$Colours) <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+  #   ColourSet$GradLabel <- c("> 6°C","4-6°C","2-4°C","< 2°C")
+  #   levels(ColourSet$GradLabel) <- c("> 6°C","4-6°C","2-4°C","< 2°C")  
+  # }
+  # 
+  # 
+  # 
+  # #### This works, but legend order is wack. 
+  # #### But the background colours are in the wrong directions.... 
+  # 
+  # Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
+  # levels(Colourvals) <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed)
+  # # ColoursVals <- c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed, "E" = "black" )
+  # 
+  # 
+  # ymin <- min(df$Value,na.rm = T)-0.1
+  # ymax <- max(df$Value,na.rm = T)
+  # year_lab <- GT["Year"][[1]]
+  # ylabel <- paste0( Startyear, "= 1")
+  # 
+  # 
+  # outputplot <- ggplot(dfwide, aes(x=Year))+
+  #   geom_area(aes(y= MaxValue,fill= "< 2°C"))+
+  #   geom_area(aes(y= CPS, fill= "2-4°C"))+
+  #   geom_area(aes(y= NPS, fill= "4-6°C"))+
+  #   geom_area(aes(y=`450S`,fill= "> 6°C"))+ 
+  #   
+  #   geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
+  #   
+  #   xlab(year_lab) + ylab(ylabel) +
+  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+  #   scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 1))+
+  #   scale_color_manual(name = "Portfolio Production",
+  #                      values = "black")+
+  #   # guides(guide_legend(override.aes =  ColourSet$Colours))+
+  #   theme(panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         axis.ticks=element_blank(), 
+  #         panel.border = element_blank(),
+  #         panel.grid = element_blank(),
+  #         legend.position = "bottom",
+  #         legend.title = element_blank(),
+  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  # 
+  # ####################################################
+  # 
+  # ColourSet <- data.frame(Colours=c(DarkGreen,DarkRed,LightRed,LightGreen))
+  # ColourSet$Colours <-as.character(ColourSet$Colours)
+  # levels(ColourSet$Colours) <- c(DarkGreen,DarkRed,LightRed,LightGreen)
+  # ColourSet$GradLabel <- c("< 2°C","> 6°C","4-6°C","2-4°C")
+  # levels(ColourSet$GradLabel) <- c("< 2°C","> 6°C","4-6°C","2-4°C")#c("< 2°C","2-4°C","4-6°C","> 6°C")  
+  # 
+  # 
+  # ### Good Tech
+  # #-----
+  # outputplot <- ggplot(dfwide, aes(x=Year))+
+  #   geom_area(aes(y= MaxValue,fill= "A"))+
+  #   geom_area(aes(y=`450S`,fill= "D"))+ 
+  #   geom_area(aes(y= NPS, fill= "C"))+
+  #   geom_area(aes(y= CPS, fill= "B"))+
+  #   
+  #   geom_line(aes(x=Year,y=PortfolioProduction))+
+  #   
+  #   xlab(year_lab) + ylab(ylabel) +
+  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+  #   scale_colour_manual("",values = Colourvals)+
+  #   # scale_color_discrete(name = "Portfolio Production")+
+  #   # guides(guide_legend(reverse=T))+   
+  #   theme(panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         axis.ticks=element_blank(), 
+  #         panel.border = element_blank(),
+  #         panel.grid = element_blank(),
+  #         legend.position = "bottom",
+  #         legend.title = element_blank(),
+  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  # 
+  # 
+  # #-------
+  # 
+  # 
+  # 
+  # 
+  # # labelling <- data.frame(values = c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour), labels = TechLabels, name = techorder)
+  # # scale_fill_manual(values = labelling$values, labels = labelling$labels)
+  # # 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
   
-  library(grid)
-  
-  a <- gtable(unit(c(1,3,1,3,1,3,1,3),c("cm")),unit(c(1,.5,1),c("cm")))
-  # b <- gtable(unit(6,"cm"),unit(6,"cm"))
-  # a <- combine(a,b)
-  gtable_show_layout(a)
-  
-  rectDG <- rectGrob(gp = gpar(fill = DarkGreen))
-  rectLG <- rectGrob(gp = gpar(fill = LightGreen))
-  rectDR <- rectGrob(gp = gpar(fill = DarkRed))
-  rectLR <- rectGrob(gp = gpar(fill = LightRed))
-  
-  textDG <- textGrob("< 2°C")
-  textLG <- textGrob("2-4°C")
-  textLR <- textGrob("4-6°C")
-  textDR <- textGrob("> 6°C")
-  
-  textPP <- textGrob("Portfolio")
-  
-  plotitem <- ggplotGrob(outputplot)
-  
-  linePP <- linesGrob(x=unit(c(0,1),"cm"), y=unit(c(0.5,.5),"cm"))
-  
-  a <- gtable_add_grob(a,rectDG,1,1)
-  a <- gtable_add_grob(a,rectLG,1,3)
-  a <- gtable_add_grob(a,rectLR,1,5)
-  a <- gtable_add_grob(a,rectDR,1,7)
-  
-  a <- gtable_add_grob(a,textDG,1,2)
-  a <- gtable_add_grob(a,textLG,1,4)
-  a <- gtable_add_grob(a,textLR,1,6)
-  a <- gtable_add_grob(a,textDR,1,8)
-  
-  a <- gtable_add_grob(a,linePP,3,1)
-  
-  a <- gtable_add_grob(a,textPP,3,2)
-  
-  plot(a)
+  # library(grid)
+  # 
+  # a <- gtable(unit(c(1,3,1,3,1,3,1,3),c("cm")),unit(c(1,.5,1),c("cm")))
+  # # b <- gtable(unit(6,"cm"),unit(6,"cm"))
+  # # a <- combine(a,b)
+  # gtable_show_layout(a)
+  # 
+  # rectDG <- rectGrob(gp = gpar(fill = DarkGreen))
+  # rectLG <- rectGrob(gp = gpar(fill = LightGreen))
+  # rectDR <- rectGrob(gp = gpar(fill = DarkRed))
+  # rectLR <- rectGrob(gp = gpar(fill = LightRed))
+  # 
+  # textDG <- textGrob("< 2°C")
+  # textLG <- textGrob("2-4°C")
+  # textLR <- textGrob("4-6°C")
+  # textDR <- textGrob("> 6°C")
+  # 
+  # textPP <- textGrob("Portfolio")
+  # 
+  # plotitem <- ggplotGrob(outputplot)
+  # 
+  # linePP <- linesGrob(x=unit(c(0,1),"cm"), y=unit(c(0.5,.5),"cm"))
+  # 
+  # a <- gtable_add_grob(a,rectDG,1,1)
+  # a <- gtable_add_grob(a,rectLG,1,3)
+  # a <- gtable_add_grob(a,rectLR,1,5)
+  # a <- gtable_add_grob(a,rectDR,1,7)
+  # 
+  # a <- gtable_add_grob(a,textDG,1,2)
+  # a <- gtable_add_grob(a,textLG,1,4)
+  # a <- gtable_add_grob(a,textLR,1,6)
+  # a <- gtable_add_grob(a,textDR,1,8)
+  # 
+  # a <- gtable_add_grob(a,linePP,3,1)
+  # 
+  # a <- gtable_add_grob(a,textPP,3,2)
+  # 
+  # plot(a)
   
   # Out246Plot <- ggplot_gtable(ggplot_build(outputplot))
   # Out246Plot$layout$clip[Out246Plot$layout$name == "panel"] <- "off"
