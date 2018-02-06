@@ -126,11 +126,20 @@ Fund_Data_CBonds <- read.csv(paste0(FundDataLocation,"FundLookThroughData_Bonds.
 BBG_Data <- read.csv(paste0(PORT.FIN.DATA.PATH,"FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBG_Data_sub <- subset(BBG_Data, ! is.na(BBG_Data$ISIN) & ISIN != "")
+BBG_Data_sub <- BBG_Data_sub[!duplicated(BBG_Data_sub$ISIN),]
 
 ### Test if there are duplicates left in the financial database
 ISINCount <- as.data.frame(table(BBG_Data_sub$ISIN))
-DupsInBBGDataBETTERCHECK <- subset(ISINCount, Freq > 1, select = "Var1")
-BBG_Data_sub <- BBG_Data_sub[!duplicated(BBG_Data_sub),]
+BBG_Data_DupISINs <- subset(ISINCount, Freq > 1, select = "Var1")
+BBG_Data_dups <- subset(BBG_Data, BBG_Data$ISIN %in% BBG_Data_DupISINs$Var1, select = c("ISIN","SharePrice"))
+
+### Calculate the mean share price for duplicated holdings and replace in the unique BBG_Data dataframe
+BBG_Data_dups <- aggregate(BBG_Data_dups["SharePrice"],by=list(BBG_Data_dups$ISIN), FUN=mean)
+colnames(BBG_Data_dups) <- c("ISIN","SharePriceMean") 
+BBG_Data_sub <- merge(BBG_Data_sub, BBG_Data_dups, by="ISIN",all.x = TRUE)
+BBG_Data_sub$SharePrice[BBG_Data_sub$ISIN %in% BBG_Data_dups$ISIN]<- BBG_Data_sub$SharePriceMean[BBG_Data_sub$ISIN %in% BBG_Data_dups$ISIN]
+BBG_Data_sub$SharePriceMean <- NULL
+
 
 #------------
 # Merge portfolio with financial data and prepare for fund-look-through (e.g. calculate USD-Value held of each security)
