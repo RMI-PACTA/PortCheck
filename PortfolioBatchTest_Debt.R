@@ -1,23 +1,77 @@
-rm(list=ls())
+
+# Based off v17 29/11
 
 #Load packages
-library(grid)
 library(plyr)
 library(reshape2)
-library(gridExtra)
-library(scales)
-library(stringr)
-library(ggplot2)
-library(png)
-library(tidyr)
 
 #Version - Control
 
 # --- DATE ---   |  --- Editor ---  | --- Version Name --- | --- Edits / Adds / Changes / Bugfixes ---
-# 2017 - 04 - 24 |        KH        |           3          | Adjust code to updated bridge files
-# 2017 - 10 - 04 |        CM        |           13         | Read ValueUSD rather than position
-# 2017 - 10 - 04 |        KH        |           13         | Read ValueUSD only if position is not given
-# 2017 - 10 - 04 |        KH        |           14         | Implemented updated IEATargets (Automotive sector based on ETP2017)
+# 2017 - 04 - 21 |        KH        |          1           | First version - loading all fund holdings and aditional information and binding it with input data (ISINs)
+
+
+
+#------------
+# Set up 2DII Dev Environment Folders and Locations
+#------------
+
+if (!exists("TWODII.CONSTS")) {
+  ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
+  print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run Common/2dii-init.R and try again.")
+} 
+
+#------------
+# Set up PortCheck-Specific Constants and Functions
+#------------
+
+### this file sourced at top of all PortCheck scripts
+### this defines any project constants and functions
+### and will also source an override file if it exists
+source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
+print("*** Starting DataImport.R Script")
+print(show.consts())
+
+
+#------------
+# Read in Parameter File and Set Variables
+#------------
+
+### define these vars so we know they will be important
+### makes the code easier to understand - they're not a surprise later
+BatchName <- NA
+Startyear <- NA
+ProjectName <- NA
+BatchToTest <- NA
+BBGDataDate <- NA
+AssessmentDate <- NA
+
+ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+### fill up those variables
+SetParameters(ParameterFile)              # Sets BAtchName, Scenario, BenchmarkRegion etc. 
+print("*** STARTING SCRIPT with PARAMETERS:")
+print(ParameterFile)
+
+#-------------
+# Set workdrive
+#-------------
+FolderLocation <<- paste0(PORTS.PATH,ProjectName,"/",BatchName,"/")
+OutputFolder <<- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/")
+
+
+setwd(FolderLocation)
+
+#Load packages
+# library(grid)
+# library(plyr)
+# library(reshape2)
+# library(gridExtra)
+# library(scales)
+# library(stringr)
+# library(ggplot2)
+# library(png)
+# library(tidyr)
+
 
 #-------------
 # All Input parameters & make the code interactive
@@ -28,14 +82,14 @@ BBGDataDate <- "30/12/2016"
 MarketDataDate <- "06_07_2016"
 AssessmentDate <- "2016Q4"
 Date <- Sys.Date() #get todays date for appending to file names to track historical calcualtion results
-BatchName <- "FebPortChecks2" #PortfolioData file name
+# BatchName <- "FebPortChecks2" #PortfolioData file name
 # FinancialDataDate <- "2017-04-19" # just in case the financial data got created by BBG-Data-Bind_v2 - Should create a function to look this up automotically and takes the most recent file (e.g. by using list function, then cut first 10 digits and sort by "date")
 BBGPORTOutput <- "BondPORTOutputMixedSource"
 BBGPORTOutput <- "FinancialData_20180131"
 # BatchName2 <- "Swiss_BatchAllPort_Bonds"
 
-Startyear <- 2017 #Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
-UserName <- sub("/.*","",sub(".*Users/","",getwd()))
+# Startyear <- 2017 #Date when the analysis starts - time horizon is always 5 years starting from here: e.g. if Startyear is 2016 the analysis will go to 2021
+# UserName <- sub("/.*","",sub(".*Users/","",getwd()))
 # FolderLocation <- paste0("W:/General Insurance Team/Analytics Team/Analytics 2016/322903/R - GranularAssetData/2D-II/") #Input folder (the substructure needs to be consistent to be able to read in all files)
 # OutputFolder <- paste0("W:/General Insurance Team/Analytics Team/Analytics 2016/322903/R - GranularAssetData/2D-II/PortfolioResults/") #Output-folder for the results
 FolderLocation <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/") #Input folder (the substructure needs to be consistent to be able to read in all files)

@@ -270,7 +270,6 @@ if (ComparisonType != "CompareBatch"){
     
     EQBatchTest_PortSnapshots <- rbind(EQBatchTest_PortSnapshots,EQComparisonPortSS)
   }
-  if (nrow(CBBatchTest) >0){
     CBComparisonBatchTest$ComparisonType <- "ComparisonResults"
     CBBatchTest <-AddMissingColumns(CBBatchTest,CBComparisonBatchTest)
     CBComparisonBatchTest <-AddMissingColumns(CBComparisonBatchTest,CBBatchTest)
@@ -380,13 +379,16 @@ for (i in 1:nrow(TestList)){
 
   
   ### Subsets results for this portfolio
-  EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName & EQBatchTest$ComparisonType == "BatchResults",]
-  EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
-  EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
-  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName & CBBatchTest$ComparisonType == "BatchResults",]
-  CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
-  CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-  
+  if (is.null(nrow(EQBatchTest)) != TRUE){
+    EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName & EQBatchTest$ComparisonType == "BatchResults",]
+    EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
+    EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
+  }
+  if (is.null(nrow(CBBatchTest)) != TRUE){
+    CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName & CBBatchTest$ComparisonType == "BatchResults",]
+    CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
+    CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
+  }
   
   
   ##### NEW SECTION
