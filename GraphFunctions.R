@@ -305,7 +305,7 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
 
 # --------
 # PLOT FUNCTIONS
-# --------
+# -------- 
 
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot,PortfolioName){
@@ -1093,8 +1093,8 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
     if (TechToPlot %in% badtech){
       outputplot <- ggplot(data=LineData)+
         annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
+
         geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=badexpColour)) +
-        #geom_ribbon(aes(x=Year,ymin=0,ymax=`2°C Benchmark`,fill=ReqCapColour))+
         geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=goodexpColour)) +
         geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
         geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
@@ -1111,12 +1111,13 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
       # good ones - ie renewables
       outputplot <- ggplot(data=LineData)+
         annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
+        
         geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=goodexpColour)) +
-        # geom_ribbon(aes(x=Year,ymin=0,ymax=Target,fill=ReqCapColour))+
         geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=badexpColour)) +
         geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
         geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
+
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
         scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
@@ -1944,6 +1945,8 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
   
   # FundsData <- FundsInPort
   
+  ### FundsData is the BatchTest ie. EquityAnalysisResults-450S-only.csv
+  ### Improve flexibility to include Corporate Bonds as well. 
   
   if(typeof(FundsData) == "list"){
     if(nrow(FundsData)>0){
@@ -2489,16 +2492,59 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
   return()
 }
 
-
-Inputs246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
+# ------------ Data Inputs to 246 Chart ----- #
+Inputs246 <- function(ChartType, Combin, BatchTest,IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
   # Combin <- EQCombin
+  # ChartType <- "EQ"
+  # BatchTest <- EQBatchTest
+    
+  # Combin <- CBCombin
+  # ChartType <- "CB"
+  # BatchTest <- CBBatchTest
+  
+  ### Function to calculate the % Build Out over 5 years
+  ### data frame needs Year, Prod and TargetProd and a label for the Chart
+  BuildOutCalc <- function(df, Label){
+    df$Value <- (df$Prod - df$Prod[df$Year == Startyear])/(df$TargetProd[df$Year == (Startyear+5)]-df$TargetProd[df$Year == Startyear])
+    df$Label <- Label
+    df$Prod <- df$TargetProd <- NULL
+    return(df)
+  }
   
   ### Production Inputs - normalised to the start year
   Production <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
-  Production <- subset(Production, select = c("Year","Production"))
-  Production$Value <- Production$Production / Production$Production[Production$Year == Startyear]
-  Production$Label <- "PortfolioProduction"
-  Production$Production <- NULL
+  
+  
+  if (ChartType == "EQ"){  
+    ### Equity Portfolio Build Out
+    Production <- subset(Production, select = c("Year","Production", "TargetProductionAlignment"))
+    Production <- rename(Production, c("Production"="Prod","TargetProductionAlignment"="TargetProd"))
+    Production <- BuildOutCalc(Production, "Portfolio")
+    
+    ### Stock Market Build Out
+    MarketBuildOut <- subset(BatchTest, InvestorName == "ListedMarket" & ComparisonType == "BatchResults")
+    MarketBuildOut <- subset(MarketBuildOut, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5) , select = c("Year","Production", "TargetProductionAlignment"))
+    MarketBuildOut <- rename(MarketBuildOut, c("Production"="Prod","TargetProductionAlignment"="TargetProd"))
+    MarketBuildOut <- BuildOutCalc(MarketBuildOut, "Stock Market")
+    
+  }else{
+    ### Debt Portfolio Build Out
+    Production <- subset(Production, select = c("Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
+    Production <- rename(Production,c("WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd"))
+    Production <- BuildOutCalc(Production, "Portfolio")
+    
+    ### Debt Market Build Out
+    MarketBuildOut <- subset(BatchTest, InvestorName == "GlobalBondUniverse" & ComparisonType == "BatchResults")
+    MarketBuildOut <- subset(MarketBuildOut, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5) , select = c("Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
+    MarketBuildOut <- rename(MarketBuildOut,c("WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd"))
+    MarketBuildOut <- BuildOutCalc(MarketBuildOut, "Debt Market")
+    
+  }
+  
+  ### Global Economy Data
+  ### To include or not to include...
+  
+  
   
   ### Inputs to the 246 chart. 
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
@@ -2507,30 +2553,36 @@ Inputs246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Sc
   IEATargetsRef <- subset(IEATargetsRef, select = c("Scenario","AnnualvalIEAtech"))
   IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="StartValue"))
   
+ 
   IEATargets <- merge(IEATargets, IEATargetsRef, by = "Scenario")
-  IEATargets$Value <- IEATargets$AnnualvalIEAtech / IEATargets$StartValue
+ 
+  IEATargets$Denominator <- IEATargets$AnnualvalIEAtech[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]-IEATargets$StartValue[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]
+  
+  
+   IEATargets$Value <- (IEATargets$AnnualvalIEAtech-IEATargets$StartValue) / IEATargets$Denominator
   
   IEATargets <- subset(IEATargets, select = c("Scenario","Year","Value"))
   IEATargets <- rename(IEATargets, c("Scenario"="Label"))
   
   
-  ###   
-  df <- rbind(Production,IEATargets)
+  df <- rbind(Production,MarketBuildOut,IEATargets)
   
-  ### Add in additional Comparisons.   
   
   return(df)
 }
 
-Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
+# ------------ 246 Chart -------------------- #
+Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName){
   
+  # ChartType <- "EQ"
   # Combin <- EQCombin
-  TechToPlot <- "RenewablesCap"
+  # BatchTest <- EQBatchTest
+  # TechToPlot <- "RenewablesCap"
   
   # Check whether the tech is a green or brown technology
   GoodBad <- GreenBrown(TechToPlot)
   
-  df <- Inputs246(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName)
+  df <- Inputs246(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,BenchmarkRegionchoose, Scenariochoose,CompanyDomicileRegionchoose,PortName)
   
   IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
   IEATargetMax$Value <- max(df$Value)+.1
@@ -2540,264 +2592,100 @@ Graph246 <- function(Combin, IEATargets246,TechToPlot,BenchmarkRegionchoose, Sce
   
   dfwide <- dcast(df,Year~Label, value.var="Value")
   
-  
-  # if(GoodBad == "Brown"){}
-  
-  # dfwide$level1 <- dfwide$CPS
-  # dfwide$level2 <- dfwide$NPS-dfwide$CPS
-  # dfwide$level3 <- dfwide$`450S` - dfwide$NPS
-  # dfwide$level4 <- dfwide$MaxValue - dfwide$`450S`
-  
-  # dflong <- subset(dfwide, select = c("Year","level4","level3","level2","level1"))
-  # dflong <- melt(dflong, id.vars = "Year")
-  
-  ### Portfolio, Economy Data
-  dfline <- subset(dfwide, select = c("Year","PortfolioProduction"))
-  
-  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
-  # ColourSet$Colours <-as.character(ColourSet$Colours)
-  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
-  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
 
   Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
-  # Colourvals <- factor(Colourvals, levels = c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed ))
 
-  # Colourvals <- data.frame( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed )
-  # factors(Colourvals) <- c("A","B","C","D")
-  
-  #Create a custom color scale
-  # library(RColorBrewer)
-  # myColors <- brewer.pal(5,"Set1")
-  # names(myColors) <- levels(dat$grp)
-  # colScale <- scale_colour_manual(name = "grp",values = myColors)
-  
-  
-  # myColors <- c("black",DarkGreen,LightGreen,LightRed,DarkRed)
-  # names(myColors)<- levels(c("PortfolioProduction","< 2°C","2-4°C","4-6°C","> 6°C"))
-  # colScale <- scale_color_manual(name = c("PortfolioProduction","< 2°C","2-4°C","4-6°C","> 6°C"), values = myColors)
-  
-  
-  
-  
-  # Colourvals2 <- c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed )
-  # Colourvals2 <- factor(Colourvals2, levels = c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed ))
-  
-      
+  ### Calculates the y axis scales and labels      
   ymin <- min(df$Value,na.rm = T)-0.1
   ymax <- max(df$Value,na.rm = T)
   year_lab <- GT["Year"][[1]]
-  ylabel <- paste0( Startyear, "= 1")
+  ylabel <- "Build Out"
+  alphaval <- 1
+  linesize <- 1.5
+  
+  ### Identifies the Lines to plot in the Chart
+  ### Selects colours up until the max number of inputs
+  LinesToPlot <- unique(df$Label)
+  LinesToPlot <- LinesToPlot[!LinesToPlot %in% c("450S","CPS","NPS","MaxValue")]
+  LinesToPlot <- factor(LinesToPlot, levels = LinesToPlot)
+  LineColours <- c("black", "grey","blue","pink")
+  LineColours <- LineColours[1: length(LinesToPlot)]
 
+  LineVector <- setNames(LineColours,LinesToPlot)
+  # LineColours <- factor(LineColours, levels = LineColours)
   
   if(GoodBad == "Brown"){
-  ### Brown Tech  
-  # Works, need to edit legend order
-  outputplot <- ggplot(dfwide, aes(x=Year))+
-    geom_area(aes(y= MaxValue,fill= "> 6°C"))+
-    geom_area(aes(y= CPS, fill= "4-6°C"))+
-    geom_area(aes(y= NPS, fill= "2-4°C"))+
-    geom_area(aes(y= `450S`, fill= "< 2°C"))+ 
-    
-    geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
-    
-    xlab(year_lab) + ylab(ylabel) +
-    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-    scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 1))+
-    scale_color_manual(name = "Portfolio Production",
-                       values = "black")+
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          axis.ticks=element_blank(), 
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+    ### Brown Tech  
+    outputplot <- ggplot(dfwide, aes(x=Year))+
+      geom_area(aes(y= MaxValue,fill= "> 6°C"))+
+      geom_area(aes(y= CPS, fill= "4-6°C"))+
+      geom_area(aes(y= NPS, fill= "2-4°C"))+
+      geom_area(aes(y= `450S`, fill= "< 2°C"))+ 
+      
+      geom_line(aes(x=Year,y=dfwide[LinesToPlot[1]], colour =  LinesToPlot[1]), size = linesize)+
+      geom_line(aes(x=Year,y=dfwide[LinesToPlot[2]], colour =  LinesToPlot[2]), size = linesize)+
+      
+      ### I can't find a way to automaticall check whether 3 exists... 
+      # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
+            
+      xlab(year_lab) + 
+      ylab(ylabel) +
+      scale_size(guide=FALSE)+
+      coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+      scale_fill_manual(values = Colourvals, 
+                        guide = guide_legend(nrow = 2))+
+      scale_color_manual(values = LineVector,
+                         guide = guide_legend(nrow = 2))+
+      
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            axis.ticks=element_blank(), 
+            panel.border = element_blank(),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank(),
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   }
   
   if(GoodBad == "Green"){
-  ### Green Tech  
-  # Works, need to edit legend order
-  outputplot <- ggplot(dfwide, aes(x=Year))+
-    geom_area(aes(y= MaxValue,fill= "< 2°C"))+
-    geom_area(aes(y= `450S`, fill= "2-4°C"))+
-    geom_area(aes(y= NPS, fill= "4-6°C"))+
-    geom_area(aes(y= CPS, fill= "> 6°C"))+
-    # geom_area(aes(y= MaxValue,fill= "A"))+
-    # geom_area(aes(y= `450S`, fill= "B"))+
-    # geom_area(aes(y= NPS, fill= "C"))+
-    # geom_area(aes(y= CPS, fill= "D"))+ 
+    ### Green Tech  
+    # Works, need to edit legend order
+    outputplot <- ggplot(dfwide, aes(x=Year))+
+      geom_area(aes(y= MaxValue,fill= "< 2°C"),alpha=alphaval)+
+      geom_area(aes(y= `450S`, fill= "2-4°C"),alpha=alphaval)+
+      geom_area(aes(y= NPS, fill= "4-6°C"),alpha=alphaval)+
+      geom_area(aes(y= CPS, fill= "> 6°C"),alpha=alphaval)+
+      
+      geom_line(aes(x=Year,y=dfwide[as.character(LinesToPlot[[1]])], colour =  as.character(LinesToPlot[1])), size = linesize)+
+      geom_line(aes(x=Year,y=dfwide[as.character(LinesToPlot[[2]])], colour =  as.character(LinesToPlot[2])), size = linesize)+
+      
+      ### I can't find a way to automaticall check whether 3 exists... 
+      # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
+            
+      xlab(year_lab) + 
+      ylab(ylabel) +
+      scale_size(guide=FALSE)+
+      coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
+      scale_fill_manual(values = Colourvals, 
+                        guide = guide_legend(nrow = 2))+
+      scale_color_manual(values = LineVector,
+                         guide = guide_legend(nrow = 2))+
+      
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            axis.ticks=element_blank(), 
+            panel.border = element_blank(),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank(),
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
     
-    geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
+   
+    }
     
-    xlab(year_lab) + ylab(ylabel) +
-    coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-    scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 2))+
-    scale_color_manual(name = "Portfolio Production",
-                       values = "black")+
-    
-    theme(panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          axis.ticks=element_blank(), 
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  
-  }
   
   
   
-  # Green Technologies
-  
-  # if(GoodBad == "Green"){}
-  
-  
-  
-  # outputplot <- ggplot(dfwide, aes(x=Year))+
-  #   geom_area(aes(y= MaxValue,fill= "< 2°C"))+
-  #   geom_area(aes(y= CPS, fill= "2-4°C"))+
-  #   geom_area(aes(y= NPS, fill= "4-6°C"))+
-  #   geom_area(aes(y=`450S`,fill= "> 6°C"))+ 
-  #   
-  #   geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
-  # 
-  ### Green Technologies
-  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
-  # ColourSet$Colours <-as.character(ColourSet$Colours)
-  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
-  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
-  # 
-  # 
-  # ymin <- min(df$Value,na.rm = T)-0.1
-  # ymax <- max(df$Value,na.rm = T)
-  # year_lab <- GT["Year"][[1]]
-  # ylabel <- paste0( Startyear, "= 1")
-  # # 
-  # outputplot <- ggplot(dflong, aes(x=Year, y=value,fill=variable))+
-  #   geom_area()+
-  #   geom_line(data = dfline, aes(x=Year,y=PortfolioProduction))+
-  #   xlab(year_lab) + ylab(ylabel) +
-  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-  #   scale_fill_manual(values = ColourSet$Colours,
-  #                     labels = ColourSet$GradLabel)+
-  # 
-  #   theme(panel.grid.major = element_blank(), 
-  #         panel.grid.minor = element_blank(),
-  #         axis.ticks=element_blank(), 
-  #         panel.border = element_blank(),
-  #         panel.grid = element_blank(),
-  #         legend.position = "bottom",
-  #         legend.title = element_blank(),
-  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  # ###  
-  #   
-  # 
-  # 
-  # 
-  # 
-  # 
-  # 
-  # ### Background colour settings, including switch for Brown technologies
-  # ColourSet <- data.frame(Colours=c(DarkGreen,LightGreen,LightRed,DarkRed))
-  # ColourSet$Colours <-as.character(ColourSet$Colours)
-  # levels(ColourSet$Colours) <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  # ColourSet$GradLabel <- c("< 2°C","2-4°C","4-6°C","> 6°C")
-  # levels(ColourSet$GradLabel) <- c("< 2°C","2-4°C","4-6°C","> 6°C")  
-  # 
-  # 
-  # 
-  # if (GoodBad == "Brown"){
-  #   ColourSet$Colours <- c(DarkRed,LightRed,LightGreen,DarkGreen)
-  #   levels(ColourSet$Colours) <- c(DarkRed,LightRed,LightGreen,DarkGreen)
-  #   ColourSet$GradLabel <- c("> 6°C","4-6°C","2-4°C","< 2°C")
-  #   levels(ColourSet$GradLabel) <- c("> 6°C","4-6°C","2-4°C","< 2°C")  
-  # }
-  # 
-  # 
-  # 
-  # #### This works, but legend order is wack. 
-  # #### But the background colours are in the wrong directions.... 
-  # 
-  # Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
-  # levels(Colourvals) <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed)
-  # # ColoursVals <- c( "A"=DarkGreen,"B"=LightGreen,"C"=LightRed,"D" =DarkRed, "E" = "black" )
-  # 
-  # 
-  # ymin <- min(df$Value,na.rm = T)-0.1
-  # ymax <- max(df$Value,na.rm = T)
-  # year_lab <- GT["Year"][[1]]
-  # ylabel <- paste0( Startyear, "= 1")
-  # 
-  # 
-  # outputplot <- ggplot(dfwide, aes(x=Year))+
-  #   geom_area(aes(y= MaxValue,fill= "< 2°C"))+
-  #   geom_area(aes(y= CPS, fill= "2-4°C"))+
-  #   geom_area(aes(y= NPS, fill= "4-6°C"))+
-  #   geom_area(aes(y=`450S`,fill= "> 6°C"))+ 
-  #   
-  #   geom_line(aes(x=Year,y=PortfolioProduction, colour =  "Portfolio Production"))+
-  #   
-  #   xlab(year_lab) + ylab(ylabel) +
-  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-  #   scale_fill_manual(values = Colourvals, guide = guide_legend(nrow = 1))+
-  #   scale_color_manual(name = "Portfolio Production",
-  #                      values = "black")+
-  #   # guides(guide_legend(override.aes =  ColourSet$Colours))+
-  #   theme(panel.grid.major = element_blank(), 
-  #         panel.grid.minor = element_blank(),
-  #         axis.ticks=element_blank(), 
-  #         panel.border = element_blank(),
-  #         panel.grid = element_blank(),
-  #         legend.position = "bottom",
-  #         legend.title = element_blank(),
-  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  # 
-  # ####################################################
-  # 
-  # ColourSet <- data.frame(Colours=c(DarkGreen,DarkRed,LightRed,LightGreen))
-  # ColourSet$Colours <-as.character(ColourSet$Colours)
-  # levels(ColourSet$Colours) <- c(DarkGreen,DarkRed,LightRed,LightGreen)
-  # ColourSet$GradLabel <- c("< 2°C","> 6°C","4-6°C","2-4°C")
-  # levels(ColourSet$GradLabel) <- c("< 2°C","> 6°C","4-6°C","2-4°C")#c("< 2°C","2-4°C","4-6°C","> 6°C")  
-  # 
-  # 
-  # ### Good Tech
-  # #-----
-  # outputplot <- ggplot(dfwide, aes(x=Year))+
-  #   geom_area(aes(y= MaxValue,fill= "A"))+
-  #   geom_area(aes(y=`450S`,fill= "D"))+ 
-  #   geom_area(aes(y= NPS, fill= "C"))+
-  #   geom_area(aes(y= CPS, fill= "B"))+
-  #   
-  #   geom_line(aes(x=Year,y=PortfolioProduction))+
-  #   
-  #   xlab(year_lab) + ylab(ylabel) +
-  #   coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-  #   scale_colour_manual("",values = Colourvals)+
-  #   # scale_color_discrete(name = "Portfolio Production")+
-  #   # guides(guide_legend(reverse=T))+   
-  #   theme(panel.grid.major = element_blank(), 
-  #         panel.grid.minor = element_blank(),
-  #         axis.ticks=element_blank(), 
-  #         panel.border = element_blank(),
-  #         panel.grid = element_blank(),
-  #         legend.position = "bottom",
-  #         legend.title = element_blank(),
-  #         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  # 
-  # 
-  # #-------
-  # 
-  # 
-  # 
-  # 
-  # # labelling <- data.frame(values = c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour), labels = TechLabels, name = techorder)
-  # # scale_fill_manual(values = labelling$values, labels = labelling$labels)
-  # # 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
   
   # library(grid)
