@@ -147,7 +147,7 @@ CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # ------
 # d) Read in financial data (Data retrieved from BBG PORT function)
 # ------
-BBG_Data <- read.csv(paste0(FinancialDataFolder,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20180117.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+BBG_Data <- read.csv(paste0(FinancialDataFolder,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBGPORTOutput <- BBG_Data
 CompNames <- unique(subset(BBGPORTOutput, select = c("Ticker","Issuer")))
