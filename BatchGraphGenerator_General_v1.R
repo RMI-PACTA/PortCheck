@@ -92,6 +92,15 @@ REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
+### List of Files to read in
+EQBatchTest <- NA
+CBBatchTest <- NA
+EQBatchTest_PortSnapshots <- NA
+CBBatchTest_PortSnapshots <- NA
+EQCompProdSnapshots <- NA
+CBCompProdSnapshots <- NA
+
+
 ### Get Equity Batch Results
 if (file.exists(paste0(BATCH.RES.PATH,BatchName,"/",BatchToTest,"/",BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
   EQBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
@@ -142,8 +151,9 @@ if (exists("FundList")){
 }
 
 ### Remove Listed Market if it's there
-EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
-CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
+### Need the Listed Market
+# EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
+# CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
 
 ### Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
@@ -262,7 +272,7 @@ CBBatchTest$ComparisonType <- "BatchResults"
 # If there is a comparison file (ie the results are not being compared to themselves, the results are bound here)
 if (ComparisonType != "CompareBatch"){
   
-  if (nrow(EQBatchTest) >0){
+  if (is.null(nrow(EQBatchTest)) != TRUE){
     EQComparisonBatchTest$ComparisonType <- "ComparisonResults"
     EQBatchTest <-AddMissingColumns(EQBatchTest,EQComparisonBatchTest)
     EQComparisonBatchTest <-AddMissingColumns(EQComparisonBatchTest,EQBatchTest)
@@ -270,6 +280,7 @@ if (ComparisonType != "CompareBatch"){
     
     EQBatchTest_PortSnapshots <- rbind(EQBatchTest_PortSnapshots,EQComparisonPortSS)
   }
+  if (is.null(nrow(CBBatchTest)) != TRUE){
     CBComparisonBatchTest$ComparisonType <- "ComparisonResults"
     CBBatchTest <-AddMissingColumns(CBBatchTest,CBComparisonBatchTest)
     CBComparisonBatchTest <-AddMissingColumns(CBComparisonBatchTest,CBBatchTest)
@@ -284,7 +295,7 @@ if (ComparisonType != "CompareBatch"){
 
 ### Calculates Exposure, AUM, Coverage Weight and Weighted Mean of Coverage Weight 
 
-if (nrow(EQBatchTest) >0){
+if (is.null(nrow(EQBatchTest)) != TRUE){
   EQResults <- company.comparison("EQ",EQBatchTest,EQBatchTest_PortSnapshots, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   EQExposures <- EQResults[[1]]
   EQAUMs <- EQResults[[2]]
@@ -292,7 +303,7 @@ if (nrow(EQBatchTest) >0){
   EQWMCoverageWeights <- EQResults[[4]]
 }
 
-if (nrow(CBBatchTest) >0){
+if (is.null(nrow(CBBatchTest)) != TRUE){
   CBResults <- company.comparison("CB",CBBatchTest, BatchTest_PortSnapshots,Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
   CBExposures <- CBResults[[1]]
   CBAUMs <- CBResults[[2]]
@@ -328,12 +339,13 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 #--------
 
 # b<- c("Pensionskassen")
-# ToTest2 <- which(TestList$PortfolioName %in% b)
+ToTest2 <- which(TestList$PortfolioType %in% "InvestorMPs")
+ToTest2 <- c(25,26,27,12)
 
 #-------
 # Loop through Portfolios
 #--------
-for (i in 1:nrow(TestList)){
+for (i in ToTest2){
   
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
@@ -393,33 +405,35 @@ for (i in 1:nrow(TestList)){
   
   ##### NEW SECTION
   ### Selects the current portfolio from the Comparative Results
-  EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == "ComparisonResults" & EQExposures$PortName != PortName),]
-  EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == "ComparisonResults"),]
-  EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
-  
-  if (EQCoverageWeights != "NoResults"){
-    EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == "BatchResults"),]
-    EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == "BatchResults"),]
-    EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName & EQCoverageWeights$ComparisonType == "BatchResults"),]
-    EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
-    EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
-    EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
+  if (is.null(nrow(EQBatchTest)) != TRUE){
+    EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == "ComparisonResults" & EQExposures$PortName != PortName),]
+    EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == "ComparisonResults"),]
+    EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
+    
+    if (EQCoverageWeights != "NoResults"){
+      EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == "BatchResults"),]
+      EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == "BatchResults"),]
+      EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName & EQCoverageWeights$ComparisonType == "BatchResults"),]
+      EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
+      EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
+      EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
+    }
   }
-  
-  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == "ComparisonResults" & CBExposures$PortName != PortName),]
-  CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == "ComparisonResults"),]
-  CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
-  ### Could add additional filter in at this point. 
-  
-  if (CBCoverageWeights != "NoResults"){  
-    CBExposure <- CBExposures[CBExposures$PortName == PortName & CBExposures$ComparisonType == "BatchResults",]  
-    CBAUMData <- CBAUMs[which(CBAUMs$PortName == PortName & CBAUMs$ComparisonType == "BatchResults"),] 
-    CBCoverageWeight <- CBCoverageWeights[which(CBCoverageWeights$PortName == PortName & CBCoverageWeights$ComparisonType == "BatchResults"),]
-    CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
-    CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
-    CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs) 
-  } 
-  
+  if (is.null(nrow(CBBatchTest)) != TRUE){
+    CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == "ComparisonResults" & CBExposures$PortName != PortName),]
+    CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == "ComparisonResults"),]
+    CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
+    ### Could add additional filter in at this point. 
+    
+    if (CBCoverageWeights != "NoResults"){  
+      CBExposure <- CBExposures[CBExposures$PortName == PortName & CBExposures$ComparisonType == "BatchResults",]  
+      CBAUMData <- CBAUMs[which(CBAUMs$PortName == PortName & CBAUMs$ComparisonType == "BatchResults"),] 
+      CBCoverageWeight <- CBCoverageWeights[which(CBCoverageWeights$PortName == PortName & CBCoverageWeights$ComparisonType == "BatchResults"),]
+      CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
+      CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
+      CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs) 
+    } 
+  }
   ##### NEW SECTION END  
   
   
@@ -433,12 +447,14 @@ for (i in 1:nrow(TestList)){
   
   ### Sectors with Production
   ### Used to check whether a Line Graph, Ranking, and BarChart should be printed
-  EQSectorProd <- SectorProduction(EQCombin,"EQ")
-  CBSectorProd <- SectorProduction(CBCombin,"CB")
+  if (is.null(nrow(EQBatchTest)) != TRUE){
+    EQSectorProd <- SectorProduction(EQCombin,"EQ")}
+  if (is.null(nrow(CBBatchTest)) != TRUE){
+    CBSectorProd <- SectorProduction(CBCombin,"CB")}
   
   ### Specify Language and Load Report 
   Languagechoose <-  ParameterFile$Languageselect
-  Languagechoose <- "FR"
+  # Languagechoose <- "FR"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
   RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
@@ -571,4 +587,13 @@ for (i in 1:nrow(TestList)){
   write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
   write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
 }
+
+
+### Summary Heat Map ###
+
+
+fundmap_chart(99, FundsInPort, Startyear, Scenariochoose, PortfolioName)
+
+
+
 
