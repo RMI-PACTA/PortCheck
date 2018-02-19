@@ -560,7 +560,26 @@ MarketRef <- rename(MarketRef, c("CompanyLvlProd" = "RefCompanyLvlProd", "Compan
 
 MarketRef <- subset(MarketRef, MarketRef$Year == Startyear, select = -c(Year))
 
+# Technology share of the technology in this benchmarkregion
+MarketRef$MarketTechShareRef <- MarketRef$RefCompanyLvlProd/MarketRef$RefCompanyLvlSecProd
+# Technology share of the technology in of the global portfolio
+MarketRef$RegionWtMarketTechShareRef <- MarketRef$MarketTechShareRef * MarketRef$RegionalWeightingFactorCompany
 
+## Calculate
+MarketRef[is.na(MarketRef)] <- 0
+MarketRef <- subset(MarketRef, ClimateSecDebt != 0)
+
+# Wt = The Sectoral Weight within the Debt
+MarketRef$Wt <- MarketRef$ClimateSecDebt/TotalDebt
+MarketRef$RegionWtMarketWtCompanies <-  MarketRef$Wt * MarketRef$RegionalWeightingFactorCompany
+
+CompanyWeightingData <- unique(subset(MarketRef, select = c("DebtTicker","Sector","BenchmarkRegion","Wt","RegionalWeightingFactorCompany","RegionWtMarketWtCompanies")))
+
+MarketRef$CompWtProjMarketTechShare <- MarketRef$RegionWtMarketTechShareRef * MarketRef$Wt
+
+####### Matches v15 up until here ############
+
+#-------
 ## Add lines for all technologies in each benchregion for each company. This is to insure that fair share addtions are added to cmpanyes who have existing production in each respective benchregion
 DebtTickerList <- unique(subset(MarketRef, select= c("DebtTicker")))
 
@@ -569,9 +588,9 @@ t <- subset(MarketRef, select = c(DebtTicker, Sector,Technology, BenchmarkRegion
 t1 <- datacompletionSub(t)
 
 # remove unneccessarly combinations of sector and benchregion
-t2 <- subset(t1, ((Sector == "Power" & BenchmarkRegion %in% AllLists$PowerBenchmarkRegionGlobal) | 
-                    (Sector == "Automotive" & BenchmarkRegion == "Global") | 
-                    (Sector == "Oil&Gas" & BenchmarkRegion %in% AllLists$FossilFuelBenchmarkRegions) | 
+t2 <- subset(t1, ((Sector == "Power" & BenchmarkRegion %in% AllLists$PowerBenchmarkRegionGlobal) |
+                    (Sector == "Automotive" & BenchmarkRegion == "Global") |
+                    (Sector == "Oil&Gas" & BenchmarkRegion %in% AllLists$FossilFuelBenchmarkRegions) |
                     (Sector == "Coal" & BenchmarkRegion %in% "Global")))
 
 # Add Global level debt ticker data back to completed dataframe
@@ -593,7 +612,7 @@ t10[is.na(t10)] <- 0
 
 MarketRef <- t10
 rm(t,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10)
-
+#----------
 
 # Convert IEA sectors for fossel fuels
 IEATargetssub$Sector[IEATargetssub$Technology == "Coal"] <- "Coal"
@@ -602,6 +621,76 @@ IEATargetssub$Sector[IEATargetssub$Technology == "Gas"] <- "Oil&Gas"
 
 # Clean IEATargets
 IEATargetssub[IEATargetssub == "NaN"] <- 0
+
+####### Add in Aggregated MarketRef ##########
+
+RegionalMarketWeights <- CompanyWeightingData
+RegionalMarketWeights <- ddply(RegionalMarketWeights,.(Sector,BenchmarkRegion),summarise, MarketWeightRegionWeight = sum(RegionWtMarketWtCompanies,na.rm = TRUE))
+
+# Technology Aggregation of Debt Tickers
+MarketRefTechAgg <- ddply(MarketRef,.(Sector, Technology, BenchmarkRegion), summarize,
+                          RefMarketLvlProd = sum(RefCompanyLvlProd, na.rm=TRUE),
+                          # EquityIntensity=sum(EquityIntensity, na.rm=TRUE),
+                          Wt=sum(Wt, na.rm=TRUE),
+                          # WtProduction=sum(WtProduction, na.rm=TRUE),
+                          RefCarstensMetric = sum(CompWtProjMarketTechShare, na.rm=TRUE))
+
+# Sector Aggregation of Debt Tickers
+MarketRefSecAgg <- ddply(MarketRefTechAgg,.(Sector, BenchmarkRegion), summarize,
+                         RefMarketLvlSecProd  = sum(RefMarketLvlProd, na.rm=TRUE),
+                         RefCarstensMetricSec = sum(RefCarstensMetric, na.rm=TRUE))
+
+# Combination
+MarketRefAgg <- merge(MarketRefTechAgg, MarketRefSecAgg, by= c("Sector", "BenchmarkRegion"), all.x = TRUE)
+
+MarketRefAgg <- merge(MarketRefAgg,IEATargetssub, by = c("BenchmarkRegion","Sector","Technology"), all.x = TRUE)
+
+### Calculate projected production values
+## Relative to the market and including current assets and future plans 
+MarketRefAgg$ProjMarketProd <-  MarketRefAgg$RefMarketLvlProd + MarketRefAgg$RefMarketLvlSecProd * MarketRefAgg$FairSharePerc
+MarketRefAgg$ProjMarketProd[which(MarketRefAgg$Direction == "declining")] <-  MarketRefAgg$RefMarketLvlProd[which(MarketRefAgg$Direction == "declining")] * (1 + MarketRefAgg$FairSharePerc[which(MarketRefAgg$Direction == "declining")])
+
+MarketRefAgg$Benchmark_CarstensMetric <-  MarketRefAgg$RefCarstensMetric +  MarketRefAgg$RefCarstensMetricSec * MarketRefAgg$FairSharePerc
+MarketRefAgg$Benchmark_CarstensMetric[which(MarketRefAgg$Direction == "declining")] <-  MarketRefAgg$RefCarstensMetric[which(MarketRefAgg$Direction == "declining")] * (1 + MarketRefAgg$FairSharePerc[which(MarketRefAgg$Direction == "declining")])
+MarketRefAgg$WtProjMarketProduction <- MarketRefAgg$ProjMarketProd * MarketRefAgg$Wt
+
+MarketRefSecAgg <- ddply(MarketRefAgg,.(Sector, Year, Scenario, BenchmarkRegion), summarize, 
+                      ProjMarketProdSec = sum(ProjMarketProd, na.rm=TRUE), 
+                      WtProjMarketProductionSec = sum(WtProjMarketProduction, na.rm = TRUE),
+                      Benchmark_CarstensMetricSec = sum(Benchmark_CarstensMetric,na.rm = TRUE))
+
+MarketRefAgg <- merge(MarketRefAgg, MarketRefSecAgg, by= c("Sector", "BenchmarkRegion", "Year","Scenario"), all.x = TRUE)
+
+MarketRefAgg <- merge(MarketRefAgg, MarketSecWts, by = "Sector",all.x = TRUE, all.y = FALSE)
+
+MarketRefAgg$WtTechShareTechShare <- MarketRefAgg$Benchmark_CarstensMetric / MarketRefAgg$Benchmark_CarstensMetricSec
+
+MarketRefAgg <- rename(MarketRefAgg, c("Wt" = "WtMarket", "SectorWeight" = "SecWtMarket",	"WtTechShareTechShare" = "WtTechShareTechShareMarket")) #"SectorWeight" = "SectorWeightMarket"
+
+### Add in the reference value (Start year)
+CompGrowthRefVal <- unique(subset(MarketRefAgg, MarketRefAgg$Year == Startyear & !is.na(MarketRefAgg$ProjMarketProd), select = c("Sector","BenchmarkRegion","Technology","ProjMarketProd")))
+CompGrowthRefVal <- rename(CompGrowthRefVal, c("ProjMarketProd" = "RefProjMarketProd"))
+
+MarketRefAgg<- merge(MarketRefAgg, CompGrowthRefVal, by =  c("Sector","BenchmarkRegion","Technology"), all.x = TRUE)
+MarketRefAgg$RefCompanyLvlGrowth[!is.na(MarketRefAgg$RefProjMarketProd)] <- (MarketRefAgg$CompanyLvlProd[!is.na(MarketRefAgg$RefProjMarketProd)]-MarketRefAgg$RefProjMarketProd[!is.na(MarketRefAgg$RefProjMarketProd)])/MarketRefAgg$RefProjMarketProd[!is.na(MarketRefAgg$RefProjMarketProd)]
+
+RegionalBenchmarkAgg <- MarketRefAgg
+
+# MarketBenchmarkGlobal <- merge(MarketRefAgg,RegionalMarketWeights, by = c("Sector","BenchmarkRegion"),all.x = TRUE)
+# MarketBenchmarkGlobal$PortfolioSpecific_RegWt_CarstensMetric <- MarketBenchmarkGlobal$Benchmark_CarstensMetric / MarketBenchmarkGlobal$Benchmark_CarstensMetricSec * MarketBenchmarkGlobal$MarketWeightRegionWeight
+# MarketBenchmarkGlobalAggregate <- aggregate(MarketBenchmarkGlobal["PortfolioSpecific_RegWt_CarstensMetric"], by=MarketBenchmarkGlobal[,c("Sector","Year","Technology","Scenario")], FUN=sum)
+# MarketBenchmarkGlobalAggregate$BenchmarkRegion <- "GlobalAggregate"
+# MarketBenchmarkGlobalAggregate <- rename(MarketBenchmarkGlobalAggregate, c("PortfolioSpecific_RegWt_CarstensMetric" = "Benchmark_CarstensMetric"))
+# 
+# 
+# # Calculate Market Global Aggregate benchmark - compare to global benchmark using old code.
+# MarketRefAggSave <- MarketBenchmarkGlobalAggregate
+# MarketRefAggSave$PortName <- "Market_Benchmark"
+
+
+########## End of Agg ###########
+
+
 
 #Merge IEA targets the fair share perentage
 MarketRef <- merge(MarketRef,IEATargetssub, by = c("BenchmarkRegion","Sector","Technology"), all.x = TRUE)
