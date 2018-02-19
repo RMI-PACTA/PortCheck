@@ -91,6 +91,18 @@ datacompletionSub <- function (Data){
   return(Data)
 }
 
+datacompletion <- function (Data){
+  Data <- subset(Data, Technology %in% AllLists$TechList)
+  Data <- Data %>% complete(Technology = AllLists$TechList, 
+                            Year = full_seq(c(Startyear,Startyear+10),1), 
+                            fill = list(CompanyLvlProd = 0, Wt = 0, WtProduction = 0, 
+                                        CarstenMetric_Port = 0))
+  Data$Sector <- "Power"
+  Data$Sector[Data$Technology %in% c("Oil","Gas")] <- "Oil&Gas" 
+  Data$Sector[Data$Technology %in% c("Coal")] <- "Coal" 
+  Data$Sector[Data$Technology %in%c("Electric","Hybrid","ICE")] <-"Automotive"
+  return(Data)
+}
 
 MultipleDataBind <- function(List,Headers){
   for (k in 1:length(List)){
