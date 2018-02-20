@@ -155,22 +155,23 @@ MasterData<-subset(MasterData, MasterData$Year >= Startyear)
 
 # ------
 # b) Read in Asset level Data Bridges
+# ------
 # ALDBridge <- read.csv(paste0(PROC.DATA.PATH,"/ALDEquityBridge_2017-10-27.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
 
-# c) Read in stored company level financial data (Data retrieved from API and PORT function) 
-
 # ------
-# c) Read in financial data (Data retrieved from BBG PORT function)
-# BBGPORTOutput <- read.csv(paste0(PORT.FIN.DATA.PATH,BBGPORTOutput,".csv"),stringsAsFactors=FALSE)
+# c) Read in stored company level financial data (Data retrieved from API and PORT function) 
+# ------
 BBGPORTOutput <- BBGPORTOutput[!duplicated(BBGPORTOutput$ISIN),]
 
 # ------
 # d) Read in portoflio holdings (Portfolio holdings data given by Regulator or Instituion)
+# ------
 # PortfolioAllPorts <- read.csv(paste0(PORTS.PATH,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_Bonds.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 
 
 # ------
 # e) #Define sector claissification based of BIC subgroup. Need to consoludiate SERCH BIC level 2 calssfication with whatever we were using for moodies.
+# ------
 PowerBIC <- c("Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
 PowerBICdf <- data.frame("BIClvl2" = PowerBIC, "Sector" = "Power")
 OilGasBIC <-c("Oil Comp-Explor&Prodtn", "Oil Comp-Integrated","Oil&Gas Drilling" ,"Exploration...Production","Integrated.Oils") #Metal-Diversified is to get Rio Tinto...
@@ -182,9 +183,10 @@ AutoBICdf <- data.frame("BIClvl2" = AutoBIC, "Sector" = "Automotive")
 FuturesecsBIC <- c("Bldg Prod-Cement/Aggreg","Steel-Producers", "Metal-Iron","Metal-Aluminum","Airlines","Transport-Air Freight", "Transport-Marine")
 FuturesecsBICdf <- data.frame("BIClvl2" = FuturesecsBIC, "Sector" = "Futuresecs")
 BICSectors <- rbind(PowerBICdf,OilGasBICdf,AutoBICdf,FuturesecsBICdf,CoalBICdf)
-# ------
 
+# ------
 # f) Read in regions data
+# ------
 # Import Regionsfile
 # RegionLists <- read.csv(paste0(FolderLocation,"Data/RegionLists.csv"), na.strings = c(""))
 
@@ -223,6 +225,16 @@ SectorList <- c("Automotive","Coal","Power","Oil&Gas")
 AllLists <- list(TechList = TechnologyList, PowerBenchmarkRegionOECD = PowerBenchmarkRegionOECD, PowerBenchmarkRegionNonOECD = PowerBenchmarkRegionNonOECD, PowerBenchmarkRegionGlobal = PowerBenchmarkRegionGlobal,
                  FossilFuelBenchmarkRegions = FossilFuelBenchmarkRegions, FossilFuelBenchmarkRegionsOECD = FossilFuelBenchmarkRegionsOECD, FossilFuelBenchmarkRegionsNonOECD = FossilFuelBenchmarkRegionsNonOECD,
                  MutualExclusiveCompanyDomicileRegions = MutualExclusiveCompanyDomicileRegions)
+
+# techlist <- data.frame("Technology" = AllLists$TechList)
+# #regionlist <- data.frame("BenchmarkRegion" = c("Global","OECD","Non-OECD","EU28","U.S."))
+# yearlist <- data.frame("Year" = unique(PortMix$Year))
+# # yearlist <- data.frame("Year" = Startyear:(Startyear+10))
+# lineadd <- merge(techlist,yearlist)
+# lineadd$Sector <- "Power"
+# lineadd$Sector[lineadd$Technology %in% c("Oil","Gas")] <- "Oil&Gas" 
+# lineadd$Sector[lineadd$Technology %in% c("Coal")] <- "Coal" 
+# lineadd$Sector[lineadd$Technology %in%  c("Electric","Hybrid","ICE")] <-  "Automotive"
 
 # ------
 # g) Read in scenario data
@@ -312,20 +324,39 @@ IEATargets$FairSharePerc[IEATargets$Direction == "declining"] <- IEATargets$tech
 IEATargets <- rename(IEATargets, c("Region" ="BenchmarkRegion"))
 IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
 
-# Create market data or read it in
-# For debt the market data is different as the market is different. It's no longer the listed universe, but the debt universe.
-#if (CalculateMarketData == 1){
+# Convert IEA sectors for fossel fuels
+IEATargetssub$Sector[IEATargetssub$Technology == "Coal"] <- "Coal"
+IEATargetssub$Sector[IEATargetssub$Technology == "Oil"] <- "Oil&Gas"
+IEATargetssub$Sector[IEATargetssub$Technology == "Gas"] <- "Oil&Gas"
 
-#add debt data
-# DebtData <- read.csv(paste0(PROC.DATA.PATH,"/Cbonds_Issuer&Subs_DebtTicker_BICS_2016Q4.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+# Clean IEATargets
+IEATargetssub[IEATargetssub == "NaN"] <- 0
+
+rm(IEATargets,IEATargetsPower,IEATargetsNew,IEATargetswide,RETargets,refvalIEA,EndRefValIEA )
+
+# ------
+# 1.  Processing of DebtData
+# ------
+
+# Debt Data is all of the DebtData from Bloomberg
+# Processing includes:
+# - cleaning to remove negative values
+# - adding sector breakdown
+# - aggregating to debt ticker level
+# - adding benchmark region
+# - adding some weighting factors
+#
+# Output: DataDebtCORP
+# Used as the basis for Market and Portfolio Debt. 
+
+
+### Initial cleaning ###
+
 # Rename Total row as to not confuse it with TOTAL SA...
 DebtData$Co..Corp.TKR[DebtData$Co..Corp.TKR == "Total"] <- "TotalDebt"
 
 GovBanksSupraNat <- subset(DebtData, (DebtData$Government.Development.Banks !=0 | DebtData$Supranationals != 0) & DebtData$Co..Corp.TKR != "TotalDebt") 
-#sum(GovBanksSupraNat$Total)
-#sum(DebtData$Total)-subset(DebtData,DebtData$Co..Corp.TKR =="TotalDebt")$Total
 DebtData <- subset(DebtData, !DebtData$Co..Corp.TKR %in% GovBanksSupraNat$Co..Corp.TKR)
-#sum(DebtData$Total)-subset(DebtData,DebtData$Co..Corp.TKR =="TotalDebt")$Total
 TotalDebt <- sum(DebtData$Total)-subset(DebtData,DebtData$Co..Corp.TKR =="TotalDebt")$Total
 
 # Process debt according to 2DII sector classification
@@ -339,11 +370,15 @@ DebtData$Other <- DebtData$Total - DebtData$Other
 DebtData <- rename(DebtData, c("Total" = "TotalCorpDebt"))
 DebtData[is.na(DebtData)] <- 0
 
-# Create portfolio for bond universe to be rbound with PortfolioAllPorts. have to have a bond for every secotr classifcation... so need to melt.
+### Universe Port ###
+
+# Create portfolio for bond universe to be rbound with PortfolioAllPorts. have to have a bond for every sector classifcation... so need to melt.
 UniversePort <- subset(DebtData, select = -c(TotalCorpDebt), DebtData$Co..Corp.TKR != "TotalDebt")
 UniversePort <- melt(UniversePort, id.vars = c("Co..Corp.TKR"), variable.name = "Subgroup", value.name = "Position")
 UniversePort <- subset(UniversePort, UniversePort$Position != 0)
 UniversePort$SectorWeight <- UniversePort$Position/sum(UniversePort$Position, na.rm = TRUE)
+
+# Creat FF subset of MasterData
 MasterDatasub <- MasterData
 MasterDatasub$Sector[MasterDatasub$Sector == "Fossil Fuels" & MasterDatasub$Technology %in% c("Oil","Gas")] <- "Oil&Gas"
 MasterDatasub$Sector[MasterDatasub$Sector == "Fossil Fuels" & MasterDatasub$Technology == "Coal"] <- "Coal"
@@ -411,8 +446,8 @@ if(dim(temp2)[1]>0){
 rm(temp1,temp2)  
 
 UniversePort <- subset(UniversePort, UniversePort$Position != 0 & UniversePort$piesector %in% c("Utility Power", "Coal", "Automotive","Oil&Gas"), select = -c(Sector))
-# s <- UniversePort[duplicated(UniversePort[["Co..Corp.TKR"]], fromLast=TRUE), ]
-# s <- subset(UniversePort, UniversePort$Co..Corp.TKR %in% s$Co..Corp.TKR)
+
+### Weighting
 
 CORPSecWts <- UniversePort
 CORPSecWts <- merge(CORPSecWts, BICSectors, by.x = "Subgroup", by.y = "BIClvl2", all.x = TRUE)
@@ -424,8 +459,12 @@ CORPSecWts <- ddply(CORPSecWts,.(DebtTicker, Sector), summarize,
 MarketSecWts <- ddply(CORPSecWts,.(Sector), summarize,
                       SectorWeight=sum(SectorWeight, na.rm=TRUE))
 
-
-#Continue with market portfolio
+### CorpSecWts -- AUM % weight of bond uni of each Ticker/BICS Sector matched to ALD
+### basically, maps company/sector AUM % of bond universe issuance to that company's ALD sector production 
+### maps the company/sector share of the bond universe AUM to the company/sector amount of production
+### MarketSecWts -- AUM % weight of bond uni each BICS Sector matched to ALD
+### DebtData: Ticker / sector 1 debt, sector 2 debt, other debt, total debt - one row per ticker
+### MasterData: Ticker / Sector / Tech / Year / Location - definitely multiple rows for each Ticker#Continue with market portfolio
 DebtData <- merge(MasterData, DebtData, by.x = "DebtTicker", by.y = "Co..Corp.TKR", all = TRUE)
 DebtData$PowerDebt <- rowSums(DebtData[,c("Power.Generation", "Utilities")], na.rm=T)
 DebtData$AutoDebt <- DebtData$Automobiles.Manufacturing
@@ -449,7 +488,6 @@ DebtData <- subset(DebtData, !DebtData$DebtTicker == "")
 #Sum debt for relevant sectos
 DebtData$ClimateSecDebt[DebtData$Sector == "Power" & DebtData$PowerDebt != 0] <- DebtData$PowerDebt[DebtData$Sector == "Power" & DebtData$PowerDebt != 0]
 DebtData$ClimateSecDebt[DebtData$Sector == "Automotive" & DebtData$AutoDebt != 0] <- DebtData$AutoDebt[DebtData$Sector == "Automotive" & DebtData$AutoDebt != 0]
-#DebtData$ClimateSecDebt[DebtData$Sector == "Fossil Fuels" & DebtData$TotalDebt != 0] <- DebtData$TotalDebt[DebtData$Sector == "Fossil Fuels" & DebtData$TotalDebt != 0]
 DebtData$ClimateSecDebt[DebtData$Sector == "Oil&Gas" & DebtData$OGDebt != 0] <- DebtData$OGDebt[DebtData$Sector == "Oil&Gas" & DebtData$OGDebt != 0]
 DebtData$ClimateSecDebt[DebtData$Sector == "Coal" & DebtData$CoalDebt != 0] <- DebtData$CoalDebt[DebtData$Sector == "Coal" & DebtData$CoalDebt != 0]
 
@@ -466,11 +504,13 @@ DebtDataCORP_global <-ddply(DebtDataCORP_global,.(DebtTicker, Sector, Year, Tech
 DebtDataCORP_global <- subset(DebtDataCORP_global, DebtDataCORP_global$CompanyLvlProd != 0)
 
 #Calculate global sector production per debt ticker
-DebtDataCORPSec_global <- ddply(DebtDataCORP_global,.(DebtTicker, Sector, Year,ClimateSecDebt, TotalDebt), summarize,
+DebtDataCORPSec_global <- ddply(DebtDataCORP_global,.(DebtTicker, Sector, Year, ClimateSecDebt, TotalDebt), summarize,
                                 CompanyLvlSecProd = sum(CompanyLvlProd, na.rm=TRUE)) #PowerDebt, AutoDebt, OGDebt, CoalDebt, OtherDebt,
 
-#Merge sector and technology values and Calculate tech share
+# Merge sector and technology values and Calculate tech share
+### Adds CompanySecLvlProd
 DebtDataCORP_global <- merge(DebtDataCORP_global,DebtDataCORPSec_global, by = c("DebtTicker", "Sector", "Year", "ClimateSecDebt","TotalDebt")) #"PowerDebt","AutoDebt", "OGDebt", "CoalDebt", "OtherDebt", 
+# ALL AT THE GLOBAL LEVEL - ignores REGIONS and locations
 DebtDataCORP_global$TechShare <- 1
 DebtDataCORP_global$TechShare <- DebtDataCORP_global$CompanyLvlProd/DebtDataCORP_global$CompanyLvlSecProd
 
@@ -478,6 +518,7 @@ DebtDataCORP_global$Aggregation <- "Global"
 DebtDataCORP_global$BenchmarkRegion <- "Global"
 DebtDataCORP_global$RegionalWeightingFactorCompany <- 1
 
+#### NOW TO ADD BECHMARK REGIONS
 #Merge with ISO codes then put the production in each country into it's resepective benchmark region
 DebtData <- merge(DebtData, CountryISOList, by.x = "PlantLocation", by.y = "GDPlantLocation", all.x = TRUE)
 
@@ -493,6 +534,7 @@ for (j in 1:length(BenchmarkRegionList$BenchmarkRegion)){
 }
 
 #Aggregate production of each technology from each debt ticker at the benchmark region level
+# this aggregates over individual plant location countries to Behnchmark Region
 DebtDataCORP <- ddply(DebtDataCORP,.(DebtTicker, Sector, Year, Technology, BenchmarkRegion, ClimateSecDebt, TotalDebt), summarize,
                       CompanyLvlProd=sum(CompanyLvlProd, na.rm=TRUE)) #PowerDebt, AutoDebt, OGDebt, CoalDebt, OtherDebt,
 
@@ -510,7 +552,7 @@ DebtDataCORPSecGlobal <- ddply(DebtDataCORPSecRef,.(DebtTicker, Sector, ClimateS
                                CompanyLvlSecProdGlobal=sum(CompanyLvlSecProd, na.rm=TRUE))
 DebtDataCORPSecRef <- merge(DebtDataCORPSecRef, DebtDataCORPSecGlobal, by = c("DebtTicker", "Sector", "ClimateSecDebt", "TotalDebt", "Year"))
 
-#Calculate the of production/capacity in each region. This will be use to distrubte the AUM/expsosure to each region and the relateve misalignment with the market in that region.
+#Calculate the of production/capacity in each region. This will be use to distrubte the AUM/expsosure to each region and the relative misalignment with the market in that region.
 DebtDataCORPSecRef$RegionalWeightingFactorCompany <- DebtDataCORPSecRef$CompanyLvlSecProd / DebtDataCORPSecRef$CompanyLvlSecProdGlobal
 
 DebtDataCORP <- merge(DebtDataCORP,DebtDataCORPSec, by = c("DebtTicker", "Sector", "BenchmarkRegion", "Year", "ClimateSecDebt", "TotalDebt")) # "PowerDebt","AutoDebt", "OGDebt", "CoalDebt", "OtherDebt", 
@@ -519,12 +561,12 @@ DebtDataCORP <- merge(DebtDataCORP,subset(DebtDataCORPSecRef, select = c("DebtTi
 DebtDataCORPsave <- DebtDataCORP
 DebtDataCORP <- DebtDataCORPsave
 
-# Calaculate the technology share/fuel mix
+# Calculate the technology share/fuel mix
 DebtDataCORP$TechShare <- 1
 DebtDataCORP$Aggregation <- "GlobalAggregate"
 DebtDataCORP$TechShare <- DebtDataCORP$CompanyLvlProd/DebtDataCORP$CompanyLvlSecProd
 
-#Merge back with  values aggreagted at the global level
+# Merge back with  values aggregated at the global level
 DebtDataCORP_global[setdiff(colnames(DebtDataCORP),colnames(DebtDataCORP_global))] <- NA
 DebtDataCORP <- rbind(DebtDataCORP, DebtDataCORP_global)
 DebtDataCORP[is.na(DebtDataCORP)] <- 0
@@ -545,23 +587,36 @@ DebtDataCORP$WtProduction <- DebtDataCORP$CompanyLvlProd * DebtDataCORP$Wt
 # Allocate a portion of the technolgy mix based off the technolgies debt wt in the market
 DebtDataCORP$WtTechShare <- DebtDataCORP$TechShare * DebtDataCORP$Wt
 
-# Calaculate the Carsten Metric. For global it's the debt ticker's wt (debt/total debt) multiplied by the techshare, for regional: it's the debt ticker's global wt
-# multiplied by the regional waiting factor multiplied by the techshare
+# Calculate Carsten Metric. 
+# For global it's the debt ticker's wt (debt/total debt) multiplied by the techshare, 
+# For regions: it's the debt ticker's global wt multiplied by the regional waiting factor multiplied by the techshare
 DebtDataCORP$Market_CarstensMetric <- DebtDataCORP$RegionalWeightingFactorCompany*DebtDataCORP$Wt*DebtDataCORP$TechShare
 
 # ## Calculate company level change (growth) in production to be used for new metric that scales the portfolio wt by the companies planned production
 MasterDataDebt <- subset(DebtDataCORP, select = -c(WtProduction))
 MasterDataDebt <- rename(MasterDataDebt, c("Wt" = "CORPD_Global_Wt"))
 
-# Merge with IEA targets (only by year =  start year!)
-MarketRef <- subset(DebtDataCORP, DebtDataCORP$Year == Startyear & Aggregation == "GlobalAggregate", select = c("DebtTicker", "Sector", "Technology","Year", "ClimateSecDebt", "TotalDebt",
-                                                                                                                "CompanyLvlProd", "CompanyLvlSecProd","RegionalWeightingFactorCompany", "BenchmarkRegion", "TechShare", "Wt"))
+rm(DebtDataCORPSecRef,DebtDataCORP_global,DebtDataCORPSec_global,DebtDataCORP_regional,DebtDataCORPSec,DebtDataCORPSec_global,DebtDataCORPSecGlobal)
+
+# ------
+# 2.  Creation of Market Reference Portfolio
+# ------
+
+# Create market data or read it in
+# For debt the market data is different as the market is different. It's no longer the listed universe, but the debt universe.
+#if (CalculateMarketData == 1){
+
+### MarketRef- subset of the DebtDataCORP as per the market. 
+### Not aggregated by DebtTicker
+
+MarketRef <- subset(DebtDataCORP, DebtDataCORP$Year == Startyear & Aggregation == "GlobalAggregate", 
+                    select = c("DebtTicker", "Sector", "Technology","Year", "ClimateSecDebt", "TotalDebt",
+                               "CompanyLvlProd", "CompanyLvlSecProd","RegionalWeightingFactorCompany", "BenchmarkRegion", "TechShare", "Wt"))
+
 MarketRef <- rename(MarketRef, c("CompanyLvlProd" = "RefCompanyLvlProd", "CompanyLvlSecProd" = "RefCompanyLvlSecProd", "TechShare"="MarketTechShareRef", "Wt" = "WtMarket"))
 
 MarketRef <- subset(MarketRef, MarketRef$Year == Startyear, select = -c(Year))
 
-# Technology share of the technology in this benchmarkregion
-MarketRef$MarketTechShareRef <- MarketRef$RefCompanyLvlProd/MarketRef$RefCompanyLvlSecProd
 # Technology share of the technology in of the global portfolio
 MarketRef$RegionWtMarketTechShareRef <- MarketRef$MarketTechShareRef * MarketRef$RegionalWeightingFactorCompany
 
@@ -570,14 +625,14 @@ MarketRef[is.na(MarketRef)] <- 0
 MarketRef <- subset(MarketRef, ClimateSecDebt != 0)
 
 # Wt = The Sectoral Weight within the Debt
-MarketRef$Wt <- MarketRef$ClimateSecDebt/TotalDebt
-MarketRef$RegionWtMarketWtCompanies <-  MarketRef$Wt * MarketRef$RegionalWeightingFactorCompany
+MarketRef$RegionWtMarketWtCompanies <-  MarketRef$WtMarket * MarketRef$RegionalWeightingFactorCompany
 
-CompanyWeightingData <- unique(subset(MarketRef, select = c("DebtTicker","Sector","BenchmarkRegion","Wt","RegionalWeightingFactorCompany","RegionWtMarketWtCompanies")))
+CompanyWeightingData <- unique(subset(MarketRef, select = c("DebtTicker","Sector","BenchmarkRegion","WtMarket","RegionalWeightingFactorCompany","RegionWtMarketWtCompanies")))
 
-MarketRef$CompWtProjMarketTechShare <- MarketRef$RegionWtMarketTechShareRef * MarketRef$Wt
+MarketRef$CompWtProjMarketTechShare <- MarketRef$RegionWtMarketTechShareRef * MarketRef$WtMarket
 
 ####### Matches v15 up until here ############
+# colnames(MarketRef)
 
 #-------
 ## Add lines for all technologies in each benchregion for each company. This is to insure that fair share addtions are added to cmpanyes who have existing production in each respective benchregion
@@ -606,32 +661,34 @@ t7 <- unique(subset(MarketRef, select = c("DebtTicker", "Sector", "BenchmarkRegi
 t8 <- merge(t6,t7, by = c("DebtTicker", "Sector", "BenchmarkRegion", "ClimateSecDebt", "WtMarket"))
 
 # Add Technology level data back
-t9 <- unique(subset(MarketRef, select = c("DebtTicker", "Sector", "BenchmarkRegion", "Technology", "ClimateSecDebt", "WtMarket", "RefCompanyLvlProd", "MarketTechShareRef")))
+t9 <- unique(subset(MarketRef, select = c("DebtTicker", "Sector", "BenchmarkRegion", "Technology", "ClimateSecDebt", "WtMarket", "RefCompanyLvlProd", "MarketTechShareRef","CompWtProjMarketTechShare")))
 t10 <- merge(t8,t9, by = c("DebtTicker", "Sector", "BenchmarkRegion", "Technology", "ClimateSecDebt", "WtMarket"), all = TRUE)
 t10[is.na(t10)] <- 0
 
 MarketRef <- t10
 rm(t,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10)
+## Remove debt tickers/companies that do not have actove bond issuance in the revelant sector that has asset level data
+MarketRef[is.na(MarketRef)] <- 0
+MarketRef <- subset(MarketRef, ClimateSecDebt != 0)
+colnames(MarketRef)
+
 #----------
 
-# Convert IEA sectors for fossel fuels
-IEATargetssub$Sector[IEATargetssub$Technology == "Coal"] <- "Coal"
-IEATargetssub$Sector[IEATargetssub$Technology == "Oil"] <- "Oil&Gas"
-IEATargetssub$Sector[IEATargetssub$Technology == "Gas"] <- "Oil&Gas"
 
-# Clean IEATargets
-IEATargetssub[IEATargetssub == "NaN"] <- 0
+RegionalMarketWeights <- CompanyWeightingData
+RegionalMarketWeights <- ddply(RegionalMarketWeights,.(Sector,BenchmarkRegion),summarise, 
+                               MarketWeightRegionWeight = sum(RegionWtMarketWtCompanies,na.rm = TRUE))
 
 ####### Add in Aggregated MarketRef ##########
 
-RegionalMarketWeights <- CompanyWeightingData
-RegionalMarketWeights <- ddply(RegionalMarketWeights,.(Sector,BenchmarkRegion),summarise, MarketWeightRegionWeight = sum(RegionWtMarketWtCompanies,na.rm = TRUE))
+### MarketRefAgg- subset of the Debt data as per the market. 
+### Aggregated by DebtTicker
 
 # Technology Aggregation of Debt Tickers
 MarketRefTechAgg <- ddply(MarketRef,.(Sector, Technology, BenchmarkRegion), summarize,
                           RefMarketLvlProd = sum(RefCompanyLvlProd, na.rm=TRUE),
                           # EquityIntensity=sum(EquityIntensity, na.rm=TRUE),
-                          Wt=sum(Wt, na.rm=TRUE),
+                          Wt=sum(WtMarket, na.rm=TRUE),
                           # WtProduction=sum(WtProduction, na.rm=TRUE),
                           RefCarstensMetric = sum(CompWtProjMarketTechShare, na.rm=TRUE))
 
@@ -640,9 +697,8 @@ MarketRefSecAgg <- ddply(MarketRefTechAgg,.(Sector, BenchmarkRegion), summarize,
                          RefMarketLvlSecProd  = sum(RefMarketLvlProd, na.rm=TRUE),
                          RefCarstensMetricSec = sum(RefCarstensMetric, na.rm=TRUE))
 
-# Combination
+# Combination Tech and Sector data frames with the IEA Targets
 MarketRefAgg <- merge(MarketRefTechAgg, MarketRefSecAgg, by= c("Sector", "BenchmarkRegion"), all.x = TRUE)
-
 MarketRefAgg <- merge(MarketRefAgg,IEATargetssub, by = c("BenchmarkRegion","Sector","Technology"), all.x = TRUE)
 
 ### Calculate projected production values
@@ -689,18 +745,20 @@ RegionalBenchmarkAgg <- MarketRefAgg
 
 
 ########## End of Agg ###########
+# Aggregation previously used to merge with PortfolioResults. 
+# New version is not aggregated by DebtTickers; just regionally. 
 
 
 
-#Merge IEA targets the fair share perentage
+#Merge IEA targets the fair share percentage
 MarketRef <- merge(MarketRef,IEATargetssub, by = c("BenchmarkRegion","Sector","Technology"), all.x = TRUE)
 
 ### Calculate projected production values
-## Relative to the market and including current assets and future plans
+### Relative to the market and including current assets and future plans
 MarketRef$ProjCompProd <-  MarketRef$RefCompanyLvlProd + MarketRef$RefCompanyLvlSecProd * MarketRef$FairSharePerc
 MarketRef$ProjCompProd[which(MarketRef$Direction == "declining")] <-  MarketRef$RefCompanyLvlProd[which(MarketRef$Direction == "declining")] * (1 + MarketRef$FairSharePerc[which(MarketRef$Direction == "declining")])
 
-##Clean negative production values??
+### Clean negative production values??
 MarketRef$ProjCompProd[MarketRef$ProjCompProd < 0]  <- 0 
 
 #Recalculate the RegionalWeightingFactorCompany for the projected values, and the technology share
@@ -747,6 +805,7 @@ RegionalBenchmarkSec <- ddply(MarketRef,.(BenchmarkRegion, Sector, Year, Scenari
                               ProjCompProdSec=sum(ProjCompProd, na.rm=TRUE))
 
 # Calculate the Aggregated Regional Sector Weights. This is done separately just to avoid confusion... or create it, one or the other. If you're reading this then maybe it's the later
+# Aggregation happens at this point.
 MarketRefsub <- unique(subset(MarketRef, select = c(DebtTicker, BenchmarkRegion, Sector, Year, Scenario, WtMarket, RegionalWeightingFactorCompany)))
 MarketRefsub$WtRegion<-MarketRefsub$WtMarket*MarketRefsub$RegionalWeightingFactorCompany
 
@@ -770,7 +829,7 @@ RegionalBenchmark <- merge(RegionalBenchmark,RegionalSectorWeights, by = c("Benc
 ### THIS IS DUE TO THE DIFFERENT GEOGRAPHICAL DISTRIBTION OF ASSETS BY COMPANIES AS WELL AS DIVERGENT REGIONAL ENERGY TRANSITION PATHWAYS
 RegionalBenchmark$MarketTechShare <- RegionalBenchmark$ProjCompProd/RegionalBenchmark$ProjCompProdSec
 
-## Repate the same process for the Global level aggregration
+## Repeat the same process for the Global level aggregration
 GlobalBenchmarkTech <-  ddply(MarketRef,.(Sector, Technology, Year, Scenario), summarize,  # to add the sum/aggregated FairSharePerc you have to also have to weight it appropriately
                               # Wt=sum(WtMarket, na.rm=TRUE),
                               # WtProduction=sum(WtProduction, na.rm=TRUE),
@@ -813,14 +872,14 @@ DebtBenchmarkDataframe <- rename(DebtBenchmarkDataframe, c("ProjCompProd" = "Pro
 
 # write.csv(MarketRef, paste0("Data/DebtMarketRef_", Date, ".csv"), row.names = FALSE, na = "")
 # write.csv(DebtBenchmarkDataframe, paste0("Data/DebtBenchmarkDataframe_", Date, ".csv"), row.names = FALSE, na = "")
-
+BICSMoodysRisk <- unique(subset(BICSMoodysRisk,select = c("INDUSTRY_SUBGROUP","MoodysRiskLvl")))
 
 # ------
 # g) Read in Portfolio data
 # ------
 
-#Get List of Portfolios either from folder or from 1 file (PortfolioN-check format) depending on Bulk-Methode
-#Clean Holdingds data
+#Get List of Portfolios either from folder or from 1 file (PortfolioN-check format) depending on Bulk-Method
+#Clean Holdings data
 MissingISIN <- subset(PortfolioAllPorts, ISIN == "")
 # Some bonds don't have icines.. 
 # PortfolioAllPorts <- subset(PortfolioAllPorts, ISIN != "")
@@ -938,7 +997,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
     Portfolio <- ddply(Portfolio,.(COMPANY_CORP_TICKER, Subgroup, Ticker, ISIN, CNTRY_OF_DOMICILE), summarize, Position = sum(Position))
     
     
-    ##if there is no price information or if the asset is outside of the region
+    ### if there is no price information or if the asset is outside of the region ###
     Portfolio$Position <- as.numeric(Portfolio$Position)
     if(sum(Portfolio$Position, na.rm = TRUE) != 0){
       # Subset the Portfolio by securities that cannot be assessed, i.e. with missing price or country information
@@ -1023,8 +1082,6 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
         PortfolioSectorWeights$SectorWeight <- PortfolioSectorWeights$SectorAUM / PortAUM
         
         # Moody's Risk map merging
-        # BICSMoodysRisk <- read.csv(paste0(PROC.DATA.PATH,"/BICS_to_MoodysRisk_Bridge.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-        BICSMoodysRisk <- unique(subset(BICSMoodysRisk,select = c("INDUSTRY_SUBGROUP","MoodysRiskLvl")))
         Portfolio <- merge(Portfolio, BICSMoodysRisk, by.x = c("Subgroup"), by.y = "INDUSTRY_SUBGROUP", all.x = TRUE, all.y = FALSE)
         Portfolio$MoodysRiskLvl[is.na(Portfolio$MoodysRiskLvl)] <- 5
         
@@ -1032,61 +1089,88 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
         
         # Aggregate to CORP level
         PortfolioSub <- ddply(subset(Portfolio,Position!=0),.(COMPANY_CORP_TICKER, piesector), summarize, Position = sum(Position))
+        
         # Calculate new portoflio weights at the Corp Debt ticker level
         PortAUM2 <- sum(PortfolioSub$Position)
         #if (round(PortAUM,1) != round(PortAUM2,1)) break 
-        #rm(PortAUM2)
+        rm(PortAUM2)
         
         PortfolioSub$PortWeightDebtlvl <- PortfolioSub$Position/PortAUM
         PortfolioSub$piesector[PortfolioSub$piesector %in% "Utility Power"] <- "Power"
         
-        #####  Combine with Asset level data
+        #####  Combine with Asset level data ######
         
         ReducedListDebt <- merge(subset(MasterDataDebt,Aggregation == "GlobalAggregate"), PortfolioSub, by.x = c("DebtTicker","Sector"), by.y = c("COMPANY_CORP_TICKER", "piesector"), all.x=FALSE, all.y=FALSE)
         
-        #If there is ALD within the portfplio then proceed with the analysis
+        ### If there is ALD within the portfplio then proceed with the analysis ###
         PortAUMAnalyzed <- 0
         if(dim(ReducedListDebt)[1]>0){
           PortAUMAnalyzed <- sum(unique(subset(ReducedListDebt, select = c("Position", "DebtTicker")))[,"Position"], na.rm = TRUE)
+	        
+          # Portfolio Regionality
+          PortfolioRegionality <- merge(PortfolioSub,CompanyWeightingData, by.x = "COMPANY_CORP_TICKER", by.y = "DebtTicker", all.x = FALSE, all.y = FALSE)
+          PortfolioRegionality$RegionalWtPortfolioWt <- PortfolioRegionality$PortWeightDebtlvl * PortfolioRegionality$RegionalWeightingFactorCompany
+          PortfolioRegionSplit <- aggregate(PortfolioRegionality["RegionalWtPortfolioWt"],by = PortfolioRegionality[,c("Sector","BenchmarkRegion")], FUN = sum)
           
+          
+          
+	        ReducedListDebt$WtProduction <- ReducedListDebt$CompanyLvlProd * ReducedListDebt$PortWeightDebtlvl
+          	    
           # Minimise data frame size by restricting results to only a 10 year forcast
           ReducedListDebt <- subset (ReducedListDebt, Year <= (Startyear + 10))
           
           # Allocate production to the portfolio based on Portfolio Wt 
-          ReducedListDebt$WtProduction <- ReducedListDebt$CompanyLvlProd * ReducedListDebt$PortWeightDebtlvl
           
           # Calculate Carsten Metric
           ReducedListDebt$CarstenMetric_Port <- ReducedListDebt$PortWeightDebtlvl * ReducedListDebt$TechShare * ReducedListDebt$RegionalWeightingFactorCompany
           
-          
           # Aggregate Global and regional portfolio values
           PortMix <- subset(ReducedListDebt,select = -c(TotalDebt, ClimateSecDebt))
           
-          # make sure all technologies and sectors are in the database (to avoid errors at a later stage) ###MAYBE CHANGE THIS TO USE THE COMPLETEDATA FUNCTION AT SOME STAGE
-          techlist <- data.frame("Technology" = c("Electric","Hybrid","ICE","OilCap","GasCap","CoalCap","RenewablesCap","HydroCap","NuclearCap", "Coal","Oil","Gas"))
-          #regionlist <- data.frame("BenchmarkRegion" = c("Global","OECD","Non-OECD","EU28","U.S."))
+          # make sure all technologies and sectors are in the database (to avoid errors at a later stage) 
+          # MAYBE CHANGE THIS TO USE THE COMPLETEDATA FUNCTION AT SOME STAGE
+          techlist <- data.frame("Technology" = AllLists$TechList)
           yearlist <- data.frame("Year" = unique(PortMix$Year))
           lineadd <- merge(techlist,yearlist)
           lineadd$Sector <- "Power"
           lineadd$Sector[lineadd$Technology %in% c("Oil","Gas")] <- "Oil&Gas" 
           lineadd$Sector[lineadd$Technology %in% c("Coal")] <- "Coal" 
           lineadd$Sector[lineadd$Technology %in%  c("Electric","Hybrid","ICE")] <-  "Automotive"
-          PortMix <- subset(PortMix, Technology %in% c("Electric","Hybrid","ICE","OilCap","GasCap","CoalCap","RenewablesCap","HydroCap","NuclearCap", "Coal","Oil","Gas"))
+          ### the datacompletion function does this, however is fairly specific. 
+          PortMix <- subset(PortMix, Technology %in% TechnologyList)
           PortMix <- merge(PortMix,lineadd, by = c("Sector","Technology","Year"), all.y = TRUE, all.x = TRUE)
+          
+          #calaculate the sector prodution and the techshare
+          Sectorref <- ddply(PortMix,.(DebtTicker,BenchmarkRegion, Sector, Year),summarize,
+                             WtSectorProd = sum(WtProduction,na.rm=TRUE))
+          
+          Sectorref2 <- ddply(PortMix,.(Sector, Year),summarize,
+                              SectorWeight = sum(PortWeightDebtlvl,na.rm=TRUE))
+          
+          techlist2 <- unique(subset(PortMix, select = c("DebtTicker","Sector","Technology", "Year")))
+          Sectorref <- merge(Sectorref,techlist2, by = c("Sector", "Year", "DebtTicker"), all.x = TRUE, all.y = TRUE)
+          PortMix <- merge(PortMix,Sectorref, by = c("DebtTicker","BenchmarkRegion", "Sector", "Technology",  "Year"), all.x=TRUE, all.y=FALSE) #Method
+          
+          
           # fill blanks of newly add rows
           PortMix$WtProduction[is.na(PortMix$WtProduction)] <- 0
           PortMix$CarstenMetric_Port[is.na(PortMix$CarstenMetric_Port)] <- 0
+          
+          PortMix$PortWtTechShare <- PortMix$WtProduction/PortMix$WtSectorProd * PortMix$PortWeightDebtlvl
+          
           
           ## Aggregate Portfolio at regional level
           PortMixRegionalTech <- ddply(PortMix,.(BenchmarkRegion, Sector, Technology, Year), summarize,
                                        CompanyLvlProd = sum(CompanyLvlProd, na.rm=TRUE),
                                        Wt = sum(PortWeightDebtlvl, na.rm=TRUE),
                                        WtProduction = sum(WtProduction, na.rm=TRUE),
+                                       PortWtTechShare = sum(PortWtTechShare, na.rm=TRUE),
                                        CarstenMetric_Port = sum(CarstenMetric_Port, na.rm=TRUE))
           
           PortMixRegionalSec <- ddply(PortMix,.(BenchmarkRegion, Sector, Year), summarize,
                                       CompanyLvlProdSec = sum(CompanyLvlProd, na.rm=TRUE),
                                       WtProductionSec = sum(WtProduction, na.rm=TRUE),
+                                      PortWtTechShareSec=sum(PortWtTechShare, na.rm=TRUE),
                                       CarstenMetric_PortSec = sum(CarstenMetric_Port, na.rm=TRUE))
           
           PortMixRegional <- merge(PortMixRegionalTech, PortMixRegionalSec, by = c("BenchmarkRegion", "Sector", "Year"))
@@ -1103,6 +1187,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
           PortMixGlobalSec <- ddply(PortMix,.(Sector, Year), summarize,
                                     CompanyLvlProdSec = sum(CompanyLvlProd, na.rm=TRUE),
                                     WtProductionSec = sum(WtProduction, na.rm=TRUE),
+				                            PortWtTechShareSec = sum(PortWtTechShare, na.rm=TRUE),
                                     CarstenMetric_PortSec = sum(CarstenMetric_Port, na.rm=TRUE))
           
           PortMixGlobal <- merge(PortMixGlobalTech, PortMixGlobalSec, by = c("Sector", "Year"))
@@ -1114,21 +1199,61 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
           
           #Complete dataframe to insure successful merging
           PortMix <- datacompletion(PortMix)
+          
           PortMix$CompanyLvlProdSec [is.na(PortMix$CompanyLvlProdSec)] <- 0
           PortMix$WtProductionSec [is.na(PortMix$WtProductionSec)] <- 0
           PortMix$CarstenMetric_PortSec [is.na(PortMix$CarstenMetric_PortSec)] <- 0
+	        PortMix$PortWtTechShareSec [is.na(PortMix$PortWtTechShareSec)] <- 0
           
-          # Calculate regional and global techshares. These are not the techshare used to calculate the Carsten metric. They're the raw techshares of companies the portfolio is invested in without the effect 
-          # of the portfolio portfolio wt distrubtion over different different companies regional distrubtion of physical assets.
+          # Calculate regional and global techshares. These are not the techshare used to calculate the Carsten metric. 
+	        # They're the raw techshares of companies the portfolio is invested in without the effect 
+          # of the portfolio portfolio wt distrubtion over different companies different regional distrubtion of physical assets.
           PortMix$PortCompanyTechShare <- PortMix$CompanyLvlProd/PortMix$CompanyLvlProdSec
           PortMix$PortWtTechShare <- PortMix$WtProduction/PortMix$WtProductionSec
           
           # Rename datafelds as prepreation for mering with the market benchmark" data
           PortMix <- rename(PortMix, c("Wt" = "PortWt","CompanyLvlProd" = "PortCompanyLvlProd", "CompanyLvlProdSec" = "PortCompanyLvlProdSec", "WtProduction" = "PortWtProduction", "WtProductionSec" = "PortWtProductionSec"))
           
+          ###### New Aggregation lines ###########
+# 	        PortfolioRegionSplit <- Regiondatacompletion(PortfolioRegionSplit)
+# 
+#           PortfolioBenchmark <- merge(PortfolioRegionSplit, subset(RegionalBenchmark, select = c("Sector","BenchmarkRegion", "Year","Scenario","Technology")), by = c("Sector","BenchmarkRegion"), all.x = TRUE)
+#           # "SecWtMarket","Benchmark_CarstensMetric","Benchmark_CarstensMetricSec","RefMarketLvlProd","ProjMarketProd","ProjMarketProdSec","WtProjMarketProduction","WtTechShareTechShareMarket"
+#           PortfolioBenchmark$PortfolioBenchmark_CarstensMetric <- PortfolioBenchmark$Benchmark_CarstensMetric / PortfolioBenchmark$Benchmark_CarstensMetricSec * PortfolioBenchmark$RegionalWtPortfolioWt
+#           PortfolioBenchmark$RegWtProjMarketProd <- PortfolioBenchmark$ProjMarketProd * PortfolioBenchmark$RegionalWtPortfolioWt
+#           PortfolioBenchmark$RegWtRefMarketLvlProd <- PortfolioBenchmark$RefMarketLvlProd * PortfolioBenchmark$RegionalWtPortfolioWt
+# 
+#           # PortfolioBenchmark <- merge(PortfolioBenchmark,unique(subset(PortMix1, Year == Startyear,select = c("Technology","Wt"))), by = "Technology", all.x = TRUE) # that actually makes no sense but maybe we need to calculate the Wt
+#           PortfolioBenchmark$Benchmark_WtTechShare <- PortfolioBenchmark$RegWtProjMarketProd/PortfolioBenchmark$ProjMarketProdSec
+#           PortfolioBenchmark$Benchmark_WtTechShareTechShare <- PortfolioBenchmark$WtTechShareTechShareMarket * PortfolioBenchmark$RegionalWtPortfolioWt
+# 
+#           PortBenchmark <- ddply(PortfolioBenchmark,.(Sector, Year, Scenario, Technology,  SecWtMarket), summarize,
+#                                Benchmark_CarstensMetric=sum(PortfolioBenchmark_CarstensMetric, na.rm=TRUE),
+#                                RegWtProjMarketProd = sum(RegWtProjMarketProd,na.rm = TRUE),
+#                                RegWtRefMarketLvlProd = sum(RegWtRefMarketLvlProd,na.rm = TRUE),
+#                                Benchmark_WtTechShare = sum(Benchmark_WtTechShare,na.rm = TRUE),
+#                                Benchmark_WtTechShareTechShare = sum(Benchmark_WtTechShareTechShare ,na.rm = TRUE))
+# 
+#           PortBenchmarkSec <- ddply(PortBenchmark,.(Sector, Year, Scenario), summarize,
+#                                  RegWtProjMarketProdSec = sum(RegWtProjMarketProd,na.rm = TRUE),
+#                                  Benchmark_WtTechShareSec = sum(Benchmark_WtTechShare,na.rm = TRUE),
+#                                  Benchmark_WtTechShareTechShareSec = sum(Benchmark_WtTechShareTechShare ,na.rm = TRUE))
+# 
+#           PortBenchmark <- merge(PortBenchmark, PortBenchmarkSec, by= c("Sector", "Year", "Scenario"))
+# 
+#           PortBenchmark$Benchmark_OGC <- PortBenchmark$RegWtProjMarketProd / PortBenchmark$RegWtRefMarketLvlProd * 100
+#           PortBenchmark$Benchmark_WtTechShareTechShare_corrupted <- PortBenchmark$Benchmark_WtTechShare / PortBenchmark$Benchmark_WtTechShareSec
+#           PortBenchmark$Benchmark_WtTechShareTechShare <- PortBenchmark$Benchmark_WtTechShareTechShare / PortBenchmark$Benchmark_WtTechShareTechShareSec
+# 
+#           PortBenchmark$BenchmarkRegion <- "GlobalAggregate"
           
           
           ############
+          
+          ### The regional and market benchmarks are bound to the Portfolio Data here 
+          ### DebtBenchmarkDataframe was created prior to this loop. 
+          ### However can Benchmark_WtTechShareTS be created previously or is it dependent on the portfolio?
+          ### However DebtBenchmarkDataframe and the PortBenchmark aren't the same. Merge with PortBenchmark to ensure coverage. 
           
           Combin <- merge(PortMix, DebtBenchmarkDataframe, by = c("BenchmarkRegion", "Sector", "Technology", "Year"))  
           
@@ -1146,7 +1271,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
           
           #Merge back with combin
           Combin <- merge(Combin, OGCMetric, by = c("BenchmarkRegion", "Sector", "Technology", "Scenario", "Year", "PortWtProduction", "CarstenMetric_PortSec", "ProjWtRegion_Market", "ProjMarketProd"))
-          # 
+           
           # OGCMetrikRef$OGCMetrik_PortfolioRef <- OGCMetrikRef$SectorWeight / OGCMetrikRef$SecWtMarket * 100
           # OGCMetrikRef$OGCMetrik_PortfolioRef <- (OGCMetrikRef$SectorWeight * OGCMetrikRef$PortTechShare) / (OGCMetrikRef$SecWtMarket * OGCMetrikRef$RegWtProjMarketProd / OGCMetrikRef$RegWtProjMarketProdSec) * 100
           # OGCMetrikRef <- rename(OGCMetrikRef, c("WtProduction" = "WtProductionRef"))
@@ -1183,7 +1308,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)){
           # Combin$TrajectoryExposure[Combin$Sector == "Fossil Fuels"] <- (Combin$Production[Combin$Sector == "Fossil Fuels"] - Combin$ScenarioTrajectoryProd[Combin$Sector == "Fossil Fuels"]) / Combin$ScenarioTrajectoryProd[Combin$Sector == "Fossil Fuels"]
           # #Combin$AUMExposure <- (Combin$Production - Combin$TargetProductionAUMIntensity) / Combin$TargetProductionAUMIntensity
           
-          #implement AUM in sector values
+          # implement AUM in sector values
           Combin$PortName <- as.character(PortfolioName)
           Combin$InvestorName <- ListAllPorts$InvestorName[i]
           Combin$Type <- ListAllPorts$Type[i]
@@ -1235,10 +1360,7 @@ if(length(flist)>0){
     for (file in flist){file.copy(file, RunDirectory)}}
 }
 
-
-
 CombinAllsave <- CombinAll
-
 
 write.csv(CombinAll,paste(BatchFolder,BatchName,"_DebtAnalysisResults.csv",sep = ""),row.names = FALSE)
 write.csv(ReducedListDebtAll,paste(BatchFolder,BatchName,"_DebtProductionCompanies_Snapshot",Startyear+5,".csv",sep = ""),row.names = FALSE)
@@ -1248,5 +1370,4 @@ write.csv(MissingBBGInfo, paste0(BatchFolder,BatchName,"_",dim(MissingBBGInfo)[1
 
 Sub450Scenario <- subset(CombinAll, Scenario == "450S")
 write.csv(Sub450Scenario,paste(BatchFolder,BatchName,"_DebtAnalysisResults-450S-only.csv",sep = ""),row.names = FALSE, na = "")
-
 
