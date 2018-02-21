@@ -436,7 +436,7 @@ for (i in 1:nrow(TestList)){
   
   ### Specify Language and Load Report 
   Languagechoose <-  ParameterFile$Languageselect
-  Languagechoose <- "FR"
+  # Languagechoose <- "FR"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
   RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
