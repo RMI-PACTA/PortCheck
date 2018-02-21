@@ -706,10 +706,10 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   # WeightedResults <- EQWMCoverageWeight
   
   
-  # combin <- CBCombin
-  # ChartType <- "CB"
-  # WeightedResults <- CBWMCoverageWeight
-  # SectorToPlot <- "Fossil Fuels"
+  combin <- CBCombin
+  ChartType <- "CB"
+  WeightedResults <- CBWMCoverageWeight
+  SectorToPlot <- "Fossil Fuels"
   # plotnumber=99
   
   
@@ -2734,6 +2734,34 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
   
 }
 
-
+#----------- Distribution Chart ------------- #
+distribution_chart <- function(ChartType, Combin, BatchTest, PortName){
+  
+  ### Distribution Charts can have different y axes - primarily however a percentage value. 
+  ### Want to test whether equity and CB can be plotted on the same x axis - for Carsten's metric it is the case
+  ### Example chart: % of Portfolio in Climate Relevant Sectors (Carsten's Metric)
+  
+  ### Plotting all results, however the specific portfolio should be highlighted (eg. different colour)
+  
+  ### Climate Relevant Sectors means all sectors in our results atm, Carstens Metric can be aggregated (% value)
+  ### Currently CarstensMetric is not printed in the Equity Results
+  
+  # Necessary input dataframes
+  # BatchTest <- CBComparisonBatchTest
+  # Combin <- CBCombin
+  
+  
+  Combin <- rbind(Combin, BatchTest)
+  
+  df <- unique(subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose  & Scenario %in% Scenariochoose & Year %in% (Startyear+5), select = c("PortName","Year","Sector","Technology","CarstensMetric")))
+  
+  dfagg <- aggregate(df["CarstensMetric"],by=df[c("PortName")],FUN=sum)   
+  
+  # theme_distribution<- function()            # Check the Stacked_Bar_Chart for ideas on what this should contain. 
+  
+  # outputplot <- 
+        # theme_distribution()
+  
+}
 
 
