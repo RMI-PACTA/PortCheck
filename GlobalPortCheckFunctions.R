@@ -43,6 +43,16 @@ SetParameters <- function(ParameterFile){
 
 trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
+datacompletion <- function (Data){
+  Data <- subset(Data, Technology %in% AllLists$TechList)
+  Data <- Data %>% complete(Technology = AllLists$TechList, Year = full_seq(c(Startyear,Startyear+10),1), fill = list(CompanyLvlProd = 0, Wt = 0, WtProduction = 0, CarstenMetric_Port = 0))
+  Data$Sector <- "Power"
+  Data$Sector[Data$Technology %in% c("Oil","Gas")] <- "Oil&Gas" 
+  Data$Sector[Data$Technology %in% c("Coal")] <- "Coal" 
+  Data$Sector[Data$Technology %in%c("Electric","Hybrid","ICE")] <-"Automotive"
+  return(Data)
+}
+
 datacompletioneqy <- function (Data){
   Data <- subset(Data, Technology %in% AllLists$TechList)
   Data <- Data %>% complete(BenchmarkRegion = subset(BenchmarkRegionList, !BenchmarkRegion %in% c("NonOECDRest"), select = "BenchmarkRegion"), 
@@ -121,15 +131,12 @@ AddMissingColumns <- function(dfa, dfb){
   dfa <- cbind(dfa,tempdf)
 }
 
-
 ChangeFundPort <- function(BatchTest){
   
   BatchTest$Type <- revalue(BatchTest$Type, c("Fund" = "Portfolio","Brand"="Investor"))
   return(BatchTest)
   
 }
-
-
 
 addcompanyeqy <- function(BatchName, BatchFolder, CombinAll, ReducedListAll,PortfolioAll,PortfolioListAll,InvestorToRemove){
   setwd(paste0(OutputFolder,"/Swiss/2016Q4"))
@@ -152,4 +159,6 @@ addcompanyeqy <- function(BatchName, BatchFolder, CombinAll, ReducedListAll,Port
   
   return(results)
 }
+
+
 

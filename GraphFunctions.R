@@ -4,7 +4,7 @@
 
 #----------- Creates the figure list for the report
 figure_list <- function(figurelist){
-  figurelist <- as.data.frame(list.files(RegionDirectory,pattern=c("\\.png$"), full.names = FALSE))
+  figurelist <- as.data.frame(list.files(LANGUAGE.PATH,pattern=c("\\.png$"), full.names = FALSE))
   colnames(figurelist)<- "FigName"
   figurelist$ordernumber <- as.numeric(gsub("[A-z _ .]","",figurelist$FigName))
   figurelist <- figurelist[order(figurelist$ordernumber),]  
