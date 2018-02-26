@@ -1462,8 +1462,6 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
   # combin <- EQCombin
   # PortSnapshot <- EQPortSnapshot
   # companiestoprint<-20
-  # AUMData<- EQAUMData
-  # Ranks <- EQRanks
   # combin<-EQCombin
   # SectorToPlot <-"OG"
   
@@ -1472,8 +1470,6 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
   # AlloftheCompanies <- OGCarbonBudget
   # PortSnapshot <- CBPortSnapshot
   # companiestoprint<-20
-  # AUMData<- CBAUMData
-  # Ranks <- CBRanks
   # combin<-CBCombin
   
   

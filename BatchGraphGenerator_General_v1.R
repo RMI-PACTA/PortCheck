@@ -142,8 +142,8 @@ if (exists("FundList")){
 }
 
 ### Remove Listed Market if it's there
-EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
-CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
+# EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
+# CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
 
 ### Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
