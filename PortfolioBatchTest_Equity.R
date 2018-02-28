@@ -1,4 +1,3 @@
-rm(list=ls())
 
 #Load packages
 library(grid)
@@ -18,33 +17,59 @@ library(zoo)
 # 2017-09-22  |     KH      | 15 | Changed to new IEA Targets for automotive (i.e. ETP 2017)
 # 2017-09-25  |     KH      | 16 | Changed to new financial data (added the swiss BBG look-ups) including adjusting for the new PORT lookup (e.g. changing to MarketVal for SharePrice, etc.)
 
+
+#------------
+# Set up 2DII Dev Environment Folders and Locations
+#------------
+
+if (!exists("TWODII.CONSTS")) {
+  ### 2dii-init should be run once, before any/all 2 Degrees R code.  Check for this.
+  print("/// WARNING: 2DII DEV NAMES AND PATHS NOT INITIALIZED.  Run Common/2dii-init.R and try again.")
+} 
+
+#------------
+# Set up PortCheck-Specific Constants and Functions
+#------------
+
+### this file sourced at top of all PortCheck scripts
+### this defines any project constants and functions
+### and will also source an override file if it exists
+source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
+print("*** Starting DataImport.R Script")
+print(show.consts())
+
+
+#------------
+# Read in Parameter File and Set Variables
+#------------
+
+### define these vars so we know they will be important
+### makes the code easier to understand - they're not a surprise later
+BatchName <- NA
+Startyear <- NA
+ProjectName <- NA
+BatchToTest <- NA
+BBGDataDate <- NA
+AssessmentDate <- NA
+
+ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+### fill up those variables
+SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkRegion etc. 
+print("*** STARTING SCRIPT with PARAMETERS:")
+print(ParameterFile)
+
 #-------------
 # Get user-name & set folder locations
 #-------------
-UserName <- sub("/.*","",sub(".*Users/","",getwd()))
-DataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
-CodeFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/02_AlignmentTest/")
-FinancialDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/02_FinancialData/")
-PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
-OutputFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/")
-
-#-------------
-# Set parameter file
-#-------------
+# UserName <- sub("/.*","",sub(".*Users/","",getwd()))
+# DataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/01_ProcessedData/")
+# CodeFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/02_AlignmentTest/")
+# FinancialDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/00_Data/02_FinancialData/")
+# PortfolioDataFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/02_PortfolioData/")
+# OutputFolder <- paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/")
 
 
-UserName <- sub("/.*","",sub(".*Users/","",getwd()))
-source(paste0("C:/Users/",UserName,"/Dropbox (2° Investing)/PortCheck/01_Code/02_AlignmentTest/GlobalPortCheckFunctions.R"))
 
-ParameterFile <- ReadParameterFile(PortfolioDataFolder)
-SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkRegion etc. 
-
-
-# ParameterFileName <- choose.files(default = paste0(PortfolioDataFolder,"99_ParameterFiles/*_ParameterFile.csv"),caption = "Select a parameter file", multi = FALSE)
-# ParameterFileInfo <- file.info(ParameterFileName, extra_cols = TRUE)
-# BatchName <- sub(".*/","",gsub("\\","/",sub("_ParameterFile.csv","",ParameterFileName), fixed = TRUE))
-# ParameterFile <- read.csv(ParameterFileName, stringsAsFactors = FALSE, strip.white = TRUE)
-# BatchName <- ParameterFile$BatchName
 
 #-------------
 # All Input parameters & make the code interactive (adjust to ParameterFile)
@@ -88,7 +113,7 @@ AllLists <- list(TechList = TechnologyList, SectorList = SectorList,
 #-------------
 # Set workdrive
 #-------------
-setwd(DataFolder)
+# setwd(PROC.DATA.PATH)
 
 # ------
 # |------------------------------|
@@ -108,9 +133,9 @@ setwd(DataFolder)
 # a) Read in asset level data
 # ------
 # For the Swiss Project use the wrong coal data... 
-MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+MasterData <- read.csv(paste0(PROC.DATA.PATH,"MasterData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 if (length(grep("Swiss",BatchName))==1){
-  MasterData <- read.csv(paste0(DataFolder,"MasterData",ParameterFile$DateofFinancialData,"_WrongCoalData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+  MasterData <- read.csv(paste0(PROC.DATA.PATH,"MasterData",ParameterFile$DateofFinancialData,"_WrongCoalData.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 }
 
 
@@ -130,14 +155,14 @@ MasterData<-subset(MasterData, MasterData$Year >= Startyear)
 # ------
 # b) Read in Asset level Data Bridge
 # ------
-ALDBridge <- read.csv(paste0(DataFolder,"ALDEquityBridge_2017-04-25.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-EquityBridge <- read.csv(paste0(DataFolder,"EquityBridge_2017-06-27.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
-# DebtToALDBridge <- read.csv(paste0(DataFolder,"DebtToALDBridge_2017-05-03.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+ALDBridge <- read.csv(paste0(PROC.DATA.PATH,"ALDEquityBridge_2017-04-25.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+EquityBridge <- read.csv(paste0(PROC.DATA.PATH,"EquityBridge_2017-06-27.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+# DebtToALDBridge <- read.csv(paste0(PROC.DATA.PATH,"DebtToALDBridge_2017-05-03.csv"),stringsAsFactors = FALSE, strip.white = TRUE)
 
 # ------
 # c) Read in stored company level financial data (Data retrieved from API and PORT function) 
 # ------
-CompanylvlBBGEquityData <- read.csv(paste0(DataFolder,"CompanylvlBBGData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors = FALSE, strip.white = TRUE)
+CompanylvlBBGEquityData <- read.csv(paste0(PROC.DATA.PATH,"CompanylvlBBGData",ParameterFile$DateofFinancialData,".csv"),stringsAsFactors = FALSE, strip.white = TRUE)
 CompanylvlBBGEquityData$FFperc <- as.numeric(CompanylvlBBGEquityData$FFperc)/100
 CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # CompanylvlBBGEquityData$TotalEqyOut <- as.numeric(CompanylvlBBGEquityData$TotalEqyOut)
@@ -147,7 +172,7 @@ CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # ------
 # d) Read in financial data (Data retrieved from BBG PORT function)
 # ------
-BBG_Data <- read.csv(paste0(FinancialDataFolder,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
+BBG_Data <- read.csv(paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
 BBGPORTOutput <- BBG_Data
 CompNames <- unique(subset(BBGPORTOutput, select = c("Ticker","Issuer")))
@@ -156,7 +181,7 @@ CompNames <- rename(CompNames, c("Issuer" = "Name"))
 # ------
 # e) Read in portfolio holdings (Portfolio holdings data given by Regulator or Instituion)
 # ------
-PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
+PortfolioAllPorts <- read.csv(paste0(PORTS.PATH,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 # PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 # PortfolioAllPorts <- subset(PortfolioAllPorts, InvestorName == "GEPABU")
 
@@ -164,22 +189,22 @@ PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektNa
 # f) Read in regions data
 # ------
 # Get market size information ($USD) for Listed markets
-MarketSizeData <- read.csv(paste0(DataFolder,"ListedMarketSizeAUM.csv"), strip.white = TRUE, stringsAsFactors = FALSE)
+MarketSizeData <- read.csv(paste0(PROC.DATA.PATH,"ListedMarketSizeAUM.csv"), strip.white = TRUE, stringsAsFactors = FALSE)
 MarketSizeData$MarketSize <- MarketSizeData[,eval(paste0("MarketSize",ParameterFile$DateofFinancialData))]
 MarketSizeData <- subset(MarketSizeData, MarketRegion != "", select = c("MarketRegion","MarketSize"))
 
 # Create a List of all existing Benchmark-Region and all assessed CompanyLocation-Regions
-BenchRegionLists <- read.csv(paste0(DataFolder,"BenchRegions.csv"))
+BenchRegionLists <- read.csv(paste0(PROC.DATA.PATH,"BenchRegions.csv"))
 BenchRegionLists[is.na(BenchRegionLists)] <- ""
 BenchRegionLists <- rename(BenchRegionLists, c("BenchRegions" = "BenchmarkRegions", "BenchRegions_ISO_colnames" = "BenchmarkRegions_ISO_colnames"))
 BenchmarkRegionList <- data.frame(BenchmarkRegion = BenchRegionLists$BenchmarkRegions[!is.na(BenchRegionLists$BenchmarkRegions) & BenchRegionLists$BenchmarkRegions != ""], BenchmarkRegionColname = BenchRegionLists$BenchmarkRegions_ISO_colnames[!is.na(BenchRegionLists$BenchmarkRegions_ISO_colnames) & BenchRegionLists$BenchmarkRegions_ISO_colnames != ""])
-CompanyDomicileRegion <- read.csv(paste0(DataFolder,"IndexRegions.csv"))
+CompanyDomicileRegion <- read.csv(paste0(PROC.DATA.PATH,"IndexRegions.csv"))
 CompanyDomicileRegion <- rename(CompanyDomicileRegion, c("IndexUniverse" = "CompanyDomicileRegion", "IndexUniverseColname" = "CompanyDomicileRegionColname")) 
 #if(any(is.na(CompanyDomicileRegion))) {CompanyDomicileRegion[is.na(CompanyDomicileRegion)] <- ""}
 CompanyDomicileRegionList <- data.frame(CompanyDomicileRegion = CompanyDomicileRegion$CompanyDomicileRegion[!is.na(CompanyDomicileRegion$CompanyDomicileRegion) & CompanyDomicileRegion$CompanyDomicileRegion != ""], CompanyDomicileRegionColname = CompanyDomicileRegion$CompanyDomicileRegionColname[!is.na(CompanyDomicileRegion$CompanyDomicileRegionColname) & CompanyDomicileRegion$CompanyDomicileRegionColname != ""])
 
 # Read countryname-conversion file to abbreviation
-CountryISOList <- read.csv(paste0(DataFolder,"CountryISOCodes.csv"), stringsAsFactors = FALSE, strip.white = TRUE, na.strings = c(""))
+CountryISOList <- read.csv(paste0(PROC.DATA.PATH,"CountryISOCodes.csv"), stringsAsFactors = FALSE, strip.white = TRUE, na.strings = c(""))
 CountryISOList <- subset(CountryISOList, CountryISOList$COUNTRY != "#N/A")
 CountryISOList$GDPlantLocation<-as.character(CountryISOList$GDPlantLocation)
 
@@ -215,7 +240,7 @@ if (ParameterFile$CalculateMarketData == TRUE){
   
   EconomyData <- subset(EconomyData, EconomyData$Production != 0)
   SaveEconomyData <- merge(EconomyData, CompNames, by.x = "EQY_FUND_TICKER", by.y = "Ticker", all.x = TRUE, all.y = FALSE)
-  write.csv(SaveEconomyData, paste0(DataFolder,"EconomyData_",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
+  write.csv(SaveEconomyData, paste0(PROC.DATA.PATH,"EconomyData_",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
 
 
   CountryISOListUniqueISO <- CountryISOList[!duplicated(CountryISOList$COUNTRY_ISO),]
@@ -240,7 +265,7 @@ if (ParameterFile$CalculateMarketData == TRUE){
     }
   }
   EconomyDataAllBenchmarkRegions <- ddply(EcoDataAllBenchmarkRegions,.(BenchmarkRegion, Sector, Technology, Year),summarize,Production = sum(Production,na.rm=TRUE))
-  write.csv(EconomyDataAllBenchmarkRegions, paste0(DataFolder,"/EconomyDataAllBenchmarkRegions",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
+  write.csv(EconomyDataAllBenchmarkRegions, paste0(PROC.DATA.PATH,"/EconomyDataAllBenchmarkRegions",ParameterFile$DateofFinancialData,"_",Sys.Date(),".csv"), row.names = FALSE)
 
 
   # Calculate the total regional production owned by listed companies for calculating the benchmark-starting point (Market exposure) for global portfolios
@@ -295,7 +320,7 @@ if (ParameterFile$CalculateMarketData == TRUE){
     MarketDataCompLvl$Production <- x
   })
   
-  write.csv(MarketDataCompLvl, paste0(DataFolder,"CompanyLevelData_",Sys.Date(),".csv"), row.names = FALSE)
+  write.csv(MarketDataCompLvl, paste0(PROC.DATA.PATH,"CompanyLevelData_",Sys.Date(),".csv"), row.names = FALSE)
   
   #Remove duplicate production for multi_fund _tickers for the same Asset level data entity. E.g BHP AU, BLT LN etc.
   # ALDBridgesub<-subset(ALDBridge, select= c("GDCompanyID","EQY_FUND_TICKER"))
@@ -305,7 +330,7 @@ if (ParameterFile$CalculateMarketData == TRUE){
   MarketData <- subset(MarketDataCompLvl, !MarketDataCompLvl$EQY_FUND_TICKER %in% c("BLT LN", "NonFloatingProduction", "NonListedProduction", "govt"))
   MarketData <- ddply(MarketData,.(BenchmarkRegion, Sector, Technology, Year, CompanyDomicileRegion),summarize,Production = sum(Production,na.rm=TRUE))
   
-  MarketData <- datacompletion(MarketData)
+  MarketData <- datacompletioneqy(MarketData)
   
   MarketSectorref <- ddply(subset(MarketData, Year == Startyear),.(BenchmarkRegion, Sector, CompanyDomicileRegion),summarize, RefProdMarketSector = sum(Production,na.rm=TRUE))
   MarketTechref <- subset(MarketData, Year == Startyear, select = -c(Year))
@@ -316,10 +341,10 @@ if (ParameterFile$CalculateMarketData == TRUE){
   
   saveMarketData <- MarketData
   
-  write.csv(MarketData, paste0(DataFolder,"MarketData.csv"), row.names = FALSE, na = "")
+  write.csv(MarketData, paste0(PROC.DATA.PATH,"MarketData.csv"), row.names = FALSE, na = "")
   # write.csv(Marketmix,paste0("Data/MarketMixWithCompanyLvlData_",Sys.Date(),".csv"),row.names = FALSE, na = "")
 }else{
-  MarketData <- read.csv(paste0(DataFolder,"MarketData.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
+  MarketData <- read.csv(paste0(PROC.DATA.PATH,"MarketData.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
 }
 
 #Calculate technology share in the the starting year (This will be scaled to portfolio size later on to calculate the starting point of the 2Â°C benchmark)
@@ -338,9 +363,9 @@ MarketRef <- subset(MarketRef)
 
 if (ParameterFile$CalculateIEATArgets == TRUE){
   
-  # IEATargets <- read.csv(paste0(DataFolder,"IEATargets_linear",ParameterFile$IEAScenarioYear,".csv"),stringsAsFactors=FALSE)
+  # IEATargets <- read.csv(paste0(PROC.DATA.PATH,"IEATargets_linear",ParameterFile$IEAScenarioYear,".csv"),stringsAsFactors=FALSE)
   
-  IEATargetsNew <- read.csv(paste0(DataFolder,"IEATargets_WEO2016+ETP2017.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
+  IEATargetsNew <- read.csv(paste0(PROC.DATA.PATH,"IEATargets_WEO2016+ETP2017.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
   IEATargets <- subset(IEATargetsNew, (Source == "WEO2016" & Sector %in% c("Power","Fossil Fuels")) | Source == "ETP2017" & Sector == "Automotive", select = -c(Source))
   IEATargets$Scenario[IEATargets$Scenario == "2DS" & IEATargets$Sector == "Automotive"] <- "450S"
   
@@ -426,13 +451,13 @@ if (ParameterFile$CalculateIEATArgets == TRUE){
   IEATargets <- rename(IEATargets, c("Region" ="BenchmarkRegion"))
   IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
   
-  if(file.exists(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"))){
-    # file.copy(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(DataFolder,"Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
-    file.rename(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(DataFolder,"00_Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
+  if(file.exists(paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"))){
+    # file.copy(paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(PROC.DATA.PATH,"Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
+    file.rename(paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), paste0(PROC.DATA.PATH,"00_Archive/IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions_UsedUntil",Sys.Date(),".csv"))
   }
-  write.csv(IEATargets, paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), row.names = FALSE, na = "")
+  write.csv(IEATargets, paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), row.names = FALSE, na = "")
 }else{
-  IEATargets <-  read.csv(paste0(DataFolder,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
+  IEATargets <-  read.csv(paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"), stringsAsFactors = FALSE, strip.white = TRUE)
   IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
 }
 
@@ -673,7 +698,7 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
         Portfoliomix <- aggregate(PortfolioDataAll["Production"], by=PortfolioDataAll[,c("Sector","Technology", "Year", "BenchmarkRegion", "CompanyDomicileRegion")], FUN=sum)
         rm(PortfolioDataAll)
         Portmix <- Portfoliomix
-        Portmix <- datacompletion(Portmix)
+        Portmix <- datacompletioneqy(Portmix)
         
       }
     }
@@ -830,9 +855,9 @@ ReducedListAll <- merge(ReducedListAll, CompNames, by.x = "EQY_FUND_TICKER", by.
 
 # Create a folder for portolio results and go to that folder, 
 #Definitely need to check for these
-BatchFolder <- paste0(OutputFolder, BatchName,"/")
+BatchFolder <- paste0(BATCH.RES.PATH, BatchName,"/")
 if(!dir.exists(file.path(BatchFolder))){dir.create(file.path(BatchFolder), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
-BatchFolder <- paste0(OutputFolder, BatchName,"/",ParameterFile$AssessmentDate,"/")
+BatchFolder <- paste0(BATCH.RES.PATH, BatchName,"/",ParameterFile$AssessmentDate,"/")
 if(!dir.exists(file.path(BatchFolder))){dir.create(file.path(BatchFolder), showWarnings = TRUE, recursive = FALSE, mode = "0777")}  
 
 # If there is already existing data, then copy all png,pdf and csv files into the next RunDirectory
