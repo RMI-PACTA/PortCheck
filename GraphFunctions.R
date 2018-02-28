@@ -2750,18 +2750,55 @@ distribution_chart <- function(ChartType, Combin, BatchTest, PortName){
   # BatchTest <- CBComparisonBatchTest
   # Combin <- CBCombin
   
+  BatchTest <- CBComparisonBatchTest
+  Combin <- CBCombin
+  ChartType <- "CB"
+  PortName <- unique(CBCombin$PortName)
   
   Combin <- rbind(Combin, BatchTest)
   
-  df <- unique(subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose  & Scenario %in% Scenariochoose & Year %in% (Startyear+5), select = c("PortName","Year","Sector","Technology","CarstensMetric")))
+  df <- unique(subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                        Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                      select = c("PortName","Year","Sector","Technology","CarstensMetric","ComparisonType")))
   
-  dfagg <- aggregate(df["CarstensMetric"],by=df[c("PortName")],FUN=sum)   
+  dfagg <- aggregate(df["CarstensMetric"],by=df[c("PortName","ComparisonType")],FUN=sum)
+  dfagg <- arrange(dfagg, desc(CarstensMetric))
+  dfagg$PortName <- factor(dfagg$PortName, levels=dfagg$PortName)
   
-  # theme_distribution<- function()            # Check the Stacked_Bar_Chart for ideas on what this should contain. 
+  theme_distribution <- function(base_size = textsize, base_family = "") {
+    theme(axis.ticks=element_blank(), 
+          axis.text.x=element_text(face="bold",colour="black",size=textsize),
+          axis.text.y=element_text(face="bold",colour="black",size=textsize),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.line = element_line(colour = "black",size=1),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(), 
+          legend.position=c(0.5,-.3),
+          legend.direction="horizontal",
+          legend.text = element_text(face="bold",size=textsize,colour="black"),
+          legend.background = element_rect(fill = "transparent",colour = NA),
+          legend.key.size=unit(0.4,"cm"),
+          legend.title=element_blank(),
+          legend.key = element_blank(),
+          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          plot.title = element_text(hjust = 0.5)
+    )
+  }
   
-  # outputplot <- 
-        # theme_distribution()
+  distribution_plot<- ggplot(dfagg, aes(PortName, CarstensMetric, fill=rev(ComparisonType)))+
+    geom_bar(stat = "identity",width = .6)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    expand_limits(0,0)+
+    guides(fill=guide_legend(nrow = 1))+
+    scale_x_discrete(labels=NULL)+
+    ggtitle("% of Portfolio in Climate Relevent Sectors")+
+    xlab("California Insurance Portfolios")+
+    theme_distribution()
   
+  print(distribution_plot)
 }
 
 
