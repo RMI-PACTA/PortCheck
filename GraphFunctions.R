@@ -2225,8 +2225,13 @@ heatmap_data <- function(EQDataInput, CBDataInput,FundsOrPort,PortName){
   # CBDataInput <- CBCombin
   
   BenchYear <- Startyear + 5
+  # FundsData <- data.frame( "PortName"=character(),
+                           # "Technology"=character(),
+                           # "BenchmarkRegion"=character(),
+                           # "Exposure"=numeric()  )
   
-  if(length(EQDataInput) > 0){ 
+  # if(nrow(EQDataInput) > 1){ 
+  if (typeof(EQDataInput) == "list"){ if (nrow(EQDataInput) > 0){
     EQData <- subset(EQDataInput,Year == BenchYear & Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose,
                      select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
     
@@ -2237,9 +2242,12 @@ heatmap_data <- function(EQDataInput, CBDataInput,FundsOrPort,PortName){
     EQData$Exposure <- as.numeric(EQData$Exposure)
     
     if (FundsOrPort == "Port"){ EQData$PortName <- "Equity"}
-  }
+    
+    FundsDataTemp <- EQData
+  }}
   
-  if (length(CBDataInput) > 0){
+  # if (nrow(CBDataInput) > 1 & nrow(CBDataInput) != NULL){
+  if (typeof(CBDataInput) == "list"){ if (nrow(CBDataInput) > 0){
     CBData <- subset(CBDataInput, Year == BenchYear & Scenario == Scenariochoose ,
                      select = c("PortName","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
     
@@ -2250,15 +2258,14 @@ heatmap_data <- function(EQDataInput, CBDataInput,FundsOrPort,PortName){
     CBData$Exposure <- as.numeric(CBData$Exposure)
     
     if (FundsOrPort == "Port"){CBData$PortName <- "Corporate Bonds"}
-  }
-
-  if (length(CBDataInput) > 0 & length(EQDataInput)>0){FundsData <- rbind(EQData,CBData)}else{
-    if(length(CBDataInput) > 0){FundsData <- CBData}else{
-      if(length(EQDataInput) > 0){FundsData <- EQData}else{
-        FundsData <- "NoData"
-      }
-    }
-  }
+    
+    if(exists("FundsDataTemp")){FundsDataTemp <- CBData}
+      else{FundsDataTemp <- rbind(FundsData,CBData)}
+  }}
+  
+  if(exists("FundsDataTemp")){return(FundsDataTemp)}
+  
+  
   
 }
 
@@ -2450,7 +2457,7 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       # TechnologyLabel$XPosition[1]<-0.5
       HeatmapGGPlot <- ggplot(HeatmapData, aes(x = as.factor(HeatmapData$Technology),fill = as.factor(HeatmapData$ExposureColour), y = as.factor(HeatmapData$PortName), group=HeatmapData$PortName)) +
         geom_tile(colour = "grey95") +
-        geom_text(aes(label = HeatmapData$ExposureText),colour=AxisColour, size = geom.text.size, data = data.frame()) + # text for % values
+        # geom_text(aes(label = HeatmapData$ExposureText),colour=AxisColour, size = geom.text.size, data = data.frame()) + # text for % values
         annotation_custom(reng,xmin=.7,xmax=1.3,ymin=iconymin,ymax = iconymax)+
         annotation_custom(hydg,xmin=1.7,xmax=2.3,ymin=iconymin,ymax = iconymax)+
         annotation_custom(nucg,xmin=2.7,xmax=3.3,ymin=iconymin,ymax = iconymax)+

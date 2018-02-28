@@ -9,6 +9,7 @@
 # Load packages
 # ------
 
+
 library(grid)
 library(ggplot2)
 library(ggthemes)
@@ -142,8 +143,8 @@ if (exists("FundList")){
 }
 
 ### Remove Listed Market if it's there
-# EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
-# CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("ListedMarket", "MetaPortfolio"),]
+EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("MetaPortfolio"),]    #"ListedMarket"
+CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("MetaPortfolio"),]     #"ListedMarket", 
 
 ### Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
@@ -422,16 +423,16 @@ for (i in 1:nrow(TestList)){
   } 
   
   ##### NEW SECTION END  
-  
-  
-  
+
   
   ### Fund Results
   ### Choose the top 20 funds in the results to present
   FundsInPort <- Portfunds(20,FundList,FundsDataAll, PortfolioName,InvestorName, TestType)
-  if (typeof(FundsInPort) == "list"){
-    if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
+  if (typeof(FundsInPort) == "list"){ if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
   
+  FundsHeatMapData <- heatmap_data(FundsInPort,NULL,"Funds","")
+  # Required Batch Results
+  PortHeatMapData <- heatmap_data(EQCombin, CBCombin,"Port",PortName)
   ### Sectors with Production
   ### Used to check whether a Line Graph, Ranking, and BarChart should be printed
   EQSectorProd <- SectorProduction(EQCombin,"EQ")
@@ -452,9 +453,11 @@ for (i in 1:nrow(TestList)){
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
       
-      # -------
-      # Swiss Charts
-      # -------
+      # Overall Heat Map
+      
+      fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
+        
+      
       # Page 4
       plot_0 <- port_pie("00", PortData)
       #
@@ -519,7 +522,7 @@ for (i in 1:nrow(TestList)){
       }
 
       # Page 16
-      plot_35 <- fundmap_chart(35,FundsInPort, Startyear, Scenariochoose, PortfolioName)
+      plot_35 <- fundmap_chart(35,FundsHeatMapData, Startyear, Scenariochoose, PortfolioName)
 
       # Page 17
       plot_36 <- other_sector_chart(36, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Cement",PortName)
