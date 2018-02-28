@@ -310,31 +310,31 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot,PortfolioName){
   
-  theme_linecharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(), 
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_text(face="bold",colour="black",size=textsize),
-          axis.title.y=element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          #panel.background = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          # legend.position=c(0.5,0),#legend.position = "none",
-          legend.position = "none",
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          #legend.title=element_blank(),
-          legend.title = element_text(colour = "black", size = textsize),
-          legend.key = element_blank(),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          plot.margin = unit(c(1,1, 0, 0), "lines")
-          # plot.margin = unit(c(1,1, 5, 2), "lines")
-    )
-  }    
+  # theme_linecharts <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.text.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.line = element_line(colour = "black",size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         #panel.background = element_blank(),
+  #         panel.background = element_rect(fill = "transparent",colour = NA),
+  #         # legend.position=c(0.5,0),#legend.position = "none",
+  #         legend.position = "none",
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour="black"),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         #legend.title=element_blank(),
+  #         legend.title = element_text(colour = "black", size = textsize),
+  #         legend.key = element_blank(),
+  #         plot.background = element_rect(fill = "transparent",colour = NA),
+  #         plot.margin = unit(c(1,1, 0, 0), "lines")
+  #         # plot.margin = unit(c(1,1, 5, 2), "lines")
+  #   )
+  # }    
   
   
   
@@ -427,27 +427,27 @@ other_sector_chart <- function(plotnumber, EQ_OS_WEM,CB_OS_WEM, OSTargets,Sector
 shipping_chart <- function(plotnumber, EQPortSnapshot,CBPortSnapshot,ShippingData, SectorToPlot="Shipping",PortfolioName){
   
   
-  theme_barcharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(), 
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_blank(),
-          axis.title.y=element_text(face="bold",colour="black",size=textsize),#element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          legend.position=c(0.5,-.3),
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          legend.title=element_blank(),
-          legend.key = element_blank(),
-          plot.margin = unit(c(0.6,0, 2.5, 0), "lines"),
-          plot.background = element_rect(fill = "transparent",colour = NA)
-    )
-  }
+  # theme_barcharts <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.text.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.x=element_blank(),
+  #         axis.title.y=element_text(face="bold",colour="black",size=textsize),#element_text(face="bold",colour="black",size=textsize),
+  #         axis.line = element_line(colour = "black",size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         panel.background = element_blank(), 
+  #         legend.position=c(0.5,-.3),
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour="black"),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         legend.title=element_blank(),
+  #         legend.key = element_blank(),
+  #         plot.margin = unit(c(0.6,0, 2.5, 0), "lines"),
+  #         plot.background = element_rect(fill = "transparent",colour = NA)
+  #   )
+  # }
   
   EQShipsPort<- subset(EQPortSnapshot, EQPortSnapshot$ISIN %in% ShippingData$ISIN)
   CBShipsPort<- subset(CBPortSnapshot, CBPortSnapshot$ISIN %in% ShippingData$ISIN)
@@ -713,27 +713,27 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   # plotnumber=99
   
   
-  theme_barcharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(), 
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          legend.position=c(0.5,-.3),
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          legend.title=element_blank(),
-          legend.key = element_blank(),
-          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-          plot.background = element_rect(fill = "transparent",colour = NA)
-    )
-  }
+  # theme_barcharts <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.text.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.x=element_blank(),
+  #         axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
+  #         axis.line = element_line(colour = "black",size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         panel.background = element_blank(), 
+  #         legend.position=c(0.5,-.3),
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour="black"),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         legend.title=element_blank(),
+  #         legend.key = element_blank(),
+  #         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+  #         plot.background = element_rect(fill = "transparent",colour = NA)
+  #   )
+  # }
   
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
@@ -913,7 +913,7 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
     
     
   }else{
-  
+    
     Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
     Label <- GT[Label][[1]]
     
@@ -942,6 +942,293 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   return() 
 }
 
+
+# ------------- STACKED BAR CHART DATA ------ #
+stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
+  
+  # combin <- EQCombin
+  # ChartType <- "EQ"
+  # WeightedResults <- EQWMCoverageWeight
+  
+  # combin <- CBCombin
+  # ChartType <- "CB"
+  # WeightedResults <- CBWMCoverageWeight
+  
+  
+  wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+  
+  WeightedResults$PortName <- NULL
+  
+  
+  # Test to check for results; If == 0, no chart is printed. 
+  PlotChart <-nrow(combin)
+  
+  if(PlotChart>0){
+    
+    combin <- combin[!combin$Technology %in% "OilCap",]                  # While there are Oil power production results, we do not use them. 
+    combin <- combin[, -which(colnames(combin) %in% c("ComparisonType","Type"))]
+    
+    WeightedResults <- WeightedResults[, -which(colnames(WeightedResults) %in% c("ComparisonType","Type","PortName"))]
+    
+    
+    if (ChartType=="EQ"){
+      
+      ### Equity Results Processing
+      
+      ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose)
+      
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("InvestorName","PortName","Sector","Technology","Production", "TargetProductionAlignment","TargetProductionAUMIntensity"))  
+      
+      
+      ### For Power and Automotive, the Reference Production (Benchmark) is the TargetProductionAlignment; for FF it's based of the TargetProductionAUMIntensity
+      ProductionMix_5yrs$RefTechProd <- ProductionMix_5yrs$TargetProductionAlignment
+      
+      ### Convert the Production values to Energy (rather than units of coal, gas or oil (kt, m3, barrels))
+      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]*24
+      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]*6.12
+      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Coal"]*24
+      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Oil"]*6.12
+      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+      
+      ProductionMix_5yrs$TargetProductionAlignment <-ProductionMix_5yrs$TargetProductionAUMIntensity <- NULL
+      
+      ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Sector, Technology), summarise,
+                                  PortProduction= sum(Production),
+                                  RefProduction = sum(RefTechProd))
+      
+      ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Sector","Technology","PortProduction","RefProduction","CoverageWeight"))
+      ProductionMix_5yrs <- melt(ProductionMix_5yrs, id = c( "Technology","Sector"))
+      SectorTotals <- ddply(ProductionMix_5yrs,.(Sector,variable), summarise,SectorTotal = sum(value))
+      ProductionMix_5yrs <- merge(ProductionMix_5yrs,SectorTotals)
+      
+      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value/ProductionMix_5yrs$SectorTotal
+      
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select= c("Sector","Technology","variable","TechShare"))
+      ProductionMix_5yrs$Technology <- gsub("Cap","",ProductionMix_5yrs$Technology)
+      ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
+      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioNameLong
+      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- GT["X2Target"][[1]]
+      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- GT["AveragePort"][[1]]
+      
+      ProductionMix <- ProductionMix_5yrs
+      
+    }else{
+      
+      ### Corporate Bonds Results Processing ### 
+      
+      ### FOSSIL FUELS
+      FFMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
+      
+      FFMix_5yrs$TechShare <- FFMix_5yrs$SectorWeight
+      FFMix_5yrs$TechShare[FFMix_5yrs$Sector %in% "Oil&Gas"] <- FFMix_5yrs$SectorWeight[FFMix_5yrs$Sector %in% "Oil&Gas"]*FFMix_5yrs$PortTechShare[FFMix_5yrs$Sector %in% "Oil&Gas"]
+      TSSUM <- sum(FFMix_5yrs$TechShare, na.rm = TRUE)
+      FFMix_5yrs$TechShare <- FFMix_5yrs$TechShare/TSSUM 
+      
+      MarketTechShareOGSum <- sum(FFMix_5yrs$RegWtProjMarketProd[FFMix_5yrs$Sector %in% "Oil&Gas"],na.rm = TRUE)
+      FFMix_5yrs$MarketTechShareOG <- FFMix_5yrs$RegWtProjMarketProd/MarketTechShareOGSum
+      
+      FFMix_5yrs$TechShareMarket <- FFMix_5yrs$SecWtMarket
+      FFMix_5yrs$TechShareMarket[FFMix_5yrs$Sector %in% "Oil&Gas"]<- FFMix_5yrs$SecWtMarket[FFMix_5yrs$Sector %in% "Oil&Gas"]*FFMix_5yrs$MarketTechShareOG[FFMix_5yrs$Sector %in% "Oil&Gas"]
+      TSSUMMarket  <- sum(FFMix_5yrs$TechShareMarket, na.rm = TRUE)
+      FFMix_5yrs$TechShareMarket <-FFMix_5yrs$TechShareMarket/TSSUMMarket 
+      
+      FFMix_5yrs <- unique(subset(FFMix_5yrs, select = c("Technology","TechShare","TechShareMarket")))
+      
+      FFWeightedResults <- subset(WeightedResults, Technology %in% FFMix_5yrs$Technology)
+      sumWR <- sum(FFWeightedResults$CoverageWeight, na.rm = TRUE)
+      FFWeightedResults$CoverageWeight <- FFWeightedResults$CoverageWeight/sumWR
+      
+      FFMix_5yrs <- merge(FFMix_5yrs,FFWeightedResults, by="Technology")
+      FFMix_5yrs <- rename(FFMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],
+                                         "TechShare"=PortfolioNameLong,
+                                         "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+      
+      
+      FFMix_5yrs <- melt(FFMix_5yrs, id.vars = c("Technology"))
+      FFMix_5yrs$Sector <- "Fossil Fuels"
+      FFMix_5yrs <- rename(FFMix_5yrs, c("value"="TechShare"))
+      
+      FFMix_5yrs$TechShare[is.nan(FFMix_5yrs$TechShare)] <- 0
+      FFMix_5yrs <- subset(FFMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
+      
+      ### NON FOSSIL FUELS
+      ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Automotive","Power"))
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
+      ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by=c("Technology"))
+      ProductionMix_5yrs <- rename(ProductionMix_5yrs, 
+                                   c("WtTechShareTechShare"=PortfolioNameLong,
+                                     "Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],
+                                     "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+      
+      ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Sector","Technology"))
+      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value
+      ProductionMix_5yrs$value <- NULL
+      
+      ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
+      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
+      
+      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "CoalCap"] <- "Coal"
+      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "GasCap"] <- "Gas"
+      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "HydroCap"] <- "Hydro"
+      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "NuclearCap"] <- "Nuclear"
+      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "RenewablesCap"] <- "Renewables"
+      
+      tsharesum <- ddply(ProductionMix_5yrs, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
+      ProductionMix_5yrs <- merge(ProductionMix_5yrs,tsharesum, by= c("Sector","variable"))
+      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$TechShare/ProductionMix_5yrs$SectorTotal 
+      ProductionMix_5yrs$SectorTotal<- NULL
+      
+      ### Merge the FF Results back in
+      
+      ProductionMix <- rbind(ProductionMix_5yrs, FFMix_5yrs)
+      
+    }
+  } else{
+    ProductionMix <- 0
+  }
+  
+  
+  return(ProductionMix)
+  
+  
+  
+}
+
+
+# ------------- STACKED BAR CHARTS ---------- #
+Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
+  
+  ### Sample Variables (ie for testing only - remain commented out for normal use)
+  
+  # combin <- EQCombin
+  # ChartType <- "EQ"
+  # WeightedResults <- EQWMCoverageWeight
+  
+  # combin <- CBCombin
+  # ChartType <- "CB"
+  # WeightedResults <- CBWMCoverageWeight
+  
+  ################  
+  
+  PlotData <- stacked_bar_chart_data(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
+  
+  if (nrow(PlotData >0)){
+    ### Add or Remove Average Portfolio Results ####
+    PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
+    ################################################
+    # This is from the previous chart - possibly now, need to consider what exactly needs to be plot. 
+    # Options - Portfolio, Benchmark, Average of Peers, Listed Market
+    # This is not entirely reflected in the data. 
+    # This should be specified by the Parameter file perhaps. 
+    ################################################
+    
+    
+    #### Something like this Section needs to be replicated for the complete data set. ###
+    ### The order needs to be set, the colours need to be specifid and the labels need to be determined. 
+    ### In this chart SectorToPlot is not set 
+    
+    #   if (SectorToPlot == "Automotive"){ 
+    #     technologyorder <-c("Electric","Hybrid","ICE")
+    #     techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
+    #     colours <- factor(c(ICEColour,HybridColour,ElectricColour))
+    #     ylabel <- GT["StackedBarYLabel_Automotive"][[1]]}
+    #   
+    #   if (SectorToPlot == "Power"){
+    #     ylabel <- GT["StackedBarYLabel_Power"][[1]]
+    #     technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
+    #     techorder <- data.frame(order=c(1,2,4,3,5),Technology= technologyorder)
+    #     colours <- factor(c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour))}
+    #   
+    #   if (SectorToPlot == "Fossil Fuels"){
+    #     ylabel <- GT["StackedBarYLabel_FF"][[1]]
+    #     technologyorder <- c("Coal","Gas","Oil")
+    #     techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
+    #     colours <- factor(c(CoalProdColour,GasProdColour,OilProdColour))
+    #   }  
+    #   colourdf <- data.frame(colours, Technology = technologyorder)
+    
+    ########
+    ### Basically a solution is required so that we can plot the following from the same base of code
+    ### 1. Sector Specific stacked bar chart (Horizontal) (this exists)
+    ### 2. All Sectors stacked bar charts (vertical) as outlined 
+    
+    ### I would think, either by a SectorToPlot <- "All", "Fossil Fuels", "Automotive", "Power"
+    ### Therefore the "All" Option needs to be coded in. 
+    ### Open to alternatives though. 
+    
+    
+    
+    
+    ### Check this, as the Coal Production vs Coal Capacity may cause issues if the merge is just by Technology. 
+    ### ie. the colourdf needs to include the sector as well. 
+    
+    PlotData <- merge(PlotData,colourdf, by=c("Technology")) # "Sector",
+    orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
+    PlotData$variable <- factor(PlotData$variable, levels=orderofchart)
+    PlotData$Technology <- factor(PlotData$Technology, levels=technologyorder)
+    PlotData <- PlotData[order(PlotData$Technology,PlotData$variable),]
+    PlotData$variable <- wrap.labels(PlotData$variable,20)
+    
+    PlotData$Sector <- NULL
+    
+    if (SectorToPlot == "Fossil Fuels"){PlotData$Label <- paste0(PlotData$Technology,"Prod")}else{PlotData$Label<- PlotData$Technology}
+    if (SectorToPlot == "Power"){PlotData$Label <- paste0(PlotData$Label,"Cap")}
+    
+    PlotData$Language <- t(GT[paste0("T_",PlotData$Label)])[,1]
+    
+    stackedbarchart_plot<- ggplot(PlotData, aes(variable, TechShare,fill=rev(Technology)))+
+      geom_bar(stat = "identity",width = .6)+
+      scale_fill_manual(labels=unique(rev(PlotData$Language)),values=unique(as.character((PlotData$colours))))+
+      scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+      expand_limits(0,0)+
+      guides(fill=guide_legend(nrow = 1))+
+      ylab(ylabel)+
+      theme_barcharts()+ 
+      coord_flip()        #### THIS CAN BE REMOVED TO MAKE IT VERTICAL ####
+    
+    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
+    
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=stackedbarchart_plot,dpi=ppi)
+    
+    
+  }else{
+    
+    
+    ### Returns if no data is available ####
+    
+    Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
+    Label <- GT[Label][[1]]
+    
+    outputplot <-
+      ggplot()+
+      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=4)+
+      geom_blank()+
+      theme(
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA))
+    
+    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=outputplot,dpi=ppi)
+    
+  }
+  
+  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",plot=stackedbarchart_plot,dpi=ppi)
+  return() 
+}
+
+
+
+
 # ------------- MINI LINE CHARTS ------------ #
 mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlot, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose,figuredirectoy, PortfolioName){
   
@@ -951,30 +1238,30 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
   # ChartType <- "EQ"
   
   
-  theme_linecharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(), 
-          axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.title.x=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.line = element_line(colour = AxisColour,size=1),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          #panel.background = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          # legend.position=c(0.5,-.4),#legend.position = "none", 
-          legend.position = "none", 
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          #legend.title=element_blank(),
-          legend.title = element_text(colour = AxisColour, size = textsize),
-          legend.key = element_blank(),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          plot.margin = unit(c(1,1, 0, 0), "lines")
-    )
-  }    
+  # theme_linecharts <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
+  #         axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
+  #         axis.title.x=element_text(face="bold",colour=AxisColour,size=textsize),
+  #         axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
+  #         axis.line = element_line(colour = AxisColour,size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         #panel.background = element_blank(),
+  #         panel.background = element_rect(fill = "transparent",colour = NA),
+  #         # legend.position=c(0.5,-.4),#legend.position = "none", 
+  #         legend.position = "none", 
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         #legend.title=element_blank(),
+  #         legend.title = element_text(colour = AxisColour, size = textsize),
+  #         legend.key = element_blank(),
+  #         plot.background = element_rect(fill = "transparent",colour = NA),
+  #         plot.margin = unit(c(1,1, 0, 0), "lines")
+  #   )
+  # }    
   
   
   production <- subset(combin, Technology %in% TechToPlot)
@@ -1093,7 +1380,7 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
     if (TechToPlot %in% badtech){
       outputplot <- ggplot(data=LineData)+
         annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
-
+        
         geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=badexpColour)) +
         geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=goodexpColour)) +
         geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
@@ -1117,7 +1404,7 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
         geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
         geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
-
+        
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
         scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
@@ -2423,27 +2710,27 @@ renewablesadditions_chart <- function(plotnumber,ChartType,combin, PortSnapshot,
       progresslabel <- GT["Remaining"][[1]]  #CORRECT #GT["StillReq"][[1]]#GT["X2Target"][[1]]
       Target <- GT["Progress"][[1]] # blue
       
-      theme_barcharts <- function(base_size = textsize, base_family = "") {
-        theme(axis.ticks=element_blank(), 
-              axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.title.x=element_blank(),
-              axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.line = element_line(colour = AxisColour,size=1),
-              panel.grid.major = element_blank(), 
-              panel.grid.minor = element_blank(),
-              panel.background = element_blank(), 
-              legend.position=c(0.5,-.2),
-              legend.direction="horizontal",
-              legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-              legend.background = element_rect(fill = "transparent",colour = NA),
-              legend.key.size=unit(0.4,"cm"),
-              legend.title=element_blank(),
-              legend.key = element_blank(),
-              plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
-              plot.background = element_rect(fill = "transparent",colour = NA)
-        )
-      }
+      # theme_barcharts <- function(base_size = textsize, base_family = "") {
+      #   theme(axis.ticks=element_blank(), 
+      #         axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
+      #         axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
+      #         axis.title.x=element_blank(),
+      #         axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
+      #         axis.line = element_line(colour = AxisColour,size=1),
+      #         panel.grid.major = element_blank(), 
+      #         panel.grid.minor = element_blank(),
+      #         panel.background = element_blank(), 
+      #         legend.position=c(0.5,-.2),
+      #         legend.direction="horizontal",
+      #         legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+      #         legend.background = element_rect(fill = "transparent",colour = NA),
+      #         legend.key.size=unit(0.4,"cm"),
+      #         legend.title=element_blank(),
+      #         legend.key = element_blank(),
+      #         plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
+      #         plot.background = element_rect(fill = "transparent",colour = NA)
+      #   )
+      # }
       
       RenAddBar <- ggplot(RenewablesBar, aes(x=rev(Name),y=rev(value), fill = variable))+
         geom_bar(stat = "identity", width=.8, colour = NA)+
@@ -2493,7 +2780,7 @@ Inputs246 <- function(ChartType, Combin, BatchTest,IEATargets246,TechToPlot,Benc
   # Combin <- EQCombin
   # ChartType <- "EQ"
   # BatchTest <- EQBatchTest
-    
+  
   # Combin <- CBCombin
   # ChartType <- "CB"
   # BatchTest <- CBBatchTest
@@ -2549,13 +2836,13 @@ Inputs246 <- function(ChartType, Combin, BatchTest,IEATargets246,TechToPlot,Benc
   IEATargetsRef <- subset(IEATargetsRef, select = c("Scenario","AnnualvalIEAtech"))
   IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="StartValue"))
   
- 
+  
   IEATargets <- merge(IEATargets, IEATargetsRef, by = "Scenario")
- 
+  
   IEATargets$Denominator <- IEATargets$AnnualvalIEAtech[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]-IEATargets$StartValue[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]
   
   
-   IEATargets$Value <- (IEATargets$AnnualvalIEAtech-IEATargets$StartValue) / IEATargets$Denominator
+  IEATargets$Value <- (IEATargets$AnnualvalIEAtech-IEATargets$StartValue) / IEATargets$Denominator
   
   IEATargets <- subset(IEATargets, select = c("Scenario","Year","Value"))
   IEATargets <- rename(IEATargets, c("Scenario"="Label"))
@@ -2588,9 +2875,9 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
   
   dfwide <- dcast(df,Year~Label, value.var="Value")
   
-
+  
   Colourvals <- c( "< 2°C"=DarkGreen,"2-4°C"=LightGreen,"4-6°C"=LightRed,"> 6°C" =DarkRed )
-
+  
   ### Calculates the y axis scales and labels      
   ymin <- min(df$Value,na.rm = T)-0.1
   ymax <- max(df$Value,na.rm = T)
@@ -2606,7 +2893,7 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
   LinesToPlot <- factor(LinesToPlot, levels = LinesToPlot)
   LineColours <- c("black", "grey","blue","pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-
+  
   LineVector <- setNames(LineColours,LinesToPlot)
   # LineColours <- factor(LineColours, levels = LineColours)
   
@@ -2623,7 +2910,7 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
       
       ### I can't find a way to automaticall check whether 3 exists... 
       # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
-            
+      
       xlab(year_lab) + 
       ylab(ylabel) +
       scale_size(guide=FALSE)+
@@ -2657,7 +2944,7 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
       
       ### I can't find a way to automaticall check whether 3 exists... 
       # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
-            
+      
       xlab(year_lab) + 
       ylab(ylabel) +
       scale_size(guide=FALSE)+
@@ -2676,9 +2963,9 @@ Graph246 <- function(ChartType, Combin, BatchTest, IEATargets246,TechToPlot,Benc
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"))
     
-   
-    }
     
+  }
+  
   
   
   
@@ -2761,28 +3048,28 @@ distribution_chart <- function(ChartType, Combin, BatchTest, PortName){
   dfagg <- arrange(dfagg, desc(CarstensMetric))
   dfagg$PortName <- factor(dfagg$PortName, levels=dfagg$PortName)
   
-  theme_distribution <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(), 
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(), 
-          legend.position=c(0.5,-.3),
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          legend.title=element_blank(),
-          legend.key = element_blank(),
-          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          plot.title = element_text(hjust = 0.5)
-    )
-  }
+  # theme_distribution <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.text.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.x=element_blank(),
+  #         axis.title.y=element_blank(),
+  #         axis.line = element_line(colour = "black",size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         panel.background = element_blank(), 
+  #         legend.position=c(0.5,-.3),
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour="black"),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         legend.title=element_blank(),
+  #         legend.key = element_blank(),
+  #         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+  #         plot.background = element_rect(fill = "transparent",colour = NA),
+  #         plot.title = element_text(hjust = 0.5)
+  #   )
+  # }
   
   distribution_plot<- ggplot(dfagg, aes(PortName, CarstensMetric, fill=rev(ComparisonType)))+
     geom_bar(stat = "identity",width = .6)+
@@ -2795,6 +3082,128 @@ distribution_chart <- function(ChartType, Combin, BatchTest, PortName){
     theme_distribution()
   
   print(distribution_plot)
+}
+
+
+#----------- CHART THEMES --------------------#
+
+# Stacked Bar
+theme_barcharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        legend.position=c(0.5,-.3),
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title=element_blank(),
+        legend.key = element_blank(),
+        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+        plot.background = element_rect(fill = "transparent",colour = NA)
+  )
+}
+
+# Renewable additions
+theme_barcharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.line = element_line(colour = AxisColour,size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        legend.position=c(0.5,-.2),
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title=element_blank(),
+        legend.key = element_blank(),
+        plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
+        plot.background = element_rect(fill = "transparent",colour = NA)
+  )
+}
+
+# Distribution Chart
+theme_distribution <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        legend.position=c(0.5,-.3),
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title=element_blank(),
+        legend.key = element_blank(),
+        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.title = element_text(hjust = 0.5)
+  )
+}
+
+# shipping
+theme_barcharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(face="bold",colour="black",size=textsize),#element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        legend.position=c(0.5,-.3),
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title=element_blank(),
+        legend.key = element_blank(),
+        plot.margin = unit(c(0.6,0, 2.5, 0), "lines"),
+        plot.background = element_rect(fill = "transparent",colour = NA)
+  )
+}
+
+# mini line charts & other sector charts
+theme_linecharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.title.x=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
+        axis.line = element_line(colour = AxisColour,size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        # legend.position=c(0.5,-.4),#legend.position = "none", 
+        legend.position = "none", 
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = AxisColour, size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines")
+  )
 }
 
 
