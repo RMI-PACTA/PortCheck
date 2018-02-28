@@ -942,7 +942,6 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   return() 
 }
 
-
 # ------------- STACKED BAR CHART DATA ------ #
 stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
   
@@ -1097,7 +1096,6 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRe
   
 }
 
-
 # ------------- STACKED BAR CHARTS ---------- #
 Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
   
@@ -1225,9 +1223,6 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
   # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",plot=stackedbarchart_plot,dpi=ppi)
   return() 
 }
-
-
-
 
 # ------------- MINI LINE CHARTS ------------ #
 mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlot, BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose,figuredirectoy, PortfolioName){
@@ -2223,17 +2218,69 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType,PortSnapshot,
   return()  
 }
 
+#------------- Data for HeatMap (Portfolio) --- #
+heatmap_data <- function(EQDataInput, CBDataInput,FundsOrPort,PortName){
+  
+  # EQDataInput <- EQCombin
+  # CBDataInput <- CBCombin
+  
+  BenchYear <- Startyear + 5
+  
+  if(length(EQDataInput) > 0){ 
+    EQData <- subset(EQDataInput,Year == BenchYear & Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose,
+                     select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
+    
+    EQData$MarketExposure[EQData$Technology %in% c("Oil", "Gas", "Coal")] <- EQData$AUMExposure[EQData$Technology %in% c("Oil", "Gas", "Coal")]
+    EQData$Exposure <- EQData$MarketExposure
+    
+    EQData <- EQData[,!names(EQData) %in%   c("MarketExposure",'AUMExposure')]
+    EQData$Exposure <- as.numeric(EQData$Exposure)
+    
+    if (FundsOrPort == "Port"){ EQData$PortName <- "Equity"}
+  }
+  
+  if (length(CBDataInput) > 0){
+    CBData <- subset(CBDataInput, Year == BenchYear & Scenario == Scenariochoose ,
+                     select = c("PortName","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
+    
+    CBData$Exposure_WtTechShareTechShare[CBData$Technology %in% c("Oil", "Gas", "Coal")] <- CBData$Exposure_OGCMetrik[CBData$Technology %in% c("Oil", "Gas", "Coal")]
+    CBData$Exposure <- CBData$Exposure_WtTechShareTechShare
+    
+    CBData <- CBData[,!names(CBData) %in%   c("Exposure_WtTechShareTechShare",'Exposure_OGCMetrik')]
+    CBData$Exposure <- as.numeric(CBData$Exposure)
+    
+    if (FundsOrPort == "Port"){CBData$PortName <- "Corporate Bonds"}
+  }
+
+  if (length(CBDataInput) > 0 & length(EQDataInput)>0){FundsData <- rbind(EQData,CBData)}else{
+    if(length(CBDataInput) > 0){FundsData <- CBData}else{
+      if(length(EQDataInput) > 0){FundsData <- EQData}else{
+        FundsData <- "NoData"
+      }
+    }
+  }
+  
+}
+
 # ------------ FUND MAP --------------------- # 
 fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, PortfolioName){
   
   # FundsData <- FundsInPort
+  # FundsData <- EQBatchTest
   
-  ### FundsData is the BatchTest ie. EquityAnalysisResults-450S-only.csv
+  # EQDataInput <- EQCombin
+  # CBDataInput <- CBCombin
+  
+  BenchYear <- Startyear + 5
+  
+ 
+  
+  ### FundsData is the BatchTest ie. EquityAnalysisHeatmap-450S-only.csv
   ### Improve flexibility to include Corporate Bonds as well. 
   
   if(typeof(FundsData) == "list"){
     if(nrow(FundsData)>0){
-      BenchYear <- Startyear + 5
+      
       AxisColour = 'Black'
       textcolour = 'Black'
       geom.text.size = 2.5
@@ -2241,15 +2288,15 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       BrownList <-c("CoalCap", "GasCap", "OilCap", "Gas", "Oil", "Coal", "ICE")
       GreenList <-c("NuclearCap", "HydroCap", "RenewablesCap", "Electric","Hybrid")
       
-      # Read Results
-      #  Results <- read.csv(paste(OutputLocation,PortfolioHoldings,"/",ResultsDate,"_",PortfolioHoldings,"_EquityAnalysisResults-450S-only.csv",sep = ""),stringsAsFactors = FALSE, strip.white = TRUE)
-      Results <- FundsData #combin
+      # Read Heatmap
+      #  Heatmap <- read.csv(paste(OutputLocation,PortfolioHoldings,"/",HeatmapDate,"_",PortfolioHoldings,"_EquityAnalysisHeatmap-450S-only.csv",sep = ""),stringsAsFactors = FALSE, strip.white = TRUE)
+      Heatmap <- FundsData #combin
       
       
       # Remove shitty name
-      Results$PortName <- gsub("_.*","",Results$PortName)
-      if ("ISIN" %in% colnames(Results)){Results$PortName <- Results$ISIN}
-      techlist <- unique(Results$Technology)
+      Heatmap$PortName <- gsub("[01]_.*","",Heatmap$PortName)
+      if ("ISIN" %in% colnames(Heatmap)){Heatmap$PortName <- Heatmap$ISIN}
+      techlist <- unique(Heatmap$Technology)
       techlist <- techlist[techlist != "OilCap"]
       techlistshort <- c("elec","hyb","ICE","coal","gas","oil","coac","gasc","hyd","nuc","ren")
       Techlist <- as.data.frame(t(rbind(techlist,techlistshort)))
@@ -2257,8 +2304,8 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       ################## Heatmap ########################
       
       #Select subset of results: Year, Scenario, Where the companies are located/the investment universe, and just funds, not brands. 
-      Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-      # No Companydomregion for Stoxx600
+      # Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
+      # # No Companydomregion for Stoxx600
       # Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
       
       
@@ -2266,13 +2313,13 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       # Heatmap$PortName[Heatmap$PortName == "FTSE"] <- "FTSE350"
       
       # Use AUM Exposure method for fossel fuels
-      Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- Heatmap$AUMExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")]
-      # After getting the AUM values, remove that vector from the dataframe
-      Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
-      Heatmap$MarketExposure <- as.numeric(Heatmap$MarketExposure)
+      # Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- Heatmap$AUMExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")]
+      # # After getting the AUM values, remove that vector from the dataframe
+      # Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
+      # Heatmap$MarketExposure <- as.numeric(Heatmap$MarketExposure)
       # Rename the technologies to be more reader friendly
       # Heatmap$Technology <- revalue(Heatmap$Technology, c("Gas" = "Gas\nProduction","Oil" = "Oil\nProduction", "Coal" = "Coal\nProduction", "Electric" = "Electric\nVehicles", "Hybrid" = "Hybrid\nVehicles", "ICE" = "ICE\nVehicles", "RenewablesCap" = "Renewable\nCapacity", "NuclearCap" = "Nuclear\nCapacity", "HydroCap" = "Hydro\nCapacity", "GasCap" = "Gas\nCapacity", "CoalCap" = "Coal\nCapacity"))
-      Heatmap$MarketExposure <- Heatmap$MarketExposure*100
+      Heatmap$Exposure <- Heatmap$Exposure*100
       
       #fill in values if some regions or technologies are not within the portfolio
       Heatmap <- Heatmap %>% complete(PortName, Technology, BenchmarkRegion) # Keeps N/As
@@ -2283,30 +2330,30 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       # Heatmap$ExposureColour[!is.na(Heatmap$MarketExposure)] <- 'grey95'
       
       # 'good' alignment
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 0 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< 0] <- "#FFFFFF"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 5 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< -5] <- "#d2e7d2"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 15 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< -15] <- "#a5cfa5"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 25 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< -25] <- "#78b878"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 50 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< -50] <- "#4ba04b"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$MarketExposure> 75 | Heatmap$Technology %in% BrownList & Heatmap$MarketExposure< -75] <- "#1f891f"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 0 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< 0] <- "#FFFFFF"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 5 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -5] <- "#d2e7d2"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 15 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -15] <- "#a5cfa5"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 25 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -25] <- "#78b878"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 50 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -50] <- "#4ba04b"
+      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 75 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -75] <- "#1f891f"
       
       # 'bad' alignment
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 0 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< 0 ] <- "#FFFFFF"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 5 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< -5 ] <- "#fad7d3"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 15 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< -15 ] <- "#f5afa8"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 25 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< -25 ] <- "#f0877d"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 50 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< -50 ] <- "#eb5f52"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$MarketExposure> 75 | Heatmap$Technology %in% GreenList & Heatmap$MarketExposure< -75 ] <- "#e73827"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 0 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< 0 ] <- "#FFFFFF"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 5 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -5 ] <- "#fad7d3"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 15 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -15 ] <- "#f5afa8"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 25 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -25 ] <- "#f0877d"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 50 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -50 ] <- "#eb5f52"
+      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 75 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -75 ] <- "#e73827"
       
       
       # repval = 200
       # redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
       # 
-      # Heatmap$ExposureColour <- redgreen[(100+Heatmap$MarketExposure)]
-      # Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & !is.na(Heatmap$MarketExposure)] <- redgreen[(100+Heatmap$MarketExposure[Heatmap$Technology %in% BrownList & !is.na(Heatmap$MarketExposure)] )]
+      # Heatmap$ExposureColour <- redgreen[(100+Heatmap$Exposure)]
+      # Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & !is.na(Heatmap$Exposure)] <- redgreen[(100+Heatmap$Exposure[Heatmap$Technology %in% BrownList & !is.na(Heatmap$Exposure)] )]
       
       #add '%' text
-      Heatmap$ExposureText <-Heatmap$MarketExposure# remove text for auto sector
+      Heatmap$ExposureText <-Heatmap$Exposure# remove text for auto sector
       Heatmap$ExposureText[!is.na(Heatmap$ExposureText)]<-paste(round(Heatmap$ExposureText[!is.na(Heatmap$ExposureText)], 0), "%", sep="")
       
       # Order Technologies
@@ -2403,7 +2450,7 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       # TechnologyLabel$XPosition[1]<-0.5
       HeatmapGGPlot <- ggplot(HeatmapData, aes(x = as.factor(HeatmapData$Technology),fill = as.factor(HeatmapData$ExposureColour), y = as.factor(HeatmapData$PortName), group=HeatmapData$PortName)) +
         geom_tile(colour = "grey95") +
-        # geom_text(aes(label = HeatmapData$ExposureText),colour=AxisColour, size = geom.text.size, data = data.frame()) + # text for % values
+        geom_text(aes(label = HeatmapData$ExposureText),colour=AxisColour, size = geom.text.size, data = data.frame()) + # text for % values
         annotation_custom(reng,xmin=.7,xmax=1.3,ymin=iconymin,ymax = iconymax)+
         annotation_custom(hydg,xmin=1.7,xmax=2.3,ymin=iconymin,ymax = iconymax)+
         annotation_custom(nucg,xmin=2.7,xmax=3.3,ymin=iconymin,ymax = iconymax)+

@@ -266,6 +266,7 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
 
 # ------------ List to Test Creation -------- # 
 FundPortcheck <- function(PortsToTest,PortfolioList){
+  
   PortsToTestUnique <- PortsToTest
   PortsToTestUnique$Type[PortsToTestUnique$Type == "Investor"] <- "Brand"
   PortsToTestUnique$Type[PortsToTestUnique$Type == "Portfolio"] <- "Fund"
