@@ -1455,7 +1455,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=p1,dpi=ppi)
 
     } 
@@ -1470,7 +1470,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=p2,dpi=ppi)
 
     }
@@ -1485,7 +1485,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
        ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=p3,dpi=ppi)
 
     }
@@ -1499,7 +1499,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       
       p2 <- ggplot(dat$`Fossil Fuels`, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
@@ -1510,7 +1510,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       
       p3 <- ggplot(dat$Power, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
@@ -1522,7 +1522,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
         guides(fill=guide_legend(nrow = 1))+
         ylab(ylabel)+
         theme_barcharts()+
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       
       grid.arrange(p1,p2,p3,nrow=1)    
     # print(PlotData)
