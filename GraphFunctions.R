@@ -1105,7 +1105,7 @@ Combined_stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResul
   Gas = "#999999"
   Oil = "#333333"
   Nuclear="#FF6633"
-  Hydro="#336699",
+  Hydro="#336699"
   Renewables="#336633"
   Electric="#99CC66"
   Hybrid="#FFCC66"
