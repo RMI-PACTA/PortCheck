@@ -457,6 +457,9 @@ for (i in 1:nrow(TestList)){
       
       fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
         
+      stacked_bar_chart_new(99,"EQ",EQCombin,EQWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
+
+      
       
       # Page 4
       plot_0 <- port_pie("00", PortData)

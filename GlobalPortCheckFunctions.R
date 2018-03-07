@@ -2,6 +2,12 @@
 
 
 
+#----
+# Wraps labels for charts
+#----
+wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+
 
 #-----
 # Read Parameter File
