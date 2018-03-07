@@ -1100,17 +1100,6 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRe
 stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,SectorToPlot,BenchmarkRegionchoose, 
                               CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, 
                               PortfolioNameLong){
-  Coal = "#663300"
-  Gas = "#999999"
-  Oil = "#333333"
-  Nuclear="#ed7d31"
-  Hydro="#336699"
-  Renewables="#336633"
-  Electric="#99CC66"
-  Hybrid="#FFCC66"
-  ICE="#333f50"
-  CoalP="#843c0c"
-  GasP="#afabab"
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   if(ChartType=="EQ"){
