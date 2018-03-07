@@ -855,7 +855,7 @@ SetGraphInputs <- function(){
   RenewablesColour <<- "#548235"
   HydroColour <<- "#2e75b6"
   NuclearColour <<- "#ed7d31"
-  GasCapColour<<-"afabab"
+  GasCapColour<<-"#afabab"
   CoalCapColour <<- "#843c0c" 
   ElectricColour<<- "#a9d18e"
   HybridColour<<- "#ffd966"
