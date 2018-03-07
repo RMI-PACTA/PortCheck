@@ -710,13 +710,14 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   # WeightedResults <- EQWMCoverageWeight
   
   
-  combin <- CBCombin
-  ChartType <- "CB"
-  WeightedResults <- CBWMCoverageWeight
-  SectorToPlot <- "Fossil Fuels"
+  #combin <- CBCombin
+  #ChartType <- "CB"
+  #WeightedResults <- CBWMCoverageWeight
+  #SectorToPlot <- "Fossil Fuels"
   # plotnumber=99
   
   
+# <<<<<<< HEAD
   theme_barcharts <- function(base_size = textsize, base_family = "") {
     theme(axis.ticks=element_blank(),
           axis.text.x=element_text(face="bold",colour="black",size=textsize),
@@ -741,210 +742,236 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   
   # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+
+  # theme_barcharts <- function(base_size = textsize, base_family = "") {
+  #   theme(axis.ticks=element_blank(), 
+  #         axis.text.x=element_text(face="bold",colour="black",size=textsize),
+  #         axis.text.y=element_text(face="bold",colour="black",size=textsize),
+  #         axis.title.x=element_blank(),
+  #         axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
+  #         axis.line = element_line(colour = "black",size=1),
+  #         panel.grid.major = element_blank(), 
+  #         panel.grid.minor = element_blank(),
+  #         panel.background = element_blank(), 
+  #         legend.position=c(0.5,-.3),
+  #         legend.direction="horizontal",
+  #         legend.text = element_text(face="bold",size=textsize,colour="black"),
+  #         legend.background = element_rect(fill = "transparent",colour = NA),
+  #         legend.key.size=unit(0.4,"cm"),
+  #         legend.title=element_blank(),
+  #         legend.key = element_blank(),
+  #         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+  #         plot.background = element_rect(fill = "transparent",colour = NA)
+  #   )
+  # }
   
-  WeightedResults$PortName <- NULL
+  #wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  #wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+# >>>>>>> d861ee40fafaec07aa06fe9668d499002bcdc7c7
   
-  if(SectorToPlot == "All"){cbondsgo <-nrow(combin)}
-  if(SectorToPlot == "Fossil Fuels"){cbondsgo <- nrow(subset(combin, combin$Sector %in% c("Fossil Fuels","Oil&Gas","Coal")))}else{cbondsgo <- nrow(subset(combin, combin$Sector == SectorToPlot))}
+  #WeightedResults$PortName <- NULL
   
-  if(cbondsgo>0){
+  #if(SectorToPlot == "All"){cbondsgo <-nrow(combin)}
+  #if(SectorToPlot == "Fossil Fuels"){cbondsgo <- nrow(subset(combin, combin$Sector %in% c("Fossil Fuels","Oil&Gas","Coal")))}else{cbondsgo <- nrow(subset(combin, combin$Sector == SectorToPlot))}
+  
+  #if(cbondsgo>0){
     
-    combin <- combin[!combin$Technology %in% "OilCap",]
-    combin <- combin[, -which(colnames(combin) %in% c("ComparisonType","Type"))]
-    WeightedResults <- WeightedResults[, -which(colnames(WeightedResults) %in% c("ComparisonType","Type","PortName"))]
+  #  combin <- combin[!combin$Technology %in% "OilCap",]
+  #  combin <- combin[, -which(colnames(combin) %in% c("ComparisonType","Type"))]
+  #  WeightedResults <- WeightedResults[, -which(colnames(WeightedResults) %in% c("ComparisonType","Type","PortName"))]
     
-    if (ChartType=="EQ"){
-      ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose & Sector == SectorToPlot)
-      if (SectorToPlot == "Fossil Fuels"){
-        ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]*24
-        ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]*6.12
-        ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]*0.0372
-        ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Coal"]*24
-        ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Oil"]*6.12
-        ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+  #  if (ChartType=="EQ"){
+  #    ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose & Sector == SectorToPlot)
+  #    if (SectorToPlot == "Fossil Fuels"){
+  #      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]*24
+  #      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]*6.12
+  #      ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+  #      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Coal"]*24
+  #      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Oil"]*6.12
+  #      ProductionMix_5yrs$RefTechProd[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Gas"]*0.0372
         
-        ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Year, Sector, Technology,Scenario), summarise,
-                                    PortProduction= sum(Production),
-                                    RefProduction = sum(RefTechProd))
-      }else{
-        ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Year, Sector, Technology,Scenario), summarise,
-                                    PortProduction= sum(Production),
-                                    RefProduction = sum(TargetProductionAlignment))}
+  #      ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Year, Sector, Technology,Scenario), summarise,
+  #                                  PortProduction= sum(Production),
+  #                                  RefProduction = sum(RefTechProd))
+  #    }else{
+  #      ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Year, Sector, Technology,Scenario), summarise,
+  #                                  PortProduction= sum(Production),
+  #                                  RefProduction = sum(TargetProductionAlignment))}
       
-      ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
-      ProductionMix_5yrs <- melt(ProductionMix_5yrs, id = c( "Year","Technology","Scenario","Sector"))
-      SectorTotals <- ddply(ProductionMix_5yrs,.(Year,Sector,variable), summarise,SectorTotal = sum(value))
-      ProductionMix_5yrs <- merge(ProductionMix_5yrs,SectorTotals)
+  #    ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
+  #    ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+  #    ProductionMix_5yrs <- melt(ProductionMix_5yrs, id = c( "Year","Technology","Scenario","Sector"))
+  #    SectorTotals <- ddply(ProductionMix_5yrs,.(Year,Sector,variable), summarise,SectorTotal = sum(value))
+  #    ProductionMix_5yrs <- merge(ProductionMix_5yrs,SectorTotals)
       
-      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value/ProductionMix_5yrs$SectorTotal
+  #    ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value/ProductionMix_5yrs$SectorTotal
       
-      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select= c("Sector","Technology","variable","TechShare"))
-      ProductionMix_5yrs$Technology <- gsub("Cap","",ProductionMix_5yrs$Technology)
-      ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
-      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioNameLong
-      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- GT["X2Target"][[1]]
-      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- GT["AveragePort"][[1]]
+  #    ProductionMix_5yrs <- subset(ProductionMix_5yrs, select= c("Sector","Technology","variable","TechShare"))
+  #    ProductionMix_5yrs$Technology <- gsub("Cap","",ProductionMix_5yrs$Technology)
+  #    ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
+  #    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioNameLong
+  #    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- GT["X2Target"][[1]]
+  #    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- GT["AveragePort"][[1]]
       
-    }else{
+  #  }else{
       
-      if (SectorToPlot == "Fossil Fuels"){
-        ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
+  #    if (SectorToPlot == "Fossil Fuels"){
+  #      ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
         
-        ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$SectorWeight
-        ProductionMix_5yrs$TechShare[ProductionMix_5yrs$Sector %in% "Oil&Gas"] <- ProductionMix_5yrs$SectorWeight[ProductionMix_5yrs$Sector %in% "Oil&Gas"]*ProductionMix_5yrs$PortTechShare[ProductionMix_5yrs$Sector %in% "Oil&Gas"]
-        TSSUM <- sum(ProductionMix_5yrs$TechShare, na.rm = TRUE)
-        ProductionMix_5yrs$TechShare <-ProductionMix_5yrs$TechShare/TSSUM 
+  #      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$SectorWeight
+  #      ProductionMix_5yrs$TechShare[ProductionMix_5yrs$Sector %in% "Oil&Gas"] <- ProductionMix_5yrs$SectorWeight[ProductionMix_5yrs$Sector %in% "Oil&Gas"]*ProductionMix_5yrs$PortTechShare[ProductionMix_5yrs$Sector %in% "Oil&Gas"]
+  #      TSSUM <- sum(ProductionMix_5yrs$TechShare, na.rm = TRUE)
+  #      ProductionMix_5yrs$TechShare <-ProductionMix_5yrs$TechShare/TSSUM 
         
-        MarketTechShareOGSum <- sum(ProductionMix_5yrs$RegWtProjMarketProd[ProductionMix_5yrs$Sector %in% "Oil&Gas"],na.rm = TRUE)
-        ProductionMix_5yrs$MarketTechShareOG <- ProductionMix_5yrs$RegWtProjMarketProd/MarketTechShareOGSum
+  #      MarketTechShareOGSum <- sum(ProductionMix_5yrs$RegWtProjMarketProd[ProductionMix_5yrs$Sector %in% "Oil&Gas"],na.rm = TRUE)
+  #      ProductionMix_5yrs$MarketTechShareOG <- ProductionMix_5yrs$RegWtProjMarketProd/MarketTechShareOGSum
         
-        ProductionMix_5yrs$TechShareMarket <- ProductionMix_5yrs$SecWtMarket
-        ProductionMix_5yrs$TechShareMarket[ProductionMix_5yrs$Sector %in% "Oil&Gas"]<- ProductionMix_5yrs$SecWtMarket[ProductionMix_5yrs$Sector %in% "Oil&Gas"]*ProductionMix_5yrs$MarketTechShareOG[ProductionMix_5yrs$Sector %in% "Oil&Gas"]
-        TSSUMMarket  <- sum(ProductionMix_5yrs$TechShareMarket, na.rm = TRUE)
-        ProductionMix_5yrs$TechShareMarket <-ProductionMix_5yrs$TechShareMarket/TSSUMMarket 
+  #      ProductionMix_5yrs$TechShareMarket <- ProductionMix_5yrs$SecWtMarket
+  #      ProductionMix_5yrs$TechShareMarket[ProductionMix_5yrs$Sector %in% "Oil&Gas"]<- ProductionMix_5yrs$SecWtMarket[ProductionMix_5yrs$Sector %in% "Oil&Gas"]*ProductionMix_5yrs$MarketTechShareOG[ProductionMix_5yrs$Sector %in% "Oil&Gas"]
+  #      TSSUMMarket  <- sum(ProductionMix_5yrs$TechShareMarket, na.rm = TRUE)
+  #      ProductionMix_5yrs$TechShareMarket <-ProductionMix_5yrs$TechShareMarket/TSSUMMarket 
         
-        ProductionMix_5yrs <- unique(subset(ProductionMix_5yrs, select = c("Technology","TechShare","TechShareMarket")))
+  #      ProductionMix_5yrs <- unique(subset(ProductionMix_5yrs, select = c("Technology","TechShare","TechShareMarket")))
         
-        WeightedResults <- subset(WeightedResults, Technology %in% ProductionMix_5yrs$Technology)
-        sumWR <- sum(WeightedResults$CoverageWeight, na.rm = TRUE)
-        WeightedResults$CoverageWeight <- WeightedResults$CoverageWeight/sumWR
+  #      WeightedResults <- subset(WeightedResults, Technology %in% ProductionMix_5yrs$Technology)
+  #      sumWR <- sum(WeightedResults$CoverageWeight, na.rm = TRUE)
+  #      WeightedResults$CoverageWeight <- WeightedResults$CoverageWeight/sumWR
         
-        ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],"TechShare"=PortfolioNameLong,"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+  #      ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
+  #      ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],"TechShare"=PortfolioNameLong,"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+  #      # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+        
+  #      ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Technology"))
+  #      ProductionMix_5yrs$Sector <- "Fossil Fuels"
+  #      ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("value"="TechShare"))
+        
+  #      ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
+  #      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
+        
+  #    }else{
+  #      ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% SectorToPlot)
+  #      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
+  #      ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
+  #      ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
         # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
         
-        ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Technology"))
-        ProductionMix_5yrs$Sector <- "Fossil Fuels"
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("value"="TechShare"))
         
-        ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
+  #      ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Sector","Technology"))
+  #      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value
+  #      ProductionMix_5yrs$value <- NULL
         
-      }else{
-        ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% SectorToPlot)
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-        ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
-        # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+  #      ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
+  #      ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
         
+  #      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "CoalCap"] <- "Coal"
+  #      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "GasCap"] <- "Gas"
+  #      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "HydroCap"] <- "Hydro"
+  #      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "NuclearCap"] <- "Nuclear"
+  #      ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "RenewablesCap"] <- "Renewables"
+  #      ProductionMix_5yrs <- subset(ProductionMix_5yrs,!Technology %in% "OilCap")
         
-        ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Sector","Technology"))
-        ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value
-        ProductionMix_5yrs$value <- NULL
+  #      tsharesum <- ddply(ProductionMix_5yrs, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
+  #      ProductionMix_5yrs <- merge(ProductionMix_5yrs,tsharesum, by= c("Sector","variable"))
+  #      ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$TechShare/ProductionMix_5yrs$SectorTotal 
+  #      ProductionMix_5yrs$SectorTotal<- NULL
         
-        ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
-        
-        ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "CoalCap"] <- "Coal"
-        ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "GasCap"] <- "Gas"
-        ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "HydroCap"] <- "Hydro"
-        ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "NuclearCap"] <- "Nuclear"
-        ProductionMix_5yrs$Technology[ProductionMix_5yrs$Technology %in% "RenewablesCap"] <- "Renewables"
-        ProductionMix_5yrs <- subset(ProductionMix_5yrs,!Technology %in% "OilCap")
-        
-        tsharesum <- ddply(ProductionMix_5yrs, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
-        ProductionMix_5yrs <- merge(ProductionMix_5yrs,tsharesum, by= c("Sector","variable"))
-        ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$TechShare/ProductionMix_5yrs$SectorTotal 
-        ProductionMix_5yrs$SectorTotal<- NULL
-        
-      }
-    }
+  #    }
+  #  }
     
     
-    if (SectorToPlot == "Automotive"){ 
-      technologyorder <-c("Electric","Hybrid","ICE")
-      techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
-      colours <- factor(c(ICEColour,HybridColour,ElectricColour))
-      ylabel <- GT["StackedBarYLabel_Automotive"][[1]]}
+  #  if (SectorToPlot == "Automotive"){ 
+  #    technologyorder <-c("Electric","Hybrid","ICE")
+  #    techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
+  #    colours <- factor(c(ICEColour,HybridColour,ElectricColour))
+  #    ylabel <- GT["StackedBarYLabel_Automotive"][[1]]}
     
-    if (SectorToPlot == "Power"){
-      ylabel <- GT["StackedBarYLabel_Power"][[1]]
-      technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
-      techorder <- data.frame(order=c(1,2,4,3,5),Technology= technologyorder)
-      colours <- factor(c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour))}
+  #  if (SectorToPlot == "Power"){
+  #    ylabel <- GT["StackedBarYLabel_Power"][[1]]
+  #    technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
+  #    techorder <- data.frame(order=c(1,2,4,3,5),Technology= technologyorder)
+  #    colours <- factor(c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour))}
     
-    if (SectorToPlot == "Fossil Fuels"){
-      ylabel <- GT["StackedBarYLabel_FF"][[1]]
-      technologyorder <- c("Coal","Gas","Oil")
-      techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
-      colours <- factor(c(CoalProdColour,GasProdColour,OilProdColour))
-    }  
-    colourdf <- data.frame(colours, Technology = technologyorder)
+  #  if (SectorToPlot == "Fossil Fuels"){
+  #    ylabel <- GT["StackedBarYLabel_FF"][[1]]
+  #    technologyorder <- c("Coal","Gas","Oil")
+  #    techorder <- data.frame(order=c(1,2,3),Technology= technologyorder)
+  #    colours <- factor(c(CoalProdColour,GasProdColour,OilProdColour))
+  #  }  
+  #  colourdf <- data.frame(colours, Technology = technologyorder)
     
-    PlotData <- ProductionMix_5yrs
+  #  PlotData <- ProductionMix_5yrs
     
     
     
     ### Add or Remove Average Portfolio Results ####
-    PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
+  #  PlotData <- subset(PlotData, !PlotData$variable == GT["AveragePort"][[1]])
     ################################################
     
     
-    PlotData <- merge(PlotData,colourdf, by="Technology")
-    orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
-    PlotData$variable <- factor(PlotData$variable, levels=orderofchart)
-    PlotData$Technology <- factor(PlotData$Technology, levels=technologyorder)
-    PlotData <- PlotData[order(PlotData$Technology,PlotData$variable),]
-    PlotData$variable <- wrap.labels(PlotData$variable,20)
+  #  PlotData <- merge(PlotData,colourdf, by="Technology")
+  #  orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
+  #  PlotData$variable <- factor(PlotData$variable, levels=orderofchart)
+  #  PlotData$Technology <- factor(PlotData$Technology, levels=technologyorder)
+  #  PlotData <- PlotData[order(PlotData$Technology,PlotData$variable),]
+  #  PlotData$variable <- wrap.labels(PlotData$variable,20)
     
     # PlotData$variable <- revalue(PlotData$variable,c("AggregiertesPortfolio" = GT["AggregatedPortName"][[1]]))
     
     # write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
-    PlotData$Sector <- NULL
+   # PlotData$Sector <- NULL
     
     
     # LanguageLabels <- GT[unique(paste0("T_",PlotData$Technology))]
-    if (SectorToPlot == "Fossil Fuels"){PlotData$Label <- paste0(PlotData$Technology,"Prod")}else{PlotData$Label<- PlotData$Technology}
-    if (SectorToPlot == "Power"){PlotData$Label <- paste0(PlotData$Label,"Cap")}
+  #  if (SectorToPlot == "Fossil Fuels"){PlotData$Label <- paste0(PlotData$Technology,"Prod")}else{PlotData$Label<- PlotData$Technology}
+  #  if (SectorToPlot == "Power"){PlotData$Label <- paste0(PlotData$Label,"Cap")}
     
-    PlotData$Language <- t(GT[paste0("T_",PlotData$Label)])[,1]
+  #  PlotData$Language <- t(GT[paste0("T_",PlotData$Label)])[,1]
     
-    stackedbarchart_plot<- ggplot(PlotData, aes(variable, TechShare,fill=rev(Technology)))+
-      geom_bar(stat = "identity",width = .6)+
-      scale_fill_manual(labels=unique(rev(PlotData$Language)),values=unique(as.character((PlotData$colours))))+
-      scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-      expand_limits(0,0)+
-      guides(fill=guide_legend(nrow = 1))+
-      ylab(ylabel)+
-      theme_barcharts()+ 
-      coord_flip()
+  #  stackedbarchart_plot<- ggplot(PlotData, aes(variable, TechShare,fill=rev(Technology)))+
+  #    geom_bar(stat = "identity",width = .6)+
+  #    scale_fill_manual(labels=unique(rev(PlotData$Language)),values=unique(as.character((PlotData$colours))))+
+  #    scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+  #    expand_limits(0,0)+
+  #    guides(fill=guide_legend(nrow = 1))+
+  #    ylab(ylabel)+
+  #    theme_barcharts()+ 
+  #    coord_flip()
     
-    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
+#    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
     
     # print(PlotData)
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=stackedbarchart_plot,dpi=ppi)
+#    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=stackedbarchart_plot,dpi=ppi)
     
     
-  }else{
+#  }else{
     
-    Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
-    Label <- GT[Label][[1]]
+#    Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
+#    Label <- GT[Label][[1]]
     
-    outputplot <-
-      ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=4)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
+#    outputplot <-
+#      ggplot()+
+#      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=4)+
+#      geom_blank()+
+#      theme(
+#        axis.title.x=element_blank(),
+#        axis.title.y=element_blank(),
+#        axis.text.x=element_blank(),
+#        axis.text.y=element_blank(), 
+#       axis.ticks = element_blank(),
+#       panel.grid.major = element_blank(),
+#        panel.grid.minor = element_blank(),
         #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA))
+#        panel.background = element_rect(fill = "transparent",colour = NA))
     
-    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=outputplot,dpi=ppi)
+#    if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
+#        ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,plot=outputplot,dpi=ppi)
     
-  }
+#  }
   
   
   # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",plot=stackedbarchart_plot,dpi=ppi)
-  return() 
-}
+#  return() 
+#}
 
 # ------------- STACKED BAR CHART DATA ------ #
 stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
@@ -1108,7 +1135,7 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
   Coal = "#663300"
   Gas = "#999999"
   Oil = "#333333"
-  Nuclear="#FF6633"
+  Nuclear="#ed7d31"
   Hydro="#336699"
   Renewables="#336633"
   Electric="#99CC66"
@@ -1116,12 +1143,13 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
   ICE="#333f50"
   CoalP="#843c0c"
   GasP="#afabab"
+# <<<<<<< HEAD
   
 
   # ChartType <- "EQ"
   # combin <- EQCombin
   
-  ProductionMix_5yrs <- stacked_bar_chart_data(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
+  # ProductionMix_5yrs <- stacked_bar_chart_data(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
   
    
   if(ChartType=="EQ"){
@@ -1161,6 +1189,44 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
     # ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- "Stock Market" #GT["X2Target"][[1]]
     # ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- "Peers" #GT["AveragePort"][[1]]
     #---------
+  # =======
+  # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+  # if(ChartType=="EQ"){
+    #EQ
+    # combin <- EQCombin
+    # WeightedResults <- EQWMCoverageWeight
+    
+    combin <- combin[!combin$Technology %in% "OilCap",]
+    combin <- combin[, -which(colnames(combin) %in% c("ComparisonType","Type"))]
+    WeightedResults <- WeightedResults[, -which(colnames(WeightedResults) %in% c("ComparisonType","Type","PortName"))]
+    
+    ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & Scenario == Scenariochoose)
+    ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Coal"]*24
+    ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Oil"]*6.12
+    ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$Production[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+    ProductionMix_5yrs$TargetProductionAlignment[ProductionMix_5yrs$Technology == "Coal"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Coal"]*24
+    ProductionMix_5yrs$TargetProductionAlignment[ProductionMix_5yrs$Technology == "Oil"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Oil"]*6.12
+    ProductionMix_5yrs$TargetProductionAlignment[ProductionMix_5yrs$Technology == "Gas"]<- ProductionMix_5yrs$TargetProductionAUMIntensity[ProductionMix_5yrs$Technology == "Gas"]*0.0372
+    
+    ProductionMix_5yrs <- ddply(ProductionMix_5yrs, .(Year, Sector, Technology,Scenario), summarise,
+                                PortProduction= sum(Production),
+                                RefProduction = sum(TargetProductionAlignment))
+    
+    ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
+    ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
+    ProductionMix_5yrs <- melt(ProductionMix_5yrs, id = c( "Year","Technology","Scenario","Sector"))
+    SectorTotals <- ddply(ProductionMix_5yrs,.(Year,Sector,variable), summarise,SectorTotal = sum(value))
+    ProductionMix_5yrs <- merge(ProductionMix_5yrs,SectorTotals)
+    
+    ProductionMix_5yrs$TechShare <- ProductionMix_5yrs$value/ProductionMix_5yrs$SectorTotal
+    
+    ProductionMix_5yrs <- subset(ProductionMix_5yrs, select= c("Sector","Technology","variable","TechShare"))
+    ProductionMix_5yrs$Technology <- gsub("Cap","",ProductionMix_5yrs$Technology)
+    ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
+    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioNameLong
+    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- "Stock Market" #GT["X2Target"][[1]]
+    ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- "Peers" #GT["AveragePort"][[1]]
     
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
     technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
@@ -1172,6 +1238,12 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
     colourdf$Sector<-as.factor(colourdf$Sector)
     ProductionMix_5yrs$Technology<-as.factor(ProductionMix_5yrs$Technology)
     ProductionMix_5yrs$Sector<-as.factor(ProductionMix_5yrs$Sector)
+    
+    # ProductionMix_5yrs <- right_join(mutate(ProductionMix_5yrs, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),
+                                     # mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
+    
+    combined <- sort(union(levels(ProductionMix_5yrs$Technology), levels(colourdf$Technology)))
+    combined1 <- sort(union(levels(ProductionMix_5yrs$Sector), levels(colourdf$Sector)))
     
     ProductionMix_5yrs <- right_join(mutate(ProductionMix_5yrs, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),
                                      mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
@@ -1196,10 +1268,9 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
         theme_barcharts()+
         theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       print(p1)
-      ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","Automotive",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+      ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
       
     }else if (SectorToPlot == "Fossil Fuels"){
-      
       p2 <- ggplot(dat$`Fossil Fuels`, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1211,10 +1282,12 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
         theme_barcharts()+
         theme(legend.position = "bottom")
       print(p2)
+      stacked_bar_chart (99,"EQ",EQCombin,EQWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
       ggsave(p2,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","FossilFuels",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
       
-    }else if (SectorToPlot == "Power"){
       
+      
+    }else if (SectorToPlot == "Power"){
       p3 <- ggplot(dat$Power, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1228,7 +1301,7 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
         theme(legend.position = "bottom")
       print(p3)
       
-      ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","Power",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+      ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
     }else if(SectorToPlot == "All"){
       p1<- ggplot(dat$Automotive, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
@@ -1276,60 +1349,116 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
     #-----------
     # # combin1 <- CBCombin
     # # WeightedResults1 <- CBWMCoverageWeight
-    # ProductionMix_5yrs1 <- subset(combin1, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Power","Automotive"))
-    # ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,WeightedResults1, by="Technology")
-    # ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare","CoverageWeight"))
-    # ProductionMix_5yrs1 <- melt(ProductionMix_5yrs1, id.vars = c("Sector","Technology"))
-    # ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$value
-    # ProductionMix_5yrs1$value <- NULL
-    # ProductionMix_5yrs1$TechShare[is.nan(ProductionMix_5yrs1$TechShare)] <- 0
-    # 
-    # ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "CoalCap"] <- "Coal"
-    # ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "GasCap"] <- "Gas"
-    # ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "HydroCap"] <- "Hydro"
-    # ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "NuclearCap"] <- "Nuclear"
-    # ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "RenewablesCap"] <- "Renewables"
-    # ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1,!Technology %in% "OilCap")
-    # 
-    # tsharesum <- ddply(ProductionMix_5yrs1, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
-    # ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,tsharesum, by= c("Sector","variable"))
-    # ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$TechShare/ProductionMix_5yrs1$SectorTotal
-    # ProductionMix_5yrs1$SectorTotal<- NULL
-    # 
-    # #fuel
-    # ProductionMix_5yrs1_fuel <- subset(combin1, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
-    # ProductionMix_5yrs1_fuel$TechShare <- ProductionMix_5yrs1_fuel$SectorWeight
-    # ProductionMix_5yrs1_fuel$TechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"] <- ProductionMix_5yrs1_fuel$SectorWeight[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$PortTechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
-    # TSSUM <- sum(ProductionMix_5yrs1_fuel$TechShare, na.rm = TRUE)
-    # ProductionMix_5yrs1_fuel$TechShare <-ProductionMix_5yrs1_fuel$TechShare/TSSUM
-    # MarketTechShareOGSum <- sum(ProductionMix_5yrs1_fuel$RegWtProjMarketProd[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"],na.rm = TRUE)
-    # ProductionMix_5yrs1_fuel$MarketTechShareOG <- ProductionMix_5yrs1_fuel$RegWtProjMarketProd/MarketTechShareOGSum
-    # ProductionMix_5yrs1_fuel$TechShareMarket <- ProductionMix_5yrs1_fuel$SecWtMarket
-    # ProductionMix_5yrs1_fuel$TechShareMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]<- ProductionMix_5yrs1_fuel$SecWtMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$MarketTechShareOG[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
-    # TSSUMMarket  <- sum(ProductionMix_5yrs1_fuel$TechShareMarket, na.rm = TRUE)
-    # ProductionMix_5yrs1_fuel$TechShareMarket <-ProductionMix_5yrs1_fuel$TechShareMarket/TSSUMMarket
-    # ProductionMix_5yrs1_fuel <- unique(subset(ProductionMix_5yrs1_fuel, select = c("Technology","TechShare","TechShareMarket")))
-    # 
-    # WeightedResults_fuel <- subset(WeightedResults1, Technology %in% ProductionMix_5yrs1_fuel$Technology)
-    # sumWR <- sum(WeightedResults_fuel$CoverageWeight, na.rm = TRUE)
-    # WeightedResults_fuel$CoverageWeight <- WeightedResults_fuel$CoverageWeight/sumWR
-    # 
-    # ProductionMix_5yrs1_fuel <- merge(ProductionMix_5yrs1_fuel,WeightedResults_fuel, by="Technology")
-    # ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c( "Technology","TechShare","TechShareMarket","CoverageWeight"))
-    # 
-    # ProductionMix_5yrs1_fuel <- melt(ProductionMix_5yrs1_fuel, id.vars = c("Technology"))
-    # ProductionMix_5yrs1_fuel$Sector <- "Fossil Fuels"
-    # colnames(ProductionMix_5yrs1_fuel)[3] <- "TechShare"
-    # ProductionMix_5yrs1_fuel$TechShare[is.nan(ProductionMix_5yrs1_fuel$TechShare)] <- 0
-    # ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c("Sector","Technology","variable","TechShare"))
-    # 
-    # ProductionMix_5yrs1<-rbind(ProductionMix_5yrs1,ProductionMix_5yrs1_fuel)
-    # levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="Benchmark_WtTechShareTechShare"] <- "Stock Market"
-    # levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="CoverageWeight"] <- "Peers"
-    # levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShare"] <- PortfolioNameLong
-    # levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="WtTechShareTechShare"] <- PortfolioNameLong
-    # levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShareMarket"] <- "Stock Market"
+    ProductionMix_5yrs1 <- subset(combin1, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Power","Automotive"))
+    ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,WeightedResults1, by="Technology")
+    ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare","CoverageWeight"))
+    ProductionMix_5yrs1 <- melt(ProductionMix_5yrs1, id.vars = c("Sector","Technology"))
+    ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$value
+    ProductionMix_5yrs1$value <- NULL
+    ProductionMix_5yrs1$TechShare[is.nan(ProductionMix_5yrs1$TechShare)] <- 0
+
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "CoalCap"] <- "Coal"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "GasCap"] <- "Gas"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "HydroCap"] <- "Hydro"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "NuclearCap"] <- "Nuclear"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "RenewablesCap"] <- "Renewables"
+    ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1,!Technology %in% "OilCap")
+
+    tsharesum <- ddply(ProductionMix_5yrs1, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
+    ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,tsharesum, by= c("Sector","variable"))
+    ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$TechShare/ProductionMix_5yrs1$SectorTotal
+    ProductionMix_5yrs1$SectorTotal<- NULL
+
+    #fuel
+    ProductionMix_5yrs1_fuel <- subset(combin1, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
+    ProductionMix_5yrs1_fuel$TechShare <- ProductionMix_5yrs1_fuel$SectorWeight
+    ProductionMix_5yrs1_fuel$TechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"] <- ProductionMix_5yrs1_fuel$SectorWeight[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$PortTechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
+    TSSUM <- sum(ProductionMix_5yrs1_fuel$TechShare, na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$TechShare <-ProductionMix_5yrs1_fuel$TechShare/TSSUM
+    MarketTechShareOGSum <- sum(ProductionMix_5yrs1_fuel$RegWtProjMarketProd[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"],na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$MarketTechShareOG <- ProductionMix_5yrs1_fuel$RegWtProjMarketProd/MarketTechShareOGSum
+    ProductionMix_5yrs1_fuel$TechShareMarket <- ProductionMix_5yrs1_fuel$SecWtMarket
+    ProductionMix_5yrs1_fuel$TechShareMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]<- ProductionMix_5yrs1_fuel$SecWtMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$MarketTechShareOG[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
+    TSSUMMarket  <- sum(ProductionMix_5yrs1_fuel$TechShareMarket, na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$TechShareMarket <-ProductionMix_5yrs1_fuel$TechShareMarket/TSSUMMarket
+    ProductionMix_5yrs1_fuel <- unique(subset(ProductionMix_5yrs1_fuel, select = c("Technology","TechShare","TechShareMarket")))
+
+    WeightedResults_fuel <- subset(WeightedResults1, Technology %in% ProductionMix_5yrs1_fuel$Technology)
+    sumWR <- sum(WeightedResults_fuel$CoverageWeight, na.rm = TRUE)
+    WeightedResults_fuel$CoverageWeight <- WeightedResults_fuel$CoverageWeight/sumWR
+
+    ProductionMix_5yrs1_fuel <- merge(ProductionMix_5yrs1_fuel,WeightedResults_fuel, by="Technology")
+    ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c( "Technology","TechShare","TechShareMarket","CoverageWeight"))
+
+    ProductionMix_5yrs1_fuel <- melt(ProductionMix_5yrs1_fuel, id.vars = c("Technology"))
+    ProductionMix_5yrs1_fuel$Sector <- "Fossil Fuels"
+    colnames(ProductionMix_5yrs1_fuel)[3] <- "TechShare"
+    ProductionMix_5yrs1_fuel$TechShare[is.nan(ProductionMix_5yrs1_fuel$TechShare)] <- 0
+    ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c("Sector","Technology","variable","TechShare"))
+
+    ProductionMix_5yrs1<-rbind(ProductionMix_5yrs1,ProductionMix_5yrs1_fuel)
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="Benchmark_WtTechShareTechShare"] <- "Stock Market"
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="CoverageWeight"] <- "Peers"
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShare"] <- PortfolioNameLong
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="WtTechShareTechShare"] <- PortfolioNameLong
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShareMarket"] <- "Stock Market"
     #-------------
+    
+    # combin1 <- CBCombin
+    # WeightedResults1 <- CBWMCoverageWeight
+    ProductionMix_5yrs1 <- subset(combin, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Power","Automotive"))
+    ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,WeightedResults, by="Technology")
+    ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare","CoverageWeight"))
+    ProductionMix_5yrs1 <- melt(ProductionMix_5yrs1, id.vars = c("Sector","Technology"))
+    ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$value
+    ProductionMix_5yrs1$value <- NULL
+    ProductionMix_5yrs1$TechShare[is.nan(ProductionMix_5yrs1$TechShare)] <- 0
+    
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "CoalCap"] <- "Coal"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "GasCap"] <- "Gas"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "HydroCap"] <- "Hydro"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "NuclearCap"] <- "Nuclear"
+    ProductionMix_5yrs1$Technology[ProductionMix_5yrs1$Technology %in% "RenewablesCap"] <- "Renewables"
+    ProductionMix_5yrs1 <- subset(ProductionMix_5yrs1,!Technology %in% "OilCap")
+    
+    tsharesum <- ddply(ProductionMix_5yrs1, .(Sector,variable), summarise, SectorTotal =sum(TechShare, na.rm = TRUE))
+    ProductionMix_5yrs1 <- merge(ProductionMix_5yrs1,tsharesum, by= c("Sector","variable"))
+    ProductionMix_5yrs1$TechShare <- ProductionMix_5yrs1$TechShare/ProductionMix_5yrs1$SectorTotal
+    ProductionMix_5yrs1$SectorTotal<- NULL
+    
+    #fuel
+    ProductionMix_5yrs1_fuel <- subset(combin, Year==(Startyear+5) & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Oil&Gas","Coal"))
+    ProductionMix_5yrs1_fuel$TechShare <- ProductionMix_5yrs1_fuel$SectorWeight
+    ProductionMix_5yrs1_fuel$TechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"] <- ProductionMix_5yrs1_fuel$SectorWeight[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$PortTechShare[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
+    TSSUM <- sum(ProductionMix_5yrs1_fuel$TechShare, na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$TechShare <-ProductionMix_5yrs1_fuel$TechShare/TSSUM
+    MarketTechShareOGSum <- sum(ProductionMix_5yrs1_fuel$RegWtProjMarketProd[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"],na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$MarketTechShareOG <- ProductionMix_5yrs1_fuel$RegWtProjMarketProd/MarketTechShareOGSum
+    ProductionMix_5yrs1_fuel$TechShareMarket <- ProductionMix_5yrs1_fuel$SecWtMarket
+    ProductionMix_5yrs1_fuel$TechShareMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]<- ProductionMix_5yrs1_fuel$SecWtMarket[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]*ProductionMix_5yrs1_fuel$MarketTechShareOG[ProductionMix_5yrs1_fuel$Sector %in% "Oil&Gas"]
+    TSSUMMarket  <- sum(ProductionMix_5yrs1_fuel$TechShareMarket, na.rm = TRUE)
+    ProductionMix_5yrs1_fuel$TechShareMarket <-ProductionMix_5yrs1_fuel$TechShareMarket/TSSUMMarket
+    ProductionMix_5yrs1_fuel <- unique(subset(ProductionMix_5yrs1_fuel, select = c("Technology","TechShare","TechShareMarket")))
+    
+    WeightedResults_fuel <- subset(WeightedResults, Technology %in% ProductionMix_5yrs1_fuel$Technology)
+    sumWR <- sum(WeightedResults_fuel$CoverageWeight, na.rm = TRUE)
+    WeightedResults_fuel$CoverageWeight <- WeightedResults_fuel$CoverageWeight/sumWR
+    
+    ProductionMix_5yrs1_fuel <- merge(ProductionMix_5yrs1_fuel,WeightedResults_fuel, by="Technology")
+    ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c( "Technology","TechShare","TechShareMarket","CoverageWeight"))
+    
+    ProductionMix_5yrs1_fuel <- melt(ProductionMix_5yrs1_fuel, id.vars = c("Technology"))
+    ProductionMix_5yrs1_fuel$Sector <- "Fossil Fuels"
+    colnames(ProductionMix_5yrs1_fuel)[3] <- "TechShare"
+    ProductionMix_5yrs1_fuel$TechShare[is.nan(ProductionMix_5yrs1_fuel$TechShare)] <- 0
+    ProductionMix_5yrs1_fuel <- subset(ProductionMix_5yrs1_fuel, select = c("Sector","Technology","variable","TechShare"))
+    
+    ProductionMix_5yrs1<-rbind(ProductionMix_5yrs1,ProductionMix_5yrs1_fuel)
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="Benchmark_WtTechShareTechShare"] <- "Stock Market"
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="CoverageWeight"] <- "Peers"
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShare"] <- PortfolioNameLong
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="WtTechShareTechShare"] <- PortfolioNameLong
+    levels(ProductionMix_5yrs1$variable)[levels(ProductionMix_5yrs1$variable)=="TechShareMarket"] <- "Stock Market"
     
     
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
@@ -1342,6 +1471,9 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
     colourdf$Sector<-as.factor(colourdf$Sector)
     ProductionMix_5yrs1$Technology<-as.factor(ProductionMix_5yrs1$Technology)
     ProductionMix_5yrs1$Sector<-as.factor(ProductionMix_5yrs1$Sector)
+    
+    combined <- sort(union(levels(ProductionMix_5yrs1$Technology), levels(colourdf$Technology)))
+    combined1 <- sort(union(levels(ProductionMix_5yrs1$Sector), levels(colourdf$Sector)))
     
     ProductionMix_5yrs1 <- right_join(mutate(ProductionMix_5yrs1, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),
                                       mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
@@ -1379,7 +1511,7 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
         theme_barcharts()+
         theme(legend.position = "bottom")
       print(p2)
-      ggsave(p2,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","FossilFuels",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+      ggsave(p2,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
       
     }else if (SectorToPlot == "Power"){
       p3 <- ggplot(dat$Power, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1394,7 +1526,8 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
         theme_barcharts()+
         theme(legend.position = "bottom")
       print(p3)
-      ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+
+            ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
     }else if(SectorToPlot == "All"){
       p1<- ggplot(dat$Automotive, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
@@ -1457,6 +1590,10 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
   }
 }
 
+    # ggsave(outputplot,filename=paste0(plotnumber,"_","PortfolioName","_","ChartType","_","SectorToPlot",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+  }
+# }
+  
 
 
 # ------------- MINI LINE CHARTS ------------ #
@@ -3335,7 +3472,7 @@ distribution_chart_inputs <- function(){
 
 
 
-distribution_chart("% of Portfolio in Climate Relevent Sectors", "Carsten's Metric", "CarstensMetric", CBCombin, CBComparisonBatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors)
+# distribution_chart("% of Portfolio in Climate Relevent Sectors", "Carsten's Metric", "CarstensMetric", CBCombin, CBComparisonBatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors)
 
 #----------- Distribution Chart ------------- #
 distribution_chart <- function(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors){
