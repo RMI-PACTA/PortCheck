@@ -852,17 +852,17 @@ SectorPrint <- function(SectorToPlot,SectorProd){
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
   #Saturated colours
-  RenewablesColour <<- "#b3de69"
-  HydroColour <<- "#428bbd"
-  NuclearColour <<- "#827ab8"
-  GasCapColour<<-"grey75"
-  CoalCapColour <<- "#252525"
-  ElectricColour<<- "#69c454"
-  HybridColour<<- "#00b7be"
-  ICEColour<<- "#2F4F4F"   #"#ed1c24" #"#f93620"
-  GasProdColour <<- "#ffb861"
-  OilProdColour <<- "#c88450"
-  CoalProdColour <<- "#835834"
+  RenewablesColour <<- "#548235"
+  HydroColour <<- "#2e75b6"
+  NuclearColour <<- "#ed7d31"
+  GasCapColour<<-"afabab"
+  CoalCapColour <<- "#843c0c" 
+  ElectricColour<<- "#a9d18e"
+  HybridColour<<- "#ffd966"
+  ICEColour<<- "#333f50"   #"#ed1c24" #"#f93620"
+  GasProdColour <<- "#a6a6a6"
+  OilProdColour <<- "#3b3838"
+  CoalProdColour <<- "#663300"
   
   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
   IndexColour <<-  "grey85"

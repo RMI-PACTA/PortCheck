@@ -1132,6 +1132,7 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRe
 stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,SectorToPlot,BenchmarkRegionchoose, 
                               CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, 
                               PortfolioNameLong){
+<<<<<<< HEAD
   Coal = "#663300"
   Gas = "#999999"
   Oil = "#333333"
@@ -1152,6 +1153,10 @@ stacked_bar_chart_new <- function(plotnumber,ChartType,combin,WeightedResults,Se
   # ProductionMix_5yrs <- stacked_bar_chart_data(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
   
    
+=======
+  wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+>>>>>>> fa584affe5824b50eb8e4bbfb3dd263519ed27fc
   if(ChartType=="EQ"){
     #EQ
     #---------
