@@ -702,8 +702,9 @@ pie_chart <- function(plotnumber,ChartType,PortSnapshot, PortfolioName, CompanyD
   return()
 }
 
+#---------
 # ------------- STACKED BAR CHARTS ---------- #
-stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,SectorToPlot,BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
+# stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,SectorToPlot,BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
   
   # combin <- EQCombin
   # ChartType <- "EQ"
@@ -972,8 +973,10 @@ stacked_bar_chart <- function(plotnumber,ChartType,combin,WeightedResults,Sector
   # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",plot=stackedbarchart_plot,dpi=ppi)
 #  return() 
 #}
+#--------------
 
 # ------------- STACKED BAR CHART DATA ------ #
+# -------------NEW STACKED BAR CHARTS ---------- #
 stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
   
   # combin <- EQCombin
@@ -1130,10 +1133,6 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRe
 
 Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
 
-
-
-
-# -------------NEW STACKED BAR CHARTS ---------- #
 stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
@@ -1159,7 +1158,9 @@ stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
           plot.background = element_rect(fill = "transparent",colour = NA)
     )
   }
-  if(ChartType=="EQ"|ChartType=="CB"){
+  
+  
+  if(nrow(Production)>0){
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
     technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
     colours <- c(CoalCapColour,"#afabab",NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
@@ -1186,93 +1187,154 @@ stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
     Production <- Production[order(Production$Technology,Production$variable),]
     Production$variable <- wrap.labels(Production$variable,20)
     
-
-    if (SectorToPlot == "Automotive"){
-      dat<- subset(Production,Sector=="Automotive")
+    
+    if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
+      dat <- subset(Production, Sector == SectorToPlot)
+      
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+            geom_bar(stat = "identity",width = .6)+
+            theme_minimal()+
+            scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+            scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+            expand_limits(0,0)+
+            guides(fill=guide_legend(nrow = 1))+
+            ylab(ylabel)+
+            theme_barcharts()+
+            theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
       print(p1)
+      
+      if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
-      
-    }else if (SectorToPlot == "Fossil Fuels"){
-      dat<- subset(Production,Sector=="Fossil Fuels")
-      p2 <- ggplot(dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom")
-      print(p2)
-      ggsave(p2,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","FossilFuels",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
-      
-    }else if (SectorToPlot == "Power"){
-      dat<- subset(Production,Sector=="Power")
-      p3 <- ggplot(dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat$Technology)),
-                          values=unique(as.character(dat$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom")
-      print(p3)
-      
-      ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
-    }else if(SectorToPlot == "TechToPlot"){
+    }else if (SectorToPlot == "All"){
       dat<- subset(Production,Sector=="Automotive")
-      p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+        p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+          geom_bar(stat = "identity",width = .6)+
+          theme_minimal()+
+          scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+          expand_limits(0,0)+
+          guides(fill=guide_legend(nrow = 1))+
+          ylab(ylabel)+
+          theme_barcharts()+
+          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+
+        dat1<- subset(Production,Sector=="Fossil Fuels")
+        p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+          geom_bar(stat = "identity",width = .6)+
+          theme_minimal()+
+          scale_fill_manual(labels=unique(as.character(dat1$Technology)),values=unique(as.character(dat1$colours)))+
+          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+          expand_limits(0,0)+
+          guides(fill=guide_legend(nrow = 1))+
+          ylab(ylabel)+
+          theme_barcharts()+
+          theme(legend.position = "bottom")
+
+        dat2<- subset(Production,Sector=="Power")
+        p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+          geom_bar(stat = "identity",width = .6)+
+          theme_minimal()+
+          scale_fill_manual(labels=unique(as.character(dat2$Technology)),
+                            values=unique(as.character(dat2$colours)))+
+          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+          expand_limits(0,0)+
+          guides(fill=guide_legend(nrow = 1))+
+          ylab(ylabel)+
+          theme_barcharts()+
+          theme(legend.position = "bottom")
+        print(grid.arrange(p1,p2,p3,nrow=1))
+        ggsave(grid.arrange(p1,p2,p3,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","TechToPlot",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
       
-      dat1<- subset(Production,Sector=="Fossil Fuels")
-      p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat1$Technology)),values=unique(as.character(dat1$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom")
-      
-      dat2<- subset(Production,Sector=="Power")
-      p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-        geom_bar(stat = "identity",width = .6)+
-        theme_minimal()+
-        scale_fill_manual(labels=unique(as.character(dat2$Technology)),
-                          values=unique(as.character(dat2$colours)))+
-        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-        expand_limits(0,0)+
-        guides(fill=guide_legend(nrow = 1))+
-        ylab(ylabel)+
-        theme_barcharts()+
-        theme(legend.position = "bottom")
-      print(grid.arrange(p1,p2,p3,nrow=1))
-      ggsave(grid.arrange(p1,p2,p3,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","TechToPlot",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
     }
+    
+    #-------------
+    # if (SectorToPlot == "Automotive"){
+    #   dat<- subset(Production,Sector=="Automotive")
+    #   p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+    #   print(p1)
+    #   ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+    #   
+    # }else if (SectorToPlot == "Fossil Fuels"){
+    #   dat<- subset(Production,Sector=="Fossil Fuels")
+    #   p2 <- ggplot(dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom")
+    #   print(p2)
+    #   ggsave(p2,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","FossilFuels",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+    #   
+    # }else if (SectorToPlot == "Power"){
+    #   dat<- subset(Production,Sector=="Power")
+    #   p3 <- ggplot(dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat$Technology)),
+    #                       values=unique(as.character(dat$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom")
+    #   print(p3)
+    #   
+    #   ggsave(p3,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+    # }else if(SectorToPlot == "TechToPlot"){
+    #   dat<- subset(Production,Sector=="Automotive")
+    #   p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+    #   
+    #   dat1<- subset(Production,Sector=="Fossil Fuels")
+    #   p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat1$Technology)),values=unique(as.character(dat1$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom")
+    #   
+    #   dat2<- subset(Production,Sector=="Power")
+    #   p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+    #     geom_bar(stat = "identity",width = .6)+
+    #     theme_minimal()+
+    #     scale_fill_manual(labels=unique(as.character(dat2$Technology)),
+    #                       values=unique(as.character(dat2$colours)))+
+    #     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    #     expand_limits(0,0)+
+    #     guides(fill=guide_legend(nrow = 1))+
+    #     ylab(ylabel)+
+    #     theme_barcharts()+
+    #     theme(legend.position = "bottom")
+    #   print(grid.arrange(p1,p2,p3,nrow=1))
+    #   ggsave(grid.arrange(p1,p2,p3,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","TechToPlot",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+    # }
+    #-------------
   }else{
     Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
   #  Label <- GT[Label][[1]]
@@ -1293,9 +1355,9 @@ stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
         panel.background = element_rect(fill = "transparent",colour = NA))
     print(outputplot)
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot<- "FossilFuels"}
-    #ggsave(outputplot,filename=paste0(plotnumber,"_","PortfolioName","_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+    ggsave(outputplot,filename=paste0(plotnumber,"_","PortfolioName","_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
   }
-  }
+}
 
 
 
