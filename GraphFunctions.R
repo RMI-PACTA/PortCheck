@@ -1051,7 +1051,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
 
         dat1<- subset(Production,Sector=="Fossil Fuels")
         chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-        dat$variable <- factor(dat$variable, levels=chartorder2)
+        dat1$variable <- factor(dat1$variable, levels=chartorder2)
         p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1067,7 +1067,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
 
         dat2<- subset(Production,Sector=="Power")
         chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-        dat$variable <- factor(dat$variable, levels=chartorder3)
+        dat2$variable <- factor(dat2$variable, levels=chartorder3)
         p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
