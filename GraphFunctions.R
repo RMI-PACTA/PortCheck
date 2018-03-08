@@ -1024,7 +1024,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
             guides(fill=guide_legend(nrow = 1))+
             ylab(ylabel)+
             theme_barcharts()+
-            theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
+            theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
+                  axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
       print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
@@ -1040,7 +1041,9 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
+          ggtitle("Automotive")
+          theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
+                axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
         dat1<- subset(Production,Sector=="Fossil Fuels")
         p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1052,7 +1055,9 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.x = element_blank())
+          ggtitle("Fossil Fuels")
+          theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
+                axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
         dat2<- subset(Production,Sector=="Power")
         p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1065,7 +1070,9 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
+          ggtitle("Power")
+          theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
+                axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
         # print(grid.arrange(p2,p3,p1,nrow=1))
         ggsave(grid.arrange(p2,p3,p1,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
       
