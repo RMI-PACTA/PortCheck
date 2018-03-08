@@ -1143,7 +1143,8 @@ stacked_bar_chart_vertical <- function(plotnumber,SectorToPlot,Production,ChartT
           axis.text.y=element_text(face="bold",colour="black",size=textsize),
           axis.title.x=element_blank(),
           axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
+          axis.line.x = element_line(colour = "black",size=1),
+          axis.line.y = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           panel.background = element_blank(),
@@ -1185,7 +1186,7 @@ stacked_bar_chart_vertical <- function(plotnumber,SectorToPlot,Production,ChartT
     
     
     
-    orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
+    orderofchart <- c(PortfolioNameLong,GT["X2Target"][[1]],GT["AveragePort"][[1]])
     Production$variable <- factor(Production$variable, levels=orderofchart)
     #Production$Technology <- factor(Production$Technology, levels=technologyorder)
     Production <- Production[order(Production$Technology,Production$variable),]
@@ -1208,7 +1209,7 @@ stacked_bar_chart_vertical <- function(plotnumber,SectorToPlot,Production,ChartT
       print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
-      ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+      ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
     }else if (SectorToPlot == "All"){
       dat<- subset(Production,Sector=="Automotive")
         p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1245,9 +1246,9 @@ stacked_bar_chart_vertical <- function(plotnumber,SectorToPlot,Production,ChartT
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom")
-        print(grid.arrange(p1,p2,p3,nrow=1))
-        ggsave(grid.arrange(p1,p2,p3,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_","TechToPlot",'_Stackedbar.png', sep=""),bg="transparent",height=1.8,width=7.5,dpi=ppi)
+          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+        print(grid.arrange(p2,p3,p1,nrow=1))
+        ggsave(grid.arrange(p2,p3,p1,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
       
     }
     
