@@ -1133,7 +1133,7 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults){
 
 # Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
 
-stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
+stacked_bar_chart_vertical <- function(plotnumber,SectorToPlot,Production,ChartType){
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
@@ -1178,8 +1178,12 @@ stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
     combined <- sort(union(levels(Production$Technology), levels(colourdf$Technology)))
     combined1 <- sort(union(levels(Production$Sector), levels(colourdf$Sector)))
     
+    library(dplyr,warn.conflicts = F)
     Production <- right_join(mutate(Production, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),
                                      mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
+    detach("package:dplyr", unload=TRUE)
+    
+    
     
     orderofchart <- c(GT["X2Target"][[1]],PortfolioNameLong,GT["AveragePort"][[1]])
     Production$variable <- factor(Production$variable, levels=orderofchart)
