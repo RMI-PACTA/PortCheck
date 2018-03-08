@@ -953,8 +953,8 @@ stacked_bar_chart_data <- function(ChartType){
 }
 
 stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Production){
-  # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-  # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
   theme_barcharts <- function(base_size = textsize, base_family = "") {
     theme(axis.ticks=element_blank(),
