@@ -1131,7 +1131,7 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults){
   
 }
 
-Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
+# Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
 
 stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}

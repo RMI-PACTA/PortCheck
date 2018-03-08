@@ -455,12 +455,15 @@ for (i in 1:nrow(TestList)){
       
       # Overall Heat Map
       
-      fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
+      # fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
+      
+      # StackedBarProdData <-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
         
-      stacked_bar_chart_new(99,"EQ",EQCombin,EQWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
+      # stacked_bar_chart_new(99,"Power",StackedBarProdData,"EQ")
 
-      
-      
+      ########################
+      ### GENERAL TEMPLATE ###
+      ########################
       # Page 4
       plot_0 <- port_pie("00", PortData)
       #
