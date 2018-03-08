@@ -1045,7 +1045,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Automotive Production")
+          ggtitle("Automotive Production")+
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
@@ -1061,7 +1061,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Fossil Fuels Production")
+          ggtitle("Fossil Fuels Production")+
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
@@ -1078,7 +1078,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Power Capacity")
+          ggtitle("Power Capacity")+
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
         # print(grid.arrange(p2,p3,p1,nrow=1))
