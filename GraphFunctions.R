@@ -1079,7 +1079,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           theme_barcharts()+
           ggtitle("Power Capacity")+
           theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
-        cmd<-print(grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1))
+        cmd<-grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1)
 
         ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
