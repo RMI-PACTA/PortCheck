@@ -3480,7 +3480,7 @@ distribution_chart_inputs <- function(){
 # distribution_chart("% of Portfolio in Climate Relevent Sectors", "Carsten's Metric", "CarstensMetric", CBCombin, CBComparisonBatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors)
 
 #----------- Distribution Chart ------------- #
-distribution_chart <- function(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors){
+distribution_chart <- function(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors, LineHighl, LineLabels, LineColors){
   
   #Title - Title of plot. MetricName - Name of metric (used for y-axis label)
   #MetricCol - name of column inwhich to find the metric (assumes it is precalculated)
@@ -3492,8 +3492,7 @@ distribution_chart <- function(Title, MetricName, MetricCol, Combin, BatchTest,B
   #LineLabels - Labels for those reference lines
   #LineColors - Colors for those reference lines
   
-  
-    
+
   BatchTest <- CBComparisonBatchTest
   Combin <- CBCombin
   MetricCol <- "CarstensMetric"
