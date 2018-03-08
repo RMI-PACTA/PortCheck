@@ -14,6 +14,7 @@ library(grid)
 library(ggplot2)
 library(ggthemes)
 library(plyr)
+# library(dplyr)
 library(reshape2)
 library(gridExtra)
 library(scales)
@@ -99,12 +100,12 @@ if (file.exists(paste0(BATCH.RES.PATH,BatchName,"/",BatchToTest,"/",BatchName,"_
 }else{
   EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 }
-EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",".csv"), stringsAsFactors=FALSE,strip.white = T)
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_CompanysProduction_Snapshot.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",".csv"), stringsAsFactors=FALSE,strip.white = T)
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2022.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 ### External Data Read In
@@ -165,7 +166,7 @@ if (ComparisonFile %in% c("FundComparison","Swiss")){
     EQComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"),stringsAsFactors = FALSE)
     EQComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_PortfolioData_Snapshot2017.csv"),stringsAsFactors = FALSE)
     CBComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors = FALSE)
-    CBComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtPortfolioData_Snapshot",Startyear,".csv"),stringsAsFactors = FALSE)
+    CBComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtPortfolioData_Snapshot",".csv"),stringsAsFactors = FALSE)
     
     comparisonNumber <- 100
     if (ComparisonFile == "Swiss"){comparisonNumber <- length(unique(EQComparisonBatchTestLong$PortName))}
@@ -455,103 +456,119 @@ for (i in 1:nrow(TestList)){
       
       # Overall Heat Map
       
-      fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
+      # fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
+      
+      EQStackedBarProdData <-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
         
-      stacked_bar_chart_new(99,"EQ",EQCombin,EQWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
+      stacked_bar_chart_vertical(99,"EQ","Power",EQStackedBarProdData)
+      stacked_bar_chart_vertical(99,"EQ","Fossil Fuels",EQStackedBarProdData)
+      stacked_bar_chart_vertical(99,"EQ","Automotive",EQStackedBarProdData)
+      stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
+      
+      
+      CBStackedBarProdData <-stacked_bar_chart_data ("CB", CBCombin,CBWMCoverageWeight)
+      
+      stacked_bar_chart_vertical(99,"CB","Power",CBStackedBarProdData)
+      stacked_bar_chart_vertical(99,"CB","Fossil Fuels",CBStackedBarProdData)
+      stacked_bar_chart_vertical(99,"CB","Automotive",CBStackedBarProdData)
+      stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
+      
+      
 
-      
-      
+      ########################
+      ### GENERAL TEMPLATE ###
+      ########################
       # Page 4
       plot_0 <- port_pie("00", PortData)
       #
-      plot_1 <- pie_chart("01","EQ",EQPortSnapshot, PortfolioName, CompanyDomicileRegionchoose)
-      plot_2 <- pie_chart("02","CB",CBPortSnapshot, PortfolioName, CompanyDomicileRegionchoose)
+      plot_1 <- pie_chart("01","EQ",EQPortSnapshot)
+      plot_2 <- pie_chart("02","CB",CBPortSnapshot)
 
       # Page 8
       if (SectorPrint("Power",EQSectorProd)==1){
-        plot_3 <- stacked_bar_chart("03","EQ",EQCombin,EQWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
-        plot_4 <- mini_line_chart("04","EQ",EQCombin,"RenewablesCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_5 <- mini_line_chart("05","EQ",EQCombin,"CoalCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_6 <- mini_line_chart("06","EQ",EQCombin,"GasCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
-        # plot_7 <- ranking_chart_alignment("07","EQ",Startyear,"Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
+        plot_3 <- stacked_bar_chart_horizontal("03","EQ",EQCombin,EQWMCoverageWeight,"Power")
+        plot_4 <- mini_line_chart("04","EQ",EQCombin,"RenewablesCap","Power")
+        plot_5 <- mini_line_chart("05","EQ",EQCombin,"CoalCap","Power")
+        plot_6 <- mini_line_chart("06","EQ",EQCombin,"GasCap","Power")
+        plot_7 <- ranking_chart_alignment("07","EQ","Power", EQExposureRange, EQAUMDatarange,EQRanks)
+        # plot_7 <- ranking_chart_alignment("07","EQ","Power", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,InvestorName)
       }
 
       # Page 9
       if (SectorPrint("Power",CBSectorProd)==1){
-        plot_08 <- stacked_bar_chart("08","CB",CBCombin,CBWMCoverageWeight,"Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
-        plot_09 <- mini_line_chart("09","CB",CBCombin,"RenewablesCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_10 <- mini_line_chart(10,"CB", CBCombin,"CoalCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_11 <- mini_line_chart(11,"CB",CBCombin,"GasCap","Power", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_12 <- ranking_chart_alignment(12,"CB",Startyear,"Power", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)
+        plot_08 <- stacked_bar_chart_horizontal("08","CB",CBCombin,CBWMCoverageWeight,"Power")
+        plot_09 <- mini_line_chart("09","CB",CBCombin,"RenewablesCap","Power")
+        plot_10 <- mini_line_chart(10,"CB", CBCombin,"CoalCap","Power")
+        plot_11 <- mini_line_chart(11,"CB",CBCombin,"GasCap","Power")
+        plot_12 <- ranking_chart_alignment(12,"CB","Power", CBExposureRange, CBAUMDatarange,CBRanks)
       }
       # Page 10
       if (SectorPrint("Automotive",EQSectorProd)==1){
-        plot_13 <- stacked_bar_chart(13,"EQ",EQCombin,EQWMCoverageWeight,"Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
-        plot_14 <- mini_line_chart(14,"EQ",EQCombin,"ICE","Automotive",BenchmarkRegionchoose,  CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_15 <- mini_line_chart(15,"EQ",EQCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_16 <- mini_line_chart(16,"EQ",EQCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_17 <- ranking_chart_alignment(17,"EQ",Startyear,"Automotive",EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+        plot_13 <- stacked_bar_chart_horizontal(13,"EQ",EQCombin,EQWMCoverageWeight,"Automotive")
+        plot_14 <- mini_line_chart(14,"EQ",EQCombin,"ICE","Automotive")
+        plot_15 <- mini_line_chart(15,"EQ",EQCombin,"Electric","Automotive")
+        plot_16 <- mini_line_chart(16,"EQ",EQCombin,"Hybrid","Automotive")
+        plot_17 <- ranking_chart_alignment(17,"EQ","Automotive",EQExposureRange, EQAUMDatarange,EQRanks)
       }
       # Page 11
       if (SectorPrint("Automotive",CBSectorProd)==1){
-        plot_18 <- stacked_bar_chart(18,"CB",CBCombin,CBWMCoverageWeight,"Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
-        plot_19 <- mini_line_chart(19,"CB",CBCombin,"ICE","Automotive",BenchmarkRegionchoose,  CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_20 <- mini_line_chart(20,"CB",CBCombin,"Electric","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_21 <- mini_line_chart(21,"CB",CBCombin,"Hybrid","Automotive", BenchmarkRegionchoose, CompanyDomicileRegionchoose, Scenariochoose, figuredirectory,PortfolioName)
-        plot_22 <- ranking_chart_alignment(22,"CB",Startyear,"Automotive", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)}
+        plot_18 <- stacked_bar_chart_horizontal(18,"CB",CBCombin,CBWMCoverageWeight,"Automotive")
+        plot_19 <- mini_line_chart(19,"CB",CBCombin,"ICE","Automotive")
+        plot_20 <- mini_line_chart(20,"CB",CBCombin,"Electric","Automotive")
+        plot_21 <- mini_line_chart(21,"CB",CBCombin,"Hybrid","Automotive")
+        plot_22 <- ranking_chart_alignment(22,"CB","Automotive", CBExposureRange, CBAUMDatarange,CBRanks)}
 
       # Page 12
-      plot_23 <- stacked_bar_chart(23,"EQ",EQCombin,EQWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName,PortfolioName)
-      plot_24 <- mini_line_chart(24,"EQ",EQCombin,"Oil","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-      plot_25 <- mini_line_chart(25,"EQ",EQCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-      plot_26 <- mini_line_chart(26,"EQ",EQCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-      plot_27 <- ranking_chart_alignment(27,"EQ",Startyear,"Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_23 <- stacked_bar_chart_horizontal(23,"EQ",EQCombin,EQWMCoverageWeight,"Fossil Fuels")
+      plot_24 <- mini_line_chart(24,"EQ",EQCombin,"Oil","Fossil Fuels")
+      plot_25 <- mini_line_chart(25,"EQ",EQCombin,"Gas","Fossil Fuels")
+      plot_26 <- mini_line_chart(26,"EQ",EQCombin,"Coal","Fossil Fuels")
+      plot_27 <- ranking_chart_alignment(27,"EQ","Fossil Fuels", EQExposureRange, EQAUMDatarange,EQRanks)
 
       # Page 13
       if (SectorPrint("Fossil Fuels",CBSectorProd)==1){
-        plot_28 <- stacked_bar_chart(28,"CB",CBCombin,CBWMCoverageWeight,"Fossil Fuels",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,Startyear, PortfolioName,PortfolioName)
-        plot_29 <- mini_line_chart(29,"CB",CBCombin,"Oil","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_30 <- mini_line_chart(30,"CB",CBCombin,"Gas","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_31 <- mini_line_chart(31,"CB",CBCombin,"Coal","Fossil Fuels", BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose, figuredirectory,PortfolioName)
-        plot_32 <- ranking_chart_alignment(32,"CB",Startyear,"Fossil Fuels", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)}
+        plot_28 <- stacked_bar_chart_horizontal(28,"CB",CBCombin,CBWMCoverageWeight,"Fossil Fuels")
+        plot_29 <- mini_line_chart(29,"CB",CBCombin,"Oil","Fossil Fuels")
+        plot_30 <- mini_line_chart(30,"CB",CBCombin,"Gas","Fossil Fuels")
+        plot_31 <- mini_line_chart(31,"CB",CBCombin,"Coal","Fossil Fuels")
+        plot_32 <- ranking_chart_alignment(32,"CB","Fossil Fuels", CBExposureRange, CBAUMDatarange,CBRanks)}
 
       # Page 14
-      plot_33 <- ranking_chart_alignment(33,"EQ",Startyear,"All", EQExposureRange, EQAUMDatarange,EQRanks,figuredirectory,PortName)
+      plot_33 <- ranking_chart_alignment(33,"EQ","All", EQExposureRange, EQAUMDatarange,EQRanks)
 
       # Page 15
       if (nrow(CBPortSnapshot)>0){
-        plot_34 <- ranking_chart_alignment(34,"CB",Startyear,"All", CBExposureRange, CBAUMDatarange,CBRanks,figuredirectory,PortName)
+        plot_34 <- ranking_chart_alignment(34,"CB","All", CBExposureRange, CBAUMDatarange,CBRanks)
       }
 
       # Page 16
-      plot_35 <- fundmap_chart(35,FundsHeatMapData, Startyear, Scenariochoose, PortfolioName)
+      plot_35 <- fundmap_chart(35,FundsHeatMapData)
 
       # Page 17
-      plot_36 <- other_sector_chart(36, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Cement",PortName)
-      plot_37 <- other_sector_chart(37, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Steel",PortName)
-      plot_38 <- other_sector_chart(38, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Aviation",PortName)
-      plot_39 <- shipping_chart(39, EQPortSnapshot,CBPortSnapshot,ShippingData, SectorToPlot="Shipping",PortfolioName)
+      plot_36 <- other_sector_chart(36, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Cement")
+      plot_37 <- other_sector_chart(37, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Steel")
+      plot_38 <- other_sector_chart(38, EQ_OS_WEM,CB_OS_WEM, OSTargets,SectorToPlot = "Aviation")
+      plot_39 <- shipping_chart(39, EQPortSnapshot,CBPortSnapshot,ShippingData, SectorToPlot="Shipping")
       OtherSectors <- data.frame("Cement"=plot_36,"Steel"=plot_37,"Aviation"=plot_38,"Shipping"=plot_39)
       
       # Page 21
       if(nrow(EQCombin)==0){
-        plot_43 <- flat_wheel_chart(43,10,"CB",CBPortSnapshot,CBCombin, UtilityCompanies,SectorToPlot = "Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_43 <- flat_wheel_chart(43,10,"CB",CBPortSnapshot,CBCombin, UtilityCompanies,SectorToPlot = "Power")
       }else{
-        plot_43 <- flat_wheel_chart(43,10,"EQ",EQPortSnapshot,EQCombin, UtilityCompanies,SectorToPlot = "Power",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_43 <- flat_wheel_chart(43,10,"EQ",EQPortSnapshot,EQCombin, UtilityCompanies,SectorToPlot = "Power")
       }
 
       # Page 22
       if(nrow(EQCombin)==0){
-        plot_44 <- flat_wheel_chart(44,10,"CB",CBPortSnapshot,CBCombin, AutoCompanies,SectorToPlot = "Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_44 <- flat_wheel_chart(44,10,"CB",CBPortSnapshot,CBCombin, AutoCompanies,SectorToPlot = "Automotive")
       }else{
-        plot_44 <- flat_wheel_chart(44,10,"EQ",EQPortSnapshot,EQCombin, AutoCompanies,SectorToPlot = "Automotive",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_44 <- flat_wheel_chart(44,10,"EQ",EQPortSnapshot,EQCombin, AutoCompanies,SectorToPlot = "Automotive")
       }
 
       if (nrow(EQCombin)==0){
-        plot_46 <- flat_wheel_chart(46,20,"CB",CBPortSnapshot,CBCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_46 <- flat_wheel_chart(46,20,"CB",CBPortSnapshot,CBCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG")
       }else{
-        plot_46 <- flat_wheel_chart(46,20,"EQ",EQPortSnapshot,EQCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG",BenchmarkRegionchoose, CompanyDomicileRegionchoose,Scenariochoose,IndexData,Indexchoose,PortfolioName,PortfolioName)
+        plot_46 <- flat_wheel_chart(46,20,"EQ",EQPortSnapshot,EQCompProdSnapshot, OGCarbonBudget,SectorToPlot = "OG")
       }
 
       # Page 24
@@ -565,10 +582,11 @@ for (i in 1:nrow(TestList)){
       # -------
       # PDF CREATION
       # -------
-      EQReportData<-report_data("EQ",EQCombin, EQExposureRange,EQAUMDatarange,EQRanks,EQPortSnapshot,CompanyDomicileRegionchoose, BenchmarkRegionchoose,Scenariochoose, Startyear,PortfolioName)
-      CBReportData<-report_data("CB",CBCombin, CBExposureRange,CBAUMDatarange,CBRanks,CBPortSnapshot,CompanyDomicileRegionchoose, BenchmarkRegionchoose,Scenariochoose, Startyear,PortfolioName)
+      EQReportData<-report_data("EQ",EQCombin, EQExposureRange,EQAUMDatarange,EQRanks,EQPortSnapshot)
+      CBReportData<-report_data("CB",CBCombin, CBExposureRange,CBAUMDatarange,CBRanks,CBPortSnapshot)
       
       report(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData,FundsInPort,OtherSectors,EQSectorProd,CBSectorProd,Languagechoose)
+      report()
     })}else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
