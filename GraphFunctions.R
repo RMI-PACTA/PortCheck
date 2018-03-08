@@ -1014,7 +1014,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
-      
+      chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat$variable <- factor(dat$variable, levels=chartorder)
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
             geom_bar(stat = "identity",width = .6)+
             theme_minimal()+
@@ -1033,6 +1034,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
     }else if (SectorToPlot == "TechToPlot"){
       dat<- subset(Production,Sector=="Automotive")
+      chartorder1 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat$variable <- factor(dat$variable, levels=chartorder1)
         p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1042,11 +1045,13 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Automotive")
+          ggtitle("Automotive Production")
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
         dat1<- subset(Production,Sector=="Fossil Fuels")
+        chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+        dat$variable <- factor(dat$variable, levels=chartorder2)
         p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1056,11 +1061,13 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Fossil Fuels")
+          ggtitle("Fossil Fuels Production")
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
         dat2<- subset(Production,Sector=="Power")
+        chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+        dat$variable <- factor(dat$variable, levels=chartorder3)
         p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1071,7 +1078,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          ggtitle("Power")
+          ggtitle("Power Capacity")
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
                 axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
         # print(grid.arrange(p2,p3,p1,nrow=1))
