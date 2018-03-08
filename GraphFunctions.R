@@ -977,7 +977,7 @@ pie_chart <- function(plotnumber,ChartType,PortSnapshot, PortfolioName, CompanyD
 
 # ------------- STACKED BAR CHART DATA ------ #
 # -------------NEW STACKED BAR CHARTS ---------- #
-stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong){
+stacked_bar_chart_data <- function(ChartType, combin,WeightedResults){
   
   # combin <- EQCombin
   # ChartType <- "EQ"
@@ -1131,7 +1131,7 @@ stacked_bar_chart_data <- function(ChartType, combin,WeightedResults,BenchmarkRe
   
 }
 
-Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight,BenchmarkRegionchoose,CompanyDomicileRegionchoose,Scenariochoose,Startyear,PortfolioName, PortfolioNameLong)
+Production<-stacked_bar_chart_data ("EQ", EQCombin,EQWMCoverageWeight)
 
 stacked_bar_chart_new <- function(plotnumber,SectorToPlot,Production,ChartType){
   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
