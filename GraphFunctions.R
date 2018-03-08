@@ -1062,7 +1062,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           theme_barcharts()+
           ggtitle("Fossil Fuels Production")+
           theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
-                axis.text.y = element_blank(),axis.line = element_blank())
+                axis.line = element_blank())
 
         dat2<- subset(Production,Sector=="Power")
         chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
@@ -1078,10 +1078,10 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           ylab(ylabel)+
           theme_barcharts()+
           ggtitle("Power Capacity")+
-          theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",
-                axis.text.y = element_blank(),axis.line= element_blank())
-        # print(grid.arrange(p2,p3,p1,nrow=1))
-        ggsave(grid.arrange(p2,p3,p1,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
+          theme(plot.title = element_text(hjust = 0.5),legend.position = "bottom",axis.line= element_blank())
+        cmd<-print(grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1))
+
+        ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
       
     }
   }else{
