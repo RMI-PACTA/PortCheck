@@ -1024,12 +1024,12 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
             guides(fill=guide_legend(nrow = 1))+
             ylab(ylabel)+
             theme_barcharts()+
-            theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+            theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
       print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
-    }else if (SectorToPlot == "All"){
+    }else if (SectorToPlot == "TechToPlot"){
       dat<- subset(Production,Sector=="Automotive")
         p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
@@ -1040,7 +1040,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
 
         dat1<- subset(Production,Sector=="Fossil Fuels")
         p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1052,7 +1052,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom")
+          theme(legend.position = "bottom",axis.line.x = element_blank())
 
         dat2<- subset(Production,Sector=="Power")
         p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
@@ -1065,7 +1065,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank(),axis.line.x = element_blank())
         # print(grid.arrange(p2,p3,p1,nrow=1))
         ggsave(grid.arrange(p2,p3,p1,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
       
