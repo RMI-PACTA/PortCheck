@@ -778,12 +778,13 @@ sector_bar_chart <- function(plotnumber){
   piesharesEQ <- PSSProcessing("EQ") 
   
   if(!exists("piesharesEQ")){pieshares <- PSSProcessing("EQ") 
-  }  else{
+  }else{
     piesharesCB <- PSSProcessing("CB") 
-    pieshares <- rbind(piesharesEQ,piesharesCB)}  
+    pieshares <- rbind(piesharesEQ,piesharesCB)
+  }  
   
   ### Need to be changed!
-    
+  
   Palette <- c("#8c510a","#dfc27d","#c7eae5","#35978f","#003c30")
   sectororder <-c("Fossil Fuels","Utility Power","Non-Utility Power","Automotive","Other High Carbon Sectors")
   colourdf <- data.frame(colour=Palette, piesector =sectororder)
@@ -795,6 +796,7 @@ sector_bar_chart <- function(plotnumber){
   pieshares$piesector<- factor(pieshares$piesector,levels = sectororder)
   pieshares <- pieshares[order(pieshares$piesector,pieshares$label),]
   temp<-max(pieshares$Portfolio_weight)
+  
   a<-ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
@@ -805,7 +807,7 @@ sector_bar_chart <- function(plotnumber){
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
     theme(legend.position = "top" )
-
+  
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
 
@@ -961,8 +963,8 @@ stacked_bar_chart_data <- function(ChartType){
 }
 
 stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Production){
-   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+  wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
   theme_barcharts <- function(base_size = textsize, base_family = "") {
     theme(axis.ticks=element_blank(),
@@ -1008,7 +1010,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
     
     library(dplyr,warn.conflicts = F)
     Production <- right_join(mutate(Production, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),
-                                     mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
+                             mutate(colourdf, Technology=factor(Technology, levels=combined),Sector=factor(Sector, levels=combined1)),by=c("Technology","Sector"))
     detach("package:dplyr", unload=TRUE)
     
     
@@ -1025,17 +1027,17 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
       dat$variable <- factor(dat$variable, levels=chartorder)
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-            geom_bar(stat = "identity",width = .6)+
-            theme_minimal()+
-            scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
-            scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-            expand_limits(0,0)+
-            guides(fill=guide_legend(nrow = 1))+
-            ylab(ylabel)+
-            theme_barcharts()+
-            ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))+
-            theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
-                  axis.line.y = element_blank(),axis.line.x = element_blank())
+        geom_bar(stat = "identity",width = .6)+
+        theme_minimal()+
+        scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+        expand_limits(0,0)+
+        guides(fill=guide_legend(nrow = 1))+
+        ylab(ylabel)+
+        theme_barcharts()+
+        ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))+
+        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
+              axis.line.y = element_blank(),axis.line.x = element_blank())
       print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
@@ -1044,57 +1046,57 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       dat<- subset(Production,Sector=="Automotive")
       chartorder1 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
       dat$variable <- factor(dat$variable, levels=chartorder1)
-        p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-          geom_bar(stat = "identity",width = .6)+
-          theme_minimal()+
-          scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
-          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-          expand_limits(0,0)+
-          guides(fill=guide_legend(nrow = 1))+
-          ylab(ylabel)+
-          theme_barcharts()+
-          ggtitle("Automotive Production")+
-          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
-
-        dat1<- subset(Production,Sector=="Fossil Fuels")
-        chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-        dat1$variable <- factor(dat1$variable, levels=chartorder2)
-        p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-          geom_bar(stat = "identity",width = .6)+
-          theme_minimal()+
-          scale_fill_manual(labels=unique(as.character(dat1$Technology)),values=unique(as.character(dat1$colours)))+
-          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-          expand_limits(0,0)+
-          guides(fill=guide_legend(nrow = 1))+
-          ylab(ylabel)+
-          theme_barcharts()+
-          ggtitle("Fossil Fuels Production")+
-          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
-                axis.line = element_blank())
-
-        dat2<- subset(Production,Sector=="Power")
-        chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-        dat2$variable <- factor(dat2$variable, levels=chartorder3)
-        p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
-          geom_bar(stat = "identity",width = .6)+
-          theme_minimal()+
-          scale_fill_manual(labels=unique(as.character(dat2$Technology)),
-                            values=unique(as.character(dat2$colours)))+
-          scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-          expand_limits(0,0)+
-          guides(fill=guide_legend(nrow = 1))+
-          ylab(ylabel)+
-          theme_barcharts()+
-          ggtitle("Power Capacity")+
-          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
-        cmd<-grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1)
-
-        ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+      p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+        geom_bar(stat = "identity",width = .6)+
+        theme_minimal()+
+        scale_fill_manual(labels=unique(as.character(dat$Technology)),values=unique(as.character(dat$colours)))+
+        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+        expand_limits(0,0)+
+        guides(fill=guide_legend(nrow = 1))+
+        ylab(ylabel)+
+        theme_barcharts()+
+        ggtitle("Automotive Production")+
+        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
+      
+      dat1<- subset(Production,Sector=="Fossil Fuels")
+      chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat1$variable <- factor(dat1$variable, levels=chartorder2)
+      p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+        geom_bar(stat = "identity",width = .6)+
+        theme_minimal()+
+        scale_fill_manual(labels=unique(as.character(dat1$Technology)),values=unique(as.character(dat1$colours)))+
+        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+        expand_limits(0,0)+
+        guides(fill=guide_legend(nrow = 1))+
+        ylab(ylabel)+
+        theme_barcharts()+
+        ggtitle("Fossil Fuels Production")+
+        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
+              axis.line = element_blank())
+      
+      dat2<- subset(Production,Sector=="Power")
+      chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat2$variable <- factor(dat2$variable, levels=chartorder3)
+      p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
+        geom_bar(stat = "identity",width = .6)+
+        theme_minimal()+
+        scale_fill_manual(labels=unique(as.character(dat2$Technology)),
+                          values=unique(as.character(dat2$colours)))+
+        scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+        expand_limits(0,0)+
+        guides(fill=guide_legend(nrow = 1))+
+        ylab(ylabel)+
+        theme_barcharts()+
+        ggtitle("Power Capacity")+
+        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
+      cmd<-grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1)
+      
+      ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
     }
   }else{
     Label <- paste0("No",ChartType,gsub(" ","",SectorToPlot))
-  #  Label <- GT[Label][[1]]
+    #  Label <- GT[Label][[1]]
     
     outputplot <-
       ggplot()+
@@ -1118,7 +1120,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
 
 stacked_bar_chart_horizontal <- function(plotnumber,ChartType,SectorToPlot,inc_average=T){
   
-
+  
   if (ChartType == "EQ"){
     combin <- EQCombin
     WeightedResults <- EQWMCoverageWeight
@@ -1598,7 +1600,7 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
 
 # ------------- RANKING CHART - ALIGNMENT ----#
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
-
+  
   
   if (ChartType == "EQ"){
     Exposures <- EQExposureRange
@@ -2999,50 +3001,58 @@ renewablesadditions_chart <- function(plotnumber,ChartType){
 }
 
 # ------------ Data Inputs to 246 Chart ----- #
-Inputs246 <- function(ChartType, Combin, BatchTest,echToPlot){
-  # Combin <- EQCombin
-  # ChartType <- "EQ"
-  # BatchTest <- EQBatchTest
+Inputs246 <- function(ChartType, TechToPlot){
   
-  # Combin <- CBCombin
-  # ChartType <- "CB"
-  # BatchTest <- CBBatchTest
+  if (ChartType == "EQ"){  
+    Combin <- EQCombin
+    BatchTest <- EQBatchTest
+  }else if(ChartType == "CB"){
+    Combin <- CBCombin
+    BatchTest <- CBBatchTest
+  }
   
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
   BuildOutCalc <- function(df, Label){
-    df$Value <- (df$Prod - df$Prod[df$Year == Startyear])/(df$TargetProd[df$Year == (Startyear+5)]-df$TargetProd[df$Year == Startyear])
+    GoodBad <- GreenBrown(TechToPlot)
+    
+    df <- rename(df, c("Production"="Prod","TargetProductionAlignment"="TargetProd",
+                       "WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd",
+                       "AnnualvalIEAtech"="Prod"),warn_missing = F)
+    
+    if (GoodBad == "Green") {
+      df$Value <- 1+(df$Prod - df$Prod[df$Year == Startyear])/(df$TargetProd[df$Year == (Startyear+5)]-df$TargetProd[df$Year == Startyear])
+    } else if(GoodBad == "Brown"){
+      df$Value <- (df$Prod/df$Prod[df$Year == Startyear])
+    }
+    
     df$Label <- Label
     df$Prod <- df$TargetProd <- NULL
     return(df)
   }
   
   ### Production Inputs - normalised to the start year
-  Production <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
+  Production <- subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose&Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
   
   
   if (ChartType == "EQ"){  
     ### Equity Portfolio Build Out
     Production <- subset(Production, select = c("Year","Production", "TargetProductionAlignment"))
-    Production <- rename(Production, c("Production"="Prod","TargetProductionAlignment"="TargetProd"))
     Production <- BuildOutCalc(Production, "Portfolio")
     
     ### Stock Market Build Out
     MarketBuildOut <- subset(BatchTest, InvestorName == "ListedMarket" & ComparisonType == "BatchResults")
     MarketBuildOut <- subset(MarketBuildOut, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5) , select = c("Year","Production", "TargetProductionAlignment"))
-    MarketBuildOut <- rename(MarketBuildOut, c("Production"="Prod","TargetProductionAlignment"="TargetProd"))
     MarketBuildOut <- BuildOutCalc(MarketBuildOut, "Stock Market")
     
   }else{
     ### Debt Portfolio Build Out
     Production <- subset(Production, select = c("Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-    Production <- rename(Production,c("WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd"))
     Production <- BuildOutCalc(Production, "Portfolio")
     
     ### Debt Market Build Out
     MarketBuildOut <- subset(BatchTest, InvestorName == "GlobalBondUniverse" & ComparisonType == "BatchResults")
     MarketBuildOut <- subset(MarketBuildOut, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5) , select = c("Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-    MarketBuildOut <- rename(MarketBuildOut,c("WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd"))
     MarketBuildOut <- BuildOutCalc(MarketBuildOut, "Debt Market")
     
   }
@@ -3054,22 +3064,15 @@ Inputs246 <- function(ChartType, Combin, BatchTest,echToPlot){
   
   ### Inputs to the 246 chart. 
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
-  
-  IEATargetsRef <- IEATargets[IEATargets$Year == Startyear,]
-  IEATargetsRef <- subset(IEATargetsRef, select = c("Scenario","AnnualvalIEAtech"))
-  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="StartValue"))
-  
-  
-  IEATargets <- merge(IEATargets, IEATargetsRef, by = "Scenario")
-  
-  IEATargets$Denominator <- IEATargets$AnnualvalIEAtech[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]-IEATargets$StartValue[IEATargets$Scenario == "450S" & IEATargets$Year==Startyear+5]
+  IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
+  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
+  IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
   
   
-  IEATargets$Value <- (IEATargets$AnnualvalIEAtech-IEATargets$StartValue) / IEATargets$Denominator
+  IEATargets <- lapply(unique(IEATargets$Scenario), function(x) BuildOutCalc(IEATargets[IEATargets$Scenario == x,],x))
+  IEATargets <- do.call("rbind", IEATargets)
   
-  IEATargets <- subset(IEATargets, select = c("Scenario","Year","Value"))
-  IEATargets <- rename(IEATargets, c("Scenario"="Label"))
-  
+  IEATargets <- subset(IEATargets, select = c("Label","Year","Value"))
   
   df <- rbind(Production,MarketBuildOut,IEATargets)
   
@@ -3080,23 +3083,21 @@ Inputs246 <- function(ChartType, Combin, BatchTest,echToPlot){
 # ------------ 246 Chart -------------------- #
 Graph246 <- function(ChartType, TechToPlot){
   
-  # ChartType <- "EQ"
-  # Combin <- EQCombin
-  # BatchTest <- EQBatchTest
-  # TechToPlot <- "RenewablesCap"
   
   if (ChartType == "EQ"){
     BatchTest <- EQBatchTest
     Combin <- EQCombin
+    LinesToPlot <- c("Portfolio","Stock Market")
   } else if(ChartType == "CB"){
     BatchTest <- CBBatchTest
     Combin <- CBCombin
+    LinesToPlot <- c("Portfolio", "Debt Market")
   }
   
   # Check whether the tech is a green or brown technology
   GoodBad <- GreenBrown(TechToPlot)
   
-  df <- Inputs246(ChartType, Combin, BatchTest, IEATargets246,TechToPlot)
+  df <- Inputs246(ChartType, TechToPlot)
   
   IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
   IEATargetMax$Value <- max(df$Value)+.1
@@ -3107,144 +3108,86 @@ Graph246 <- function(ChartType, TechToPlot){
   dfwide <- dcast(df,Year~Label, value.var="Value")
   
   
-  Colourvals <- c( "< 2째C"=DarkGreen,"2-4째C"=LightGreen,"4-6째C"=LightRed,"> 6째C" =DarkRed )
+  if (GoodBad == "Green"){
+    dfwide$Line1 <- dfwide$CPS
+    dfwide$Line2 <- dfwide$NPS-dfwide$CPS
+    dfwide$Line3 <- dfwide$`450S`-dfwide$NPS
+    dfwide$Line4 <- dfwide$MaxValue-dfwide$`450S`
+    # dfwide$Line1 <- dfwide$`450S`
+    # dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
+    # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
+    # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
+    # lineorder <-c("Line1","Line2","Line3","Line4")
+    Palette <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+    AreaNames <-  c( "> 6캜","4-6캜","2-4캜","< 2캜") 
+  }else if (GoodBad == "Brown"){
+    dfwide$Line1 <- dfwide$`450S`
+    dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
+    dfwide$Line3 <- dfwide$CPS - dfwide$NPS
+    dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS   
+    Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+    AreaNames <-  c( "< 2캜","2-4캜","4-6캜","> 6캜") 
+    # lineorder <-c("Line4","Line3","Line2","Line1")
+  }
   
-  ### Calculates the y axis scales and labels      
-  ymin <- min(df$Value,na.rm = T)-0.1
-  ymax <- max(df$Value,na.rm = T)
-  year_lab <- GT["Year"][[1]]
-  ylabel <- "Build Out"
-  alphaval <- 1
-  linesize <- 1.5
   
-  ### Identifies the Lines to plot in the Chart
-  ### Selects colours up until the max number of inputs
-  LinesToPlot <- unique(df$Label)
-  LinesToPlot <- LinesToPlot[!LinesToPlot %in% c("450S","CPS","NPS","MaxValue")]
-  LinesToPlot <- factor(LinesToPlot, levels = LinesToPlot)
+  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
+  dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
+  # dftargets <- rev(dftargets)
+  
+  # AreaNames <-  c( "< 2캜","2-4캜","4-6캜","> 6캜") 
+  # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+  lineorder <-c("Line4","Line3","Line2","Line1")
+  colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
+  
+  dftargets$Target<-as.factor(dftargets$Target)
+  combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
+  dftargets <- merge(dftargets, colourdf, by= "Target") 
+  dftargets$Target<- factor(dftargets$Target,levels = lineorder)
+  
+  
+  maxval <- ceiling(max(df$Value)*10)/10-0.1
+  minval <- max(floor(min(df$Value)*10)/10,0)
+  
   LineColours <- c("black", "grey","blue","pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-  
+  # 
   LineVector <- setNames(LineColours,LinesToPlot)
-  # LineColours <- factor(LineColours, levels = LineColours)
   
-  if(GoodBad == "Brown"){
-    ### Brown Tech  
-    outputplot <- ggplot(dfwide, aes(x=Year))+
-      geom_area(aes(y= MaxValue,fill= "> 6째C"))+
-      geom_area(aes(y= CPS, fill= "4-6째C"))+
-      geom_area(aes(y= NPS, fill= "2-4째C"))+
-      geom_area(aes(y= `450S`, fill= "< 2째C"))+ 
-      
-      geom_line(aes(x=Year,y=dfwide[LinesToPlot[1]], colour =  LinesToPlot[1]), size = linesize)+
-      geom_line(aes(x=Year,y=dfwide[LinesToPlot[2]], colour =  LinesToPlot[2]), size = linesize)+
-      
-      ### I can't find a way to automaticall check whether 3 exists... 
-      # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
-      
-      xlab(year_lab) + 
-      ylab(ylabel) +
-      scale_size(guide=FALSE)+
-      coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-      scale_fill_manual(values = Colourvals, 
-                        guide = guide_legend(nrow = 2))+
-      scale_color_manual(values = LineVector,
-                         guide = guide_legend(nrow = 2))+
-      
-      theme(panel.grid.major = element_blank(), 
-            panel.grid.minor = element_blank(),
-            axis.ticks=element_blank(), 
-            panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  }
   
-  if(GoodBad == "Green"){
-    ### Green Tech  
-    # Works, need to edit legend order
-    outputplot <- ggplot(dfwide, aes(x=Year))+
-      geom_area(aes(y= MaxValue,fill= "< 2째C"),alpha=alphaval)+
-      geom_area(aes(y= `450S`, fill= "2-4째C"),alpha=alphaval)+
-      geom_area(aes(y= NPS, fill= "4-6째C"),alpha=alphaval)+
-      geom_area(aes(y= CPS, fill= "> 6째C"),alpha=alphaval)+
-      
-      geom_line(aes(x=Year,y=dfwide[as.character(LinesToPlot[[1]])], colour =  as.character(LinesToPlot[1])), size = linesize)+
-      geom_line(aes(x=Year,y=dfwide[as.character(LinesToPlot[[2]])], colour =  as.character(LinesToPlot[2])), size = linesize)+
-      
-      ### I can't find a way to automaticall check whether 3 exists... 
-      # geom_line(aes(x=Year,y=dfwide[LinesToPlot[3]], colour =  LinesToPlot[3]))+
-      
-      xlab(year_lab) + 
-      ylab(ylabel) +
-      scale_size(guide=FALSE)+
-      coord_cartesian(ylim = c(ymin,ymax), xlim= c(Startyear, Startyear+5), expand = FALSE )+
-      scale_fill_manual(values = Colourvals, 
-                        guide = guide_legend(nrow = 2))+
-      scale_color_manual(values = LineVector,
-                         guide = guide_legend(nrow = 2))+
-      
-      theme(panel.grid.major = element_blank(), 
-            panel.grid.minor = element_blank(),
-            axis.ticks=element_blank(), 
-            panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  outputplot <-  ggplot()+
+    geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])]), data=dfwide,colour =  "black", size = linesize)+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])]), data=dfwide,colour =  "grey", size = linesize)+   # Market
     
     
-  }
-  
-  
+    scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
+                      values=unique(as.character(dftargets$colour)))+
+    
+    scale_color_manual(labels = LineVector,
+                       guide = guide_legend(nrow = 2))+
+    
+    xlab(year_lab) +
+    ylab(ylabel)+
+    coord_cartesian(ylim=c(minval,maxval))+
+    
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(),
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))+
+    
+    theme_minimal()
+  print(outputplot)
   
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
   
-  # library(grid)
-  # 
-  # a <- gtable(unit(c(1,3,1,3,1,3,1,3),c("cm")),unit(c(1,.5,1),c("cm")))
-  # # b <- gtable(unit(6,"cm"),unit(6,"cm"))
-  # # a <- combine(a,b)
-  # gtable_show_layout(a)
-  # 
-  # rectDG <- rectGrob(gp = gpar(fill = DarkGreen))
-  # rectLG <- rectGrob(gp = gpar(fill = LightGreen))
-  # rectDR <- rectGrob(gp = gpar(fill = DarkRed))
-  # rectLR <- rectGrob(gp = gpar(fill = LightRed))
-  # 
-  # textDG <- textGrob("< 2째C")
-  # textLG <- textGrob("2-4째C")
-  # textLR <- textGrob("4-6째C")
-  # textDR <- textGrob("> 6째C")
-  # 
-  # textPP <- textGrob("Portfolio")
-  # 
-  # plotitem <- ggplotGrob(outputplot)
-  # 
-  # linePP <- linesGrob(x=unit(c(0,1),"cm"), y=unit(c(0.5,.5),"cm"))
-  # 
-  # a <- gtable_add_grob(a,rectDG,1,1)
-  # a <- gtable_add_grob(a,rectLG,1,3)
-  # a <- gtable_add_grob(a,rectLR,1,5)
-  # a <- gtable_add_grob(a,rectDR,1,7)
-  # 
-  # a <- gtable_add_grob(a,textDG,1,2)
-  # a <- gtable_add_grob(a,textLG,1,4)
-  # a <- gtable_add_grob(a,textLR,1,6)
-  # a <- gtable_add_grob(a,textDR,1,8)
-  # 
-  # a <- gtable_add_grob(a,linePP,3,1)
-  # 
-  # a <- gtable_add_grob(a,textPP,3,2)
-  # 
-  # plot(a)
-  
-  # Out246Plot <- ggplot_gtable(ggplot_build(outputplot))
-  # Out246Plot$layout$clip[Out246Plot$layout$name == "panel"] <- "off"
-  # grid.draw(Out246Plot)
-  
+
+
   
 }
 
@@ -3254,7 +3197,7 @@ distribution_chart <- function(ChartType, Combin, BatchTest){
   
   ChartType = "CarsensMetric"
   if (ChartType == "CarsensMetric") {
-  
+    
     BatchTest <- CBComparisonBatchTest
     Combin <- CBCombin
     MetricCol <- "CarstensMetric"
@@ -3292,7 +3235,7 @@ distribution_chart <- function(ChartType, Combin, BatchTest){
   dfagg$Value <- as.numeric(dfagg$Value)
   portfolio_label = "Your Portfolio\n"
   portfolio_label = paste0(portfolio_label,"Cartsten's Metric: ",
-         percent(subset(dfagg, Metric=="Comparison" & PortName==PortfolioName)[["Value"]]))
+                           percent(subset(dfagg, Metric=="Comparison" & PortName==PortfolioName)[["Value"]]))
   
   dfagg <- dfagg %>%
     filter(Metric != "Reference") %>%
@@ -3301,7 +3244,7 @@ distribution_chart <- function(ChartType, Combin, BatchTest){
     mutate("Metric" = "Unexposed") %>%
     select(PortName,Metric,Value) %>%
     rbind(dfagg)
-    
+  
   dfagg$PortName <- factor(dfagg$PortName, levels=order$PortName)
   dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
   
@@ -3332,7 +3275,7 @@ distribution_chart <- function(ChartType, Combin, BatchTest){
     geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
                aes(yintercept=Value),color=LineColors,linetype=2)+
     geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
-               aes(y=Value),x=x_coord,label=LineLabels,
+              aes(y=Value),x=x_coord,label=LineLabels,
               color="white",vjust=-.2,hjust=1)+
     annotate("label", x = x_coord, y = 1, 
              label = portfolio_label,
