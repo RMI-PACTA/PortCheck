@@ -783,21 +783,27 @@ sector_bar_chart <- function(plotnumber){
     pieshares <- rbind(piesharesEQ,piesharesCB)}  
   
   ### Need to be changed!
-  Palette <- c("blue","red","orange","brown","cyan","green","black","pink","grey","magenta")
-  
-  colourdf <- data.frame(piesector=unique(pieshares$piesector),colour=Palette[1:nrow(pieshares)])
-  pieshares <- merge(pieshares, colourdf, by= "piesector")  
-    
-  ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
+  Palette <- c("#8c510a","#dfc27d","#c7eae5","#35978f","#003c30")
+  sectororder <-c("Fossil Fuels","Utility Power","Non-Utility Power","Automotive","Other High Carbon Sectors")
+  colourdf <- data.frame(colour=Palette, piesector =sectororder)
+  pieshares$piesector<-as.factor(pieshares$piesector)
+  combined <- sort(union(levels(pieshares$piesector), levels(colourdf$sectororder)))
+  pieshares <- merge(pieshares, colourdf, by= "piesector") 
+  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
+  pieshares$label <- factor(pieshares$label, levels=orderofchart)
+  pieshares$piesector<- factor(pieshares$piesector,levels = sectororder)
+  pieshares <- pieshares[order(pieshares$piesector,pieshares$label),]
+  temp<-max(pieshares$Portfolio_weight)
+  a<-ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
     scale_fill_manual(labels=unique(as.character(pieshares$piesector)),values=unique(as.character(pieshares$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
     expand_limits(0,0)+
     guides(fill=guide_legend(nrow = 1))+
-    ylab(ylabel)+
     theme_barcharts()+
-    theme(legend.position = "bottom")
+    theme(legend.position = "top" )
+  print(a)
 
 }
 
