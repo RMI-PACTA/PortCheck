@@ -1056,7 +1056,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
-    }else if (SectorToPlot == "TechToPlot"){
+    }else if (SectorToPlot == "All"){
       dat<- subset(Production,Sector=="Automotive")
       chartorder1 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
       dat$variable <- factor(dat$variable, levels=chartorder1)
@@ -3198,7 +3198,7 @@ Graph246 <- function(ChartType, TechToPlot){
   print(outputplot)
   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
   
 
 
