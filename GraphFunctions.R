@@ -788,17 +788,18 @@ sector_bar_chart <- function(plotnumber){
   colourdf <- data.frame(piesector=unique(pieshares$piesector),colour=Palette[1:nrow(pieshares)])
   pieshares <- merge(pieshares, colourdf, by= "piesector")  
     
-  ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
+  plot1<-  ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
     scale_fill_manual(labels=unique(as.character(pieshares$piesector)),values=unique(as.character(pieshares$colour)))+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
     expand_limits(0,0)+
-    guides(fill=guide_legend(nrow = 1))+
+    guides(fill=guide_legend(nrow = 2))+
     ylab(ylabel)+
     theme_barcharts()+
     theme(legend.position = "bottom")
 
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=plot1,dpi=ppi)
 }
 
 # -------------STACKED BAR CHARTS ---------- #
