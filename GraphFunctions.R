@@ -758,11 +758,25 @@ sector_bar_chart <- function(plotnumber){
     piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
     piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
     
-    piesub_tech$piesector <- revalue(piesub_tech$piesector,c("Metal-Iron" = "Iron & Steel","NonOG Production" = "Fossil Fuels","Bldg Prod-Cement/Aggreg" = "Building Materials & Fixtures", "Oil&Gas"= "Fossil Fuels","Coal"="Fossil Fuels", "Transport-Marine" = "Marine Transportation","Metal-Aluminum"="Aluminum", "Steel-Producers" = "Iron & Steel", "Transport-Air Freight"= "Airlines"),warn_missing = FALSE)
+    # piesub_tech$piesector <- revalue(piesub_tech$piesector,c("Metal-Iron" = "Iron & Steel","NonOG Production" = "Fossil Fuels","Bldg Prod-Cement/Aggreg" = "Building Materials & Fixtures", "Oil&Gas"= "Fossil Fuels","Coal"="Fossil Fuels", "Transport-Marine" = "Marine Transportation","Metal-Aluminum"="Aluminum", "Steel-Producers" = "Iron & Steel", "Transport-Air Freight"= "Airlines"),warn_missing = FALSE)
     
     ### New Classifications ###
-    piesub_tech$piesector <- revalue(piesub_tech$piesector,c("Metal-Iron" = "Other High Carbon Sectors","NonOG Production" = "Fossil Fuels","Bldg Prod-Cement/Aggreg" = "Other High Carbon Sectors", "Oil&Gas"= "Fossil Fuels","Coal"="Fossil Fuels", "Transport-Marine" = "Other High Carbon Sectors","Metal-Aluminum"="Other High Carbon Sectors", "Steel-Producers" = "Other High Carbon Sectors", "Transport-Air Freight"= "Other High Carbon Sectors"),warn_missing = FALSE)
-    piesub_tech$piesector <- revalue(piesub_tech$piesector, c("Building Materials & Fixtures"= "Other High Carbon Sectors", "Iron & Steel" = "Other High Carbon Sectors", "Aluminum" = "Other High Carbon Sectors", "Airlines" = "Other High Carbon Sectors", "Marine Transportation" = "Other High Carbon Sectors"),warn_missing = F)
+    piesub_tech$piesector <- revalue(piesub_tech$piesector,
+                                     c("Non-Utility Power" = "Not Assessed",
+                                       "Metal-Iron" = "Other High Carbon Sectors",
+                                       "NonOG Production" = "Fossil Fuels",
+                                       "Bldg Prod-Cement/Aggreg" = "Other High Carbon Sectors", 
+                                       "Oil&Gas"= "Fossil Fuels",
+                                       "Coal"="Fossil Fuels", 
+                                       "Transport-Marine" = "Other High Carbon Sectors",
+                                       "Metal-Aluminum"="Other High Carbon Sectors", 
+                                       "Steel-Producers" = "Other High Carbon Sectors", 
+                                       "Transport-Air Freight"= "Other High Carbon Sectors",
+                                       "Building Materials & Fixtures"= "Other High Carbon Sectors", 
+                                       "Iron & Steel" = "Other High Carbon Sectors", 
+                                       "Aluminum" = "Other High Carbon Sectors", 
+                                       "Airlines" = "Other High Carbon Sectors", 
+                                       "Marine Transportation" = "Other High Carbon Sectors"),warn_missing = F)
     
     
     piesub_tech <- piesub_tech[!(piesub_tech$piesector=="Not Assessed"),]
@@ -775,9 +789,9 @@ sector_bar_chart <- function(plotnumber){
     return(pieshares)
   }
   
-  piesharesEQ <- PSSProcessing("EQ") 
+  if(nrow(EQPortSnapshot)>0){piesharesEQ <- PSSProcessing("EQ")}
   
-  if(!exists("piesharesEQ")){pieshares <- PSSProcessing("EQ") 
+  if(!exists("piesharesEQ")){pieshares <- PSSProcessing("CB") 
   }else{
     piesharesCB <- PSSProcessing("CB") 
     pieshares <- rbind(piesharesEQ,piesharesCB)
@@ -785,8 +799,8 @@ sector_bar_chart <- function(plotnumber){
   
   ### Need to be changed!
   
-  Palette <- c("#8c510a","#dfc27d","#c7eae5","#35978f","#003c30")
-  sectororder <-c("Fossil Fuels","Utility Power","Non-Utility Power","Automotive","Other High Carbon Sectors")
+  Palette <- c("#8c510a","#dfc27d","#35978f","#003c30")
+  sectororder <-c("Fossil Fuels","Utility Power","Automotive","Other High Carbon Sectors")
   colourdf <- data.frame(colour=Palette, piesector =sectororder)
   pieshares$piesector<-as.factor(pieshares$piesector)
   combined <- sort(union(levels(pieshares$piesector), levels(colourdf$sectororder)))
@@ -806,7 +820,7 @@ sector_bar_chart <- function(plotnumber){
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
-    theme(legend.position = "top" )
+    theme(legend.position = "bottom" )
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
