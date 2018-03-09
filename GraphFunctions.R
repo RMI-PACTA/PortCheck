@@ -783,23 +783,30 @@ sector_bar_chart <- function(plotnumber){
     pieshares <- rbind(piesharesEQ,piesharesCB)}  
   
   ### Need to be changed!
-  Palette <- c("blue","red","orange","brown","cyan","green","black","pink","grey","magenta")
-  
-  colourdf <- data.frame(piesector=unique(pieshares$piesector),colour=Palette[1:nrow(pieshares)])
-  pieshares <- merge(pieshares, colourdf, by= "piesector")  
     
-  plot1<-  ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
+  Palette <- c("#8c510a","#dfc27d","#c7eae5","#35978f","#003c30")
+  sectororder <-c("Fossil Fuels","Utility Power","Non-Utility Power","Automotive","Other High Carbon Sectors")
+  colourdf <- data.frame(colour=Palette, piesector =sectororder)
+  pieshares$piesector<-as.factor(pieshares$piesector)
+  combined <- sort(union(levels(pieshares$piesector), levels(colourdf$sectororder)))
+  pieshares <- merge(pieshares, colourdf, by= "piesector") 
+  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
+  pieshares$label <- factor(pieshares$label, levels=orderofchart)
+  pieshares$piesector<- factor(pieshares$piesector,levels = sectororder)
+  pieshares <- pieshares[order(pieshares$piesector,pieshares$label),]
+  temp<-max(pieshares$Portfolio_weight)
+  a<-ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
     scale_fill_manual(labels=unique(as.character(pieshares$piesector)),values=unique(as.character(pieshares$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
     expand_limits(0,0)+
-    guides(fill=guide_legend(nrow = 2))+
     ylab(ylabel)+
+    guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
-    theme(legend.position = "bottom")
+    theme(legend.position = "top" )
 
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=plot1,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
 
 # -------------STACKED BAR CHARTS ---------- #
@@ -954,8 +961,8 @@ stacked_bar_chart_data <- function(ChartType){
 }
 
 stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Production){
-  # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-  # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+   wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
   theme_barcharts <- function(base_size = textsize, base_family = "") {
     theme(axis.ticks=element_blank(),
@@ -1015,7 +1022,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
-      
+      chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat$variable <- factor(dat$variable, levels=chartorder)
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
             geom_bar(stat = "identity",width = .6)+
             theme_minimal()+
@@ -1025,13 +1033,17 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
             guides(fill=guide_legend(nrow = 1))+
             ylab(ylabel)+
             theme_barcharts()+
-            theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+            ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))+
+            theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
+                  axis.line.y = element_blank(),axis.line.x = element_blank())
       print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
-    }else if (SectorToPlot == "All"){
+    }else if (SectorToPlot == "TechToPlot"){
       dat<- subset(Production,Sector=="Automotive")
+      chartorder1 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      dat$variable <- factor(dat$variable, levels=chartorder1)
         p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1041,9 +1053,12 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
+          ggtitle("Automotive Production")+
+          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
 
         dat1<- subset(Production,Sector=="Fossil Fuels")
+        chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+        dat1$variable <- factor(dat1$variable, levels=chartorder2)
         p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1053,9 +1068,13 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom")
+          ggtitle("Fossil Fuels Production")+
+          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
+                axis.line = element_blank())
 
         dat2<- subset(Production,Sector=="Power")
+        chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+        dat2$variable <- factor(dat2$variable, levels=chartorder3)
         p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
           geom_bar(stat = "identity",width = .6)+
           theme_minimal()+
@@ -1066,9 +1085,11 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
           guides(fill=guide_legend(nrow = 1))+
           ylab(ylabel)+
           theme_barcharts()+
-          theme(legend.position = "bottom",axis.line.y = element_blank(),axis.text.y = element_blank())
-        # print(grid.arrange(p2,p3,p1,nrow=1))
-        ggsave(grid.arrange(p2,p3,p1,nrow=1),filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=7.8,dpi=ppi)
+          ggtitle("Power Capacity")+
+          theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line= element_blank())
+        cmd<-grid.arrange(p2,p3+theme(axis.text.y = element_blank()),p1+theme(axis.text.y = element_blank()),nrow=1)
+
+        ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
     }
   }else{
@@ -3229,90 +3250,105 @@ Graph246 <- function(ChartType, TechToPlot){
 
 
 #----------- Distribution Chart ------------- #
-distribution_chart <- function(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors){
+distribution_chart <- function(ChartType, Combin, BatchTest){
   
-  #Title - Title of plot. MetricName - Name of metric (used for y-axis label)
-  #MetricCol - name of column inwhich to find the metric (assumes it is precalculated)
-  #Combin - This portfolio's data. BatchTest - All other portfolios in this batch.
-  #BarHighl - Portfoilio names for which we want highlighting
-  #BarLabels - Labels for those portfolios
-  #BarColors - Colors in which to highlight
-  #LineHighl - "Portfolio" names for which to create reference lines
-  #LineLabels - Labels for those reference lines
-  #LineColors - Colors for those reference lines
+  ChartType = "CarsensMetric"
+  if (ChartType == "CarsensMetric") {
   
-  
-  
-  
+    BatchTest <- CBComparisonBatchTest
+    Combin <- CBCombin
+    MetricCol <- "CarstensMetric"
+    Title <- "Exposure of Portfolios to Climate Relevent Sectors"
+    MetricName <- "Carsten's Metric"
     
-  BatchTest <- CBComparisonBatchTest
-  Combin <- CBCombin
-  MetricCol <- "CarstensMetric"
-  Title <- "% of Portfolio in Climate Relevent Sectors"
-  MetricName <- "Carsten's Metric"
+    BarColors <- c("Orange")
+    BarColors <- c(BarColors,"Black","skyblue")
+    names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
+    
+    LineHighl <- c("Market_Benchmark")
+    LineLabels <- c("Market Benchmark")
+    names(LineLabels) <- LineHighl
+    LineColors <- c("Green")
+    names(LineColors) <- LineLabels
+    
+  }
   
-  BarHighl <- c(InvestorName)
-  #Will add comparison to the passed in highlights, for factoring
-  BarHighl <- c(BarHighl,"Comparison")
+  library(dplyr)
   
-  BarLabels <- c(InvestorNameLong)
-  #Will add Other Portfolios to the passed in labels, for factoring
-  BarLabels <- c(BarLabels, "Other Portfolios")
-  names(BarLabels) <- BarHighl
+  df <- rbind(Combin, BatchTest)
+  ID.COLS = c("PortName","Year","Sector","Technology")
   
-  BarColors <- c("Orange")
-  #Will add black for the other nonhighlighted bars
-  BarColors <- c(BarColors,"Black")
-  names(BarColors) <- BarLabels
-  
-  LineHighl <- c("GlobalBondUniverse", "Market_Benchmark")
-  LineLabels <- c("Global Bond Universe", "Market Benchmark")
-  names(LineLabels) <- LineHighl
-  
-  LineColors <- c("Blue","Green")
-  names(LineColors) <- LineLabels
-  
-  
-  Combin <- rbind(Combin, BatchTest)
-  
-  df <- unique(subset(Combin, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+  df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                         Scenario %in% Scenariochoose & Year %in% (Startyear+5) &
                         !(PortName %in% c("MetaPortfolio", "MetaPortfolio_MetaPortfolio")), 
-                      select = c("PortName","Year","Sector","Technology",MetricCol,"ComparisonType")))
+                      select = c(ID.COLS,MetricCol)))
   
-  dfagg <- aggregate(df[MetricCol],by=df[c("PortName","ComparisonType")],FUN=sum)
-  dfagg <- dfagg %>% dplyr::arrange_(.dots=MetricCol)
-  dfagg <- dfagg<-dfagg[dim(dfagg)[1]:1,]
-  dfagg$ComparisonType <- dfagg$PortName
-  dfagg[!(dfagg$ComparisonType %in% c(BarHighl,LineHighl)),"ComparisonType"] <- "Comparison"
-  dfagg$PortName <- factor(dfagg$PortName, levels=dfagg$PortName)
-  dfagg$ComparisonType <- factor(dfagg$ComparisonType,
-                                 levels=c(BarHighl,LineHighl),
-                                 labels=c(BarLabels,LineLabels))
-  dfagg$CarstensMetric <- as.numeric(dfagg$CarstensMetric)
-  x_coord <- as.numeric(row.names(subset(dfagg, dfagg$ComparisonType %in% BarLabels[BarLabels != "Other Portfolios"])))
+  df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
+  
+  dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric")],FUN=sum)
+  order <- dfagg %>% filter(Metric %in% c(MetricCol[1])) %>% arrange(desc(Value))
+  dfagg[dfagg$PortName %in% LineHighl,"Metric"] <- "Reference"
+  dfagg[dfagg$PortName == PortfolioName,"Metric"] <- "Comparison"
+  dfagg$Value <- as.numeric(dfagg$Value)
+  portfolio_label = "Your Portfolio\n"
+  portfolio_label = paste0(portfolio_label,"Cartsten's Metric: ",
+         percent(subset(dfagg, Metric=="Comparison" & PortName==PortfolioName)[["Value"]]))
+  
+  dfagg <- dfagg %>%
+    filter(Metric != "Reference") %>%
+    group_by(PortName) %>%
+    summarise("Value" = 1-sum(Value)) %>%
+    mutate("Metric" = "Unexposed") %>%
+    select(PortName,Metric,Value) %>%
+    rbind(dfagg)
+    
+  dfagg$PortName <- factor(dfagg$PortName, levels=order$PortName)
+  dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
+  
+  x_coord <- length(order$PortName)
+  detach("package:dplyr",unload=TRUE)
+  
+  theme_distribution <- function(base_size = textsize, base_family = "") {
+    theme(axis.ticks=element_blank(),
+          axis.text.x=element_text(face="bold",colour="black",size=textsize),
+          axis.text.y=element_text(face="bold",colour="black",size=textsize),
+          axis.line = element_line(colour = "black",size=1),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "skyblue",color = NA),
+          legend.title = element_blank(),
+          legend.position = "bottom",
+          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          plot.title = element_text(hjust = 0.5)
+    )
+  }
   
   distribution_plot<- ggplot(dfagg)+
-    geom_bar(data=subset(dfagg, dfagg$ComparisonType %in% BarLabels),
-             aes_string("PortName", MetricCol, fill="ComparisonType"),
-             stat = "identity",width = .6)+
-    scale_fill_manual(breaks=BarLabels[BarLabels != "Other Portfolios"],
-                      values=c(BarColors))+
-    geom_hline(data=subset(dfagg, dfagg$ComparisonType %in% LineLabels),
-               aes_string(yintercept=MetricCol,color="ComparisonType"),linetype=2)+
-    geom_label(data=subset(dfagg, dfagg$ComparisonType %in% BarLabels[BarLabels != "Other Portfolios"]),
-               aes_string(label="ComparisonType",x=x_coord,y=MetricCol),
-               size=4, color="white", fill="orange",vjust=-.3,hjust=-.1)+
+    geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
+             aes(x=PortName, y=Value, fill=Metric),
+             stat = "identity", position = "fill", width=1)+
+    scale_fill_manual(values=BarColors)+
+    geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
+               aes(yintercept=Value),color=LineColors,linetype=2)+
+    geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
+               aes(y=Value),x=x_coord,label=LineLabels,
+              color="white",vjust=-.2,hjust=1)+
+    annotate("label", x = x_coord, y = 1, 
+             label = portfolio_label,
+             hjust=1.05,vjust=1.05)+ 
     scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
     scale_x_discrete(labels=NULL)+
     expand_limits(0,0)+
-    guides(fill=FALSE)+
+    # guides(fill=FALSE)+
     ggtitle(Title)+
-    xlab(paste0(ReportName," Portfolios"))+
+    xlab(paste0(BatchName," Portfolios"))+
     ylab(MetricName)+
     theme_distribution()
   
   print(distribution_plot)
+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
+  
 }
 
 
