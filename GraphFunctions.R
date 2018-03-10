@@ -3172,22 +3172,21 @@ Graph246 <- function(ChartType, TechToPlot){
   # 
   LineVector <- setNames(LineColours,LinesToPlot)
   
-  
+  ylabel <- "Normalized Built Out"
   outputplot <-  ggplot()+
     geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])]), data=dfwide,colour =  "black", size = linesize)+  # Portfolio
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])]), data=dfwide,colour =  "grey", size = linesize)+   # Market
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "change it here1"), data=dfwide, size = linesize)+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "change it here2"), data=dfwide, size = linesize)+   # Market
     
     
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
     
-    scale_color_manual(labels = LineVector,
-                       guide = guide_legend(nrow = 2))+
+        scale_color_manual(name="",values = c("change it here1"="black","change it here2"="grey"))+
     
     xlab(year_lab) +
     ylab(ylabel)+
-    coord_cartesian(ylim=c(minval,maxval))+
+    coord_cartesian(ylim=c(0,maxval))+
     
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
