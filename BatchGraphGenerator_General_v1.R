@@ -339,7 +339,7 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 #-------
 # Loop through Portfolios
 #--------
-for (i in 30:nrow(TestList)){
+for (i in 36:nrow(TestList)){
   
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
@@ -431,9 +431,9 @@ for (i in 30:nrow(TestList)){
   FundsInPort <- Portfunds(20,FundList,FundsDataAll, PortfolioName,InvestorName, TestType)
   if (typeof(FundsInPort) == "list"){ if (nrow(FundsInPort) == 0){FundsInPort = "NoFunds"}  }
   
-  FundsHeatMapData <- heatmap_data(FundsInPort,NULL,"Funds","")
+  # FundsHeatMapData <- heatmap_data(FundsInPort,NULL,"Funds","")
   # Required Batch Results
-  PortHeatMapData <- heatmap_data(EQCombin, CBCombin,"Port",PortName)
+  # PortHeatMapData <- heatmap_data(EQCombin, CBCombin,"Port",PortName)
   ### Sectors with Production
   ### Used to check whether a Line Graph, Ranking, and BarChart should be printed
   EQSectorProd <- SectorProduction(EQCombin,"EQ")
@@ -475,7 +475,7 @@ for (i in 30:nrow(TestList)){
       
       # distribution_chart(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors)
       
-      Graph246("CB", "HydroCap")
+      # Graph246("CB", "RenewablesCap")
       
       
       inc_average <- F
@@ -545,7 +545,7 @@ for (i in 30:nrow(TestList)){
       }
 
       # Page 16
-      plot_35 <- fundmap_chart(35,FundsHeatMapData)
+      # plot_35 <- fundmap_chart(35,FundsHeatMapData)
 
       # Page 17
       plot_36 <- other_sector_chart(36,SectorToPlot = "Cement")

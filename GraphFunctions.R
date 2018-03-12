@@ -1922,10 +1922,10 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
   
   if (ChartType == "EQ"){
     PortSnapshot <- EQPortSnapshot
-    combin <- EQCompProdSnapshot
+    combin <- EQCombin
   } else if(ChartType == "CB"){
     PortSnapshot <- CBPortSnapshot
-    combin <- CBCompProdSnapshot
+    combin <- CBCombin
   }
   
   
@@ -2158,14 +2158,15 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     
     if (SectorToPlot == "Power"){techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")} 
     if (SectorToPlot == "Automotive"){techorder <- c("ICE","Hybrid","Electric")}
-    if (SectorToPlot == "Fossil Fuels"){techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
-    AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
-    AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
-    
-    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]}
-    else{
-      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
-    }
+    if (SectorToPlot == "Fossil Fuels"){
+      techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
+      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
+      AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
+      
+      if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
+      }else{
+        AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
+      }
     }
     
     colnames(PortSnapshot)[colnames(PortSnapshot) %in% c("COMPANY_CORP_TICKER","EQY_FUND_TICKER")] <- "TICKER"
@@ -2196,8 +2197,8 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       Portfoliomix$value <- (Portfoliomix$value/sum(Portfoliomix$value))*100
     }
     
-    Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose & BenchmarkRegion == BenchmarkRegionchoose & Year == Startyear+5)
-    if (ChartType == "EQ"){ Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose , select = c("Technology", "TargetProductionAlignment"))}else{
+    Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
+    if (ChartType == "EQ"){ Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))}else{
       Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
       Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
     }
@@ -3200,8 +3201,8 @@ Graph246 <- function(ChartType, TechToPlot){
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
   
-
-
+  
+  
   
 }
 
