@@ -265,16 +265,16 @@ report <- function(){
   text$text <- gsub("SamplePort",PortfolioName,text$text)
   text$text <- gsub("SAMPLEPORT",PORTFOLIONAME,text$text)
   text$text <- gsub("CO2","CO\\\\textsubscript{2}",text$text)
-  text$text <- gsub("Â°","°",text$text)
+  text$text <- gsub("ÃÂ°","Â°",text$text)
   
   if (Languagechoose == "DE"){
-    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÄGLICHKEITS-PILOTTEST"
+    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÃGLICHKEITS-PILOTTEST"
   }
   
   if (Languagechoose == "FR"){
-    text$text[grepl("TEST PILOTE DE COMPATIBILITÉ  CLIMATIQUE",text$text)] <- "TEST PILOTE\\\\ DE COMPATIBILITÉ  CLIMATIQUE"
-    text$text[grepl("POSSIBILIT",text$text)][1]<- "\\SectionHeading{PARTIE 3:}{POSSIBILITÉS D'ACTION}"
-    text$text[grepl("POSSIBILIT",text$text)][2]<- "\\PageHeading{POSSIBILITÉS D'ACTION - SÉLECTION DES FONDS}"
+    text$text[grepl("TEST PILOTE DE COMPATIBILITÃ  CLIMATIQUE",text$text)] <- "TEST PILOTE\\\\ DE COMPATIBILITÃ  CLIMATIQUE"
+    text$text[grepl("POSSIBILIT",text$text)][1]<- "\\SectionHeading{PARTIE 3:}{POSSIBILITÃS D'ACTION}"
+    text$text[grepl("POSSIBILIT",text$text)][2]<- "\\PageHeading{POSSIBILITÃS D'ACTION - SÃLECTION DES FONDS}"
   }
   
   # Copy in the graphics folder for the report
@@ -394,7 +394,7 @@ other_sector_chart <- function(plotnumber, SectorToPlot){
     
     outputplot<-outputplot+
       scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
       xlab(year_lab) + ylab(ylabel) + # Set axis labels
       # legend(values=legelabels)+
       scale_x_continuous(breaks=seq(Startyear,max(df$Year),1),expand=c(0,0))+
@@ -1029,17 +1029,18 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
     
     
     
-    orderofchart <- c(PortfolioNameLong,GT["X2Target"][[1]],GT["AveragePort"][[1]])
-    Production$variable <- factor(Production$variable, levels=orderofchart)
+    #orderofchart <- c(PortfolioNameLong,GT["X2Target"][[1]],GT["AveragePort"][[1]])
+    #Production$variable <- factor(Production$variable, levels=orderofchart)
     #Production$Technology <- factor(Production$Technology, levels=technologyorder)
-    Production <- Production[order(Production$Technology,Production$variable),]
+    #Production <- Production[order(Production$Technology,Production$variable),]
     Production$variable <- wrap.labels(Production$variable,20)
     
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
       chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-      dat$variable <- factor(dat$variable, levels=chartorder)
+      chartorder <- as.factor(chartorder)
+      dat$variable <- factor(dat$variable) #, levels=chartorder)
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1059,7 +1060,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
     }else if (SectorToPlot == "All"){
       dat<- subset(Production,Sector=="Automotive")
       chartorder1 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-      dat$variable <- factor(dat$variable, levels=chartorder1)
+      chartorder1 <- as.factor(chartorder1)
+      dat$variable <- factor(dat$variable) #, levels=chartorder)
       p1<- ggplot(data=dat, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1074,7 +1076,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       
       dat1<- subset(Production,Sector=="Fossil Fuels")
       chartorder2 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-      dat1$variable <- factor(dat1$variable, levels=chartorder2)
+      chartorder2 <- as.factor(chartorder2)
+      dat1$variable <- factor(dat1$variable) #, levels=chartorder)
       p2 <- ggplot(dat1, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1090,7 +1093,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
       
       dat2<- subset(Production,Sector=="Power")
       chartorder3 <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-      dat2$variable <- factor(dat2$variable, levels=chartorder3)
+      chartorder3 <- as.factor(chartorder3)
+      dat2$variable <- factor(dat2$variable) #, levels=chartorder)
       p3 <- ggplot(dat2, aes(x=variable, y=TechShare,fill=Technology),show.guide = TRUE)+
         geom_bar(stat = "identity",width = .6)+
         theme_minimal()+
@@ -1466,7 +1470,7 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
       oil_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
       oil_units <- paste0(oil_units," ",GT["barrels"][[1]])
       gas_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      gas_units <- paste0(gas_units, " m²")
+      gas_units <- paste0(gas_units, " mÂ²")
       unit_lookup <- data.frame(car_units,ff_units,power_units,coal_units,oil_units,gas_units)
       # ff_sectors <- c(GT["T_Coal"][[1]],GT["T_Oil"][[1]],GT["T_Gas"][[1]])
       ff_sectors <- c("Coal","Oil","Gas")
@@ -1548,7 +1552,7 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
         
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
         scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
         scale_y_continuous(expand=c(0,0))+
@@ -1566,7 +1570,7 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
         
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
         scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
         scale_y_continuous(expand=c(0,0))+
@@ -2632,7 +2636,7 @@ fundmap_chart <- function(plotnumber,FundsData){
       iceg <- rasterGrob(ice, interpolate=TRUE)
       
       
-      # HeatmapData$PortName <- revalue(HeatmapData$PortName, c("LänsförsäkringarFondförvaltningAB"="Länsförsäkringar\n FondförvaltningAB"))
+      # HeatmapData$PortName <- revalue(HeatmapData$PortName, c("LÃ¤nsfÃ¶rsÃ¤kringarFondfÃ¶rvaltningAB"="LÃ¤nsfÃ¶rsÃ¤kringar\n FondfÃ¶rvaltningAB"))
       
       # TechnologyLabel$XPosition[1]<-0.5
       HeatmapGGPlot <- ggplot(HeatmapData, aes(x = as.factor(HeatmapData$Technology),fill = as.factor(HeatmapData$ExposureColour), y = as.factor(HeatmapData$PortName), group=HeatmapData$PortName)) +
@@ -3134,14 +3138,14 @@ Graph246 <- function(ChartType, TechToPlot){
     # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
     # lineorder <-c("Line1","Line2","Line3","Line4")
     Palette <- c(DarkRed,LightRed,LightGreen,DarkGreen)
-    AreaNames <-  c( "> 6�C","4-6�C","2-4�C","< 2�C") 
+    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C") 
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS - dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS   
     Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-    AreaNames <-  c( "< 2�C","2-4�C","4-6�C","> 6�C") 
+    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
     # lineorder <-c("Line4","Line3","Line2","Line1")
   }
   
@@ -3150,7 +3154,7 @@ Graph246 <- function(ChartType, TechToPlot){
   dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
   # dftargets <- rev(dftargets)
   
-  # AreaNames <-  c( "< 2�C","2-4�C","4-6�C","> 6�C") 
+  # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
   # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
   lineorder <-c("Line4","Line3","Line2","Line1")
   colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
@@ -3169,23 +3173,22 @@ Graph246 <- function(ChartType, TechToPlot){
   # 
   LineVector <- setNames(LineColours,LinesToPlot)
   
-  
+  ylabel <- "Normalized Built Out"
   outputplot <-  ggplot()+
     geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])]), data=dfwide,colour =  "black", size = linesize)+  # Portfolio
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])]), data=dfwide,colour =  "grey", size = linesize)+   # Market
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "change it here1"), data=dfwide, size = linesize)+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "change it here2"), data=dfwide, size = linesize)+   # Market
     
     
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
     
-    scale_color_manual(labels = LineVector,
-                       guide = guide_legend(nrow = 2))+
+        scale_color_manual(name="",values = c("change it here1"="black","change it here2"="grey"))+
     
     xlab(year_lab) +
     ylab(ylabel)+
-    coord_cartesian(ylim=c(minval,maxval))+
-    
+    coord_cartesian(ylim=c(0,maxval))+
+    theme_minimal()+
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks=element_blank(),
@@ -3195,7 +3198,6 @@ Graph246 <- function(ChartType, TechToPlot){
           legend.title = element_blank(),
           plot.margin = unit(c(.5,1,0.5,.5), "cm"))+
     
-    theme_minimal()
   print(outputplot)
   
   
