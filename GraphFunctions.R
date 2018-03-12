@@ -3187,7 +3187,7 @@ Graph246 <- function(ChartType, TechToPlot){
     xlab(year_lab) +
     ylab(ylabel)+
     coord_cartesian(ylim=c(0,maxval))+
-    
+    theme_minimal()+
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.ticks=element_blank(),
@@ -3197,7 +3197,6 @@ Graph246 <- function(ChartType, TechToPlot){
           legend.title = element_blank(),
           plot.margin = unit(c(.5,1,0.5,.5), "cm"))+
     
-    theme_minimal()
   print(outputplot)
   
   
