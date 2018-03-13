@@ -2954,28 +2954,28 @@ renewablesadditions_chart <- function(plotnumber,ChartType){
       progresslabel <- GT["Remaining"][[1]]  #CORRECT #GT["StillReq"][[1]]#GT["X2Target"][[1]]
       Target <- GT["Progress"][[1]] # blue
       
-      # theme_barcharts <- function(base_size = textsize, base_family = "") {
-      #   theme(axis.ticks=element_blank(), 
-      #         axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
-      #         axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
-      #         axis.title.x=element_blank(),
-      #         axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
-      #         axis.line = element_line(colour = AxisColour,size=1),
-      #         panel.grid.major = element_blank(), 
-      #         panel.grid.minor = element_blank(),
-      #         panel.background = element_blank(), 
-      #         legend.position=c(0.5,-.2),
-      #         legend.direction="horizontal",
-      #         legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-      #         legend.background = element_rect(fill = "transparent",colour = NA),
-      #         legend.key.size=unit(0.4,"cm"),
-      #         legend.title=element_blank(),
-      #         legend.key = element_blank(),
-      #         plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
-      #         plot.background = element_rect(fill = "transparent",colour = NA)
-      #   )
-      # }
-      
+      theme_barcharts <- function(base_size = textsize, base_family = "") {
+        theme(axis.ticks=element_blank(),
+              axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
+              axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
+              axis.title.x=element_blank(),
+              axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
+              axis.line = element_line(colour = AxisColour,size=1),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.background = element_blank(),
+              legend.position=c(0.5,-.2),
+              legend.direction="horizontal",
+              legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+              legend.background = element_rect(fill = "transparent",colour = NA),
+              legend.key.size=unit(0.4,"cm"),
+              legend.title=element_blank(),
+              legend.key = element_blank(),
+              plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
+              plot.background = element_rect(fill = "transparent",colour = NA)
+        )
+      }
+
       RenAddBar <- ggplot(RenewablesBar, aes(x=rev(Name),y=rev(value), fill = variable))+
         geom_bar(stat = "identity", width=.8, colour = NA)+
         geom_segment(aes(x=0, xend = 0 , y=0, yend = 1), size=1, colour = AxisColour,  arrow = arrow(length = unit(0.4,"cm")))+
