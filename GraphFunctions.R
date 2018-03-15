@@ -1007,7 +1007,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
   if(nrow(Production)>0){
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
     technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
-    colours <- c(CoalCapColour,"#afabab",NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
+    colours <- c(CoalCapColour,GasCapColor,NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
     eng <- c("Power","Automotive","Fossil Fuels")
     sectororder<-rep(eng, times=c(5,3,3))
     colourdf <- data.frame(colours, Technology = technologyorder,Sector= sectororder)
@@ -1051,11 +1051,10 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
         ylab(ylabel)+
         theme_barcharts()+
         ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))+
-        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",
-              axis.line.y = element_blank(),axis.line.x = element_blank())
+        theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line = element_blank())
       print(p1)
       
-      if (SectorToPlot == "Fossil Fuels"){SectorToPlot == "FossilFuels"}
+      if (SectorToPlot == "Fossil Fuels"){SectorToPlot = "FossilFuels"}
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
     }else if (SectorToPlot == "All"){
       dat<- subset(Production,Sector=="Automotive")
