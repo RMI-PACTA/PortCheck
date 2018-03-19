@@ -2890,9 +2890,10 @@ Inputs246 <- function(ChartType, TechToPlot){
   return(df)
 }
 
-Graph246 <- function(ChartType, TechToPlot){
+Graph246 <- function(plotnumber, ChartType, TechToPlot){
   
-  
+  ChartType = "CB"
+  TechToPlot = "RenewablesCap"
   if (ChartType == "EQ"){
     BatchTest <- EQBatchTest
     Combin <- EQCombin
@@ -2960,10 +2961,12 @@ Graph246 <- function(ChartType, TechToPlot){
   
   LineColours <- c("black", "grey","blue","pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-  # 
+  linesize <- 1 #This is prodbably incorrect
   LineVector <- setNames(LineColours,LinesToPlot)
   
+  year_lab <- 2017 #?
   ylabel <- "Normalized Built Out"
+  
   outputplot <-  ggplot()+
     geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
     geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "change it here1"), data=dfwide, size = linesize)+  # Portfolio
@@ -2977,7 +2980,7 @@ Graph246 <- function(ChartType, TechToPlot){
     
     xlab(year_lab) +
     ylab(ylabel)+
-    coord_cartesian(ylim=c(0,maxval))+
+    coord_cartesian(ylim=c(0,2))+ #this needs a max case
     theme_minimal()+
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -2986,7 +2989,7 @@ Graph246 <- function(ChartType, TechToPlot){
           panel.grid = element_blank(),
           legend.position = "bottom",
           legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))+
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
     
     print(outputplot)
   

@@ -97,7 +97,7 @@ if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showW
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
 ### Get Equity Batch Results
-if (file.exists(paste0(BATCH.RES.PATH,BatchName,"/",BatchToTest,"/",BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
+if (file.exists(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
   EQBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
 }else{
   EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
@@ -138,7 +138,7 @@ PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
 TestList<-PortfolioBreakdown
 
 ### Funds within the Portfolios
-FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"Port_ListofFunds.csv"),stringsAsFactors = FALSE)
+FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Port_ListofFunds.csv"),stringsAsFactors = FALSE)
 if (exists("FundList")){
   FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
   FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
@@ -482,8 +482,12 @@ for (i in 1:nrow(TestList)){
 
       distribution_chart("Carsten's Metric", EQCombin, EQComparisonBatchTest)
       
-      Graph246("CB", "RenewablesCap")
+      Graph246(99, "CB", "RenewablesCap")
       
+      sector_bar_chart(1, sector_processing())
+      stacked_bar_chart_vertical(2,"EQ","All",EQStackedBarProdData)
+      Graph246(3)
+      Graph246(4)
       
       # inc_average <- F
       # ########################
