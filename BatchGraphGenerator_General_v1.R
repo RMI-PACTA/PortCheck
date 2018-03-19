@@ -474,7 +474,7 @@ for (i in 1:nrow(TestList)){
       # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
       
       
-      # distribution_chart(Title, MetricName, MetricCol, Combin, BatchTest,BarHighl, BarLabels, BarColors,LineHighl, LineLabels, LineColors)
+      # distribution_chart("EQ", EQCombin, EQComparisonBatchTest)
       
       # Graph246("CB", "RenewablesCap")
       
