@@ -472,22 +472,50 @@ for (i in 1:nrow(TestList)){
       #######################
       
       # SectorBarCharts
-      sector_bar_chart(99, sector_processing())
-
-      EQStackedBarProdData <-stacked_bar_chart_data("EQ")
-      stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
-
-      CBStackedBarProdData <-stacked_bar_chart_data("CB")
-      stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
-
-      distribution_chart("Carsten's Metric", EQCombin, EQComparisonBatchTest)
-      
-      Graph246(99, "CB", "RenewablesCap")
+      # sector_bar_chart(99, sector_processing())
+      # 
+      # EQStackedBarProdData <-stacked_bar_chart_data("EQ")
+      # stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
+      # 
+      # CBStackedBarProdData <-stacked_bar_chart_data("CB")
+      # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
+      # 
+      # distribution_chart("Carsten's Metric", EQCombin, EQComparisonBatchTest)
+      # 
+      # Graph246(99, "RenewablesCap")
       
       sector_bar_chart(1, sector_processing())
-      stacked_bar_chart_vertical(2,"EQ","All",EQStackedBarProdData)
-      Graph246(3)
-      Graph246(4)
+      stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
+      Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
+      Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
+      distribution_graph(5, "RiskExposure", CBCombin, CBComparisonBatchTest) #Combined EQ/CB
+      stacked_bar_chart_vertical(6,"EQ","All",EQStackedBarProdData)
+      stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
+      distribution_graph(8, "CarstensMetric", CBCombin, CBComparisonBatchTest)
+      distribution_graph(9, "CarstensMetric", EQCombin, EQComparisonBatchTest)
+      Graph246(9,  "EQ", "CoalCap")
+      Graph246(10, "EQ", "RenewablesCap")
+      Graph246(11, "EQ", "GasCap")
+      Graph246(12, "EQ", "NuclearCap")
+      Graph246(13, "EQ", "OilProd")
+      Graph246(14, "EQ", "GasProd")
+      Graph246(15, "EQ", "ICE")
+      Graph246(16, "EQ", "EV")
+      Graph246(17, "CB", "CoalCap")
+      Graph246(18, "CB", "RenewablesCap")
+      Graph246(19, "CB", "GasCap")
+      Graph246(20, "CB", "NuclearCap")
+      Graph246(21, "CB", "OilProd")
+      Graph246(22, "CB", "GasProd")
+      Graph246(23, "CB", "ICE")
+      Graph246(24, "CB", "EV")
+      ranking_chart_alignment(25, "EQ", "All") #Carstens Metric
+      ranking_chart_alignment(26, "CB", "All") #Carstens Metric
+      flat_wheel_chart(27, 20, "EQ", "Power")
+      flat_wheel_chart(28, 20, "EQ", "Automotive")
+      flat_wheel_chart(29, 20, "EQ", "OG")
+      flat_wheel_chart(30, 20, "EQ", "Fossil Fuels")
+      
       
       # inc_average <- F
       # ########################
@@ -596,11 +624,11 @@ for (i in 1:nrow(TestList)){
       # -------
       # PDF CREATION
       # -------
-      EQReportData<-report_data("EQ")
-      CBReportData<-report_data("CB")
-      
+      # EQReportData<-report_data("EQ")
+      # CBReportData<-report_data("CB")
+      # 
       # report(PortfolioName,ReportName, InvestorName, template, RT,EQReportData,CBReportData,FundsInPort,OtherSectors,EQSectorProd,CBSectorProd,Languagechoose)
-      report()
+      # report()
       
     })}else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
