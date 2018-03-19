@@ -93,7 +93,7 @@ report_data <- function(ChartType){
     WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
     WM$PortName <- "WeightedMean"
     df$AUM <- NULL
-    df <- df[df$PortName %in% PortfolioNameLong,]
+    df <- df[df$PortName %in% PortName,]
     df <- rbind(df,WM)
     
     df <- setNames(data.frame(t(df[,-1])), df[,1]) 
@@ -268,7 +268,7 @@ report <- function(){
   text$text <- gsub("ÃÂ°","Â°",text$text)
   
   if (Languagechoose == "DE"){
-    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÃGLICHKEITS-PILOTTEST"
+    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTR�GLICHKEITS-PILOTTEST"
   }
   
   if (Languagechoose == "FR"){
@@ -888,7 +888,7 @@ stacked_bar_chart_data <- function(ChartType){
       ProductionMix_5yrs <- subset(ProductionMix_5yrs, select= c("Sector","Technology","variable","TechShare"))
       ProductionMix_5yrs$Technology <- gsub("Cap","",ProductionMix_5yrs$Technology)
       ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
-      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioNameLong
+      ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortName
       ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- GT["X2Target"][[1]]
       ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "CoverageWeight"] <- GT["AveragePort"][[1]]
       
@@ -922,7 +922,7 @@ stacked_bar_chart_data <- function(ChartType){
       
       FFMix_5yrs <- merge(FFMix_5yrs,FFWeightedResults, by="Technology")
       FFMix_5yrs <- rename(FFMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],
-                                         "TechShare"=PortfolioNameLong,
+                                         "TechShare"=PortName,
                                          "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
       
       
@@ -938,7 +938,7 @@ stacked_bar_chart_data <- function(ChartType){
       ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
       ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by=c("Technology"))
       ProductionMix_5yrs <- rename(ProductionMix_5yrs, 
-                                   c("WtTechShareTechShare"=PortfolioNameLong,
+                                   c("WtTechShareTechShare"=PortName,
                                      "Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],
                                      "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
       
@@ -1326,7 +1326,6 @@ stacked_bar_chart_horizontal <- function(plotnumber,ChartType,SectorToPlot,inc_a
     
     # PlotData$variable <- revalue(PlotData$variable,c("AggregiertesPortfolio" = GT["AggregatedPortName"][[1]]))
     
-    # write.csv(PlotData, paste0("StackedBarChart_",ChartType,"_",SectorToPlot,"_",PortfolioName,".csv"),row.names = F)
     PlotData$Sector <- NULL
     
     
@@ -1627,7 +1626,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     
   }else if (ChartType == "CB"){
     Exposures <- CBExposureRange
-    AUMData <- CBAUMData
+    AUMData <- CBAUMDatarange
     Ranks <-CBRanks
   }
   
@@ -1635,7 +1634,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   TechList <- c("Electric","Hybrid","ICE","Coal","Oil","Gas","RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap")
   
   
-  if(PortfolioNameLong %in% c(Exposures$PortName, "PK","V") ){
+  # if(PortfolioNameLong %in% c(Exposures$PortName, "PK","V") ){
+    if(PortName %in% c(Exposures$PortName, "PK","V") ){
+      
     # Plotting Exposure
     sectors <- data.frame(Sector = c("Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels","Power","Power","Power","Power","Power"),Technology = c("Electric","Hybrid","ICE","Coal","Gas","Oil","CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap"), order =1:11)
     # TechnologyNames<-c("Electric\nVehicles", "Hybrid\nVehicles", "ICE\nVehicles", "Coal\nProduction", "Gas\nProduction", "Oil\nProduction","Renewable\nCapacity","Hydro\nCapacity", "Nuclear\nCapacity",  "Gas\nCapacity", "Coal\nCapacity")
@@ -1670,7 +1671,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       WM<- as.data.frame(lapply(df[ colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
       WM$PortName <- "WeightedMean" 
       
-      Rank <- Ranks[Ranks$PortName %in% PortfolioNameLong,]
+      # Rank <- Ranks[Ranks$PortName %in% PortfolioNameLong,]
+      Rank <- Ranks[Ranks$PortName %in% PortName,]
       maxrank <- colMaxs(as.matrix(Ranks[2:12]),na.rm = TRUE )
       autorank <- max(maxrank[1:3],na.rm = TRUE)
       ffrank <- max(maxrank[4:6])
@@ -1697,13 +1699,13 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     df$ComparisonType <- df$Type <- NULL
     
     df <- rbind(df,MinMax,WM,Rank)
-    df <- df[df$PortName %in% c(PortfolioNameLong,"Minimum","Maximum","WeightedMean","Rank"),]
+    df <- df[df$PortName %in% c(PortName,"Minimum","Maximum","WeightedMean","Rank"),]
     
     PlotData <- setNames(data.frame(t(df[,-1])), df[,1]) 
     PlotData$Technology <- rownames(PlotData)
     PlotData <- merge(PlotData,sectors,by="Technology")
     
-    PlotData$PortLoc <- PlotData[,PortfolioNameLong]/100
+    PlotData$PortLoc <- PlotData[,PortName]/100
     
     # Factorise and Order by Technology  
     PlotData <- PlotData[(order(PlotData$order)),]
@@ -1753,11 +1755,11 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     
     PlotData$xlowloc <- PlotData$LowLim
     PlotData$xupploc <- PlotData$UppLim
-    PlotData$comploc <- PlotData[,PortfolioNameLong]/100
+    PlotData$comploc <- PlotData[,PortName]/100
     PlotData$comploc[PlotData$comploc < 0] <- 0
     PlotData$comploc[PlotData$comploc > 2] <- 2
     
-    PlotData$complabel<-PlotData[,PortfolioNameLong]
+    PlotData$complabel<-PlotData[,PortName]
     PlotData$complabel[PlotData$complabel>200]<-200
     PlotData$complabel[PlotData$complabel<0]<-0    
     

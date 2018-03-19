@@ -339,7 +339,7 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 #-------
 # Loop through Portfolios
 #--------
-for (i in 36:nrow(TestList)){
+for (i in 1:nrow(TestList)){
   
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
@@ -348,6 +348,7 @@ for (i in 36:nrow(TestList)){
   InvestorName <-  TestList[i,"InvestorName"]
   PortfolioName <- TestList[i,"PortfolioName"]
   PortName <- TestList[i,"PortName"]
+  PortGraphName <- PortfolioNameLong
   if(TestType %in% c("Investor","InvestorMPs")){
     ReportName <- PortfolioNameLong
     TestType <- "Investor"
@@ -469,7 +470,7 @@ for (i in 36:nrow(TestList)){
       # EQStackedBarProdData <-stacked_bar_chart_data ("EQ")
       # stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
       # 
-      # CBStackedBarProdData <-stacked_bar_chart_data ("CB")
+      CBStackedBarProdData <-stacked_bar_chart_data ("CB")
       # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
       
       
