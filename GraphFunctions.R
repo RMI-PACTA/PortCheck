@@ -316,8 +316,110 @@ report <- function(){
 
 # --------
 # GENERAL PLOT FUNCTIONS
-# -------- 
+# ------------ Theme -------------------------#
+themecolor <- function() {
+  #tech
+  rencap <<- "#8cd98c"
+  hydrocap <<- "#6abaff"
+  nucap<<- "#ae89c5"
+  gascap<<- "#a6cad8"
+  coalcap <<- "#1a3577"
+  elec<<- "#847577"
+  hyb<<- "#a6a2a2"
+  ice<<-"#e5e6e4"
+  oilprod <<-"#00677f"
+  gasprod <<-"#a7c5d1"
+  coalprod <<- "#004335"
+  
+  #sector
+  energy<<-"#0090b2"
+  pow <<- "#2348a1"
+  trans<<- "#cfd2cd"
+  othr<<- "#9793c6"
+  
+  #trajectory
+  area_6 <<- "#e80942"
+  area_4_6 <<- "#fa8086"
+  area_2_4 <<- "#9bbe9d"
+  area_2 <<- "#6da06f"
+  eq_port <<- "#1056ff"
+  stock_market<<- "black"
+  peer_group <<- "black"
+  
+  #text size
+  textsize <<- 8
+  
+  YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
+  IndexColour <<-  "grey85"
+  Tar2DColourBar <<- "#b3de69"
+  Tar2DColour <<- "#a1c75e"
+  goodexpColour <<- "#1F891F"
+  badexpColour <<- "#ed1c24" #"#fb8072"
+  ReqCapColour <<- "grey55"
+  CurrCapColour <<- "grey75"
+  AxisColour <<- "#17375e" #"#274F80"
+  
+  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  
+  textsize <<- 8
+  linesize <<- 2
+  ppi <<- 600
+  
+}  
 
+theme_barcharts <-function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(),
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_text(face="bold",colour="black",size=textsize),
+        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        # legend.position=c(0.5,0),#legend.position = "none",
+        legend.position = "none",
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = "black", size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines")
+        # plot.margin = unit(c(1,1, 5, 2), "lines")
+  )
+}
+
+
+theme_linecharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_text(face="bold",colour="black",size=textsize),
+        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        # legend.position=c(0.5,0),#legend.position = "none",
+        legend.position = "none",
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = "black", size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines")
+        #plot.margin = unit(c(1,1, 5, 2), "lines")
+  )
+}    
+                           
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, SectorToPlot){
   
