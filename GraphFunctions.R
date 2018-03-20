@@ -419,6 +419,24 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         #plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }    
+
+
+
+theme_distribution <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(),
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "skyblue",color = NA),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.title = element_text(hjust = 0.5)
+  )
+}
                            
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, SectorToPlot){
@@ -2455,7 +2473,7 @@ sector_bar_chart <- function(plotnumber, pieshares){
 
   ### Need to be changed!
   
-  Palette <- c("#8c510a","#dfc27d","#35978f","#003c30")
+  sectorpalette <- c(energy,pow,trans,othr)
   sectororder <-c("Fossil Fuels","Utility Power","Automotive","Other High Carbon Sectors")
   colourdf <- data.frame(colour=Palette, piesector =sectororder)
   pieshares$piesector<-as.factor(pieshares$piesector)
@@ -2478,8 +2496,7 @@ sector_bar_chart <- function(plotnumber, pieshares){
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
     theme(legend.position = "bottom",
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
+        axis.title=element_blank(),
         axis.line.x = element_line(colour = "black",size=1),
         axis.line.y = element_blank(),
         panel.background = element_blank(),
@@ -2721,10 +2738,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot,Product
         annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=4)+
         geom_blank()+
         theme(
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
+          axis.title=element_blank(),
+          axis.text.=element_blank(),
           axis.ticks = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -2815,10 +2830,8 @@ stacked_bar_chart_horizontal <- function(plotnumber,ChartType,SectorToPlot,Produ
         annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=4)+
         geom_blank()+
         theme(
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
+          axis.title=element_blank(),
+          axis.text.=element_blank(),
           axis.ticks = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -2950,14 +2963,14 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
     # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
     # lineorder <-c("Line1","Line2","Line3","Line4")
-    Palette <- c(DarkRed,LightRed,LightGreen,DarkGreen)
+    Palette <- c(area_6,area_4_6,area_2_4,area_2)
     AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C") 
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS - dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS   
-    Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
+    Palette <- c(area_6,area_4_6,area_2_4,area_2)
     AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
     # lineorder <-c("Line4","Line3","Line2","Line1")
   }
@@ -2988,11 +3001,11 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   LineVector <- setNames(LineColours,LinesToPlot)
   
   ylabel <- "Normalized Built Out"
-  outputplot <-  ggplot()+
+ outputplot <-  ggplot()+
     geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "change it here1"), data=dfwide, size = linesize)+  # Portfolio
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "change it here2"), data=dfwide, size = linesize)+   # Market
-    
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Equity Portfolio"), data=dfwide, size = linesize,linetype="dashed")+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="longdash")+   # Market
+    #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[x])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
     
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
@@ -3023,23 +3036,6 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 }
 
 #----------- Distribution Chart ------------- #
-
-theme_distribution <- function(base_size = textsize, base_family = "") {
-  theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour="black",size=textsize),
-        axis.text.y=element_text(face="bold",colour="black",size=textsize),
-        axis.line = element_line(colour = "black",size=1),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "skyblue",color = NA),
-        legend.title = element_blank(),
-        legend.position = "bottom",
-        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-        plot.background = element_rect(fill = "transparent",colour = NA),
-        plot.title = element_text(hjust = 0.5)
-  )
-}
-
 distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTest){
     
   if (MetricCol == "CarstensMetric") {
