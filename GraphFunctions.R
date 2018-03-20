@@ -2970,7 +2970,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS - dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS   
-    Palette <- c(area_6,area_4_6,area_2_4,area_2)
+    Palette <- c(area_2,area_2_4,area_4_6,area_6)
     AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
     # lineorder <-c("Line4","Line3","Line2","Line1")
   }
