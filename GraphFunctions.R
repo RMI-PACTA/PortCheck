@@ -2483,7 +2483,6 @@ sector_bar_chart <- function(plotnumber, pieshares){
         axis.line.x = element_line(colour = "black",size=1),
         axis.line.y = element_blank(),
         panel.background = element_blank(),
-        legend.position=c(0.5,-.3),
         legend.text = element_text(face="bold",size=textsize,colour="black"),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
