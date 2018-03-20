@@ -474,10 +474,10 @@ for (i in 1:nrow(TestList)){
       # SectorBarCharts
       # sector_bar_chart(99, sector_processing())
       # 
-      # EQStackedBarProdData <-stacked_bar_chart_data("EQ")
+      EQStackedBarProdData <-stacked_bar_chart_data("EQ")
       # stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
       # 
-      # CBStackedBarProdData <-stacked_bar_chart_data("CB")
+      CBStackedBarProdData <-stacked_bar_chart_data("CB")
       # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
       # 
       # distribution_chart("Carsten's Metric", EQCombin, EQComparisonBatchTest)
@@ -491,30 +491,30 @@ for (i in 1:nrow(TestList)){
       distribution_graph(5, "RiskExposure", CBCombin, CBComparisonBatchTest) #Combined EQ/CB
       stacked_bar_chart_vertical(6,"EQ","All",EQStackedBarProdData)
       stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
-      distribution_graph(8, "CarstensMetric", CBCombin, CBComparisonBatchTest)
-      distribution_graph(9, "CarstensMetric", EQCombin, EQComparisonBatchTest)
-      Graph246(9,  "EQ", "CoalCap")
-      Graph246(10, "EQ", "RenewablesCap")
-      Graph246(11, "EQ", "GasCap")
-      Graph246(12, "EQ", "NuclearCap")
-      Graph246(13, "EQ", "OilProd")
-      Graph246(14, "EQ", "GasProd")
-      Graph246(15, "EQ", "ICE")
-      Graph246(16, "EQ", "EV")
-      Graph246(17, "CB", "CoalCap")
-      Graph246(18, "CB", "RenewablesCap")
-      Graph246(19, "CB", "GasCap")
-      Graph246(20, "CB", "NuclearCap")
-      Graph246(21, "CB", "OilProd")
-      Graph246(22, "CB", "GasProd")
-      Graph246(23, "CB", "ICE")
-      Graph246(24, "CB", "EV")
-      ranking_chart_alignment(25, "EQ", "All") #Carstens Metric
-      ranking_chart_alignment(26, "CB", "All") #Carstens Metric
-      flat_wheel_chart(27, 20, "EQ", "Power")
-      flat_wheel_chart(28, 20, "EQ", "Automotive")
-      flat_wheel_chart(29, 20, "EQ", "OG")
-      flat_wheel_chart(30, 20, "EQ", "Fossil Fuels")
+      distribution_chart(8, "CarstensMetric", "CB", CBCombin, CBComparisonBatchTest)
+      distribution_chart(9, "CarstensMetric", "EQ", EQCombin, EQComparisonBatchTest)
+      Graph246(10,  "EQ", "CoalCap")
+      Graph246(11, "EQ", "RenewablesCap")
+      Graph246(12, "EQ", "GasCap")
+      Graph246(13, "EQ", "NuclearCap")
+      Graph246(14, "EQ", "OilProd")
+      Graph246(15, "EQ", "GasProd")
+      Graph246(16, "EQ", "ICE")
+      Graph246(17, "EQ", "EV")
+      Graph246(18, "CB", "CoalCap")
+      Graph246(19, "CB", "RenewablesCap")
+      Graph246(20, "CB", "GasCap")
+      Graph246(21, "CB", "NuclearCap")
+      Graph246(22, "CB", "OilProd")
+      Graph246(23, "CB", "GasProd")
+      Graph246(24, "CB", "ICE")
+      Graph246(25, "CB", "EV")
+      ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
+      ranking_chart_alignment(27, "CB", "All") #Carstens Metric
+      flat_wheel_chart(28, 20, "EQ", "Power")
+      flat_wheel_chart(29, 20, "EQ", "Automotive")
+      flat_wheel_chart(30, 20, "EQ", "OG")
+      flat_wheel_chart(31, 20, "EQ", "Fossil Fuels")
       
       
       # inc_average <- F
@@ -634,9 +634,9 @@ for (i in 1:nrow(TestList)){
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
   
-  # write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
-  # write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
-  # write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
-  # write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
+  write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
 }
 

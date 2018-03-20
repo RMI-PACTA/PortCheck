@@ -2396,8 +2396,6 @@ sector_processing <- function(){
     piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
     piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
     
-    # piesub_tech$piesector <- revalue(piesub_tech$piesector,c("Metal-Iron" = "Iron & Steel","NonOG Production" = "Fossil Fuels","Bldg Prod-Cement/Aggreg" = "Building Materials & Fixtures", "Oil&Gas"= "Fossil Fuels","Coal"="Fossil Fuels", "Transport-Marine" = "Marine Transportation","Metal-Aluminum"="Aluminum", "Steel-Producers" = "Iron & Steel", "Transport-Air Freight"= "Airlines"),warn_missing = FALSE)
-    
     ### New Classifications ###
     piesub_tech$piesector <- revalue(piesub_tech$piesector,
                                      c("Non-Utility Power" = "Not Assessed",
@@ -2891,7 +2889,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   return(df)
 }
 
-Graph246 <- function(ChartType, TechToPlot){
+Graph246 <- function(plotnumber, ChartType, TechToPlot){
   
   
   if (ChartType == "EQ"){
@@ -2961,7 +2959,8 @@ Graph246 <- function(ChartType, TechToPlot){
   
   LineColours <- c("black", "grey","blue","pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-  # 
+  linesize = 1 
+  year_lab = 2017
   LineVector <- setNames(LineColours,LinesToPlot)
   
   ylabel <- "Normalized Built Out"
@@ -2987,7 +2986,7 @@ Graph246 <- function(ChartType, TechToPlot){
           panel.grid = element_blank(),
           legend.position = "bottom",
           legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))+
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
     
     print(outputplot)
   
@@ -3017,28 +3016,29 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
   )
 }
 
-distribution_chart <- function(ChartType, Combin, BatchTest){
-  
-  ChartType = "CarsensMetric"
-  if (ChartType == "CarsensMetric") {
+distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTest){
     
-    BatchTest <- CBComparisonBatchTest
-    Combin <- CBCombin
-    MetricCol <- "CarstensMetric"
+  if (MetricCol == "CarstensMetric") {
+    if(ChartType == "CB") {
+      BatchTest <- CBComparisonBatchTest
+      Combin <- CBCombin
+    } else if (ChartType == "EQ") {
+      BatchTest <- EQComparisonBatchTest
+      Combin <- EQCombin
+    }
     Title <- "Exposure of Portfolios to Climate Relevent Sectors"
     MetricName <- "Carsten's Metric"
-    
-    BarColors <- c("Orange")
-    BarColors <- c(BarColors,"Black","skyblue")
-    names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
-    
-    LineHighl <- c("Market_Benchmark")
-    LineLabels <- c("Market Benchmark")
-    names(LineLabels) <- LineHighl
-    LineColors <- c("Green")
-    names(LineColors) <- LineLabels
-    
   }
+  
+  BarColors <- c("Orange")
+  BarColors <- c(BarColors,"Black","skyblue")
+  names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
+  
+  LineHighl <- c("Market_Benchmark")
+  LineLabels <- c("Market Benchmark")
+  names(LineLabels) <- LineHighl
+  LineColors <- c("Green")
+  names(LineColors) <- LineLabels
   
   library(dplyr)
   
@@ -3098,6 +3098,6 @@ distribution_chart <- function(ChartType, Combin, BatchTest){
     theme_distribution()
   
   print(distribution_plot)
-  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
   
 }
