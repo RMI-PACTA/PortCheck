@@ -1563,7 +1563,7 @@ renewablesadditions_chart <- function(plotnumber,ChartType){
               legend.position=c(0.5,-.2),
               legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
               legend.title=element_blank(),
-              plot.margin = unit(c(.4,0, 2.2, 0), "lines")+
+              plot.margin = unit(c(.4,0, 2.2, 0), "lines"))+
         coord_flip()
       
       RenAddBar <- RenAddBar  +
