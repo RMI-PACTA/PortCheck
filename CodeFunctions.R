@@ -692,38 +692,38 @@ top5s <- function(ProdSnapshot,PortSnapshot){
 }
 
 #-------- Graph Inputs ----------
-SetGraphInputs <- function(){
-  #Saturated colours
-  RenewablesColour <<- "#b3de69"
-  HydroColour <<- "#428bbd"
-  NuclearColour <<- "#827ab8"
-  GasCapColour<<-"grey75"
-  CoalCapColour <<- "#252525"
-  ElectricColour<<- "#69c454"
-  HybridColour<<- "#00b7be"
-  ICEColour<<- "#2F4F4F"   #"#ed1c24" #"#f93620"
-  GasProdColour <<- "#ffb861"
-  OilProdColour <<- "#c88450"
-  CoalProdColour <<- "#835834"
-  
-  YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
-  IndexColour <<-  "grey85"
-  Tar2DColourBar <<- "#b3de69"
-  Tar2DColour <<- "#a1c75e"
-  goodexpColour <<- "#1F891F"
-  badexpColour <<- "#ed1c24" #"#fb8072"
-  ReqCapColour <<- "grey55"
-  CurrCapColour <<- "grey75"
-  AxisColour <<- "#17375e" #"#274F80"
-  
-  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
-  
-  textsize <<- 8
-  ppi <<- 600
-  
-  
-  
-}
+# SetGraphInputs <- function(){
+#   #Saturated colours
+#   RenewablesColour <<- "#b3de69"
+#   HydroColour <<- "#428bbd"
+#   NuclearColour <<- "#827ab8"
+#   GasCapColour<<-"grey75"
+#   CoalCapColour <<- "#252525"
+#   ElectricColour<<- "#69c454"
+#   HybridColour<<- "#00b7be"
+#   ICEColour<<- "#2F4F4F"   #"#ed1c24" #"#f93620"
+#   GasProdColour <<- "#ffb861"
+#   OilProdColour <<- "#c88450"
+#   CoalProdColour <<- "#835834"
+#   
+#   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
+#   IndexColour <<-  "grey85"
+#   Tar2DColourBar <<- "#b3de69"
+#   Tar2DColour <<- "#a1c75e"
+#   goodexpColour <<- "#1F891F"
+#   badexpColour <<- "#ed1c24" #"#fb8072"
+#   ReqCapColour <<- "grey55"
+#   CurrCapColour <<- "grey75"
+#   AxisColour <<- "#17375e" #"#274F80"
+#   
+#   ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+#   
+#   textsize <<- 8
+#   ppi <<- 600
+#   
+#   
+#   
+# }
 
 
 #-------- Graph List --------
@@ -1084,16 +1084,16 @@ report <- function(PortfolioName,ReportName, InvestorName, template, RT,EQReport
   text$text <- gsub("SamplePort",PortfolioName,text$text)
   text$text <- gsub("SAMPLEPORT",PORTFOLIONAME,text$text)
   text$text <- gsub("CO2","CO\\\\textsubscript{2}",text$text)
-  text$text <- gsub("Â°","°",text$text)
+  text$text <- gsub("Ã‚Â°","Â°",text$text)
   
   if (Languagechoose == "DE"){
-    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÄGLICHKEITS-PILOTTEST"
+    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÃ„GLICHKEITS-PILOTTEST"
   }
   
   if (Languagechoose == "FR"){
-    text$text[grepl("TEST PILOTE DE COMPATIBILITÉ  CLIMATIQUE",text$text)] <- "TEST PILOTE\\\\ DE COMPATIBILITÉ  CLIMATIQUE"
-    text$text[grepl("POSSIBILIT",text$text)][1]<- "\\SectionHeading{PARTIE 3:}{POSSIBILITÉS D'ACTION}"
-    text$text[grepl("POSSIBILIT",text$text)][2]<- "\\PageHeading{POSSIBILITÉS D'ACTION - SÉLECTION DES FONDS}"
+    text$text[grepl("TEST PILOTE DE COMPATIBILITÃ‰  CLIMATIQUE",text$text)] <- "TEST PILOTE\\\\ DE COMPATIBILITÃ‰  CLIMATIQUE"
+    text$text[grepl("POSSIBILIT",text$text)][1]<- "\\SectionHeading{PARTIE 3:}{POSSIBILITÃ‰S D'ACTION}"
+    text$text[grepl("POSSIBILIT",text$text)][2]<- "\\PageHeading{POSSIBILITÃ‰S D'ACTION - SÃ‰LECTION DES FONDS}"
   }
   
   # Copy in the graphics folder for the report
@@ -1207,7 +1207,7 @@ other_sector_chart <- function(plotnumber, EQ_OS_WEM,CB_OS_WEM, OSTargets,Sector
     
     outputplot<-outputplot+
       scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
       xlab(year_lab) + ylab(ylabel) + # Set axis labels
       # legend(values=legelabels)+
       scale_x_continuous(breaks=seq(Startyear,max(df$Year),1),expand=c(0,0))+
@@ -1829,7 +1829,7 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
       oil_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
       oil_units <- paste0(oil_units," ",GT["barrels"][[1]])
       gas_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      gas_units <- paste0(gas_units, " m²")
+      gas_units <- paste0(gas_units, " mÂ²")
       unit_lookup <- data.frame(car_units,ff_units,power_units,coal_units,oil_units,gas_units)
       # ff_sectors <- c(GT["T_Coal"][[1]],GT["T_Oil"][[1]],GT["T_Gas"][[1]])
       ff_sectors <- c("Coal","Oil","Gas")
@@ -1904,14 +1904,14 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
       outputplot <- ggplot(data=LineData)+
         annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
         geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=badexpColour)) +
-        #geom_ribbon(aes(x=Year,ymin=0,ymax=`2°C Benchmark`,fill=ReqCapColour))+
+        #geom_ribbon(aes(x=Year,ymin=0,ymax=`2Â°C Benchmark`,fill=ReqCapColour))+
         geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=goodexpColour)) +
         geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
         geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
         
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
         scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
         scale_y_continuous(expand=c(0,0))+
@@ -1928,7 +1928,7 @@ mini_line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlo
         geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
         geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
         scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
         xlab(year_lab) + ylab(ylabel) + # Set axis labels
         scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
         scale_y_continuous(expand=c(0,0))+
@@ -2909,7 +2909,7 @@ fundmap_chart <- function(plotnumber,FundsData, Startyear, Scenariochoose, Portf
       iceg <- rasterGrob(ice, interpolate=TRUE)
       
       
-      # HeatmapData$PortName <- revalue(HeatmapData$PortName, c("LänsförsäkringarFondförvaltningAB"="Länsförsäkringar\n FondförvaltningAB"))
+      # HeatmapData$PortName <- revalue(HeatmapData$PortName, c("LÃ¤nsfÃ¶rsÃ¤kringarFondfÃ¶rvaltningAB"="LÃ¤nsfÃ¶rsÃ¤kringar\n FondfÃ¶rvaltningAB"))
       
       # TechnologyLabel$XPosition[1]<-0.5
       HeatmapGGPlot <- ggplot(HeatmapData, aes(x = as.factor(HeatmapData$Technology),fill = as.factor(HeatmapData$ExposureColour), y = as.factor(HeatmapData$PortName), group=HeatmapData$PortName)) +
@@ -3569,11 +3569,11 @@ bar_chart <- function(plotnumber,combin,IndexData,SectorToPlot,BenchmarkRegionch
   
   ProductionMix_5yrs$variable <- as.character(ProductionMix_5yrs$variable)
   ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "PortProduction"] <- PortfolioName
-  ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- "2°C Benchmark"
+  ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "RefProduction"] <- "2Â°C Benchmark"
   ProductionMix_5yrs$variable[ProductionMix_5yrs$variable %in% "IndexProduction"] <- IndexName
   
   PlotData <- subset(ProductionMix_5yrs, Sector == SectorToPlot)
-  orderofchart <- c(PortfolioName,"2°C Benchmark",IndexName)
+  orderofchart <- c(PortfolioName,"2Â°C Benchmark",IndexName)
   PlotData$variable <- factor( as.character(PlotData$variable), levels=orderofchart )
   PlotData <- PlotData[order(PlotData$variable),]
   PlotData <- PlotData [order(PlotData$Technology,PlotData$variable),]
@@ -3759,7 +3759,7 @@ line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlot, Be
       geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
       geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
       scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+      scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
       xlab("Year") + ylab(paste(axislabel,unitlabel)) + # Set axis labels
       scale_x_continuous(breaks=seq(Startyear,Startyear+10,5),expand=c(0,0))+
       scale_y_continuous(expand=c(0,0))+
@@ -3774,7 +3774,7 @@ line_chart <- function(plotnumber,ChartType,combin, TechToPlot, SectorToPlot, Be
       geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
       geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
       scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2°C Benchmark"))  +
+      scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
       xlab("Year") + ylab(paste(axislabel,unitlabel)) + # Set axis labels
       scale_x_continuous(breaks=seq(Startyear,Startyear+10,5),expand=c(0,0))+
       scale_y_continuous(expand=c(0,0))+
@@ -4656,7 +4656,7 @@ heatmap_chart <- function(plotnumber,combin, Startyear, Scenariochoose, Portfoli
           legend.position="bottom",
           legend.key.size=unit(0.2, "cm"),
           legend.key.width=unit(1, "cm"))+
-    labs(x=NULL, y=NULL, title="Physical asset alignment with IEA 2°C Scenarios (by 2021)")+
+    labs(x=NULL, y=NULL, title="Physical asset alignment with IEA 2Â°C Scenarios (by 2021)")+
     coord_equal()
   
   HeatmapPlot <- ggplot_gtable(ggplot_build(HeatmapGGPlot))

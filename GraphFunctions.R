@@ -316,37 +316,113 @@ report <- function(){
 
 # --------
 # GENERAL PLOT FUNCTIONS
-# -------- 
+# ------------ Theme -------------------------#
+themecolor <- function() {
+  #tech
+  RenewablesColour <<- "#8cd98c"
+  HydroColour <<- "#6abaff"
+  NuclearColour <<- "#ae89c5"
+  GasCapColour <<- "#a6cad8"
+  CoalCapColour <<- "#1a3577"
+  ElectricColour <<- "#847577"
+  HybridColour <<- "#a6a2a2"
+  ICEColour <<-"#e5e6e4"
+  OilProdColour <<-"#00677f"
+  GasProdColour <<-"#a7c5d1"
+  CoalProdColour <<- "#004335"
+  
+  #sector
+  energy<<-"#0090b2"
+  pow <<- "#2348a1"
+  trans<<- "#cfd2cd"
+  othr<<- "#9793c6"
+  
+  #trajectory
+  area_6 <<- "#e80942"
+  area_4_6 <<- "#fa8086"
+  area_2_4 <<- "#9bbe9d"
+  area_2 <<- "#6da06f"
+  eq_port <<- "#1056ff"
+  stock_market<<- "black"
+  peer_group <<- "black"
+  
+  #text size
+  textsize <<- 8
+  
+  YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
+  IndexColour <<-  "grey85"
+  Tar2DColourBar <<- "#b3de69"
+  Tar2DColour <<- "#a1c75e"
+  goodexpColour <<- "#1F891F"
+  badexpColour <<- "#ed1c24" #"#fb8072"
+  ReqCapColour <<- "grey55"
+  CurrCapColour <<- "grey75"
+  AxisColour <<- "#17375e" #"#274F80"
+  
+  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  
+  textsize <<- 8
+  linesize <<- 2
+  ppi <<- 600
+  
+}  
 
+theme_barcharts <-function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(),
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_text(face="bold",colour="black",size=textsize),
+        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        # legend.position=c(0.5,0),#legend.position = "none",
+        legend.position = "none",
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = "black", size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines")
+        # plot.margin = unit(c(1,1, 5, 2), "lines")
+  )
+}
+
+
+theme_linecharts <- function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(), 
+        axis.text.x=element_text(face="bold",colour="black",size=textsize),
+        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_text(face="bold",colour="black",size=textsize),
+        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.line = element_line(colour = "black",size=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        #panel.background = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        # legend.position=c(0.5,0),#legend.position = "none",
+        legend.position = "none",
+        legend.direction="horizontal",
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = "black", size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines")
+        #plot.margin = unit(c(1,1, 5, 2), "lines")
+  )
+}    
+                           
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, SectorToPlot){
-  
-  theme_linecharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(),
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_text(face="bold",colour="black",size=textsize),
-          axis.title.y=element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          #panel.background = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          # legend.position=c(0.5,0),#legend.position = "none",
-          legend.position = "none",
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          #legend.title=element_blank(),
-          legend.title = element_text(colour = "black", size = textsize),
-          legend.key = element_blank(),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          plot.margin = unit(c(1,1, 0, 0), "lines")
-          # plot.margin = unit(c(1,1, 5, 2), "lines")
-    )
-  }
-  
+
   
   
   check = 0
@@ -437,28 +513,6 @@ other_sector_chart <- function(plotnumber, SectorToPlot){
 # ------------ Shipping Plots------------ #
 shipping_chart <- function(plotnumber, SectorToPlot="Shipping"){
   
-  
-  theme_barcharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(),
-          axis.text.x=element_text(face="bold",colour="black",size=textsize),
-          axis.text.y=element_text(face="bold",colour="black",size=textsize),
-          axis.title.x=element_blank(),
-          axis.title.y=element_text(face="bold",colour="black",size=textsize),#element_text(face="bold",colour="black",size=textsize),
-          axis.line = element_line(colour = "black",size=1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(),
-          legend.position=c(0.5,-.3),
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour="black"),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          legend.title=element_blank(),
-          legend.key = element_blank(),
-          plot.margin = unit(c(0.6,0, 2.5, 0), "lines"),
-          plot.background = element_rect(fill = "transparent",colour = NA)
-    )
-  }
   
   EQShipsPort<- subset(EQPortSnapshot, EQPortSnapshot$ISIN %in% ShippingData$ISIN)
   CBShipsPort<- subset(CBPortSnapshot, CBPortSnapshot$ISIN %in% ShippingData$ISIN)
@@ -731,33 +785,6 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
   }else if (ChartType == "CB"){
     combin <- CBCombin
   }
-  
-  
-  theme_linecharts <- function(base_size = textsize, base_family = "") {
-    theme(axis.ticks=element_blank(),
-          axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.title.x=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
-          axis.line = element_line(colour = AxisColour,size=1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          #panel.background = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          # legend.position=c(0.5,-.4),#legend.position = "none",
-          legend.position = "none",
-          legend.direction="horizontal",
-          legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          #legend.title=element_blank(),
-          legend.title = element_text(colour = AxisColour, size = textsize),
-          legend.key = element_blank(),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          plot.margin = unit(c(1,1, 0, 0), "lines")
-    )
-  }
-  
   
   production <- subset(combin, Technology %in% TechToPlot)
   
@@ -1530,6 +1557,13 @@ renewablesadditions_chart <- function(plotnumber,ChartType){
         scale_y_continuous(breaks = c(0,.25,.5,.75,1),label = c("0%","25%","50%","75%",Target),expand=c(0,0), limits=c(0,1))+
         scale_x_discrete(expand=c(0,0))+
         theme_barcharts()+
+        theme(axis.title.x=element_blank(),
+              axis.line = element_line(colour = AxisColour,size=1),
+              panel.background = element_blank(),
+              legend.position=c(0.5,-.2),
+              legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
+              legend.title=element_blank(),
+              plot.margin = unit(c(.4,0, 2.2, 0), "lines")+
         coord_flip()
       
       RenAddBar <- RenAddBar  +
@@ -2358,28 +2392,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
 
 #------------- SECTOR BAR CHARTS ------------ #
 
-theme_barcharts <- function(base_size = textsize, base_family = "") {
-  theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour="black",size=textsize),
-        axis.text.y=element_text(face="bold",colour="black",size=textsize),
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),#element_text(face="bold",colour="black",size=textsize),
-        axis.line.x = element_line(colour = "black",size=1),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        legend.position=c(0.5,-.3),
-        legend.direction="horizontal",
-        legend.text = element_text(face="bold",size=textsize,colour="black"),
-        legend.background = element_rect(fill = "transparent",colour = NA),
-        legend.key.size=unit(0.4,"cm"),
-        legend.title=element_blank(),
-        legend.key = element_blank(),
-        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-        plot.background = element_rect(fill = "transparent",colour = NA)
-  )
-}
+
 
 # Bar chart of the Sector Weights in the portfolio for both CB and EQ
 sector_processing <- function(){
@@ -2464,7 +2477,19 @@ sector_bar_chart <- function(plotnumber, pieshares){
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
-    theme(legend.position = "bottom" )
+    theme(legend.position = "bottom",
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.line.x = element_line(colour = "black",size=1),
+        axis.line.y = element_blank(),
+        panel.background = element_blank(),
+        legend.position=c(0.5,-.3),
+        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title=element_blank(),
+        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
+  )
   print(a)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
