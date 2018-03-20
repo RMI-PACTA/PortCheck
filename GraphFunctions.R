@@ -319,17 +319,17 @@ report <- function(){
 # ------------ Theme -------------------------#
 themecolor <- function() {
   #tech
-  rencap <<- "#8cd98c"
-  hydrocap <<- "#6abaff"
-  nucap<<- "#ae89c5"
-  gascap<<- "#a6cad8"
-  coalcap <<- "#1a3577"
-  elec<<- "#847577"
-  hyb<<- "#a6a2a2"
-  ice<<-"#e5e6e4"
-  oilprod <<-"#00677f"
-  gasprod <<-"#a7c5d1"
-  coalprod <<- "#004335"
+  RenewablesColour <<- "#8cd98c"
+  HydroColour <<- "#6abaff"
+  NuclearColour <<- "#ae89c5"
+  GasCapColour <<- "#a6cad8"
+  CoalCapColour <<- "#1a3577"
+  ElectricColour <<- "#847577"
+  HybridColour <<- "#a6a2a2"
+  ICEColour <<-"#e5e6e4"
+  OilProdColour <<-"#00677f"
+  GasProdColour <<-"#a7c5d1"
+  CoalProdColour <<- "#004335"
   
   #sector
   energy<<-"#0090b2"
