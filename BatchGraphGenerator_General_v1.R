@@ -493,7 +493,7 @@ for (i in 1:nrow(TestList)){
       stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
       distribution_chart(8, "CarstensMetric", "CB", CBCombin, CBComparisonBatchTest)
       distribution_chart(9, "CarstensMetric", "EQ", EQCombin, EQComparisonBatchTest)
-      Graph246(10,  "EQ", "CoalCap")
+      Graph246(10, "EQ", "CoalCap")
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
       Graph246(13, "EQ", "NuclearCap")
