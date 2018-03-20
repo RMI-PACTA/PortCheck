@@ -2475,7 +2475,7 @@ sector_bar_chart <- function(plotnumber, pieshares){
   
   sectorpalette <- c(energy,pow,trans,othr)
   sectororder <-c("Fossil Fuels","Utility Power","Automotive","Other High Carbon Sectors")
-  colourdf <- data.frame(colour=Palette, piesector =sectororder)
+  colourdf <- data.frame(colour=sectorpalette, piesector =sectororder)
   pieshares$piesector<-as.factor(pieshares$piesector)
   combined <- sort(union(levels(pieshares$piesector), levels(colourdf$sectororder)))
   pieshares <- merge(pieshares, colourdf, by= "piesector") 
@@ -2994,7 +2994,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   maxval <- ceiling(max(df$Value)*10)/10-0.1
   minval <- max(floor(min(df$Value)*10)/10,0)
   
-  LineColours <- c("black", "grey","blue","pink")
+  LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
   linesize = 1 
   year_lab = 2017
@@ -3010,7 +3010,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
     
-    scale_color_manual(name="",values = c("change it here1"="black","change it here2"="grey"))+
+    scale_color_manual(name="",values = c("Equity Portfolio"=eq_port,"Stock Market"=stock_market))+
     
     xlab(year_lab) +
     ylab(ylabel)+
