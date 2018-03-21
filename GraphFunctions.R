@@ -3014,21 +3014,51 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 }
 
 #----------- Distribution Chart ------------- #
-distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTest){
-    
-  if (MetricCol == "CarstensMetric") {
+distribution_chart <- function(plotnumber, MetricName, ChartType){
+  library(dplyr)
+  MetricName = "Carsten's Metric"
+  plotnumber = 99
+  ChartType ="CB"
+  if (MetricName == "Carsten's Metric") {
+    Title <- "Exposure of Portfolios to Climate Relevent Sectors"
+    MetricCol <- "CarstenMetric_Port"
     if(ChartType == "CB") {
       BatchTest <- CBComparisonBatchTest
-      Combin <- CBCombin
+      Combin <- select(CBCombin, -ComparisonType)
     } else if (ChartType == "EQ") {
       BatchTest <- EQComparisonBatchTest
       Combin <- EQCombin
     }
-    Title <- "Exposure of Portfolios to Climate Relevent Sectors"
-    MetricName <- "Carsten's Metric"
+    df <- rbind(Combin, BatchTest)
+    
+    ID.COLS = c("PortName","Year","Sector","Technology")
+    BarColors <- c("Orange")
+    df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                        select = c(ID.COLS,MetricCol)))
+    
+  } else if (MetricName == "Risk Exposure") {
+    Title <- "Risk Exposure of Portfolios"
+    MetricCol <- c("Risk 2", "Risk 1")
+    if(ChartType == "CB") {
+      PortSS <- CBPortSnapshot
+      CompSS <- CBComparisonPortSS
+    } else if (ChartType == "EQ") {
+      PortSS <- EQPortSnapshot
+      CompSS <- EQComparisonPortSS
+    }
+    df <- rbind(PortSS, CompSS)
+    df <- df %>% 
+      mutate("AUM" = AUM/PortfolioAUMAnalyzed) %>%
+      spread("MoodysRiskLvl", "AUM", fill = 0) %>%
+      rename("Risk 1" = "1", "Risk 2" = "2")
+    
+    ID.COLS = c("PortName")
+    BarColors <- c("Orange","Red")
+    df <- subset(df, select = c(ID.COLS,MetricCol))
+    
   }
   
-  BarColors <- c("Orange")
   BarColors <- c(BarColors,"Black","skyblue")
   names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
   
@@ -3038,27 +3068,14 @@ distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTe
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
   
-  library(dplyr)
-  
-  df <- rbind(Combin, BatchTest)
-  ID.COLS = c("PortName","Year","Sector","Technology")
-  
-  df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                        Scenario %in% Scenariochoose & Year %in% (Startyear+5) &
-                        !(PortName %in% c("MetaPortfolio", "MetaPortfolio_MetaPortfolio")), 
-                      select = c(ID.COLS,MetricCol)))
-  
+
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
   dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric")],FUN=sum)
-  order <- dfagg %>% filter(Metric %in% c(MetricCol[1])) %>% arrange(desc(Value))
   dfagg[dfagg$PortName %in% LineHighl,"Metric"] <- "Reference"
-  dfagg[dfagg$PortName == PortfolioName,"Metric"] <- "Comparison"
+  dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
   dfagg$Value <- as.numeric(dfagg$Value)
-  portfolio_label = "Your Portfolio\n"
-  portfolio_label = paste0(portfolio_label,"Cartsten's Metric: ",
-                           percent(subset(dfagg, Metric=="Comparison" & PortName==PortfolioName)[["Value"]]))
-  
+
   dfagg <- dfagg %>%
     filter(Metric != "Reference") %>%
     group_by(PortName) %>%
@@ -3067,10 +3084,20 @@ distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTe
     select(PortName,Metric,Value) %>%
     rbind(dfagg)
   
-  dfagg$PortName <- factor(dfagg$PortName, levels=order$PortName)
+  values = subset(dfagg, Metric=="Comparison" & PortName==PortName)[["Value"]]
+  if (MetricName == "Carsten's Metric") {
+    portfolio_label = paste0("Your Portfolio\n",
+                             "Carsten's Metric: ",percent(values[1]))
+  } else if (MetricName == "Risk Exposure") {
+    portfolio_label = paste0("Your Portfolio\n",
+                             "Risk 1: ",percent(values[1]),"\n",
+                             "Risk 2: ",percent(values[2]))
+  }
+  order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
+  dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
   dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
   
-  x_coord <- length(order$PortName)
+  x_coord <- length(unique(order$PortName))
   detach("package:dplyr",unload=TRUE)
   
   distribution_plot<- ggplot(dfagg)+
@@ -3096,6 +3123,6 @@ distribution_chart <- function(plotnumber, MetricCol, ChartType, Combin, BatchTe
     theme_distribution()
   
   print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=outputplot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
   
 }

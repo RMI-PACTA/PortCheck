@@ -497,11 +497,11 @@ for (i in 1:nrow(TestList)){
       # stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
       # Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
-      # distribution_graph(5, "RiskExposure", CBCombin, CBComparisonBatchTest) #Combined EQ/CB
+      distribution_chart(5, "Risk Exposure", "CB")
       stacked_bar_chart_vertical(6,"EQ","All",EQStackedBarProdData)
       stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
-      # distribution_chart(8, "CarstensMetric", "CB", CBCombin, CBComparisonBatchTest)
-      # distribution_chart(9, "CarstensMetric", "EQ", EQCombin, EQComparisonBatchTest)
+      distribution_chart(8, "Carsten's Metric", "CB")
+      # distribution_chart(9, "Carsten's Metric", "EQ")
       Graph246(10, "EQ", "CoalCap")
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
