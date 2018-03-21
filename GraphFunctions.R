@@ -393,7 +393,6 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
   )
 }
 
-
 theme_linecharts <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(), 
         axis.text.x=element_text(face="bold",colour="black",size=textsize),
@@ -420,8 +419,6 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
   )
 }    
 
-
-
 theme_distribution <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
         axis.text.x=element_text(face="bold",colour="black",size=textsize),
@@ -441,8 +438,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 # ------------ Other Sector Plots------------ #
 other_sector_chart <- function(plotnumber, SectorToPlot){
 
-  
-  
+
   check = 0
   EQPlotData <- subset(EQ_OS_WEM, EQ_OS_WEM$PortName == PortfolioName & EQ_OS_WEM$Sector == SectorToPlot)
   if(nrow(EQPlotData) == 1){
@@ -1912,25 +1908,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
 
 flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot){
   
-  # ChartType<- "EQ"
-  # SectorToPlot<-"Automotive"
-  # AlloftheCompanies <- UtilityCompanies
-  # AlloftheCompanies <- OGCarbonBudget
-  # combin <- EQCombin
-  # PortSnapshot <- EQPortSnapshot
-  # companiestoprint<-20
-  # combin<-EQCombin
-  # SectorToPlot <-"OG"
-  
-  # ChartType<- "CB"
-  # SectorToPlot<-"Power"
-  # AlloftheCompanies <- OGCarbonBudget
-  # PortSnapshot <- CBPortSnapshot
-  # companiestoprint<-20
-  # combin<-CBCombin
-  
-  
-  if (ChartType == "EQ"){
+   if (ChartType == "EQ"){
     PortSnapshot <- EQPortSnapshot
     combin <- EQCombin
   } else if(ChartType == "CB"){
@@ -1942,6 +1920,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
   if (SectorToPlot == "Power"){AlloftheCompanies <- UtilityCompanies}
   if (SectorToPlot == "Automotive"){AlloftheCompanies <- AutoCompanies}
   if (SectorToPlot == "OG"){AlloftheCompanies <- OGCarbonBudget}
+  if (SectorToPlot == "Oil"){AlloftheCompanies <- OilData}
   
   
   WheelofFortune<-function(df, othercompanies = TRUE ,family = NULL, columnNames = NULL, binSize = 1, spaceItem = 0.2,techorder,PortFirmY=18,OtherFirmY=5,
@@ -2096,8 +2075,8 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     CompProdSnapshot <- combin
     OG$InPort <- "AllCompanies"
     
-    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]}
-    else{
+    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
+    }else{
       AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
     }
     
@@ -2163,21 +2142,20 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       scale_fill_manual(values = Colours$Colour, labels=Colours$labels)+
       coord_flip()
     
-  }
-  else{
+  }else{
     
     if (SectorToPlot == "Power"){techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")} 
     if (SectorToPlot == "Automotive"){techorder <- c("ICE","Hybrid","Electric")}
-    if (SectorToPlot == "Fossil Fuels"){
-      techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
-      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
-      AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
-      
-      if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
-      }else{
-        AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
-      }
+    if (SectorToPlot == "Oil"){techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")}
+    
+    AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
+    AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
+    
+    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
+    }else{
+      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
     }
+    
     
     colnames(PortSnapshot)[colnames(PortSnapshot) %in% c("COMPANY_CORP_TICKER","EQY_FUND_TICKER")] <- "TICKER"
     colnames(AlloftheCompanies)[colnames(AlloftheCompanies) %in% c("COMPANY_CORP_TICKER","EQY_FUND_TICKER","EquityTicker","DebtTicker")] <- "TICKER"
@@ -2200,26 +2178,29 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     if(dim(Portfoliomix)[1] != 0){
       Portfoliomix$Classification <- "Portfolio"
       # Portfoliomix <- subset(Portfoliomix, !Portfoliomix$Technology %in% c("Oil","Diesel","LPGCNG","Petrol"))
-      Portfoliomix$Name <- PortGraphName
+      Portfoliomix$Name <- PortfolioNameLong
       Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","Capacity"))
       colnames(Portfoliomix) <- c("item", "family", "score", "value")
       Portfoliomix$value <- as.numeric(Portfoliomix$value)
       Portfoliomix$value <- (Portfoliomix$value/sum(Portfoliomix$value))*100
     }
     
-    Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
-    if (ChartType == "EQ"){ Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))}else{
-      Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
-      Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
+    if (SectorToPlot %in% c("Automotive","Power")){
+      Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
+      
+      if (ChartType == "EQ"){ 
+        Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))}else{
+        Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
+        Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
+      }
+      
+      Targetmix$Classification<-"Portfolio"
+      Targetmix$Name<-GT["X2Target"][[1]]
+      Targetmix<-rename(Targetmix, c("TargetProductionAlignment"="Capacity"))
+      Targetmix <- subset(Targetmix, select =c("Name","Classification","Technology","Capacity"))
+      colnames(Targetmix) <- c("item", "family", "score", "value")
+      Targetmix$value <- as.numeric(as.character(Targetmix$value))
     }
-    
-    Targetmix$Classification<-"Portfolio"
-    Targetmix$Name<-GT["X2Target"][[1]]
-    Targetmix<-rename(Targetmix, c("TargetProductionAlignment"="Capacity"))
-    Targetmix <- subset(Targetmix, select =c("Name","Classification","Technology","Capacity"))
-    colnames(Targetmix) <- c("item", "family", "score", "value")
-    Targetmix$value <- as.numeric(as.character(Targetmix$value))
-    
     
     # Add Index
     Indexmix <- ddply(IndexData, .(CompanyDomicileRegion,Technology), summarize, Capacity = sum(Production))
@@ -2248,11 +2229,11 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     TopIndexCompanies$totorder <- seq(1,indexcomptoprint)
     TopIndexCompanies <- TopIndexCompanies[1:(2*companiestoprint-nrow(TopPortCompanies)),]
     
-    if (SectorToPlot != "Fossil Fuels"){
+    # if (SectorToPlot != "Oil"){
       AllTopCompanies <- rbind(TopPortCompanies, TopIndexCompanies)
-    }else{
-      AllTopCompanies <- TopPortCompanies
-    }  
+    # }else{
+    #   AllTopCompanies <- TopPortCompanies
+    # }  
     
     AllCompanies <- subset(AllCompanies, AllCompanies$TICKER %in% AllTopCompanies$TICKER)
     AllCompanies <- subset(AllCompanies, Name != "NA")
@@ -2364,7 +2345,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       
     }
     
-    if (SectorToPlot == "Fossil Fuels"){
+    if (SectorToPlot == "Oil"){
       
       # Portfoliomix <- as.data.frame(sapply(Portfoliomix, function(x) gsub("Cap", "", x)))
       Portfoliomix$value <- as.numeric(as.character(Portfoliomix$value))

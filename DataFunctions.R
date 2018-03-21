@@ -486,12 +486,22 @@ company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenari
 }
 
 # ------------ Company Comparison Data ------ #
-company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose){
+company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   
   # ChartType <- "CB"
   # BatchTest <- CBBatchTest
   # BatchTest <- EQBatchTest
   # BatchTest_PortSnapshots <- EQBatchTest_PortSnapshots
+  
+  if (ChartType =="EQ"){
+    BatchTest <- EQBatchTest
+    BatchTest_PortSnapshots <- EQBatchTest_PortSnapshots
+  }else if(ChartType =="CB"){
+    BatchTest <- CBBatchTest
+    BatchTest_PortSnapshots <- CBBatchTest_PortSnapshots
+  }
+  
+  
   
   ### AUMs
   Results <- BatchTest
@@ -647,7 +657,8 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Star
   } 
   
   if (CoverageWeight != "NoCoverageWeight"){
-    CoverageWeightComparison <- subset(CoverageWeight, ComparisonType == "ComparisonResults")
+    
+    CoverageWeightComparison <- subset(CoverageWeight, ComparisonType == ComparisonFile)
     WeightedCoverageWeight <- ddply(CoverageWeightComparison, .(Technology,ComparisonType,Type),summarise, CoverageWeight= weighted.mean(CoverageWeight,PortAUM,na.rm = TRUE))
     CalculatedCWs <- nrow(unique(subset(WeightedCoverageWeight, select= c("ComparisonType","Type"))) )
     WeightedCoverageWeight$CoverageWeight <- WeightedCoverageWeight$CoverageWeight/(sum(WeightedCoverageWeight$CoverageWeight)/CalculatedCWs)
