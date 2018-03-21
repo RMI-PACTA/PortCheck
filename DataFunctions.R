@@ -896,6 +896,7 @@ SetGraphInputs <- function(){
   
   textsize <<- 8
   ppi <<- 600
+  themecolor()
   
 }
 

@@ -123,8 +123,8 @@ IndexUniverses <- read.csv("IndexRegions.csv")
 OGCarbonBudget <- read.csv(paste0(DATA.PATH,"/04_Other/CarbonCapexUpstream.csv"),stringsAsFactors = FALSE)
 
 ### Batch related Portfolio & Fund-Data Results
-PortfolioBreakdown <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Overview_Piechart.csv"),stringsAsFactors = FALSE) %>%
-  dplyr::rename("InvestorName" = "Investor.Name", "PortfolioName" = "Portfolio.Name", "HoldingType" = "Holding.Type", "PortfolioType" = "Portfolio.Type")
+PortfolioBreakdown <- rename(read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Overview_Piechart.csv"),stringsAsFactors = FALSE),
+                               c("Investor.Name" = "InvestorName", "Portfolio.Name" = "PortfolioName", "Holding.Type" = "HoldingType", "Portfolio.Type" = "PortfolioType"))
 PortfolioBreakdown$InvestorNameLong <- PortfolioBreakdown$InvestorName
 PortfolioBreakdown$PortfolioNameLong <- PortfolioBreakdown$PortfolioName
 
@@ -494,14 +494,14 @@ for (i in 1:nrow(TestList)){
       # Graph246(99, "RenewablesCap")
       
       sector_bar_chart(1, sector_processing())
-      stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
-      Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
-      Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
-      distribution_graph(5, "RiskExposure", CBCombin, CBComparisonBatchTest) #Combined EQ/CB
+      # stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
+      # Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
+      # Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
+      # distribution_graph(5, "RiskExposure", CBCombin, CBComparisonBatchTest) #Combined EQ/CB
       stacked_bar_chart_vertical(6,"EQ","All",EQStackedBarProdData)
       stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
-      distribution_chart(8, "CarstensMetric", "CB", CBCombin, CBComparisonBatchTest)
-      distribution_chart(9, "CarstensMetric", "EQ", EQCombin, EQComparisonBatchTest)
+      # distribution_chart(8, "CarstensMetric", "CB", CBCombin, CBComparisonBatchTest)
+      # distribution_chart(9, "CarstensMetric", "EQ", EQCombin, EQComparisonBatchTest)
       Graph246(10, "EQ", "CoalCap")
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
