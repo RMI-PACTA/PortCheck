@@ -2146,10 +2146,10 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     
     if (SectorToPlot == "Power"){techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")} 
     if (SectorToPlot == "Automotive"){techorder <- c("ICE","Hybrid","Electric")}
-    if (SectorToPlot == "Oil"){techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")}
+    if (SectorToPlot == "Oil"){techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
     
     AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
-    AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
+    AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)}
     
     if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
     }else{
@@ -2353,7 +2353,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       AllCompanies$value <- as.numeric(as.character(AllCompanies$value))
       
       AllCompanies <- AllCompanies[rev(order(AllCompanies$item)),]
-      AllCompanies$item <- factor(AllCompanies$item, levels=AllCompanies$item)
+      # AllCompanies$item <- factor(AllCompanies$item, levels=AllCompanies$item)
       
       AllCompanies <- rbind(AllCompanies, Portfoliomix)
       
@@ -2390,9 +2390,6 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
 }
 
 #------------- SECTOR BAR CHARTS ------------ #
-
-
-
 # Bar chart of the Sector Weights in the portfolio for both CB and EQ
 sector_processing <- function(){
   
