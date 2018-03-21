@@ -161,18 +161,25 @@ FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/20
 
 ### Add Comparative Portfolios 
 ### Add a code to update the Index results
-if (ComparisonFile %in% c("FundComparison","Swiss")){
-  COMPARISON.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/2016Q4/")
+if (ComparisonFile %in% c("FundComparison","BatchComparison")){
+  if (ComparisonFile == "FundComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",BatchName,"/",AssessmentDate,"/")
+  
+  
+  # ie. if the results are being compared to themselves (CA, Swiss, etc.)
+  if (ComparisonFile == "BatchComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/",AssessmentDate,"/")
+  
+  if (BatchName == "CA-INS"){COMPARISON.PATH <- BATCH.RES.PATH}
   
   if (ImportNewComparisonList == TRUE){
     
     EQComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"),stringsAsFactors = FALSE)
     EQComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_PortfolioData_Snapshot2017.csv"),stringsAsFactors = FALSE)
     CBComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors = FALSE)
-    CBComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtPortfolioData_Snapshot",".csv"),stringsAsFactors = FALSE)
+    CBComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtPortfolioData_Snapshot",Startyear,".csv"),stringsAsFactors = FALSE)
     
+    # Limits the number of portfolio to be compared to to this number. If swiss - includes all. 
     comparisonNumber <- 100
-    if (ComparisonFile == "Swiss"){comparisonNumber <- length(unique(EQComparisonBatchTestLong$PortName))}
+    if (ComparisonFile != "FundComparison"){comparisonNumber <- length(unique(EQComparisonBatchTestLong$PortName))}
     
     ComparisonList <- comparisonlist(comparisonNumber, EQComparisonBatchTestLong,CBComparisonBatchTestLong)
     
@@ -197,10 +204,10 @@ if (ComparisonFile %in% c("FundComparison","Swiss")){
 
 ### Hangover from the Fund/Brand 
 ### If true - changes Fund to Portfolio; Brand to Investor
-EQComparisonBatchTest <- ChangeFundPort(EQComparisonBatchTest)
-CBComparisonBatchTest <- ChangeFundPort(CBComparisonBatchTest)
-EQComparisonPortSS <- ChangeFundPort(EQComparisonPortSS)
-CBComparisonPortSS <- ChangeFundPort(CBComparisonPortSS)
+# EQComparisonBatchTest <- ChangeFundPort(EQComparisonBatchTest)
+# CBComparisonBatchTest <- ChangeFundPort(CBComparisonBatchTest)
+# EQComparisonPortSS <- ChangeFundPort(EQComparisonPortSS)
+# CBComparisonPortSS <- ChangeFundPort(CBComparisonPortSS)
 
 # ------
 # Bench Regions and Indicies and Sector Classifications
@@ -239,9 +246,9 @@ OSTargets <- read.csv(paste0(DATA.PATH,"/04_Other/SDA_Targets.csv"), stringsAsFa
 OSdata <- read.csv(paste0(DATA.PATH,"/00_RawData/99_SampleDataSets/OSmaster_2017-10-07.csv"), stringsAsFactors = FALSE)
 ShippingData <- read.csv(paste0(DATA.PATH,"/00_RawData/07_Shipping/ShippingData.csv"), stringsAsFactors = FALSE,strip.white = TRUE)
 EQ_OS_WEM <- matchOS(OSdata, EQBatchTest_PortSnapshots)
-write.csv(EQ_OS_WEM,paste0(BatchName,"_EQ_OtherSectorOutput.csv"),row.names = FALSE)
+# write.csv(EQ_OS_WEM,paste0(BatchName,"_EQ_OtherSectorOutput.csv"),row.names = FALSE)
 CB_OS_WEM <- matchOS(OSdata, CBBatchTest_PortSnapshots)
-write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FALSE)
+# write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FALSE)
 
 # ---------
 # Comparison Companies
@@ -257,15 +264,15 @@ write.csv(CB_OS_WEM,paste0(BatchName,"_CB_OtherSectorOutput.csv"),row.names = FA
 
 ###### NEW SECTION
 
-# Define this is the parameter file. CompareBatch or Name of File to compare to.  
-ComparisonType <- ComparisonFile
+# Define this in the parameter file. CompareBatch or Name of File to compare to.  
+# ComparisonType <- ComparisonFile
 
 # EQBatchTest is read in - if you want additional files to compare to, these are then bound to the original results
 EQBatchTest$ComparisonType <- "BatchResults"
 CBBatchTest$ComparisonType <- "BatchResults"
 
-# If there is a comparison file (ie the results are not being compared to themselves, the results are bound here)
-if (ComparisonType != "CompareBatch"){
+# If there is a comparison file (ie the results are NOT being compared to themselves, the results are bound here)
+if (ComparisonFile != "BatchComparison"){
   
   if (nrow(EQBatchTest) >0){
     EQComparisonBatchTest$ComparisonType <- "ComparisonResults"
@@ -277,7 +284,7 @@ if (ComparisonType != "CompareBatch"){
   }
 }
 
-if (ComparisonType != "CompareBatch"){
+if (ComparisonType != "BatchComparison"){
   if (nrow(CBBatchTest) >0){
     CBComparisonBatchTest$ComparisonType <- "ComparisonResults"
     CBBatchTest <-AddMissingColumns(CBBatchTest,CBComparisonBatchTest)
