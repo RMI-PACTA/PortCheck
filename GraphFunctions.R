@@ -2974,16 +2974,16 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   
   LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-  linesize = 1 
-  year_lab = 2017
+ 
+  year_lab = 2017 #2018
   LineVector <- setNames(LineColours,LinesToPlot)
   
   ylabel <- "Normalized Built Out"
  outputplot <-  ggplot()+
     geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Equity Portfolio"), data=dfwide, size = linesize,linetype="dashed")+  # Portfolio
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="longdash")+   # Market
-    #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[x])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Equity Portfolio"), data=dfwide, size = linesize,linetype="solid")+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="dashed")+   # Market
+    #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[3])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
     
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
