@@ -150,6 +150,13 @@ if (exists("FundList")){
 EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("MetaPortfolio"),]    #"ListedMarket"
 CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("MetaPortfolio"),]     #"ListedMarket", 
 
+EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
+EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
+EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
+CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
+CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
+CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
+
 ### Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
   CompanyNames <- unique(subset(AllCompanyData, select=c("EQY_FUND_TICKER","Name")))
@@ -268,8 +275,8 @@ CB_OS_WEM <- matchOS(OSdata, CBBatchTest_PortSnapshots)
 # ComparisonType <- ComparisonFile
 
 # EQBatchTest is read in - if you want additional files to compare to, these are then bound to the original results
-EQBatchTest$ComparisonType <- "BatchResults"
-CBBatchTest$ComparisonType <- "BatchResults"
+EQBatchTest$ComparisonType <- ComparisonFile
+CBBatchTest$ComparisonType <- ComparisonFile
 
 # If there is a comparison file (ie the results are NOT being compared to themselves, the results are bound here)
 if (ComparisonFile != "BatchComparison"){
@@ -284,7 +291,7 @@ if (ComparisonFile != "BatchComparison"){
   }
 }
 
-if (ComparisonType != "BatchComparison"){
+if (ComparisonFile != "BatchComparison"){
   if (nrow(CBBatchTest) >0){
     CBComparisonBatchTest$ComparisonType <- "ComparisonResults"
     CBBatchTest <-AddMissingColumns(CBBatchTest,CBComparisonBatchTest)
@@ -301,7 +308,7 @@ if (ComparisonType != "BatchComparison"){
 ### Calculates Exposure, AUM, Coverage Weight and Weighted Mean of Coverage Weight 
 
 if (nrow(EQBatchTest) >0){
-  EQResults <- company.comparison("EQ",EQBatchTest,EQBatchTest_PortSnapshots, Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  EQResults <- company.comparison("EQ")
   EQExposures <- EQResults[[1]]
   EQAUMs <- EQResults[[2]]
   EQCoverageWeights <- EQResults[[3]]
@@ -309,7 +316,7 @@ if (nrow(EQBatchTest) >0){
 }
 
 if (nrow(CBBatchTest) >0){
-  CBResults <- company.comparison("CB",CBBatchTest, BatchTest_PortSnapshots,Startyear, Scenariochoose,BenchmarkRegionchoose,CompanyDomicileRegionchoose)
+  CBResults <- company.comparison("CB")
   CBExposures <- CBResults[[1]]
   CBAUMs <- CBResults[[2]]
   CBCoverageWeights <- CBResults[[3]]
@@ -347,12 +354,7 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # ToTest2 <- which(TestList$PortfolioName %in% b)
 
 
-EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
-EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
-EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
-CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
-CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
-CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
+
 #-------
 # Loop through Portfolios
 #--------
@@ -400,10 +402,10 @@ for (i in 1:nrow(TestList)){
   if(!dir.exists(file.path(PORTFOLIO.PATH))){dir.create(file.path(PORTFOLIO.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 
   ### Subsets results for this portfolio
-  EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName & EQBatchTest$ComparisonType == "BatchResults",]
+  EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName & EQBatchTest$ComparisonType == ComparisonFile,]
   EQPortSnapshot <- EQBatchTest_PortSnapshots[EQBatchTest_PortSnapshots$PortName == PortName,]
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
-  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName & CBBatchTest$ComparisonType == "BatchResults",]
+  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName & CBBatchTest$ComparisonType == ComparisonFile,]
   CBPortSnapshot <- CBBatchTest_PortSnapshots[CBBatchTest_PortSnapshots$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
   
@@ -411,21 +413,21 @@ for (i in 1:nrow(TestList)){
   
   ##### NEW SECTION
   ### Selects the current portfolio from the Comparative Results
-  EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == "ComparisonResults" & EQExposures$PortName != PortName),]
-  EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == "ComparisonResults"),]
+  EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == ComparisonFile & EQExposures$PortName != PortName),]
+  EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == ComparisonFile),]
   EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
   
   if (EQCoverageWeights != "NoResults"){
-    EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == "BatchResults"),]
-    EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == "BatchResults"),]
-    EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName  &EQCoverageWeights$ComparisonType == "BatchResults"),]
+    EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == ComparisonFile),]
+    EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == ComparisonFile),]
+    EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName  &EQCoverageWeights$ComparisonType == ComparisonFile),]
     EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
     EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
     EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
   }
   
-  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == "ComparisonResults" & CBExposures$PortName != PortName),]
-  CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == "ComparisonResults"),]
+  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == ComparisonFile & CBExposures$PortName != PortName),]
+  CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == ComparisonFile),]
   CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
   ### Could add additional filter in at this point. 
   
@@ -521,7 +523,7 @@ for (i in 1:nrow(TestList)){
       flat_wheel_chart(28, 20, "EQ", "Power")
       flat_wheel_chart(29, 20, "EQ", "Automotive")
       flat_wheel_chart(30, 20, "EQ", "OG")
-      flat_wheel_chart(31, 20, "EQ", "Fossil Fuels")
+      flat_wheel_chart(31, 20, "EQ", "Oil")
       
       
       # inc_average <- F

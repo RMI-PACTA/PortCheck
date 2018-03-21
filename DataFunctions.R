@@ -528,12 +528,12 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
     Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
     Heatmap$MarketExposure <- as.numeric(Heatmap$MarketExposure)
   }else{
-    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","ComparisonType","Type","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
+    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","ComparisonType","Type","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetric"))
     
     # After getting the AUM values, remove that vector from the dataframe
     
     Heatmap$MarketExposure <- as.numeric(Heatmap$Exposure_WtTechShareTechShare)
-    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- as.numeric(Heatmap$Exposure_OGCMetrik[Heatmap$Technology %in% c("Oil", "Gas", "Coal")])
+    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- as.numeric(Heatmap$Exposure_OGCMetric[Heatmap$Technology %in% c("Oil", "Gas", "Coal")])
     Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_WtTechShareTechShare']
     Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_OGCMetrik']
   }
@@ -859,7 +859,6 @@ SectorPrint <- function(SectorToPlot,SectorProd){
   
 }
 
-
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
   #Saturated colours
@@ -901,7 +900,6 @@ SetGraphInputs <- function(){
 }
 
 #-------- Green/Brown Tech ------------- #
-
 GreenBrown <- function(Tech){
   GreenTechs <- c("Electric","Hybrid","RenewablesCap","HydroCap","NuclearCap")
   
