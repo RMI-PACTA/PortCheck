@@ -488,7 +488,7 @@ company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenari
 # ------------ Company Comparison Data ------ #
 company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   
-  # ChartType <- "CB"
+  ChartType <- "EQ"
   # BatchTest <- CBBatchTest
   # BatchTest <- EQBatchTest
   # BatchTest_PortSnapshots <- EQBatchTest_PortSnapshots
@@ -506,7 +506,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   ### AUMs
   Results <- BatchTest
   
-  if (ChartType == "EQ"){
+  if (ChartType == "dummy"){
     # AUMData<-Results[Results$PortName %in% Results$PortName,]
     AUMs <- unique(subset(Results, select=c("PortName","ComparisonType","PortAUM"))) ## CORRECT
     # AUMs <- ddply(Results, .(PortName),summarise, AUM = sum(PortAUM, na.rm=FALSE))  # WRONG BUT USED IN SWISS
@@ -516,145 +516,115 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
     AUMs <- unique(subset(Results, select = c("PortName","ComparisonType","PortfolioAUMAnalyzed")))
     AUMs <- rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
   }   
+  # 
+  # if (ChartType == "dummy"){
+  #   # CoverageWeight <- subset(BatchTest,Scenario %in% Scenariochoose & Year == Startyear+5 & BenchmarkRegion == BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose)#,select= c("PortName","Sector","Technology","MarketExposure","AUMExposure","Production","PortAUM"))
+  #   # CoverageWeight <- subset(CoverageWeight, !Technology %in% c("OilCap"))
+  #   # 
+  #   # piesub_tech <- unique(subset(BatchTest_PortSnapshots,select=c("PortName","ISIN","piesector","PortWeight")))
+  #   # piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
+  #   # piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
+  #   # pieshares <- ddply(piesub_tech, .(PortName,piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
+  #   # pieshares$piesector[pieshares$piesector == "Utility Power"]<- "Power"
+  #   # pieshares <- subset(pieshares, pieshares$piesector %in% c("Fossil Fuels", "Automotive","Power"))
+  #   # 
+  #   # df <- merge(CoverageWeight,pieshares, by.x = c("PortName", "Sector"), by.y = c("PortName","piesector"), all.x = TRUE, all.y = FALSE)
+  #   # df$Portfolio_weight[is.na(df$Portfolio_weight)] <- 0
+  #   # 
+  #   # df$SectorAUM <- df$PortAUM*df$Portfolio_weight
+  #   # 
+  #   # SectorTotAUM <- unique(subset(df, select = c("PortName","Sector","SectorAUM")))
+  #   # SectorTotAUM <- ddply(SectorTotAUM, . (PortName),summarise, SectorTotAUM = sum(SectorAUM,na.rm = TRUE))
+  #   # df<-merge(df,SectorTotAUM, by="PortName")
+  #   # 
+  #   # df$SectorCoverage <- df$SectorAUM/df$SectorTotAUM
+  #   # 
+  #   # df$Production[df$Technology == "Coal"]<- df$Production[df$Technology == "Coal"]*24
+  #   # df$Production[df$Technology == "Oil"]<- df$Production[df$Technology == "Oil"]*6.12
+  #   # df$Production[df$Technology == "Gas"]<- df$Production[df$Technology == "Gas"]*0.0372
+  #   # 
+  #   # ProdTotals <- ddply(df, .(PortName,Sector), summarise, SecProd = sum(Production, na.rm=TRUE))
+  #   # df <- merge(df, ProdTotals, by = c("PortName", "Sector"))
+  #   # 
+  #   # df$TechShare <- df$Production/df$SecProd
+  #   # df$TechAUM <- df$TechShare*df$SectorAUM
+  #   # df$CoverageWeight <- df$TechAUM/df$SectorTotAUM
+  #   # 
+  #   # df[is.na(df)]<- 0
+  #   # 
+  #   # CoverageWeight <- unique(subset(df, select =c("PortName","Technology","Sector","SectorTotAUM","PortAUM","CoverageWeight","ComparisonType","Type")))
+  #   # 
+  # }else {
+  #   
+  #   dfall <- unique(subset(BatchTest, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose))
+  #   dfall <- subset(dfall, !dfall$PortName %in% c("Market_Benchmark","GlobalBondUniverse","MetaPortfolio","MetaPortfolio_MetaPortfolio"))
+  #   if (nrow(dfall)>0){
+  #     # Fossil Fuels
+  #     dfFF <- subset(dfall, Sector %in% c("Oil&Gas","Coal"))
+  #     
+  #     dfFF$TechShare <- dfFF$SectorWeight
+  #     dfFF$TechShare[dfFF$Sector %in% "Oil&Gas"] <- dfFF$SectorWeight[dfFF$Sector %in% "Oil&Gas"]*dfFF$PortTechShare[dfFF$Sector %in% "Oil&Gas"]
+  #     TSSUM <- ddply(dfFF, .(PortName), summarize, TSSUM = sum(TechShare, na.rm = TRUE))
+  #     dfFF <- merge(dfFF,TSSUM, by= "PortName")
+  #     dfFF$TechShare <-dfFF$TechShare/dfFF$TSSUM 
+  #     
+  #     dfFF <- subset(dfFF, select = c("Sector","PortName","Technology","TechShare"))
+  #     # dfFF$Sector <- "Fossil Fuels"
+  #     
+  #     dfFF$TechShare[is.nan(dfFF$TechShare)] <- 0
+  #     
+  #     # Automotive, Power
+  #     df <- subset(dfall, Sector %in% c("Automotive","Power"))
+  #     df <- subset(df, select=c("PortName","Sector","Technology","WtTechShareTechShare"))
+  #     df <- melt(df, id.vars = c("PortName","Sector","Technology"))
+  #     df <- rename(df, c("value"="TechShare"))
+  #     df$variable <- NULL
+  #     
+  #     df$TechShare[is.nan(df$TechShare)] <- 0
+  #     df <- subset(df,!Technology %in% "OilCap")
+  #     
+  #     df <- subset(df,!Technology %in% "OilCap")
+  #     powersums <- ddply(df, .(PortName,Sector), summarise, SectorTotal=sum(TechShare, na.rm=TRUE))
+  #     df  <- merge(df, powersums, by = c("PortName","Sector"))
+  #     
+  #     df$TechShare <- df$TechShare/df$SectorTotal
+  #     df$SectorTotal <- NULL
+  #     
+  #     # Combine and normalise
+  #     
+  #     dftot <- rbind(df,dfFF)
+  #     sectorsums <- ddply(dftot, .(PortName,Sector), summarise, SectorTotal=sum(TechShare, na.rm=TRUE))
+  #     dftot  <- merge(dftot, sectorsums, by = c("PortName","Sector"))
+  #     
+  #     dftot$TechShare <- dftot$TechShare/3
+  #     dftot$SectorTotal <- NULL
+  #     
+  #     # Sector sum = 3, should equal 1?
+  #     dfallsectors <- merge(dfall, dftot, by= c("PortName","Sector","Technology"))
+  #     
+  #     secweight <- ddply(dfallsectors, .(PortName, Sector),summarise, SectorWtTotal=sum(SectorWeight, na.rm=TRUE))
+  #     secweightsum <- ddply(secweight, .(PortName),summarise, sumsecwts = sum(SectorWtTotal, na.rm = TRUE))
+  #     
+  #     sectors <- merge(secweight, secweightsum, by= "PortName")
+  #     sectors$SectorWtTotal <- sectors$SectorWtTotal/sectors$sumsecwts
+  #     sectors$sumsecwts<- NULL
+  #     
+  #     
+  #     dfallsectors<- merge(dfallsectors,sectors, by= c("PortName", "Sector"))
+  #     
+  #     dfallsectors$TechShare <- dfallsectors$TechShare*dfallsectors$SectorWtTotal
+  #     dfallsectors$SectorWtTotal <- NULL  
+  #     dfallsectors <- rename(dfallsectors, c("TechShare"="CoverageWeight"))
+  #     
+  #     
+  #     CoverageWeight <- unique(subset(dfallsectors, select = c("PortName","Technology","CoverageWeight","SectorWeight", "PortfolioAUMAnalyzed","ComparisonType","Type")))
+  #     CoverageWeight <- rename(CoverageWeight, c("PortfolioAUMAnalyzed"="PortAUM"))
+  #   }else{
+  #     CoverageWeight <- "NoCoverageWeight"
+  #   }
+  # } 
   
-  
-  ### Exposures  
-  if (ChartType == "EQ"){
-    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","ComparisonType","Type","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-    # Without Company Dom Region, for Stoxx600 
-    # Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- Heatmap$AUMExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")]
-    # After getting the AUM values, remove that vector from the dataframe
-    Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
-    Heatmap$MarketExposure <- as.numeric(Heatmap$MarketExposure)
-  }else{
-    Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","ComparisonType","Type","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetric"))
-    
-    # After getting the AUM values, remove that vector from the dataframe
-    
-    Heatmap$MarketExposure <- as.numeric(Heatmap$Exposure_WtTechShareTechShare)
-    Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- as.numeric(Heatmap$Exposure_OGCMetric[Heatmap$Technology %in% c("Oil", "Gas", "Coal")])
-    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_WtTechShareTechShare']
-    Heatmap <- Heatmap[,names(Heatmap) != 'Exposure_OGCMetrik']
-  }
-  
-  Heatmap$MarketExposure <- Heatmap$MarketExposure*100
-  Heatmap <- subset(Heatmap, Heatmap$BenchmarkRegion %in% BenchmarkRegionchoose)
-  Heatmap <- unique(subset(Heatmap, select = c("PortName","ComparisonType","Type","Technology","MarketExposure")))
-  # Heatmap <- subset(Heatmap, select = c("PortName","Technology","MarketExposure"))
-  
-  ComparisonTable <- reshape(Heatmap, v.names = "MarketExposure",idvar=c("PortName","ComparisonType","Type"),timevar="Technology", direction= "wide")
-  colnames(ComparisonTable) <- gsub("MarketExposure.","",colnames(ComparisonTable))
-  ComparisonTable$OilCap <- NULL #!!!!!!!!!
-  
-  
-  
-  if (ChartType == "EQ"){
-    CoverageWeight <- subset(BatchTest,Scenario %in% Scenariochoose & Year == Startyear+5 & BenchmarkRegion == BenchmarkRegionchoose & CompanyDomicileRegion == CompanyDomicileRegionchoose)#,select= c("PortName","Sector","Technology","MarketExposure","AUMExposure","Production","PortAUM"))
-    CoverageWeight <- subset(CoverageWeight, !Technology %in% c("OilCap"))
-    
-    piesub_tech <- unique(subset(BatchTest_PortSnapshots,select=c("PortName","ISIN","piesector","PortWeight")))
-    piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
-    piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
-    pieshares <- ddply(piesub_tech, .(PortName,piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
-    pieshares$piesector[pieshares$piesector == "Utility Power"]<- "Power"
-    pieshares <- subset(pieshares, pieshares$piesector %in% c("Fossil Fuels", "Automotive","Power"))
-    
-    df <- merge(CoverageWeight,pieshares, by.x = c("PortName", "Sector"), by.y = c("PortName","piesector"), all.x = TRUE, all.y = FALSE)
-    df$Portfolio_weight[is.na(df$Portfolio_weight)] <- 0
-    
-    df$SectorAUM <- df$PortAUM*df$Portfolio_weight
-    
-    SectorTotAUM <- unique(subset(df, select = c("PortName","Sector","SectorAUM")))
-    SectorTotAUM <- ddply(SectorTotAUM, . (PortName),summarise, SectorTotAUM = sum(SectorAUM,na.rm = TRUE))
-    df<-merge(df,SectorTotAUM, by="PortName")
-    
-    df$SectorCoverage <- df$SectorAUM/df$SectorTotAUM
-    
-    df$Production[df$Technology == "Coal"]<- df$Production[df$Technology == "Coal"]*24
-    df$Production[df$Technology == "Oil"]<- df$Production[df$Technology == "Oil"]*6.12
-    df$Production[df$Technology == "Gas"]<- df$Production[df$Technology == "Gas"]*0.0372
-    
-    ProdTotals <- ddply(df, .(PortName,Sector), summarise, SecProd = sum(Production, na.rm=TRUE))
-    df <- merge(df, ProdTotals, by = c("PortName", "Sector"))
-    
-    df$TechShare <- df$Production/df$SecProd
-    df$TechAUM <- df$TechShare*df$SectorAUM
-    df$CoverageWeight <- df$TechAUM/df$SectorTotAUM
-    
-    df[is.na(df)]<- 0
-    
-    CoverageWeight <- unique(subset(df, select =c("PortName","Technology","Sector","SectorTotAUM","PortAUM","CoverageWeight","ComparisonType","Type")))
-    
-  }else{
-    
-    dfall <- unique(subset(BatchTest, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose))
-    dfall <- subset(dfall, !dfall$PortName %in% c("Market_Benchmark","GlobalBondUniverse","MetaPortfolio","MetaPortfolio_MetaPortfolio"))
-    if (nrow(dfall)>0){
-      # Fossil Fuels
-      dfFF <- subset(dfall, Sector %in% c("Oil&Gas","Coal"))
-      
-      dfFF$TechShare <- dfFF$SectorWeight
-      dfFF$TechShare[dfFF$Sector %in% "Oil&Gas"] <- dfFF$SectorWeight[dfFF$Sector %in% "Oil&Gas"]*dfFF$PortTechShare[dfFF$Sector %in% "Oil&Gas"]
-      TSSUM <- ddply(dfFF, .(PortName), summarize, TSSUM = sum(TechShare, na.rm = TRUE))
-      dfFF <- merge(dfFF,TSSUM, by= "PortName")
-      dfFF$TechShare <-dfFF$TechShare/dfFF$TSSUM 
-      
-      dfFF <- subset(dfFF, select = c("Sector","PortName","Technology","TechShare"))
-      # dfFF$Sector <- "Fossil Fuels"
-      
-      dfFF$TechShare[is.nan(dfFF$TechShare)] <- 0
-      
-      # Automotive, Power
-      df <- subset(dfall, Sector %in% c("Automotive","Power"))
-      df <- subset(df, select=c("PortName","Sector","Technology","WtTechShareTechShare"))
-      df <- melt(df, id.vars = c("PortName","Sector","Technology"))
-      df <- rename(df, c("value"="TechShare"))
-      df$variable <- NULL
-      
-      df$TechShare[is.nan(df$TechShare)] <- 0
-      df <- subset(df,!Technology %in% "OilCap")
-      
-      df <- subset(df,!Technology %in% "OilCap")
-      powersums <- ddply(df, .(PortName,Sector), summarise, SectorTotal=sum(TechShare, na.rm=TRUE))
-      df  <- merge(df, powersums, by = c("PortName","Sector"))
-      
-      df$TechShare <- df$TechShare/df$SectorTotal
-      df$SectorTotal <- NULL
-      
-      # Combine and normalise
-      
-      dftot <- rbind(df,dfFF)
-      sectorsums <- ddply(dftot, .(PortName,Sector), summarise, SectorTotal=sum(TechShare, na.rm=TRUE))
-      dftot  <- merge(dftot, sectorsums, by = c("PortName","Sector"))
-      
-      dftot$TechShare <- dftot$TechShare/3
-      dftot$SectorTotal <- NULL
-      
-      # Sector sum = 3, should equal 1?
-      dfallsectors <- merge(dfall, dftot, by= c("PortName","Sector","Technology"))
-      
-      secweight <- ddply(dfallsectors, .(PortName, Sector),summarise, SectorWtTotal=sum(SectorWeight, na.rm=TRUE))
-      secweightsum <- ddply(secweight, .(PortName),summarise, sumsecwts = sum(SectorWtTotal, na.rm = TRUE))
-      
-      sectors <- merge(secweight, secweightsum, by= "PortName")
-      sectors$SectorWtTotal <- sectors$SectorWtTotal/sectors$sumsecwts
-      sectors$sumsecwts<- NULL
-      
-      
-      dfallsectors<- merge(dfallsectors,sectors, by= c("PortName", "Sector"))
-      
-      dfallsectors$TechShare <- dfallsectors$TechShare*dfallsectors$SectorWtTotal
-      dfallsectors$SectorWtTotal <- NULL  
-      dfallsectors <- rename(dfallsectors, c("TechShare"="CoverageWeight"))
-      
-      
-      CoverageWeight <- unique(subset(dfallsectors, select = c("PortName","Technology","CoverageWeight","SectorWeight", "PortfolioAUMAnalyzed","ComparisonType","Type")))
-      CoverageWeight <- rename(CoverageWeight, c("PortfolioAUMAnalyzed"="PortAUM"))
-    }else{
-      CoverageWeight <- "NoCoverageWeight"
-    }
-  } 
+  CoverageWeight <- "NoCoverageWeight" !!!!
   
   if (CoverageWeight != "NoCoverageWeight"){
     
@@ -675,7 +645,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   
   
   
-  results <- list(ComparisonTable, AUMs, CoverageWeight, WeightedCoverageWeight)
+  results <- list(AUMs, CoverageWeight, WeightedCoverageWeight)
   
   return(results)
 }

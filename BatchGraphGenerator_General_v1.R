@@ -102,13 +102,25 @@ if (file.exists(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenar
 }else{
   EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 }
+EQBatchTest <- subset(EQBatchTest, Type == "Portfolio")
+print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio")
+print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_CompanysProduction_Snapshot.csv"),stringsAsFactors = FALSE,strip.white = T)
+EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio")
+print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors=FALSE,strip.white = T)
+CBBatchTest <- subset(CBBatchTest, Type == "Portfolio")
+print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio")
+print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
+CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio")
+print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
 
 ### External Data Read In
 setwd(PROC.DATA.PATH)
@@ -136,10 +148,11 @@ PortfolioBreakdown$PortfolioName<- gsub("[()]","",PortfolioBreakdown$PortfolioNa
 PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
 TestList<-PortfolioBreakdown
+print(paste0("Test List: ", nrow(TestList), " rows."))
 
 ### Funds within the Portfolios
-FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Port_ListofFunds.csv"),stringsAsFactors = FALSE)
-if (exists("FundList")){
+if (file.exists(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Port_ListofFunds.csv"))){
+  FundList <- read.csv(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Port_ListofFunds.csv"),stringsAsFactors = FALSE)
   FundList$InvestorName <- gsub(".","",FundList$InvestorName, fixed = TRUE)
   FundList$PortfolioName<- gsub(".","",FundList$PortfolioName, fixed = TRUE)
 }else{
@@ -147,8 +160,8 @@ if (exists("FundList")){
 }
 
 ### Remove Listed Market if it's there
-EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("MetaPortfolio"),]    #"ListedMarket"
-CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("MetaPortfolio"),]     #"ListedMarket", 
+# EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("MetaPortfolio"),]    #"ListedMarket"
+# CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("MetaPortfolio"),]     #"ListedMarket", 
 
 EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
 EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
