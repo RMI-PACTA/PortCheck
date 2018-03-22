@@ -201,10 +201,10 @@ if (ComparisonFile %in% c("FundComparison","BatchComparison")){
     write.csv(CBComparisonPortSS,paste0(COMPARISON.PATH, "CBComparisonPortSS.csv"),row.names = F)
     
   }else{
-    EQComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"EQComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
-    EQComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"EQComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
-    CBComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"CBComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
-    CBComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"CBComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
+    # EQComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"EQComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
+    # EQComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"EQComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
+    # CBComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"CBComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
+    # CBComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"CBComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
   }
 }
 

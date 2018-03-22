@@ -3017,24 +3017,20 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 #----------- Distribution Chart ------------- #
 distribution_chart <- function(plotnumber, MetricName, ChartType){
   library(dplyr)
-  # MetricName = "Carsten's Metric"
+  # MetricName = "Risk Exposure"
   # plotnumber = 99
   # ChartType ="CB"
   if (MetricName == "Carsten's Metric") {
     Title <- "Exposure of Portfolios to Climate Relevent Sectors"
     MetricCol <- "CarstenMetric_Port"
     if(ChartType == "CB") {
-      BatchTest <- CBComparisonBatchTest
-      Combin <- select(CBCombin, -ComparisonType)
+      BatchTest <- CBBatchTest
     } else if (ChartType == "EQ") {
-      BatchTest <- EQComparisonBatchTest
-      Combin <- EQCombin
+      BatchTest <- EQBatchTest
     }
-    df <- rbind(Combin, BatchTest)
-    
     ID.COLS = c("PortName","Year","Sector","Technology")
     BarColors <- c("Orange")
-    df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+    df <- unique(subset(BatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
                         select = c(ID.COLS,MetricCol)))
     
@@ -3042,14 +3038,11 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     Title <- "Risk Exposure of Portfolios"
     MetricCol <- c("Risk 2", "Risk 1")
     if(ChartType == "CB") {
-      PortSS <- CBPortSnapshot
-      CompSS <- CBComparisonPortSS
+      PortSS <- CBBatchTest_PortSnapshots
     } else if (ChartType == "EQ") {
-      PortSS <- EQPortSnapshot
-      CompSS <- EQComparisonPortSS
+      PortSS <- EQBatchTest_PortSnapshots
     }
-    df <- rbind(PortSS, CompSS)
-    df <- df %>% 
+    df <- PortSS %>% 
       mutate("AUM" = AUM/PortfolioAUMAnalyzed) %>%
       spread("MoodysRiskLvl", "AUM", fill = 0) %>%
       rename("Risk 1" = "1", "Risk 2" = "2")
