@@ -3140,22 +3140,26 @@ CAReportData <- function(){
   NoPeers <- nrow(TestList)
   
 
-  
   ### Port Weights ###
-  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
-  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
-  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  SectorData$ChartType<- "CB"
+  SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
   
-  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
-  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
-  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]  
+  # FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  # PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  # AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  # 
+  # FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  # PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  # AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]  
+  # 
+  # Need to add the averages in
   
-  # FFSectorPeerEQ
-  # PowerSectorPeerEQ
-  # AutoSectorPeerEQ 
-  # FFSectorPeerCB
-  # PowerSectorPeerCB
-  # AutoSectorPeerCB 
+  FFSectorPeerEQ <- 1
+  PowerSectorPeerEQ<- 1
+  AutoSectorPeerEQ<- 1
+  FFSectorPeerCB<- 1
+  PowerSectorPeerCB<- 1
+  AutoSectorPeerCB<- 1
   
   ### RANKINGS ###
   
@@ -3164,7 +3168,7 @@ CAReportData <- function(){
   EQPeerRanks$PortName <- "PeerTotal"
   techlist <- unlist(colnames(EQPortRanks)[2:12])
   EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
-  colnames(EQReportRanks) <- paste0("EQ",techlist)
+  colnames(EQReportRanks) <- techlist
   
   CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
   CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
@@ -3173,25 +3177,126 @@ CAReportData <- function(){
   CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
   colnames(CBReportRanks) <- paste0("CB",techlist)
   
-  reportdata <- data.frame(
-           c("ReportInsuranceName",ReportInsuranceName), 
-           c("SizeofPortfolio",SizeofPortfolio),
-           c("NoPeers",NoPeers),
-           c("FFSectorPortEQ",FFSectorPortEQ),
-           c("PowerSectorPortEQ",PowerSectorPortEQ),
-           c("AutoSectorPortEQ",AutoSectorPortEQ),
-           c("FFSectorPortCB",FFSectorPortCB),
-           c("PowerSectorPortCB",PowerSectorPortCB),
-           c("AutoSectorPortCB",AutoSectorPortCB)
-           )
   
-  colnames(reportdata) <- as.character(unlist(reportdata[1,]))
-  reportdata = reportdata[-1, ]
+  ### MERGE ALL RESULTS ###
+  # reportdata <- data.frame(
+  #          c("ReportInsuranceName",ReportInsuranceName), 
+  #          c("SizeofPortfolio",SizeofPortfolio),
+  #          c("NoPeers",NoPeers),
+  #          c("FFSectorPortEQ",FFSectorPortEQ),
+  #          c("PowerSectorPortEQ",PowerSectorPortEQ),
+  #          c("AutoSectorPortEQ",AutoSectorPortEQ),
+  #          c("FFSectorPortCB",FFSectorPortCB),
+  #          c("PowerSectorPortCB",PowerSectorPortCB),
+  #          c("AutoSectorPortCB",AutoSectorPortCB)
+  #          )
+  # 
+  # colnames(reportdata) <- as.character(unlist(reportdata[1,]))
+  # reportdata = reportdata[-1, ]
+  # 
+  # reportdata <- cbind(reportdata,EQReportRanks)
+  # reportdata <- cbind(reportdata,CBReportRanks)
+  # 
+  # return(reportdata)
   
-  reportdata <- cbind(reportdata,EQReportRanks)
-  reportdata <- cbind(reportdata,CBReportRanks)
+}
+
+CAReport <- function(){
   
-  return(reportdata)
+  CAReportData()
+  
+  # Copy in the template for the report
+  text <- as.data.frame(template,stringsAsFactors = FALSE)  
+  colnames(text) <- "text"
+  
+  # Function removes text lines between 
+  # "handlenameS" and "handlenameE" ie CBPowerS, CBPowerE
+  # Need to add these handles into the final doc when ready. Also determine what will be kicked out/what will remain. 
+  removetextlines <- function(handlename){
+    startpage <- which(grepl(paste0(handlename,"S"),text$text))
+    endpage <- which(grepl(paste0(handlename,"E"),text$text))
+    
+    if (length(startpage) >0 ){
+      
+      removelist <- lapply(1:length(startpage), function(x) c(startpage[c(x)]:endpage[c(x)]))
+      removelist <- melt(removelist[1:length(startpage)])
+      text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
+      colnames(text) <- "text"
+    }else{
+      removeline <- which(grepl(handlename,text$text))
+      text <- as.data.frame(text[-removeline,],stringsAsFactors =FALSE)
+      colnames(text) <- "text"
+    }
+    return(text)
+  }
+  
+  
+  # Ranks
+  techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
+  for (j in techranks){
+    text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
+    text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
+  }
+  
+  # Exec Summary Values
+  execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
+  for (j in execsummarylist){
+    text$text <- gsub(j,eval(as.symbol(as.character(j))),text$text)
+  }
+  
+  # Replace Sector Weight Values
+  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=4),"Sector",rep(c("Port","Peer"),3,each=2),rep(c("EQ","CB"),6)))
+  for (j in 1:nrow(a)){
+    text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
+  }  
+  
+  # Replace Insurer Name
+  text$text <- gsub("InsurerSampleReport",PortfolioNameLong,text$text)
+  
+  # Figures
+  # Replace CAFigures
+  
+  # Update the template to reflect figure names
+  
+  # FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
+  # colnames(FigNames) <- "Name"
+  # FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
+  # FigNames$Fig <- substring(FigNames$Name,1,2)
+  # FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
+  # 
+  # for (f in 1:nrow(FigNames)){
+  #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
+  # }
+  
+  # Copy in the graphics folder for the report
+  originalloc <- paste0(GIT.PATH,"ReportGraphics/")
+  graphicsloc <- paste0(LANGUAGE.PATH ,"/","ReportGraphics/")
+  flist <- list.files(originalloc, full.names = TRUE)
+  
+  if(!dir.exists(file.path(graphicsloc))){
+    dir.create(file.path(graphicsloc), showWarnings = TRUE, recursive = FALSE, mode = "0777")
+    for (file in flist){file.copy(file, graphicsloc)}
+  }  
+  
+  # Save the template file
+  TemplateNameNew <- paste0("Template_",PortfolioName,"_",Languagechoose)
+  write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
+  
+  # Create the PDF
+  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
+  
+  # Delete remaining files and ReportGraphics Folder
+  unlink("ReportGraphics",recursive = TRUE)
+  excessfileendings <- c(".log",".rnw",".tex",".aux")
+  file.remove(paste0(TemplateNameNew,excessfileendings))
+  file.remove("FigureList.txt")
+  
+  # Rename output file
+  if (InvestorName == PortfolioName){
+    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
+      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,"_",Languagechoose,".pdf"))}
+  
+  
   
 }
 

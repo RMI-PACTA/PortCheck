@@ -339,6 +339,8 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 # ---------
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
+template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v1.tex"),encoding="UTF-8"))
+
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
 if (length(grep("Swiss",ReportTemplate))==1){ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
@@ -493,15 +495,18 @@ for (i in 1:nrow(TestList)){
       # 
       # Graph246(99, "RenewablesCap")
       
-      sector_bar_chart(1, sector_processing())
+      # Required for the report data
+      SectorData <- sector_processing()
+      
+      sector_bar_chart("01", SectorData)
       # stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
       # Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
-      distribution_chart(5, "Risk Exposure", "CB")
-      stacked_bar_chart_vertical(6,"EQ","All",EQStackedBarProdData)
-      stacked_bar_chart_vertical(7,"CB","All",CBStackedBarProdData)
-      distribution_chart(8, "Carsten's Metric", "CB")
-      # distribution_chart(9, "Carsten's Metric", "EQ")
+      distribution_chart("05", "Risk Exposure", "CB")
+      stacked_bar_chart_vertical("06","EQ","All",EQStackedBarProdData)
+      stacked_bar_chart_vertical("07","CB","All",CBStackedBarProdData)
+      distribution_chart("08", "Carsten's Metric", "CB")
+      # distribution_chart("09", "Carsten's Metric", "EQ")
       Graph246(10, "EQ", "CoalCap")
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
@@ -525,6 +530,20 @@ for (i in 1:nrow(TestList)){
       flat_wheel_chart(30, 20, "EQ", "OG")
       flat_wheel_chart(31, 20, "EQ", "Oil")
       
+      # Creates the list of figures that were printed. 
+      # A better solution is possible, but this works. 
+      # This list gets deleted after the report is printed. 
+      # The plotnumber has to match the figure number in the report ie Fig01 etc. Therefore "01" is necessary. 
+      figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
+      writeLines(figurelist,"FigureList.txt")
+      
+      
+      # Prepares the data that goes into the report
+      CAReportData()
+
+      # Creates the report for California
+      # I think it's necessary to seperate from the previous
+      CAReport()
       
       # inc_average <- F
       # ########################
