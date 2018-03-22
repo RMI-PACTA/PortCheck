@@ -3017,9 +3017,9 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 #----------- Distribution Chart ------------- #
 distribution_chart <- function(plotnumber, MetricName, ChartType){
   library(dplyr)
-  MetricName = "Carsten's Metric"
-  plotnumber = 99
-  ChartType ="CB"
+  # MetricName = "Carsten's Metric"
+  # plotnumber = 99
+  # ChartType ="CB"
   if (MetricName == "Carsten's Metric") {
     Title <- "Exposure of Portfolios to Climate Relevent Sectors"
     MetricCol <- "CarstenMetric_Port"

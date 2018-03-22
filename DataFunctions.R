@@ -545,7 +545,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   
   ComparisonTable <- reshape(Heatmap, v.names = "MarketExposure",idvar=c("PortName","ComparisonType","Type"),timevar="Technology", direction= "wide")
   colnames(ComparisonTable) <- gsub("MarketExposure.","",colnames(ComparisonTable))
-  ComparisonTable$OilCap <- NULL
+  ComparisonTable$OilCap <- NULL #!!!!!!!!!
   
   
   

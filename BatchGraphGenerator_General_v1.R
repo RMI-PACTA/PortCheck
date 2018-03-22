@@ -164,16 +164,16 @@ if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
 
 ### Funds Heat Map Data
 ### This should be updated
-FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
+# FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
 
 ### Add Comparative Portfolios 
 ### Add a code to update the Index results
 if (ComparisonFile %in% c("FundComparison","BatchComparison")){
-  if (ComparisonFile == "FundComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",BatchName,"/",AssessmentDate,"/")
+  if (ComparisonFile == "FundComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",AssessmentDate,"/")
   
   
   # ie. if the results are being compared to themselves (CA, Swiss, etc.)
-  if (ComparisonFile == "BatchComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"/01_BatchResults/",ComparisonFile,"/",AssessmentDate,"/")
+  if (ComparisonFile == "BatchComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",ComparisonFile,"/",AssessmentDate,"/")
   
   if (BatchName == "CA-INS"){COMPARISON.PATH <- BATCH.RES.PATH}
   
@@ -242,11 +242,11 @@ IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% St
 
 
 ### Bind Sector Classification from BBG - ICB Subsector Name
-CleanedBBGData <- cleanBBGData(BBGData_CompanyLevel,AllCompanyData,Startyear,Scenariochoose,CompanyDomicileRegionchoose,BenchmarkRegionchoose)
+CleanedBBGData <- cleanBBGData(BBGData_CompanyLevel,AllCompanyData,Startyear,Scenariochoose,CompanyDomicileRegionchoose,BenchmarkRegionchoose) #Needed only for flatwheel
 Companies <- CleanedBBGData[[1]]
 UtilityCompanies <- CleanedBBGData[[2]]
 AutoCompanies <- CleanedBBGData[[3]]
-OilData <- cleanOGData(OGData,AllCompanyData,Startyear)
+OilData <- cleanOGData(OGData,AllCompanyData,Startyear) #Needed only for flatwheel
 
 ### Other Sector Data
 OSTargets <- read.csv(paste0(DATA.PATH,"/04_Other/SDA_Targets.csv"), stringsAsFactors = FALSE)
