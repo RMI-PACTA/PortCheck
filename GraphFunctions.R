@@ -3144,14 +3144,14 @@ CAReportData <- function(){
   SectorData$ChartType<- "CB"
   SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
   
-  # FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
-  # PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
-  # AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
-  # 
-  # FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
-  # PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
-  # AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]  
-  # 
+  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+
+  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
+
   # Need to add the averages in
   
   FFSectorPeerEQ <- 1
@@ -3235,6 +3235,8 @@ CAReport <- function(){
   techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
   for (j in techranks){
     text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
+  }
+  for (j in techranks){
     text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
   }
   
@@ -3268,9 +3270,12 @@ CAReport <- function(){
   #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
   # }
   
+  
+  ##### PRINT REPORT ######
+  
   # Copy in the graphics folder for the report
-  originalloc <- paste0(GIT.PATH,"ReportGraphics/")
-  graphicsloc <- paste0(LANGUAGE.PATH ,"/","ReportGraphics/")
+  originalloc <- paste0(GIT.PATH,"Templates/ReportGraphics/")
+  graphicsloc <- paste0(LANGUAGE.PATH ,"ReportGraphics/")
   flist <- list.files(originalloc, full.names = TRUE)
   
   if(!dir.exists(file.path(graphicsloc))){
