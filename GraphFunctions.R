@@ -2445,6 +2445,7 @@ sector_processing <- function(){
     pieshares <- rbind(piesharesEQ,piesharesCB)
   }
   
+  return(pieshares)
 }
 
 sector_bar_chart <- function(plotnumber, pieshares){
@@ -3126,3 +3127,71 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
   
 }
+
+
+#----------- CA Report Data------------------ #
+CAReportData <- function(){
+  
+  # Output is a dataframe with the values for the text
+
+  ### Exec Summary Data ###
+  ReportInsuranceName <- PortfolioNameLong
+  SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
+  NoPeers <- nrow(TestList)
+  
+
+  
+  ### Port Weights ###
+  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  
+  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]  
+  
+  # FFSectorPeerEQ
+  # PowerSectorPeerEQ
+  # AutoSectorPeerEQ 
+  # FFSectorPeerCB
+  # PowerSectorPeerCB
+  # AutoSectorPeerCB 
+  
+  ### RANKINGS ###
+  
+  EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
+  EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
+  EQPeerRanks$PortName <- "PeerTotal"
+  techlist <- unlist(colnames(EQPortRanks)[2:12])
+  EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
+  colnames(EQReportRanks) <- paste0("EQ",techlist)
+  
+  CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
+  CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
+  CBPeerRanks$PortName <- "PeerTotal"
+  techlist <- unlist(colnames(CBPortRanks)[2:12])
+  CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
+  colnames(CBReportRanks) <- paste0("CB",techlist)
+  
+  reportdata <- data.frame(
+           c("ReportInsuranceName",ReportInsuranceName), 
+           c("SizeofPortfolio",SizeofPortfolio),
+           c("NoPeers",NoPeers),
+           c("FFSectorPortEQ",FFSectorPortEQ),
+           c("PowerSectorPortEQ",PowerSectorPortEQ),
+           c("AutoSectorPortEQ",AutoSectorPortEQ),
+           c("FFSectorPortCB",FFSectorPortCB),
+           c("PowerSectorPortCB",PowerSectorPortCB),
+           c("AutoSectorPortCB",AutoSectorPortCB)
+           )
+  
+  colnames(reportdata) <- as.character(unlist(reportdata[1,]))
+  reportdata = reportdata[-1, ]
+  
+  reportdata <- cbind(reportdata,EQReportRanks)
+  reportdata <- cbind(reportdata,CBReportRanks)
+  
+  return(reportdata)
+  
+}
+
