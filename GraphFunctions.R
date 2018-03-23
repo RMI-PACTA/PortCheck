@@ -2462,34 +2462,37 @@ sector_bar_chart <- function(plotnumber, dfagg){
 # -------------STACKED BAR CHARTS ---------- #
 
 stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
-  
+  library(dplyr)
   if (ChartType == "EQ"){
     Portfolio <- EQCombin
-    Batch <- subset(EQBatchTest, EQBatchTest$PortName != PortName)
+    Batch <- EQBatchTest[EQBatchTest$PortName != PortName,]
   }else if (ChartType == "CB"){
     Portfolio <- CBCombin
-    Batch <- subset(CBBatchTest, CBBatchTest$PortName != PortName)
+    Batch <- CBBatchTest[CBBatchTest$PortName != PortName,]
   }
   #Tag Target portfolio, benchmark
   Portfolio$ComparisonType = "Portfolio"
   Batch$ComparisonType = "Peers"
   Combin <- rbind(Portfolio,Batch)
-  Production <- subset(Combin, Year == Startyear & BenchmarkRegion %in% BenchmarkRegionchoose & Scenario %in% Scenariochoose,
+  Production <- subset(Combin, Year == Startyear & 
+                         BenchmarkRegion %in% BenchmarkRegionchoose & 
+                         Scenario %in% Scenariochoose &
+                         Technology != "OilCap",
                        select=c("PortName","Sector","Technology","CarstenMetric_Port","ComparisonType"))
   # Aggregate and rename CarstenMetric_Port
   ID.COLS = c("Sector","Technology","ComparisonType")
-  df <- df %>% gather(key=Metric, value=Value, "ComparisonType")
-  dfagg <- aggregate(df["Value"],by=df[c(ID.COLS)],FUN=sum)
+  Production <- Production %>% gather(key=Metric, value=Value, "CarstenMetric_Port")
+  Production <- aggregate(Production["Value"],by=Production[c(ID.COLS)],FUN=sum)
   #Created an average for the peers (or even just use fill!)
   
   if(nrow(Production)>0){
     Production$TechName <- Production$Technology
-    Production[Production$Sector=="Fossil Fuels","TechName"] <- revalue(Production[Production$Sector=="Fossil Fuels","TechName"],
+    Production[Production$Sector=="Oil&Gas","TechName"] <- revalue(Production[Production$Sector=="Oil&Gas","TechName"],
                                                                         c("Coal" = "CoalProd",
                                                                           "Gas" = "GasProd",
                                                                           "Oil" = "OilProd"))
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
-    technologyorder <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","CoalProd","GasProd","OilProd")
+    technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","CoalProd","GasProd","OilProd")
     colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
     names(colours) <- technologyorder
     labels <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
@@ -2499,24 +2502,27 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
     Production$Technology<-as.factor(Production$TechName)
     Production$Sector<-as.factor(Production$Sector)
     
-    Production$variable <- wrap.labels(Production$variable,20)
+    Production$ComparisonType <- wrap.labels(Production$ComparisonType,20)
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
-    Production$variable <- factor(Production$variable)
+    Production$ComparisonType <- factor(Production$ComparisonType)
     dat <- Production
+    detach("package:dplyr",unload=TRUE)
     
-    templete <- ggplot(data=Production, aes(x=variable, y=TechShare,fill=TechName),show.guide = TRUE)+
-      geom_bar(stat = "identity",width = .6)+
+    templete <- ggplot(data=dat, aes(x=ComparisonType, y=Value,fill=TechName),show.guide = TRUE)+
+      geom_bar(stat = "identity", position = "fill", width = .6)+
       theme_minimal()+
       scale_fill_manual(labels=labels,values=colours)+
-      scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-      expand_limits(0,0)+
+      scale_y_continuous(expand=c(0,0), labels=percent)+
+      # expand_limits(0,0)+
       guides(fill=guide_legend(nrow = 1))+
       ylab(ylabel)+
       theme_barcharts()+
       ggtitle("Templete")+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),legend.position = "bottom",axis.line = element_blank())
+      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
+            legend.position = "bottom",legend.title = element_blank(),
+            axis.line = element_blank())
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
@@ -2534,7 +2540,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
       p1 <- templete %+% dat +
         ggtitle("Automotive Production")
       
-      dat<- subset(Production,Sector=="Fossil Fuels")
+      dat<- subset(Production,Sector=="Oil&Gas")
       p2 <- templete %+% dat +
         ggtitle("Fossil Fuels Production")
       

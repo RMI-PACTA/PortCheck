@@ -494,10 +494,10 @@ for (i in 1:nrow(TestList)){
       # SectorBarCharts
       # sector_bar_chart(99, sector_processing())
       # 
-      EQStackedBarProdData <-stacked_bar_chart_data("EQ")
+      # EQStackedBarProdData <-stacked_bar_chart_data("EQ")
       # stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
       # 
-      CBStackedBarProdData <-stacked_bar_chart_data("CB")
+      # CBStackedBarProdData <-stacked_bar_chart_data("CB")
       # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
       # 
       # distribution_chart("Carsten's Metric", EQCombin, EQComparisonBatchTest)
