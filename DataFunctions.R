@@ -624,7 +624,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
   #   }
   # } 
   
-  CoverageWeight <- "NoCoverageWeight" !!!!
+  CoverageWeight <- "NoCoverageWeight" #!!!!
   
   if (CoverageWeight != "NoCoverageWeight"){
     
