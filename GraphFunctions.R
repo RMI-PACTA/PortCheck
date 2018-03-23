@@ -2476,27 +2476,27 @@ sector_processing <- function(){
 #  return(pieshares)
 #}
 
-sector_bar_chart <- function(plotnumber, pieshares){
+sector_bar_chart <- function(plotnumber, dfagg){
 
   ### Need to be changed!
   
-  sectorpalette <- c(energy,pow,trans,othr)
-  sectororder <-c("Fossil Fuels","Utility Power","Automotive","Other High Carbon Sectors")
-  colourdf <- data.frame(colour=sectorpalette, piesector =sectororder)
-  pieshares$piesector<-as.factor(pieshares$piesector)
-  combined <- sort(union(levels(pieshares$piesector), levels(colourdf$sectororder)))
-  pieshares <- merge(pieshares, colourdf, by= "piesector") 
+  sectorpalette <- c(energy,pow,trans)
+  sectororder <-c("Fossil Fuels","Utility Power","Automotive")
+  colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
+  dfagg$Sector<-as.factor(dfagg$Sector)
+  combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
+  dfagg <- merge(dfagg, colourdf, by= "Sector") 
   orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
-  pieshares$label <- factor(pieshares$label, levels=orderofchart)
-  pieshares$piesector<- factor(pieshares$piesector,levels = sectororder)
-  pieshares <- pieshares[order(pieshares$piesector,pieshares$label),]
-  temp<-max(pieshares$Portfolio_weight)
+  dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
+  dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
+  dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
+  temp<-max(dfagg$CarstenMetric_Port)
   ylabel = ""
-  
-  a<-ggplot(pieshares, aes(x=label, y=Portfolio_weight,fill=piesector),show.guide = TRUE)+
+
+  a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
-    scale_fill_manual(labels=unique(as.character(pieshares$piesector)),values=unique(as.character(pieshares$colour)))+
+    scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
     scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
