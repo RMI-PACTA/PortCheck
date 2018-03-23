@@ -2391,62 +2391,90 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
 
 #------------- SECTOR BAR CHARTS ------------ #
 # Bar chart of the Sector Weights in the portfolio for both CB and EQ
+
 sector_processing <- function(){
   
-  PSSProcessing <- function(ChartType){  
-    if (ChartType == "EQ"){
-      PortSnapshot <- EQPortSnapshot
-    }else if(ChartType == "CB"){PortSnapshot <- CBPortSnapshot}
+    EQBatchTest <- EQCombin
+    EQBatchTest$Type <- "Equity Portfolio"
+    CBBatchTest <- CBCombin
+    CBBatchTest$Type <- "Corporate Bond Portfolio"
     
-    colnames(PortSnapshot)[colnames(PortSnapshot) %in% "IssLvlPortWeight"] <- "PortWeight"
-    PortSnapshotSub <- subset(PortSnapshot, CNTRY_OF_DOMICILE %in% IndexUniverses[,names(IndexUniverses) == eval(paste0(CompanyDomicileRegionchoose,"_ISO"))])
-    piesub_tech <- unique(subset(PortSnapshotSub,select=c("ISIN","piesector","PortWeight")))
+    ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
     
-    piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
-    piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
+    CB <- unique(subset(CBBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                        select = c(ID.COLS)))
+    EQ <- unique(subset(EQBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                        select = c(ID.COLS)))
+
+    df <- rbind(CB,EQ)
+    df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
+    df$Sector<-as.factor(df$Sector)
+    levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
+    levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
+    dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
+    
+    return(dfagg)
+    }                                       
+                                       
+                                       
+#sector_processing <- function(){
+  
+#  PSSProcessing <- function(ChartType){  
+#    if (ChartType == "EQ"){
+#      PortSnapshot <- EQPortSnapshot
+#    }else if(ChartType == "CB"){PortSnapshot <- CBPortSnapshot}
+    
+#   colnames(PortSnapshot)[colnames(PortSnapshot) %in% "IssLvlPortWeight"] <- "PortWeight"
+#    PortSnapshotSub <- subset(PortSnapshot, CNTRY_OF_DOMICILE %in% IndexUniverses[,names(IndexUniverses) == eval(paste0(CompanyDomicileRegionchoose,"_ISO"))])
+#    piesub_tech <- unique(subset(PortSnapshotSub,select=c("ISIN","piesector","PortWeight")))
+    
+#    piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
+#    piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
     
     ### New Classifications ###
-    piesub_tech$piesector <- revalue(piesub_tech$piesector,
-                                     c("Non-Utility Power" = "Not Assessed",
-                                       "Metal-Iron" = "Other High Carbon Sectors",
-                                       "NonOG Production" = "Fossil Fuels",
-                                       "Bldg Prod-Cement/Aggreg" = "Other High Carbon Sectors", 
-                                       "Oil&Gas"= "Fossil Fuels",
-                                       "Coal"="Fossil Fuels", 
-                                       "Transport-Marine" = "Other High Carbon Sectors",
-                                       "Metal-Aluminum"="Other High Carbon Sectors", 
-                                       "Steel-Producers" = "Other High Carbon Sectors", 
-                                       "Transport-Air Freight"= "Other High Carbon Sectors",
-                                       "Building Materials & Fixtures"= "Other High Carbon Sectors", 
-                                       "Iron & Steel" = "Other High Carbon Sectors", 
-                                       "Aluminum" = "Other High Carbon Sectors", 
-                                       "Airlines" = "Other High Carbon Sectors", 
-                                       "Marine Transportation" = "Other High Carbon Sectors"),warn_missing = F)
+#    piesub_tech$piesector <- revalue(piesub_tech$piesector,
+#                                     c("Non-Utility Power" = "Not Assessed",
+#                                       "Metal-Iron" = "Other High Carbon Sectors",
+#                                       "NonOG Production" = "Fossil Fuels",
+#                                       "Bldg Prod-Cement/Aggreg" = "Other High Carbon Sectors", 
+#                                       "Oil&Gas"= "Fossil Fuels",
+#                                       "Coal"="Fossil Fuels", 
+#                                       "Transport-Marine" = "Other High Carbon Sectors",
+#                                       "Metal-Aluminum"="Other High Carbon Sectors", 
+#                                       "Steel-Producers" = "Other High Carbon Sectors", 
+#                                       "Transport-Air Freight"= "Other High Carbon Sectors",
+#                                       "Building Materials & Fixtures"= "Other High Carbon Sectors", 
+#                                       "Iron & Steel" = "Other High Carbon Sectors", 
+#                                       "Aluminum" = "Other High Carbon Sectors", 
+#                                       "Airlines" = "Other High Carbon Sectors", 
+#                                       "Marine Transportation" = "Other High Carbon Sectors"),warn_missing = F)
     
     
-    piesub_tech <- piesub_tech[!(piesub_tech$piesector=="Not Assessed"),]
+#    piesub_tech <- piesub_tech[!(piesub_tech$piesector=="Not Assessed"),]
     
-    pieshares <- ddply(piesub_tech, .(piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
+#    pieshares <- ddply(piesub_tech, .(piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
     
-    if (ChartType == "EQ"){pieshares$label <- "Equity Portfolio"
-    }else if(ChartType == "CB"){pieshares$label <- "Corporate Bond Portfolio"}
+#    if (ChartType == "EQ"){pieshares$label <- "Equity Portfolio"
+#    }else if(ChartType == "CB"){pieshares$label <- "Corporate Bond Portfolio"}
     
-    return(pieshares)
-  }
+#    return(pieshares)
+#  }
   
-  if(nrow(EQPortSnapshot)>0){
-    piesharesEQ <- PSSProcessing("EQ")
-  }
+#  if(nrow(EQPortSnapshot)>0){
+#    piesharesEQ <- PSSProcessing("EQ")
+#  }
   
-  if(!exists("piesharesEQ")){
-    pieshares <- PSSProcessing("CB") 
-  }else{
-    piesharesCB <- PSSProcessing("CB") 
-    pieshares <- rbind(piesharesEQ,piesharesCB)
-  }
+#  if(!exists("piesharesEQ")){
+#    pieshares <- PSSProcessing("CB") 
+#  }else{
+#    piesharesCB <- PSSProcessing("CB") 
+#    pieshares <- rbind(piesharesEQ,piesharesCB)
+#  }
   
-  return(pieshares)
-}
+#  return(pieshares)
+#}
 
 sector_bar_chart <- function(plotnumber, pieshares){
 
