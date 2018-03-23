@@ -508,14 +508,14 @@ for (i in 1:nrow(TestList)){
       SectorData <- sector_processing()
       
       sector_bar_chart("01", SectorData)
-      # stacked_bar_chart_vertical(2,"Combined?","All",EQStackedBarProdData) #Combined EQ/CB
-      # Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
-      # Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
+      stacked_bar_chart_vertical(2,"Summary","All") #Combined EQ/CB
+      # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
+      # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
       distribution_chart("05", "Risk Exposure", "CB")
       stacked_bar_chart_vertical("06","EQ","All")
       stacked_bar_chart_vertical("07","CB","All")
       distribution_chart("08", "Carsten's Metric", "CB")
-      # distribution_chart("09", "Carsten's Metric", "EQ")
+      distribution_chart("09", "Carsten's Metric", "EQ")
       Graph246(10, "EQ", "CoalCap")
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
