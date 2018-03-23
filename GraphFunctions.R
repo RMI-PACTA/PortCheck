@@ -2144,14 +2144,18 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     
   }else{
     
-    if (SectorToPlot == "Power"){techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")} 
+    if (SectorToPlot == "Power"){techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")}
+    
     if (SectorToPlot == "Automotive"){techorder <- c("ICE","Hybrid","Electric")}
-    if (SectorToPlot == "Oil"){techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
     
-    AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
-    AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)}
+    if (SectorToPlot == "Oil"){
+      techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
+      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
+      AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
+    }
     
-    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
+    if (ChartType == "EQ"){
+      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
     }else{
       AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
     }
@@ -2189,7 +2193,8 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
       
       if (ChartType == "EQ"){ 
-        Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))}else{
+        Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))
+      }else{
         Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
         Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
       }
