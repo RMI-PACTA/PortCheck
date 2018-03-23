@@ -97,17 +97,13 @@ if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showW
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
 ### Get Equity Batch Results
-if (file.exists(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"))){
-  EQBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults_",Scenariochoose,"_",BenchmarkRegionchoose,"_",CompanyDomicileRegionchoose,".csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-}else{
-  EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
-}
+EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_PortfolioWeightedAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio")
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio")
 print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
-EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_CompanysProduction_Snapshot.csv"),stringsAsFactors = FALSE,strip.white = T)
+EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_CompanysProduction_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio")
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
@@ -236,7 +232,7 @@ if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
 RegionCountries <- data.frame(BenchmarkRegionList$Global, BenchmarkRegionList$OECD)
 RegionCountries <- rename(RegionCountries, c("BenchmarkRegionList.Global"="Global","BenchmarkRegionList.OECD"="OECD"))
 
-IndexUniverses[is.na(IndexUniverses)] <- ""
+#IndexUniverses[is.na(IndexUniverses)] <- ""
 IndexUniversesList <- data.frame(IndexUniverse = IndexUniverses$IndexUniverse[!is.na(IndexUniverses$IndexUniverse) & IndexUniverses$IndexUniverse != ""], IndexUniversesColname = IndexUniverses$IndexUniverseColname[!is.na(IndexUniverses$IndexUniverseColname) & IndexUniverses$IndexUniverseColname != ""])
 
 ### Select the Regional and Index Benchmarks
@@ -322,18 +318,18 @@ if (ComparisonFile != "BatchComparison"){
 
 if (nrow(EQBatchTest) >0){
   EQResults <- company.comparison("EQ")
-  EQExposures <- EQResults[[1]]
-  EQAUMs <- EQResults[[2]]
-  EQCoverageWeights <- EQResults[[3]]
-  EQWMCoverageWeights <- EQResults[[4]]
+  # EQExposures <- EQResults[[1]]
+  EQAUMs <- EQResults[[1]]
+  EQCoverageWeights <- EQResults[[2]]
+  EQWMCoverageWeights <- EQResults[[3]]
 }
 
 if (nrow(CBBatchTest) >0){
   CBResults <- company.comparison("CB")
-  CBExposures <- CBResults[[1]]
-  CBAUMs <- CBResults[[2]]
-  CBCoverageWeights <- CBResults[[3]]
-  CBWMCoverageWeights <- CBResults[[4]]
+  # CBExposures <- CBResults[[1]]
+  CBAUMs <- CBResults[[1]]
+  CBCoverageWeights <- CBResults[[2]]
+  CBWMCoverageWeights <- CBResults[[3]]
 }
 
 ###### END NEW SECTION
@@ -428,11 +424,11 @@ for (i in 1:nrow(TestList)){
   
   ##### NEW SECTION
   ### Selects the current portfolio from the Comparative Results
-  EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == ComparisonFile & EQExposures$PortName != PortName),]
+  #EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == ComparisonFile & EQExposures$PortName != PortName),]
   EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == ComparisonFile),]
-  EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
+  #EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
   
-  if (EQCoverageWeights != "NoResults"){
+  if (EQCoverageWeights != "NoCoverageWeight"){
     EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == ComparisonFile),]
     EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == ComparisonFile),]
     EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName  &EQCoverageWeights$ComparisonType == ComparisonFile),]
@@ -441,12 +437,12 @@ for (i in 1:nrow(TestList)){
     EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
   }
   
-  CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == ComparisonFile & CBExposures$PortName != PortName),]
+  #CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == ComparisonFile & CBExposures$PortName != PortName),]
   CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == ComparisonFile),]
-  CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
+  #CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
   ### Could add additional filter in at this point. 
   
-  if (CBCoverageWeights != "NoResults"){  
+  if (CBCoverageWeights != "NoCoverageWeight"){  
     CBExposure <- CBExposures[CBExposures$PortName == PortName & CBExposures$ComparisonType == "BatchResults",]  
     CBAUMData <- CBAUMs[which(CBAUMs$PortName == PortName & CBAUMs$ComparisonType == "BatchResults"),] 
     CBCoverageWeight <- CBCoverageWeights[which(CBCoverageWeights$PortName == PortName & CBCoverageWeights$ComparisonType == "BatchResults"),]
@@ -468,8 +464,8 @@ for (i in 1:nrow(TestList)){
   # PortHeatMapData <- heatmap_data(EQCombin, CBCombin,"Port",PortName)
   ### Sectors with Production
   ### Used to check whether a Line Graph, Ranking, and BarChart should be printed
-  EQSectorProd <- SectorProduction(EQCombin,"EQ")
-  CBSectorProd <- SectorProduction(CBCombin,"CB")
+  # EQSectorProd <- SectorProduction(EQCombin,"EQ")
+  # CBSectorProd <- SectorProduction(CBCombin,"CB")
   
   ### Specify Language and Load Report 
   Languagechoose <-  ParameterFile$Languageselect
@@ -516,8 +512,8 @@ for (i in 1:nrow(TestList)){
       # Graph246(3, "Combined?", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Combined?", "Fossil Fuels") #No fossil fuel combination?
       distribution_chart("05", "Risk Exposure", "CB")
-      stacked_bar_chart_vertical("06","EQ","All",EQStackedBarProdData)
-      stacked_bar_chart_vertical("07","CB","All",CBStackedBarProdData)
+      stacked_bar_chart_vertical("06","EQ","All")
+      stacked_bar_chart_vertical("07","CB","All")
       distribution_chart("08", "Carsten's Metric", "CB")
       # distribution_chart("09", "Carsten's Metric", "EQ")
       Graph246(10, "EQ", "CoalCap")

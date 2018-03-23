@@ -639,10 +639,8 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots){
     # CoverageWeightDF <- subset(CoverageWeight, select = c("PortName","ComparisonType","Technology","CoverageWeight"))
     # CoverageWeightDF <- rbind(CoverageWeightDF,WeightedCoverageWeight)
   }else{
-    CoverageWeight<- "NoCoverageWeight"
+    WeightedCoverageWeight<- "NoCoverageWeight"
   }
-  
-  
   
   
   results <- list(AUMs, CoverageWeight, WeightedCoverageWeight)
