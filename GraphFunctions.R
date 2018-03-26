@@ -312,7 +312,181 @@ report <- function(){
   return()
 }
 
+#----------- CA Report Data------------------ #
+CAReportData <- function(){
+  
+  # Output is a dataframe with the values for the text
+  
+  ### Exec Summary Data ###
+  ReportInsuranceName <- PortfolioNameLong
+  SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
+  NoPeers <- nrow(TestList)
+  
+  
+  ### Port Weights ###
+  SectorData$ChartType<- "CB"
+  SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
+  
+  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  
+  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
+  
+  # Need to add the averages in
+  
+  FFSectorPeerEQ <- 1
+  PowerSectorPeerEQ<- 1
+  AutoSectorPeerEQ<- 1
+  FFSectorPeerCB<- 1
+  PowerSectorPeerCB<- 1
+  AutoSectorPeerCB<- 1
+  
+  ### RANKINGS ###
+  
+  EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
+  EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
+  EQPeerRanks$PortName <- "PeerTotal"
+  techlist <- unlist(colnames(EQPortRanks)[2:12])
+  EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
+  colnames(EQReportRanks) <- techlist
+  
+  CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
+  CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
+  CBPeerRanks$PortName <- "PeerTotal"
+  techlist <- unlist(colnames(CBPortRanks)[2:12])
+  CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
+  colnames(CBReportRanks) <- paste0("CB",techlist)
+  
+  
+  ### MERGE ALL RESULTS ###
+  # reportdata <- data.frame(
+  #          c("ReportInsuranceName",ReportInsuranceName), 
+  #          c("SizeofPortfolio",SizeofPortfolio),
+  #          c("NoPeers",NoPeers),
+  #          c("FFSectorPortEQ",FFSectorPortEQ),
+  #          c("PowerSectorPortEQ",PowerSectorPortEQ),
+  #          c("AutoSectorPortEQ",AutoSectorPortEQ),
+  #          c("FFSectorPortCB",FFSectorPortCB),
+  #          c("PowerSectorPortCB",PowerSectorPortCB),
+  #          c("AutoSectorPortCB",AutoSectorPortCB)
+  #          )
+  # 
+  # colnames(reportdata) <- as.character(unlist(reportdata[1,]))
+  # reportdata = reportdata[-1, ]
+  # 
+  # reportdata <- cbind(reportdata,EQReportRanks)
+  # reportdata <- cbind(reportdata,CBReportRanks)
+  # 
+  # return(reportdata)
+  
+}
 
+CAReport <- function(){
+  
+  CAReportData()
+  
+  # Copy in the template for the report
+  text <- as.data.frame(template,stringsAsFactors = FALSE)  
+  colnames(text) <- "text"
+  
+  # Function removes text lines between 
+  # "handlenameS" and "handlenameE" ie CBPowerS, CBPowerE
+  # Need to add these handles into the final doc when ready. Also determine what will be kicked out/what will remain. 
+  removetextlines <- function(handlename){
+    startpage <- which(grepl(paste0(handlename,"S"),text$text))
+    endpage <- which(grepl(paste0(handlename,"E"),text$text))
+    
+    if (length(startpage) >0 ){
+      
+      removelist <- lapply(1:length(startpage), function(x) c(startpage[c(x)]:endpage[c(x)]))
+      removelist <- melt(removelist[1:length(startpage)])
+      text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
+      colnames(text) <- "text"
+    }else{
+      removeline <- which(grepl(handlename,text$text))
+      text <- as.data.frame(text[-removeline,],stringsAsFactors =FALSE)
+      colnames(text) <- "text"
+    }
+    return(text)
+  }
+  
+  
+  # Ranks
+  techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
+  for (j in techranks){
+    text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
+  }
+  for (j in techranks){
+    text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
+  }
+  
+  # Exec Summary Values
+  execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
+  for (j in execsummarylist){
+    text$text <- gsub(j,eval(as.symbol(as.character(j))),text$text)
+  }
+  
+  # Replace Sector Weight Values
+  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=4),"Sector",rep(c("Port","Peer"),3,each=2),rep(c("EQ","CB"),6)))
+  for (j in 1:nrow(a)){
+    text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
+  }  
+  
+  # Replace Insurer Name
+  text$text <- gsub("InsurerSampleReport",PortfolioNameLong,text$text)
+  
+  # Figures
+  # Replace CAFigures
+  
+  # Update the template to reflect figure names
+  
+  # FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
+  # colnames(FigNames) <- "Name"
+  # FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
+  # FigNames$Fig <- substring(FigNames$Name,1,2)
+  # FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
+  # 
+  # for (f in 1:nrow(FigNames)){
+  #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
+  # }
+  
+  
+  ##### PRINT REPORT ######
+  
+  # Copy in the graphics folder for the report
+  originalloc <- paste0(GIT.PATH,"Templates/ReportGraphics/")
+  graphicsloc <- paste0(LANGUAGE.PATH ,"ReportGraphics/")
+  flist <- list.files(originalloc, full.names = TRUE)
+  
+  if(!dir.exists(file.path(graphicsloc))){
+    dir.create(file.path(graphicsloc), showWarnings = TRUE, recursive = FALSE, mode = "0777")
+    for (file in flist){file.copy(file, graphicsloc)}
+  }  
+  
+  # Save the template file
+  TemplateNameNew <- paste0("Template_",PortfolioName,"_",Languagechoose)
+  write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
+  
+  # Create the PDF
+  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
+  
+  # Delete remaining files and ReportGraphics Folder
+  unlink("ReportGraphics",recursive = TRUE)
+  excessfileendings <- c(".log",".rnw",".tex",".aux")
+  file.remove(paste0(TemplateNameNew,excessfileendings))
+  file.remove("FigureList.txt")
+  
+  # Rename output file
+  if (InvestorName == PortfolioName){
+    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
+      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,"_",Languagechoose,".pdf"))}
+  
+  
+  
+}
 
 # --------
 # GENERAL PLOT FUNCTIONS
@@ -434,1188 +608,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         plot.title = element_text(hjust = 0.5)
   )
 }
-                           
-# ------------ Other Sector Plots------------ #
-other_sector_chart <- function(plotnumber, SectorToPlot){
-
-
-  check = 0
-  EQPlotData <- subset(EQ_OS_WEM, EQ_OS_WEM$PortName == PortfolioName & EQ_OS_WEM$Sector == SectorToPlot)
-  if(nrow(EQPlotData) == 1){
-    EQPlotData$ChartType <- "EQ"
-    check = check+.5}
-  
-  CBPlotData <- subset(CB_OS_WEM, CB_OS_WEM$PortName == PortfolioName & CB_OS_WEM$Sector == SectorToPlot)
-  if(nrow(CBPlotData) == 1){
-    CBPlotData$ChartType <- "CB"
-    check = check+1.5}
-  
-  if (check == 2){PlotData <- rbind(EQPlotData,CBPlotData)} else{
-    if (check == 0.5){PlotData <- EQPlotData}else{
-      if (check == 1.5){PlotData <-CBPlotData}}}
-  
-  if (check >0){
-    
-    PlotData<- merge(PlotData,OSTargets, by="Sector")
-    PlotData <- PlotData[,!colnames(PlotData) %in% c("Sector","PortName", "TargetEmissionsFactor")]
-    
-    df <- melt(PlotData, id.vars = c("ChartType", "EmissionsFactor"))
-    df <- df[with(df,order(ChartType)),]
-    
-    df$Year <- 2017:2022
-    df$value <- df$EmissionsFactor*df$value
-    
-    year_lab <- GT["Year"][[1]]
-    ylabel <- paste0(GT["OtherSectorLabel"][[1]]," (",GT[paste0(SectorToPlot,"Units")][[1]],")")
-    
-    df$ChartType<-factor(df$ChartType)
-    # df <- df[with(df,order(Year)),]
-    
-    dfCB <- df[df$ChartType == "CB",]
-    dfEQ <- df[df$ChartType == "EQ",]
-    
-    outputplot <- ggplot()
-    
-    if (nrow(dfCB)>0){outputplot<-outputplot+
-      geom_line(data=dfCB,aes(x=Year,y=value,colour=Tar2DColour,group=1),size=1.5,linetype=1)+
-      annotate(geom = "point",y=dfCB$value[dfCB$Year==2017],x=dfCB$Year[dfCB$Year==2017],size=5,colour=YourportColour,fill=YourportColour, shape=22)}
-    if (nrow(dfEQ)>0){outputplot<-outputplot+geom_line(data=dfEQ,aes(x=Year,y=value,colour=Tar2DColour,group=1),size=1.5,linetype=2)+
-      annotate(geom = "point",y=dfEQ$value[dfEQ$Year==2017],x=dfEQ$Year[dfEQ$Year==2017],size=5,colour=YourportColour,fill=YourportColour, shape=22)}
-    
-    outputplot<-outputplot+
-      scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
-      xlab(year_lab) + ylab(ylabel) + # Set axis labels
-      # legend(values=legelabels)+
-      scale_x_continuous(breaks=seq(Startyear,max(df$Year),1),expand=c(0,0))+
-      scale_y_continuous(expand=c(0,0))+
-      expand_limits(x=c(2016.5,2021.5),y= c(.95*min(df[,c(4)], na.rm=TRUE),1.05*max(df[,c(4)], na.rm=TRUE)))+
-      theme_linecharts()  
-    
-    
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",SectorToPlot,'_OtherSectors.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi)
-    InPort=1
-  }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
-    Label = GT[paste0("NoSectorOther")][[1]]
-    
-    
-    outputplot <- ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,30), size=4)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "white",colour = NA))
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",SectorToPlot,'_OtherSectors.png', sep=""),bg="transparent",height=3.6,width=3.6,plot=outputplot,dpi=ppi)
-    InPort=0
-  }    
-  
-  return(InPort)
-}
-
-# ------------ Shipping Plots------------ #
-shipping_chart <- function(plotnumber, SectorToPlot="Shipping"){
-  
-  
-  EQShipsPort<- subset(EQPortSnapshot, EQPortSnapshot$ISIN %in% ShippingData$ISIN)
-  CBShipsPort<- subset(CBPortSnapshot, CBPortSnapshot$ISIN %in% ShippingData$ISIN)
-  
-  noships <- nrow(EQShipsPort) +nrow(CBShipsPort)
-  
-  if(noships >0){
-    
-    EQShips <- ShippingData[ShippingData$ISIN %in% EQShipsPort$ISIN,]
-    CBShips <- ShippingData[ShippingData$ISIN %in% CBShipsPort$ISIN,]
-    EQShipsinPort <- merge(EQShips, EQShipsPort, by="ISIN")
-    CBShipsinPort <- merge(CBShips, CBShipsPort, by="ISIN")
-    
-    ship_summary <- function(ShipsinPort,ClassificationName){
-      if(ClassificationName == "CB"){
-        # WEighted Approach (CB and potentially EQY)
-        ShipAUM <- sum(CBShipsinPort$AUM[ShipsinPort$Year == 2017],na.rm = TRUE)
-        ShipsinPort <- CBShipsinPort
-        ShipsinPort$ShipShare <- ShipsinPort$AUM/ShipAUM
-        ShipsinPortlong <- melt(ShipsinPort[,c("Year","ShipShare",grep("Perc",colnames(ShipsinPort), value = TRUE))], id.var=c("Year","ShipShare"))
-        ShipsinPortlong$TechShare <- ShipsinPortlong$ShipShare * ShipsinPortlong$value
-        ShipsinPort <- aggregate(ShipsinPortlong["TechShare"], by = ShipsinPortlong[,c("Year","variable")], FUN = sum)
-        ShipsinPort$variable <- strtrim(ShipsinPort$variable,5)
-        ShipsinPort$Type <- GT["ShipsTypeListedCorporateBonds"][[1]]
-        return(ShipsinPort)
-      }else{
-        #Ownership Approach
-        EQShipsinPort <- aggregate(EQShipsinPort["Position"], by = EQShipsinPort[,c("Issuer","GHG_A", "GHG_B", "GHG_C", "GHG_D", "GHG_E", "GHG_F", "GHG_G", "Year", "TotalShares")], FUN = sum)
-        ShipsinPort <- EQShipsinPort
-        ShipsinPort$ShipShare <- ShipsinPort$Position / ShipsinPort$TotalShares
-        ShipsinPortlong <- melt(ShipsinPort[,c("Year","ShipShare",grep("GHG_",colnames(ShipsinPort), value = TRUE))], id.var=c("Year","ShipShare"))
-        ShipsinPortlong$PortfolioProduction <- ShipsinPortlong$ShipShare * as.numeric(ShipsinPortlong$value)
-        ShipsinPort <- aggregate(ShipsinPortlong["PortfolioProduction"], by = ShipsinPortlong[,c("Year","variable")], FUN = sum)
-        ShipsinPortRef <- ddply(ShipsinPortlong,.(Year),summarize, TotalShips = sum(PortfolioProduction, na.rm = TRUE))
-        ShipsinPort <- merge(ShipsinPort,ShipsinPortRef, by = "Year", all.x = TRUE)
-        ShipsinPort$TechShare <- ShipsinPort$PortfolioProduction / ShipsinPort$TotalShips
-        ShipsinPort <- ShipsinPort[,c("Year", "variable", "TechShare")]
-        ShipsinPort$Type <- GT["ShipsTypeListedEquity"][[1]]
-        return(ShipsinPort)
-      }
-    }
-    
-    
-    #Market
-    ShipsListedMarket <- subset(ShippingData, Company == "ListedMarket", select = c("Year",grep("Perc",colnames(ShippingData), value = TRUE)))
-    ShipsListedMarket <- melt(ShipsListedMarket, id.var=c("Year"))
-    ShipsListedMarket$variable <- strtrim(ShipsListedMarket$variable,5)
-    ShipsListedMarket$Type <- GT["ShipsTypeStockMarket"][[1]]
-    ShipsListedMarket <- rename(ShipsListedMarket, c("value" = "TechShare"))
-    
-    ShipsSummary <- ShipsListedMarket
-    
-    #CB
-    if(dim(CBShipsinPort)[1]>0){
-      ShipsCB <- ship_summary(CBShipsinPort, "CB")
-      ShipsSummary <- rbind(ShipsSummary, ShipsCB)
-    }
-    
-    #EQ
-    if(dim(EQShipsinPort)[1]>0){
-      ShipsEQ <- ship_summary(EQShipsinPort, "EQ")
-      ShipsSummary <- rbind(ShipsSummary, ShipsEQ)
-    }
-    
-    if(length(unique(ShipsSummary$Type)) > 2){
-      ShipsSummary <- subset(ShipsSummary, Year == Startyear+5)
-    }
-    
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
-    
-    ShipsSummary$Order <- str_sub(ShipsSummary$variable,-1,-1)
-    ShipsSummary$variable <- paste0("GHG ",str_sub(ShipsSummary$variable,-1,-1)," Score")
-    ShipsSummary$Name <- paste0(ShipsSummary$Type," ",ShipsSummary$Year)
-    ShipColourPalette <- c("#D73027", "#FC8D59", "#FEE08B", "#FFFFBF", "#D9EF8B", "#91CF60", "#1A9850")
-    ShipsSummary$Order <- factor(ShipsSummary$Order, levels=rev(c("A","B","C","D","E","F","G")))
-    ShipsSummary <- ShipsSummary[order(ShipsSummary$Order),]
-    ShipsSummary$Name <- wrap.labels(ShipsSummary$Name,8)
-    
-    ylabel <- GT["ShipYLabel"][[1]]
-    
-    shippingchart<- ggplot(ShipsSummary, aes(Name, TechShare,fill=Order))+
-      geom_bar(stat = "identity",width = .6, show.legend = TRUE)+
-      scale_fill_manual(labels=unique(ShipsSummary$Order),values=ShipColourPalette)+
-      scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-      expand_limits(0,0)+
-      guides(fill=guide_legend(nrow = 1))+
-      ylab(ylabel)+
-      theme_barcharts()
-    
-    # print(PlotData)
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_Shippingbar.png"),bg="transparent",height=3.6,width=3.6,plot=shippingchart,dpi=ppi)
-    InPort=1
-    
-  }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    # 
-    Label = GT[paste0("No",SectorToPlot)][[1]]
-    
-    
-    shippingchart <- ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,30), size=4)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA))
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_Shippingbar.png"),bg="transparent",height=3.6,width=3.6,plot=shippingchart,dpi=ppi)
-    
-    InPort=0
-    
-  }
-  
-  return(InPort)}
-
-# ------------- PORT DATA PIE --------------- #
-port_pie <- function(plotnumber, PortData){
-  
-  Port <- PortData
-  
-  Port <- subset(PortData, select = c("Bonds","Equity","Others"))
-  if(nrow(Port)>0){
-    SumPort <- sum(Port[1,1:3],na.rm = TRUE)
-    Port<- melt(Port)
-    Port<- rename(Port,c("variable"="Classification"))
-    Port$perc <- round(Port$value/SumPort,2)*100
-    
-    Palette <- data.frame(Classification = c("Bonds","Equity","Others"),Colour=c("dodgerblue4","dodgerblue1","grey"))
-    Palette$Colour <- as.character(Palette$Colour)
-    Port <- merge(Port,Palette, by="Classification")
-    
-    Port$Label <- lapply(Port$Classification, function(x) GT[paste0(x,"Title")][[1]])
-    
-    
-    PieChart<- ggplot(Port, aes(x="", y=perc, fill=Classification))+
-      geom_bar(stat = "identity",color=NA, width = 0.5)+
-      geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
-      scale_fill_manual(values= Port$Colour,labels=paste(Port$Label,": ",Port$perc,"%",sep=""))+
-      guides(fill = guide_legend(override.aes = list(colour = NULL)))+
-      theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
-            axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
-            plot.background = element_rect(fill = "transparent",colour = NA),
-            panel.background = element_rect(fill = "transparent",colour = NA),
-            legend.background = element_rect(fill = "transparent",colour = NA),
-            legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-            legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
-    
-    PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",'Portpie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
-  }
-  
-}
-
-# ------------- PIE CHART ------------------- #
-pie_chart <- function(plotnumber,ChartType){
-  
-  if (ChartType == "EQ"){
-    PortSnapshot <- EQPortSnapshot
-  }else if(ChartType == "CB"){
-    PortSnapshot <- CBPortSnapshot
-  }
-  
-  
-  if (nrow(PortSnapshot)>0){
-    
-    colnames(PortSnapshot)[colnames(PortSnapshot) %in% "IssLvlPortWeight"] <- "PortWeight"
-    PortSnapshotSub <- subset(PortSnapshot, CNTRY_OF_DOMICILE %in% IndexUniverses[,names(IndexUniverses) == eval(paste0(CompanyDomicileRegionchoose,"_ISO"))])
-    piesub_tech <- unique(subset(PortSnapshotSub,select=c("ISIN","piesector","PortWeight")))
-    
-    piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
-    piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
-    # piesub_tech$piesector[piesub_tech$piesector] <- "Not Assessed"
-    
-    
-    #OUT OF REGION <- Anti-PortSnapshotSub if Region != Global/GLobalAgg
-    piesub_tech$piesector <- revalue(piesub_tech$piesector,c("Metal-Iron" = "Iron & Steel","NonOG Production" = "Fossil Fuels","Bldg Prod-Cement/Aggreg" = "Building Materials & Fixtures", "Oil&Gas"= "Fossil Fuels","Coal"="Fossil Fuels", "Transport-Marine" = "Marine Transportation","Metal-Aluminum"="Aluminum", "Steel-Producers" = "Iron & Steel", "Transport-Air Freight"= "Airlines"),warn_missing = FALSE)
-    
-    pieshares <- ddply(piesub_tech, .(piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
-    pieshares$label <- "Total Portfolio"
-    
-    # Create a sub dataframe for plotting
-    secfull <- c("Utility Power", "Automotive", "Fossil Fuels", "Non-Utility Power", "Airlines", "Building Materials & Fixtures","Aluminum", "Iron & Steel", "Marine Transportation","Not Assessed")
-    secsmiss <- setdiff(secfull,unique(pieshares$piesector))
-    
-    weights <- rep(0,length(secsmiss))
-    label <- rep("Total Portfolio",length(secsmiss))
-    missingdf <- data.frame(secsmiss,weights,label)
-    names(missingdf) <- names(pieshares)
-    pieshares <- rbind(pieshares,missingdf)
-    pieshares <- within(pieshares,piesector <- factor(piesector, levels=secfull))
-    pieshares$piesector <- revalue(pieshares$piesector,c("Building Materials & Fixtures" = "Building Materials"))
-    pieshares <- pieshares[with(pieshares,order(label,piesector)),]
-    pieshares <- pieshares[pieshares$label %in% "Total Portfolio",]
-    pieshares$perc <- round(pieshares$Portfolio_weight*100,1)
-    Palette <- c("#274f80","#30629e", "#3974bc", "#5288cA", "#934d1d","#D26E2A", "#ED7D31", "#F1A78A","#F5C7B8", "#E5E5E5", "#b7b7b7") #blue #b7b7b7
-    
-    pieshares$piesector <- revalue(pieshares$piesector, c("Utility Power"=GT["PS_UP"][[1]],"Automotive"=GT["PS_Aut"][[1]],"Fossil Fuels"=GT["PS_FF"][[1]],"Non-Utility Power"=GT["PS_NUP"][[1]],"Airlines"=GT["PS_Air"][[1]],"Building Materials"=GT["PS_BM"][[1]],"Iron & Steel"=GT["PS_IS"][[1]],"Marine Transportation"=GT["PS_MT"][[1]],"Not Assessed"=GT["PS_NA"][[1]]),warn_missing = FALSE) 
-    
-    PieChart<- ggplot(pieshares, aes(x="", y=Portfolio_weight, fill=piesector))+
-      geom_bar(stat = "identity",color=NA, width = 0.5)+
-      geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
-      scale_fill_manual(values= Palette,labels=paste(pieshares$piesector," ",pieshares$perc,"%",sep=""))+
-      guides(fill = guide_legend(override.aes = list(colour = NULL)))+
-      theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
-            axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
-            plot.background = element_rect(fill = "transparent",colour = NA),
-            panel.background = element_rect(fill = "transparent",colour = NA),
-            legend.background = element_rect(fill = "transparent",colour = NA),
-            legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-            legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
-    
-    PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_pie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
-    
-  }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
-    if (ChartType == "CB"){
-      Label <- GT["NoDebtPie"][[1]]
-    }else{Label <- GT["NoEquityPie"][[1]]}
-    
-    
-    outputplot <- 
-      ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=5)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA))
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_pie.png',sep=""),bg="transparent",height=2.6,width=4,plot=outputplot,dpi=ppi)
-  }
-  
-  return()
-}
-
-# ------------- MINI LINE CHARTS ------------ #
-mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
-  
-  # combin <- EQCombin
-  # TechToPlot <- "CoalCap"
-  # SectorToPlot <- "Power"
-  # ChartType <- "EQ"
-  
-  
-  if (ChartType == "EQ"){
-    combin <- EQCombin
-    
-  }else if (ChartType == "CB"){
-    combin <- CBCombin
-  }
-  
-  production <- subset(combin, Technology %in% TechToPlot)
-  
-  production <- rename(production, c("WtProduction"="Production"),warn_missing = FALSE)
-  
-  # if ((sum(production$Production, na.rm = TRUE)>0 | SectorToPlot == "Fossil Fuels") & nrow(combin)>0){
-  
-  if (nrow(combin)>0){
-    
-    if (ChartType == "EQ"){
-      LineData <- subset(combin, Technology %in% TechToPlot & BenchmarkRegion %in% BenchmarkRegionchoose & CompanyDomicileRegion %in% CompanyDomicileRegionchoose & Scenario %in% Scenariochoose)  
-      if (SectorToPlot == "Fossil Fuels"){
-        LineData <- subset(LineData, select = c("Sector","Year","Production","TargetProductionAUMIntensity"))
-        names(LineData)[names(LineData)=="TargetProductionAUMIntensity"] <- "TargetProductionAlignment"
-      } else{
-        LineData <- subset(LineData, select = c("Sector","Year","Production","TargetProductionAlignment"))
-        
-      }
-      
-      names(LineData)[names(LineData)=="TargetProductionAlignment"] <- "Target"
-      names(LineData)[names(LineData)== "Production"] <- "Portfolio"
-      
-      sectors <- c("Automotive", "Fossil Fuels", "Power")
-      axislabels <- c(GT["Cars"][[1]], GT["FossilFuels_Unit"][[1]], GT["Power_Unit"][[1]])
-      lookup <- data.frame(sectors,axislabels)
-      # axislabel <- paste(TechToPlot,lookup$axislabels[grep(SectorToPlot, lookup$sectors)])
-      if(SectorToPlot == "Fossil Fuels"){TechLabel <- GT[paste0("T_",TechToPlot,"Prod")][[1]]}else{TechLabel <- GT[paste0("T_",TechToPlot)][[1]] }       # Removes "Cap " from the Power labels
-      axislabel <- paste(TechLabel,lookup$axislabels[grep(SectorToPlot, lookup$sectors)])
-      
-      if(SectorToPlot == "Automotive"){axislabel <- TechLabel}
-      
-      # Scaling and Labelling the Y axis
-      maxval <- max(LineData[,4],LineData[,3],na.rm=TRUE)
-      
-      magnitude_scale <- c(1,1,1e3,1e6,1e9)
-      power_units <- c("kW","MW","GW","TW","Error_powertoohigh")
-      car_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      ff_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      ff_units <- paste0(ff_units," ",GT["barrels"][[1]])
-      coal_units <- c("","t","kt","MT","GT")
-      oil_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      oil_units <- paste0(oil_units," ",GT["barrels"][[1]])
-      gas_units <- c("","",GT["thousand"][[1]],GT["million"][[1]],GT["billion"][[1]])
-      gas_units <- paste0(gas_units, " mÂ²")
-      unit_lookup <- data.frame(car_units,ff_units,power_units,coal_units,oil_units,gas_units)
-      # ff_sectors <- c(GT["T_Coal"][[1]],GT["T_Oil"][[1]],GT["T_Gas"][[1]])
-      ff_sectors <- c("Coal","Oil","Gas")
-      sectors <- cbind(sectors, ff_sectors)
-      unit_lookup <- setNames(unit_lookup,sectors)
-      
-      # Scales the Data to the correct units based on the maximum value.
-      max_magnitude <- findInterval(maxval,magnitude_scale)
-      if(max_magnitude == 0){max_magnitude <- 2}
-      LineData$Portfolio <- LineData$Portfolio /magnitude_scale[max_magnitude]
-      LineData$Target <- LineData$Target/magnitude_scale[max_magnitude]
-      
-      # Looks up the units within the correct line in the unit_lookup dataframe and sets the labels
-      if (SectorToPlot == "Fossil Fuels")  unit_search <- TechToPlot else
-        unit_search <- SectorToPlot
-      
-      unitlabel <- paste("(",unit_lookup[unit_search][max_magnitude,],")",sep="")  
-      if (unitlabel =="()"){unitlabel<-""}
-      
-    }else{  # "CB"
-      LineData <- subset(combin, BenchmarkRegion %in% BenchmarkRegionchoose & Technology %in% TechToPlot)#  & Scenario %in% Scenariochoose)    
-      
-      if (SectorToPlot == "Fossil Fuels"){
-        LineData <- subset(LineData, select = c("Sector","Year","OGCMetrik_Portfolio","Benchmark_OGC"))
-        names(LineData)[names(LineData)=="Benchmark_OGC"] <- "Target"
-        names(LineData)[names(LineData)== "OGCMetrik_Portfolio"] <- "Portfolio"      
-        
-        LineData$Portfolio <- LineData$Portfolio/100
-        LineData$Target <- LineData$Target/100  
-      }else{
-        
-        LineData <- subset(LineData, select = c("Sector","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-        names(LineData)[names(LineData)=="Benchmark_WtTechShareTechShare"] <- "Target"
-        names(LineData)[names(LineData)== "WtTechShareTechShare"] <- "Portfolio"}
-      
-      max_magnitude <- 100
-      if(SectorToPlot == "Fossil Fuels"){TechLabel <- GT[paste0("T_",TechToPlot,"Prod")][[1]]}else{TechLabel <- GT[paste0("T_",TechToPlot)][[1]] }       # Removes "Cap " from the Power labels
-      
-      if (SectorToPlot == "Fossil Fuels"){unitlabel <- paste0(TechLabel," (",Startyear, " = 100)")}else{
-        unitlabel <- paste0(TechLabel," (%)")}
-      axislabel <- ""
-      
-      LineData$Portfolio <- LineData$Portfolio*100
-      LineData$Target <- LineData$Target*100  
-    }
-    
-    LineData <- subset(LineData, LineData$Year >= Startyear)
-    LineData$Portfolio[!LineData$Year %in% c(Startyear:(Startyear+5))]<- NA
-    
-    goodtech <- c("Renewables","Hydro","Nuclear","Hybrid","Electric")  
-    badtech <- c("ICE","Oil","Gas","Coal","GasCap","CoalCap")
-    
-    # Image
-    techicon <- readPNG(paste0(figuredirectory,TechToPlot,".png"))
-    g <- rasterGrob(techicon, interpolate=TRUE)
-    
-    scalemax <- max(LineData$Target,LineData$Portfolio, na.rm = TRUE)
-    targetline <- LineData$Target[LineData$Year == max(LineData$Year,na.rm = TRUE)]
-    if(targetline>scalemax*.5 & !is.na(targetline)){
-      ylocmin <- (.2/(max(LineData$Year)-Startyear))*(scalemax)
-      ylocmax <- ylocmin +(1.5/(max(LineData$Year)-Startyear))*(scalemax)
-    }else{
-      ylocmax <- scalemax-(.2/(max(LineData$Year)-Startyear))*scalemax
-      ylocmin <- ylocmax- (1.5/(max(LineData$Year)-Startyear))*(scalemax)
-    } 
-    
-    year_lab <-  GT["Year"][[1]]
-    ylabel <- paste(axislabel,unitlabel)
-    # bad ones - ie coal, oil, ice
-    # PortfolioName <- gsub("_.*", "\\1", PortfolioName)
-    if (TechToPlot %in% badtech){
-      outputplot <- ggplot(data=LineData)+
-        annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
-        
-        geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=badexpColour)) +
-        geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=goodexpColour)) +
-        geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
-        geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
-        geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
-        
-        scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
-        xlab(year_lab) + ylab(ylabel) + # Set axis labels
-        scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
-        scale_y_continuous(expand=c(0,0))+
-        expand_limits(y= 1.1*max(LineData[,c(3,4)], na.rm=TRUE))+
-        theme_linecharts()
-    }else{
-      # good ones - ie renewables
-      outputplot <- ggplot(data=LineData)+
-        annotation_custom(g,xmin=max(LineData$Year)-1.5, xmax=max(LineData$Year), ymin=ylocmin, ymax=ylocmax)+
-        
-        geom_ribbon(aes(x=Year,ymin=Target,ymax=pmax(Target,Portfolio),fill=goodexpColour)) +
-        geom_ribbon(aes(x=Year,ymin=pmin(Target,Portfolio),ymax=Target,fill=badexpColour)) +
-        geom_ribbon(aes(x=Year,ymin=0,ymax=pmin(Target,Portfolio),fill=CurrCapColour))+
-        geom_line(aes(x=Year,y=Portfolio,colour=YourportColour),size=1.5,linetype=1) +
-        geom_line(aes(x=Year,y=Target,colour=Tar2DColour),size=1.5,linetype=2) +
-        
-        scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-        scale_colour_manual(name="",guide='legend',values= c(YourportColour,Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
-        xlab(year_lab) + ylab(ylabel) + # Set axis labels
-        scale_x_continuous(breaks=seq(Startyear,max(LineData$Year),5),expand=c(0,0))+
-        scale_y_continuous(expand=c(0,0))+
-        expand_limits(y= 1.1*max(LineData[,c(3,4)], na.rm=TRUE))+
-        theme_linecharts()
-    }
-    outputplot <- outputplot +
-      guides(colour=guide_legend(keywidth = 4, keyheight = 1,order=1,override.aes = list(linetype=c(1,2),colour=c(YourportColour,Tar2DColour),size=1.5)))    
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,'_MiniLinePlot.png', sep=""),bg="transparent",height=2.2,width=2.4,plot=outputplot,dpi=ppi)
-    InPort=1
-  }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
-    # techname <- paste0("T_",TechToPlot)
-    
-    if (SectorToPlot %in% c("Fossil Fuels","Coal","Oil&Gas")){techlabel <- GT[paste0("T_",TechToPlot,"Prod")][[1]]}else{techlabel <- GT[paste0("T_",TechToPlot)][[1]]}
-    # techlabel <- GT[paste0("T_",TechToPlot)][[1]]
-    replacename <- paste0("NoSector",ChartType)
-    
-    Label <- GT[replacename][[1]]
-    Label <- gsub("techname",techlabel, Label)
-    Label <- gsub("?-l", "?l",Label)
-    
-    outputplot <- ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,20), size=4)+
-      geom_blank()+
-      theme(axis.title.x=element_blank(),
-            axis.title.y=element_blank(),
-            axis.text.x=element_blank(),
-            axis.text.y=element_blank(),
-            axis.ticks = element_blank(),
-            panel.grid.major = element_blank(), 
-            panel.grid.minor = element_blank(),
-            #panel.background = element_blank(),
-            panel.background = element_rect(fill = "transparent",colour = NA))
-    
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,'_MiniLinePlot.png', sep=""),bg="transparent",height=2.2,width=2.4,plot=outputplot,dpi=ppi)
-    InPort=0
-  }
-  return(InPort)    
-}
-
-#------------- Data for HeatMap (Portfolio) --- #
-heatmap_data <- function(EQDataInput, CBDataInput,FundsOrPort,PortName){
-  
-  # EQDataInput <- EQCombin
-  # CBDataInput <- CBCombin
-  
-  BenchYear <- Startyear + 5
-  # FundsData <- data.frame( "PortName"=character(),
-  # "Technology"=character(),
-  # "BenchmarkRegion"=character(),
-  # "Exposure"=numeric()  )
-  
-  # if(nrow(EQDataInput) > 1){ 
-  if (typeof(EQDataInput) == "list"){ if (nrow(EQDataInput) > 0){
-    EQData <- subset(EQDataInput,Year == BenchYear & Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose,
-                     select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-    
-    EQData$MarketExposure[EQData$Technology %in% c("Oil", "Gas", "Coal")] <- EQData$AUMExposure[EQData$Technology %in% c("Oil", "Gas", "Coal")]
-    EQData$Exposure <- EQData$MarketExposure
-    
-    EQData <- EQData[,!names(EQData) %in%   c("MarketExposure",'AUMExposure')]
-    EQData$Exposure <- as.numeric(EQData$Exposure)
-    
-    if (FundsOrPort == "Port"){ EQData$PortName <- "Equity"}
-    
-    FundsDataTemp <- EQData
-  }}
-  
-  # if (nrow(CBDataInput) > 1 & nrow(CBDataInput) != NULL){
-  if (typeof(CBDataInput) == "list"){ if (nrow(CBDataInput) > 0){
-    CBData <- subset(CBDataInput, Year == BenchYear & Scenario == Scenariochoose ,
-                     select = c("PortName","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
-    
-    CBData$Exposure_WtTechShareTechShare[CBData$Technology %in% c("Oil", "Gas", "Coal")] <- CBData$Exposure_OGCMetrik[CBData$Technology %in% c("Oil", "Gas", "Coal")]
-    CBData$Exposure <- CBData$Exposure_WtTechShareTechShare
-    
-    CBData <- CBData[,!names(CBData) %in%   c("Exposure_WtTechShareTechShare",'Exposure_OGCMetrik')]
-    CBData$Exposure <- as.numeric(CBData$Exposure)
-    
-    if (FundsOrPort == "Port"){CBData$PortName <- "Corporate Bonds"}
-    
-    if(exists("FundsDataTemp")){FundsDataTemp <- CBData}
-    else{FundsDataTemp <- rbind(FundsData,CBData)}
-  }}
-  
-  if(exists("FundsDataTemp")){return(FundsDataTemp)}
-  
-  
-  
-}
-
-# ------------ FUND MAP --------------------- # 
-fundmap_chart <- function(plotnumber,FundsData){
-  
-  # FundsData <- FundsInPort
-  # FundsData <- EQBatchTest
-  
-  # EQDataInput <- EQCombin
-  # CBDataInput <- CBCombin
-  
-  BenchYear <- Startyear + 5
-  
-  
-  
-  ### FundsData is the BatchTest ie. EquityAnalysisHeatmap-450S-only.csv
-  ### Improve flexibility to include Corporate Bonds as well. 
-  
-  if(typeof(FundsData) == "list"){
-    if(nrow(FundsData)>0){
-      
-      AxisColour = 'Black'
-      textcolour = 'Black'
-      geom.text.size = 2.5
-      
-      BrownList <-c("CoalCap", "GasCap", "OilCap", "Gas", "Oil", "Coal", "ICE")
-      GreenList <-c("NuclearCap", "HydroCap", "RenewablesCap", "Electric","Hybrid")
-      
-      # Read Heatmap
-      #  Heatmap <- read.csv(paste(OutputLocation,PortfolioHoldings,"/",HeatmapDate,"_",PortfolioHoldings,"_EquityAnalysisHeatmap-450S-only.csv",sep = ""),stringsAsFactors = FALSE, strip.white = TRUE)
-      Heatmap <- FundsData #combin
-      
-      
-      # Remove shitty name
-      Heatmap$PortName <- gsub("[01]_.*","",Heatmap$PortName)
-      if ("ISIN" %in% colnames(Heatmap)){Heatmap$PortName <- Heatmap$ISIN}
-      techlist <- unique(Heatmap$Technology)
-      techlist <- techlist[techlist != "OilCap"]
-      techlistshort <- c("elec","hyb","ICE","coal","gas","oil","coac","gasc","hyd","nuc","ren")
-      Techlist <- as.data.frame(t(rbind(techlist,techlistshort)))
-      
-      ################## Heatmap ########################
-      
-      #Select subset of results: Year, Scenario, Where the companies are located/the investment universe, and just funds, not brands. 
-      # Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose & CompanyDomicileRegion == CompanyDomicileRegionchoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-      # # No Companydomregion for Stoxx600
-      # Heatmap <- subset(Results, Results$Year == BenchYear & Results$Scenario == Scenariochoose ,select = c("PortName","Technology","BenchmarkRegion","MarketExposure", "AUMExposure"))
-      
-      
-      # # Rename the Brand FTSE to the fund FTSE350
-      # Heatmap$PortName[Heatmap$PortName == "FTSE"] <- "FTSE350"
-      
-      # Use AUM Exposure method for fossel fuels
-      # Heatmap$MarketExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")] <- Heatmap$AUMExposure[Heatmap$Technology %in% c("Oil", "Gas", "Coal")]
-      # # After getting the AUM values, remove that vector from the dataframe
-      # Heatmap <- Heatmap[,names(Heatmap) != 'AUMExposure']
-      # Heatmap$MarketExposure <- as.numeric(Heatmap$MarketExposure)
-      # Rename the technologies to be more reader friendly
-      # Heatmap$Technology <- revalue(Heatmap$Technology, c("Gas" = "Gas\nProduction","Oil" = "Oil\nProduction", "Coal" = "Coal\nProduction", "Electric" = "Electric\nVehicles", "Hybrid" = "Hybrid\nVehicles", "ICE" = "ICE\nVehicles", "RenewablesCap" = "Renewable\nCapacity", "NuclearCap" = "Nuclear\nCapacity", "HydroCap" = "Hydro\nCapacity", "GasCap" = "Gas\nCapacity", "CoalCap" = "Coal\nCapacity"))
-      Heatmap$Exposure <- Heatmap$Exposure*100
-      
-      #fill in values if some regions or technologies are not within the portfolio
-      Heatmap <- Heatmap %>% complete(PortName, Technology, BenchmarkRegion) # Keeps N/As
-      
-      #Create colour bands/buckets
-      #alligned
-      Heatmap$ExposureColour <-"grey50"#'grey95'
-      # Heatmap$ExposureColour[!is.na(Heatmap$MarketExposure)] <- 'grey95'
-      
-      # 'good' alignment
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 0 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< 0] <- "#FFFFFF"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 5 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -5] <- "#d2e7d2"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 15 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -15] <- "#a5cfa5"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 25 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -25] <- "#78b878"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 50 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -50] <- "#4ba04b"
-      Heatmap$ExposureColour[Heatmap$Technology %in% GreenList & Heatmap$Exposure> 75 | Heatmap$Technology %in% BrownList & Heatmap$Exposure< -75] <- "#1f891f"
-      
-      # 'bad' alignment
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 0 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< 0 ] <- "#FFFFFF"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 5 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -5 ] <- "#fad7d3"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 15 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -15 ] <- "#f5afa8"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 25 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -25 ] <- "#f0877d"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 50 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -50 ] <- "#eb5f52"
-      Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & Heatmap$Exposure> 75 | Heatmap$Technology %in% GreenList & Heatmap$Exposure< -75 ] <- "#e73827"
-      
-      
-      # repval = 200
-      # redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
-      # 
-      # Heatmap$ExposureColour <- redgreen[(100+Heatmap$Exposure)]
-      # Heatmap$ExposureColour[Heatmap$Technology %in% BrownList & !is.na(Heatmap$Exposure)] <- redgreen[(100+Heatmap$Exposure[Heatmap$Technology %in% BrownList & !is.na(Heatmap$Exposure)] )]
-      
-      #add '%' text
-      Heatmap$ExposureText <-Heatmap$Exposure# remove text for auto sector
-      Heatmap$ExposureText[!is.na(Heatmap$ExposureText)]<-paste(round(Heatmap$ExposureText[!is.na(Heatmap$ExposureText)], 0), "%", sep="")
-      
-      # Order Technologies
-      # Technology<-c("Electric\nVehicles", "Hybrid\nVehicles", "ICE\nVehicles", "Gas\nProduction", "Oil\nProduction", "Coal\nProduction","Renewable\nCapacity","Hydro\nCapacity", "Nuclear\nCapacity",  "Gas\nCapacity", "Coal\nCapacity")
-      tempdb <- data.frame(Sector = c("Power","Power","Power","Power","Power","Fossil Fuels","Fossil Fuels","Fossil Fuels","Automotive","Automotive","Automotive"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Oil","Gas","Coal","ICE","Electric","Hybrid"), XPosition =1:11)
-      
-      # Sector <- c("Automotive","Automotive","Automotive","FossilFuels","FossilFuels","FossilFuels","Power","Power","Power","Power","Power")
-      # tempdb<-data.frame(cbind(Technology, Sector,XPosition = (seq(from = 1, to = length(Technology), by = 1))))
-      Heatmap <- merge(tempdb,Heatmap,by=c("Technology"),all.x=TRUE,all.y=FALSE)
-      Heatmap$XPosition <- as.numeric(as.character(Heatmap$XPosition))
-      
-      # Order Funds
-      nofunds <-  length(unique(Heatmap$PortName))
-      tempdb<-data.frame(PortName = unique(Heatmap$PortName), YPosition = 1)
-      tempdb <- tempdb[order(tempdb$PortName),]
-      tempdb$YPosition <- seq(1,nofunds)
-      
-      Heatmap <- merge(tempdb, Heatmap, by="PortName", all.x=TRUE, all.y=FALSE)
-      Heatmap <- arrange(Heatmap, YPosition, XPosition)
-      Heatmap$YPosition <- rev(as.numeric(as.character(Heatmap$YPosition)))
-      rm(tempdb)
-      
-      #set region and technolgies as factor
-      Heatmap<- Heatmap[order(Heatmap$YPosition,Heatmap$XPosition),]
-      Heatmap$PortName <- factor(Heatmap$PortName, levels= unique(Heatmap$PortName)) #Reverse order
-      Heatmap$Technology <- factor(Heatmap$Technology, levels=unique(Heatmap$Technology)) #current order
-      
-      #####Select individual portfolio###
-      HeatmapData <- Heatmap
-      # HeatMapTitle <- as.character(GT["HeatMap_Title"][[1]])
-      
-      # Translation Titles
-      # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-      # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-      
-      HeatmapData$a <- paste0(gsub(" ","",HeatmapData$Sector),"_Unit")
-      HeatmapData$b <- paste0("T_",HeatmapData$Technology)
-      HeatmapData$b[HeatmapData$Sector %in% "Fossil Fuels"] <- paste0("T_",HeatmapData$Technology[HeatmapData$Sector %in% "Fossil Fuels"],"Prod")
-      
-      
-      
-      # HeatmapData$c <- t(GT[HeatmapData$b])
-      HeatmapData$TechTitle <- wrap.labels(paste0(t(GT[HeatmapData$b])," ",t(GT[HeatmapData$a])),13)
-      HeatmapData$TechTitle[HeatmapData$Sector %in% "Automotive"] <- wrap.labels(paste0(t(GT[HeatmapData$b[HeatmapData$Sector %in% "Automotive"]])),10)
-      
-      
-      HeatmapData$a <-HeatmapData$b <- NULL
-      
-      
-      TechnologyLabel<- unique(subset(HeatmapData, select = c("TechTitle", "XPosition")))
-      FundLabel <- unique(subset(HeatmapData, select = c("PortName", "YPosition")))
-      
-      TechnologyLabel$TechTitle <- revalue(TechnologyLabel$TechTitle,c("Hybrid-Autos"="Hybrid-\nAutos","Elektro-Autos"="Elektro-\nAutos","Autos mit\nVerbrennungsmotor"="Autos mit\n Verbrennungs-\nmotor","Hydro?lectricit?" ="Hydro\n?lectricit?","Voitures\n? moteur\n?\ncombustion"="Voitures\n? moteur ?\ncombustion"),warn_missing = FALSE)
-      
-      # FundLabel <- FundLabel[order(FundLabel$YPosition),]
-      
-      AutoLabel <- as.character(GT["S_Automotive"][[1]])
-      FFLabel <- as.character(GT["S_FossilFuels"][[1]])
-      PowerLabel <- as.character(GT["S_Power"][[1]])
-      
-      technamelabelheight <- nrow(FundLabel)+2.5
-      sectorlabelheight <- technamelabelheight + 2
-      
-      iconymin <- nrow(FundLabel)+.6
-      iconymax <- iconymin+1.7
-      
-      ren <- readPNG(paste0(figuredirectory,"RenewablesCap",".png"))
-      hyd <- readPNG(paste0(figuredirectory,"HydroCap",".png"))
-      nuc <- readPNG(paste0(figuredirectory,"NuclearCap",".png"))
-      coac <- readPNG(paste0(figuredirectory,"CoalCap",".png"))
-      gasc <- readPNG(paste0(figuredirectory,"GasCap",".png"))
-      oil <- readPNG(paste0(figuredirectory,"Oil",".png"))
-      gas <- readPNG(paste0(figuredirectory,"Gas",".png"))
-      coal <- readPNG(paste0(figuredirectory,"Coal",".png"))
-      elec <- readPNG(paste0(figuredirectory,"Electric",".png"))
-      hyb <- readPNG(paste0(figuredirectory,"Hybrid",".png"))
-      ice <- readPNG(paste0(figuredirectory,"ICE",".png"))
-      
-      reng <- rasterGrob(ren, interpolate=TRUE)
-      hydg <- rasterGrob(hyd, interpolate=TRUE)
-      nucg <- rasterGrob(nuc, interpolate=TRUE)
-      coacg <- rasterGrob(coac, interpolate=TRUE)
-      gascg <- rasterGrob(gasc, interpolate=TRUE)
-      oilg <- rasterGrob(oil, interpolate=TRUE)
-      gasg <- rasterGrob(gas, interpolate=TRUE)
-      coalg <- rasterGrob(coal, interpolate=TRUE)
-      elecg <- rasterGrob(elec, interpolate=TRUE)
-      hybg <- rasterGrob(hyb, interpolate=TRUE)
-      iceg <- rasterGrob(ice, interpolate=TRUE)
-      
-      
-      # HeatmapData$PortName <- revalue(HeatmapData$PortName, c("LÃ¤nsfÃ¶rsÃ¤kringarFondfÃ¶rvaltningAB"="LÃ¤nsfÃ¶rsÃ¤kringar\n FondfÃ¶rvaltningAB"))
-      
-      # TechnologyLabel$XPosition[1]<-0.5
-      HeatmapGGPlot <- ggplot(HeatmapData, aes(x = as.factor(HeatmapData$Technology),fill = as.factor(HeatmapData$ExposureColour), y = as.factor(HeatmapData$PortName), group=HeatmapData$PortName)) +
-        geom_tile(colour = "grey95") +
-        # geom_text(aes(label = HeatmapData$ExposureText),colour=AxisColour, size = geom.text.size, data = data.frame()) + # text for % values
-        annotation_custom(reng,xmin=.7,xmax=1.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(hydg,xmin=1.7,xmax=2.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(nucg,xmin=2.7,xmax=3.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(gascg,xmin=3.7,xmax=4.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(coacg,xmin=4.7,xmax=5.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(oilg,xmin=5.7,xmax=6.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(coacg,xmin=6.7,xmax=7.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(gascg,xmin=7.7,xmax=8.3,ymin=iconymin,ymax = iconymax)+    
-        annotation_custom(iceg,xmin=8.7,xmax=9.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(hybg,xmin=9.7,xmax=10.3,ymin=iconymin,ymax = iconymax)+
-        annotation_custom(elecg,xmin=10.7,xmax=11.3,ymin=iconymin,ymax = iconymax)+
-        
-        annotate("text", x = TechnologyLabel$XPosition, y = technamelabelheight,  label= TechnologyLabel$TechTitle, angle = 0, hjust= 0.5, vjust = 0, size = geom.text.size)+ # text for technology axis
-        annotate("text", y = FundLabel$YPosition, label = wrap.labels(FundLabel$PortName,11), angle = 0, x = 0.35, hjust = 1, fontface= "plain", size = geom.text.size)+ # text for fund axis
-        annotate("text", x = 2.5, y = sectorlabelheight, label = PowerLabel, angle = 0, hjust= 0, vjust = 0,fontface= "bold", size = geom.text.size)+ # label for technology axis
-        annotate("text", x = 6.5, y = sectorlabelheight, label = FFLabel, angle = 0, hjust= 0, vjust = 0,fontface= "bold" ,size = geom.text.size)+ # label for technology axis
-        annotate("text", x = 9.5, y = sectorlabelheight, label = AutoLabel, angle = 0, hjust= 0, vjust = 0, fontface= "bold",size = geom.text.size)+ # label for technology axis
-        
-        scale_fill_identity()+
-        scale_x_discrete("", expand = c(0, 0)) +
-        scale_y_discrete("", expand = c(0, 0)) +
-        
-        annotate("segment", x =5.5, xend = 5.5, y = 0.5, yend = nrow(FundLabel)+.5, colour = "black", linetype = 'solid', size = 0.3) + # vertical lines
-        annotate("segment", x = 8.5, xend = 8.5, y = 0.5, yend = nrow(FundLabel)+.5, colour = "black", linetype = 'solid', size = 0.3) + # vertical lines
-        theme(axis.ticks = element_line(colour= "transparent"),
-              axis.text.x = element_blank(),
-              axis.text.y = element_blank(),
-              axis.title.x=element_blank(),
-              axis.title.y=element_text(face="bold",colour=textcolour, size=3),
-              plot.background = element_rect(fill = "transparent",colour = NA),
-              plot.margin = unit(c(1., 0, 0, 3.5), "lines"),                           # (top, , , left side margin) 
-              panel.background = element_rect(fill = "transparent",colour = NA),
-              panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
-              legend.title=element_text(size=6),
-              legend.text=element_text(size=6),
-              legend.position="bottom",
-              legend.key.size=unit(0.3, "cm"),
-              legend.key.width=unit(1., "cm"))#+
-      # labs(x=NULL, y=NULL, title=HeatMapTitle)#+
-      # coord_equal()
-      
-      HeatmapPlot <- ggplot_gtable(ggplot_build(HeatmapGGPlot))
-      HeatmapPlot$layout$clip[HeatmapPlot$layout$name == "panel"] <- "off"
-      grid.draw(HeatmapPlot)
-      
-      chartheight <- 1.2+nrow(Heatmap)*.027
-      
-      
-      ppi = 600
-      png(paste0(plotnumber,"_",PortfolioName,"_Funds_HeatMap.png"), height = chartheight*ppi, width = 6.8*ppi,res=ppi,bg="transparent")
-      grid.draw(HeatmapPlot)
-      dev.off()
-    }}
-  
-}
-
-# ------------ Capacity Build Out ----------- #
-buildout_chart <- function(plotnumber,ChartType, combin,  SectorToPlot,BenchmarkRegionchoose, Scenariochoose, CompanyDomicileRegionchoose){
-  
-  
-  ProdData <- subset(combin,  BenchmarkRegion %in% BenchmarkRegionchoose &Scenario %in% Scenariochoose)
-  
-  if (ChartType == "EQ"){
-    ProdData <- subset(combin,  BenchmarkRegion %in% BenchmarkRegionchoose & CompanyDomicileRegion %in% CompanyDomicileRegionchoose & Scenario %in% Scenariochoose)
-    if (SectorToPlot == "Fossil Fuels"){
-      ProdData <- subset(ProdData, select = c("Sector","Technology","Year","Production","TargetProductionAUMIntensity"))
-      names(ProdData)[names(ProdData)=="TargetProductionAUMIntensity"] <- "TargetProductionAlignment"
-    } else{
-      ProdData <- subset(ProdData, select = c("Sector","Technology","Year","Production","TargetProductionAlignment"))
-    }
-    
-    
-    ProdData$Production[ProdData$Technology == "Coal"]<- ProdData$Production[ProdData$Technology == "Coal"]*24
-    ProdData$Production[ProdData$Technology == "Oil"]<- ProdData$Production[ProdData$Technology == "Oil"]*6.12
-    ProdData$Production[ProdData$Technology == "Gas"]<- ProdData$Production[ProdData$Technology == "Gas"]*0.0372
-  }else{
-    
-    ProdData <- subset(ProdData, select = c("Sector","Technology","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
-    names(ProdData)[names(ProdData) %in% c("WtTechShareTechShare","Benchmark_WtTechShareTechShare")] <- c("Production","TargetProductionAlignment")
-  }
-  
-  ProdData$NextYear <- 0
-  ProdData$NextYear[1:nrow(ProdData)] <- ProdData$Production[1:nrow(ProdData)+1]
-  ProdData$NextYear[ProdData$Year==Startyear+10]<- 0
-  
-  ProdData$BuildOut <- ProdData$NextYear-ProdData$Production
-  
-  BuildOut <- ProdData[ProdData$Year == Startyear+5 & ProdData$Sector == SectorToPlot,]
-  BuildOut <- merge(BuildOut,ColourPalette, by= c("Technology", "Sector"))
-  
-  if (sum(BuildOut$BuildOut, na.rm = TRUE)>0){
-    BuildOutIndicator<-1
-    # Select Units
-    #-----------
-    sectors <- c("Automotive", "Fossil Fuels", "Power")
-    BuildOut$TechTrans <- t(GT[paste0("T_",BuildOut$Technology)])
-    
-    if (ChartType =="EQ"){
-      axislabels <- c(as.character(GT["Cars"][[1]]), as.character(GT["produced"][[1]]), as.character(GT["Power_Unit"][[1]]))
-      lookup <- data.frame(sectors,axislabels)
-      BuildOut$Technology <- gsub("Cap","",BuildOut$Technology)               # Removes "Cap " from the Power labels
-      BuildOut$axislabel <- paste(BuildOut$TechTrans,lookup$axislabels[grep(SectorToPlot, lookup$sectors)])
-      
-      # Scaling and Labelling the Y axis
-      maxval <- max(BuildOut$BuildOut,na.rm=TRUE)
-      
-      magnitude_scale <- c(1e-3,1,1e3,1e6,1e9)
-      Power <- c("kW","MW","GW","TW","Error_powertoohigh")
-      Automotive <- c("","",as.character(GT["thousand"][[1]]),as.character(GT["million"][[1]]),as.character(GT["billion"][[1]]))
-      
-      unit_lookup <- data.frame(Automotive,Power)
-      # unit_lookup <- setNames(unit_lookup,sectors)
-      
-      # Scales the Data to the correct units based on the maximum value.
-      max_magnitude <- findInterval(maxval,magnitude_scale)
-      if(max_magnitude == 0){max_magnitude <- 2}
-      
-      
-      
-      
-      if(magnitude_scale[max_magnitude]== 1e-3 & SectorToPlot =="Automotive"){
-        BuildOut$BuildOut <- BuildOut$BuildOut
-        BuildOut$BuildOut <- round(BuildOut$BuildOut,3)}    else{
-          BuildOut$BuildOut <- BuildOut$BuildOut/magnitude_scale[max_magnitude]
-          BuildOut$BuildOut <- round(BuildOut$BuildOut,1)
-          
-          # Looks up the units within the correct line in the unit_lookup dataframe and sets the labels
-          BuildOut$unitlabel <- unit_lookup[SectorToPlot][max_magnitude,]}
-    }
-    
-    # CB Units
-    #-----------
-    if (SectorToPlot == "Power"){
-      BuildOut$BuildOut[BuildOut$BuildOut < 0]<-0
-      BuildOut$xaxis <- paste0(BuildOut$TechTrans,": ",round(BuildOut$BuildOut,1), " ",BuildOut$unitlabel)
-      
-      BOChart<- ggplot(BuildOut, aes(x="", y=BuildOut, fill=Technology))+
-        geom_bar(stat = "identity",color=NA, width = 0.5)+
-        geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
-        
-        # guides(fill = guide_legend(override.aes = list(colour = NULL)))+
-        guides(fill=guide_legend(title = GT["BuildOutTitle"][[1]]))+
-        scale_fill_manual(values= as.character(BuildOut$Colours),labels=BuildOut$xaxis)+
-        theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
-              axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-              axis.line = element_blank(), plot.margin = unit(c(0,0,25,0), "mm"),
-              plot.background = element_rect(fill = "transparent",colour = NA),
-              panel.background = element_rect(fill = "transparent",colour = NA),
-              legend.background = element_rect(fill = "transparent",colour = NA),
-              legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-              legend.title = element_text(size=textsize,family = "Calibri",colour="black"),
-              legend.key.size=unit(0.4,"cm"),
-              legend.position = "right") +
-        coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
-    }else{
-      
-      BuildOut$Xaxis <- GT["Low_Carb"][[1]]
-      BuildOut$Xaxis[BuildOut$Technology == "ICE"] <- GT["High_Carb"][[1]]
-      
-      BOChart <- ggplot(BuildOut,aes(x=Xaxis, y=BuildOut, fill = Technology))+
-        geom_bar(stat = "identity",color=NA,width = .8)+
-        geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = .8)+
-        annotate(geom = "rect",colour="black", xmin=0.5,xmax=2.5,ymin=0,ymax=0)+
-        guides(fill=guide_legend(title = GT["BuildOutTitle"][[1]]))+
-        scale_fill_manual(values= as.character(BuildOut$Colours),labels=paste0(BuildOut$TechTrans,": ",BuildOut$BuildOut, " ",BuildOut$unitlabel, " Cars"))+
-        theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),axis.text.x = element_text(colour="black"),
-              panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-              axis.line = element_blank(), plot.margin = unit(c(0,0,15,0), "mm"),
-              plot.background = element_rect(fill = "transparent",colour = NA),
-              panel.background = element_rect(fill = "transparent",colour = NA),
-              legend.background = element_rect(fill = "transparent",colour = NA),
-              legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-              legend.key.size=unit(0.4,"cm"),
-              legend.position = "bottom")
-      
-      
-    } 
-    
-  }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    
-    Label <- GT["NoBuildOut"][[1]]
-    
-    BOChart <- ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,30), size=3)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA))
-    
-    BuildOutIndicator<-0
-    
-  }
-  
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_BuildOut.png'),bg="transparent",height=2.5,width=4.5,plot=BOChart,dpi=ppi)
-  
-  return(BuildOutIndicator)
-}
-
-# ------------ RENEWABLES ADDITIONS CHART --- #
-renewablesadditions_chart <- function(plotnumber,ChartType){
-  
-  # combin <- EQCombin
-  # PortSnapshot <- EQPortSnapshot
-  # combin <-  EQCombin
-  # PortSnapshot<-CBPortSnapshot
-  
-  if (ChartType == "EQ"){
-    PortSnapshot <- EQPortSnapshot
-    combin <- EQCombin
-  } 
-  
-  
-  if(ChartType=="EQ"){
-    # Definition of Regions
-    PowerRegionExclusion <- c("Global", "OECD", "NonOECD","EU", "OECDAmericas" , "LatinAmerica", "Africa", "EEurope_Eurasia", "NonOECDAsia", "OECDAsiaOceania", "NonOECDRest","OECDAggregate","NonOECDAggregate")
-    GlobalAggregate <- subset(combin, CompanyDomicileRegion %in% CompanyDomicileRegionchoose & Scenario == Scenariochoose & Year %in% c(Startyear,Startyear+5))# & !BenchmarkRegion %in% PowerRegionExclusion)
-    GlobalAggregate <- subset(GlobalAggregate, select = c("BenchmarkRegion","Year","Direction","FairSharePerc"))
-    regions <- data.frame(unique(GlobalAggregate$BenchmarkRegion[!GlobalAggregate$BenchmarkRegion %in% c("GlobalAggregate","OECDAggregate","NonOECDAggregate")]))
-    
-    Countries <- data.frame(BenchmarkRegion=character(),Country=character())
-    if (BenchmarkRegionchoose != "GlobalAggregate"){for (j in 1:(nrow(regions))){
-      countries <- data.frame(BenchmarkRegion=regions[j,],Country=unique(BenchmarkRegionList[[as.character(regions[j,])]]))
-      Countries <- rbind(Countries,countries)}}else{
-        Countries<- data.frame(BenchmarkRegion="Global",Country=RegionCountries$Global)
-      }
-  }else{
-    PortSnapshot <- rename(PortSnapshot, c("COMPANY_CORP_TICKER"="EQY_FUND_TICKER"),warn_missing = FALSE)
-  }
-  # Companies in Port
-  PortCompanies <- unique(subset(PortSnapshot, select = c("EQY_FUND_TICKER","Name","piesector"), PortSnapshot$AUM >0))
-  
-  # IEA Renewables Targets
-  IEATargetsRenew <- subset(AllIEATargets,Year %in% c(Startyear, Startyear+5) & Scenario == Scenariochoose & Technology =="RenewablesCap", select = c("BenchmarkRegion","Year","Direction","FairSharePerc","AnnualvalIEAtech"))
-  
-  # Power Capacities
-  PowerCapacity <- subset(MasterData,  Sector =="Power" & Year %in% c(Startyear,Startyear+5) & EQY_FUND_TICKER != "NonListedProduction" & Technology != "OilCap")
-  
-  # Cut down to power companies
-  PowerCapacity <- merge(PortCompanies, PowerCapacity, by = "EQY_FUND_TICKER")
-  renewcap <- subset(PowerCapacity, PowerCapacity$Technology %in% "RenewablesCap")
-  
-  if (nrow(renewcap)>0 ){
-    
-    # Calculate the company power total for all technology 
-    PowerTotals <- ddply(PowerCapacity, .(EQY_FUND_TICKER,Year,PlantLocation), summarise,LocalCompanyCap = sum(CompLvlProduction))
-    PowerTotals <- merge(PowerTotals, Countries, by.x ="PlantLocation", by.y="Country")
-    PowerTotals <- merge(PowerTotals, IEATargetsRenew, by = c("Year","BenchmarkRegion"))
-    PowerTotals$LocalTargetAdditions <- PowerTotals$LocalCompanyCap*(PowerTotals$FairSharePerc)
-    
-    CompanyPowerTotals <- ddply(PowerTotals, .(EQY_FUND_TICKER,Year),summarise, TargetAdditions =sum(LocalTargetAdditions), CompanyCap = sum(LocalCompanyCap))
-    CompanyPowerTotals <- subset(CompanyPowerTotals, Year == Startyear+5, select = c("EQY_FUND_TICKER","TargetAdditions","CompanyCap"))
-    
-    RenewCapacity <- subset(PowerCapacity,  Technology =="RenewablesCap", select = c("EQY_FUND_TICKER","Name","Year","piesector","Technology","PlantLocation","CompLvlProduction") )
-    RenewCapacity <- ddply(RenewCapacity, .(EQY_FUND_TICKER,Name,piesector,Year),summarise, RenewableCap = sum(CompLvlProduction))
-    RenewAdditions <- dcast(RenewCapacity, EQY_FUND_TICKER+Name+piesector~Year, fun=sum, value.var = "RenewableCap")
-    RenewAdditions$Additions <- RenewAdditions[[as.character(Startyear+5)]]-RenewAdditions[[as.character(Startyear)]]
-    RenewAdditions <- subset(RenewAdditions, select = c("EQY_FUND_TICKER","Name","piesector","Additions"))
-    
-    Renewables <- merge(RenewAdditions,CompanyPowerTotals, by = c("EQY_FUND_TICKER"))
-    
-    Renewables <- subset(Renewables, piesector == "Utility Power")
-    if(dim(Renewables)[1] != 0 ){
-      AllUtilities <- ddply(Renewables,.(piesector),summarise, TargetAdditions=sum(TargetAdditions), CompanyCap=sum(CompanyCap), Additions =sum(Additions))  
-      AllUtilities$Name <- "All Portfolio Utilities"
-      AllUtilities$piesector <- "Combined"
-      AllUtilities$EQY_FUND_TICKER <- GT["AllPortUtilities"][[1]]
-      
-      Renewables<- rbind(Renewables,AllUtilities)
-      
-      Renewables$AddPerc <- Renewables$Additions/Renewables$TargetAdditions
-      Renewables$AddPerc[Renewables$AddPerc > 1]<- 1
-      Renewables$Remaining <- 1-Renewables$AddPerc
-      Renewables$StillRequired <- Renewables$TargetAdditions-Renewables$Additions
-      Renewables<- subset(Renewables, Renewables$TargetAdditions != 0)
-      
-      Renewables <- Renewables[order(Renewables$CompanyCap),]
-      
-      nocompanies <- nrow(Renewables)
-      companiestokeep <- 20
-      
-      if (nocompanies > companiestokeep){
-        RenewablesToPlot <- Renewables[((nocompanies-companiestokeep)+1):nocompanies,]
-      }else{
-        RenewablesToPlot <- Renewables
-      }
-      
-      RenewablesBar <- subset(RenewablesToPlot, select = c("Name","piesector","AddPerc","Remaining","StillRequired"))
-      RenewablesBar <- melt(RenewablesBar, id.vars = c("Name","piesector"))
-      RenewablesBar <- RenewablesBar[order(RenewablesBar$piesector,RenewablesBar$Name),]
-      RenewablesBar$Name <- factor(RenewablesBar$Name, levels = unique(RenewablesBar$Name))
-      
-      RenewablesStillRequired <- subset(RenewablesBar, RenewablesBar$variable == "StillRequired")
-      RenewablesStillRequired$value[RenewablesStillRequired$value < 0 ] <-0
-      RenewablesBar <- RenewablesBar[!(RenewablesBar$variable == "StillRequired"),]
-      
-      RenewablesStillRequired$Name <- factor(RenewablesStillRequired$Name, levels = (RenewablesStillRequired$Name))
-      
-      Yaxislabel <- GT["REBuildout_axis"][[1]]
-      stillreq <- GT["Remaining"][[1]]  # red
-      remainlabel <- GT["Progress"][[1]]#GT["StillReq"][[1]]
-      progresslabel <- GT["Remaining"][[1]]  #CORRECT #GT["StillReq"][[1]]#GT["X2Target"][[1]]
-      Target <- GT["Progress"][[1]] # blue
-      
-      theme_barcharts <- function(base_size = textsize, base_family = "") {
-        theme(axis.ticks=element_blank(),
-              axis.text.x=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.text.y=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.title.x=element_blank(),
-              axis.title.y=element_text(face="bold",colour=AxisColour,size=textsize),
-              axis.line = element_line(colour = AxisColour,size=1),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.background = element_blank(),
-              legend.position=c(0.5,-.2),
-              legend.direction="horizontal",
-              legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-              legend.background = element_rect(fill = "transparent",colour = NA),
-              legend.key.size=unit(0.4,"cm"),
-              legend.title=element_blank(),
-              legend.key = element_blank(),
-              plot.margin = unit(c(.4,0, 2.2, 0), "lines"),
-              plot.background = element_rect(fill = "transparent",colour = NA)
-        )
-      }
-
-      RenAddBar <- ggplot(RenewablesBar, aes(x=rev(Name),y=rev(value), fill = variable))+
-        geom_bar(stat = "identity", width=.8, colour = NA)+
-        geom_segment(aes(x=0, xend = 0 , y=0, yend = 1), size=1, colour = AxisColour,  arrow = arrow(length = unit(0.4,"cm")))+
-        geom_hline(yintercept = 1, colour=Tar2DColour, linetype = "longdash", size = 1)+
-        scale_fill_manual(breaks=c("AddPerc","Remaining"),values = c("AddPerc"= badexpColour, "Remaining" = YourportColour), labels = c("AddPerc"=progresslabel, "Remaining" = remainlabel))+
-        annotate(hjust = 1,"text", x = c(1:(length(RenewablesStillRequired$Name))) , y = .98, label = paste((round(RenewablesStillRequired$value,0)), "MW",stillreq,sep=" "), colour = "white",size = 3)+
-        scale_y_continuous(breaks = c(0,.25,.5,.75,1),label = c("0%","25%","50%","75%",Target),expand=c(0,0), limits=c(0,1))+
-        scale_x_discrete(expand=c(0,0))+
-        theme_barcharts()+
-        theme(axis.title.x=element_blank(),
-              axis.line = element_line(colour = AxisColour,size=1),
-              panel.background = element_blank(),
-              legend.position=c(0.5,-.2),
-              legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-              legend.title=element_blank(),
-              plot.margin = unit(c(.4,0, 2.2, 0), "lines"))+
-        coord_flip()
-      
-      RenAddBar <- RenAddBar  +
-        theme(  axis.title.x=element_text(face="bold",colour=AxisColour,size=textsize),
-                axis.title.y=element_blank(),
-                panel.grid.major = element_blank(), 
-                panel.grid.minor = element_blank(),
-                panel.background = element_blank(), 
-                # legend.position=c(0.5,-.28),
-                legend.position = "bottom",
-                legend.direction="horizontal",
-                legend.text = element_text(face="bold",size=textsize,colour=AxisColour),
-                legend.background = element_rect(fill = "transparent",colour = NA),
-                legend.key.size=unit(0.4,"cm"),
-                legend.title=element_blank(),
-                legend.key = element_blank(),
-                plot.margin = unit(c(.4,1.5, 0, 0), "lines"))+
-        ylab(Yaxislabel)
-      
-      
-      RenAddValues <- c(4.8,8)
-      
-      NoCompanies <- nrow(RenewablesToPlot)
-      
-      plotheight <- .2*NoCompanies +.9
-      plotwidth <- .1*NoCompanies +7.1
-      
-      ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_RenewableAdditions.png"),bg="transparent",height=plotheight,width=plotwidth,plot=RenAddBar,dpi=ppi)
-    }
-  }
-  
-  return()
-}
-
-
-# --------
-# CAINS PLOT FUNCTIONS
-# -------- 
+                          
 # ------------- RANKING CHART - ALIGNMENT ----#
 
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
@@ -2084,17 +1077,18 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
       AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
     }
     
+    #What is this doing??
     colnames(PortSnapshot)[colnames(PortSnapshot) %in% c("COMPANY_CORP_TICKER","EQY_FUND_TICKER")] <- "TICKER"
     colnames(AlloftheCompanies)[colnames(AlloftheCompanies) %in% c("COMPANY_CORP_TICKER","EQY_FUND_TICKER","EquityTicker","DebtTicker")] <- "TICKER"
     
     OG$InPort[OG$EQY_FUND_TICKER %in% CompProdSnapshot$EQY_FUND_TICKER] <- "PortCompanies"
     
     OGCompanies <- AllCompanyData[AllCompanyData$EQY_FUND_TICKER %in% OG$EQY_FUND_TICKER,]
-    OGCompanies <- subset(OGCompanies, Year %in% (Startyear+5) & BenchmarkRegion %in% "Global" & CompanyDomicileRegion %in% CompanyDomicileRegionchoose)
+    OGCompanies <- subset(OGCompanies, Year == (Startyear+5) & BenchmarkRegion %in% "Global" & CompanyDomicileRegion %in% CompanyDomicileRegionchoose)
     
     OGCompanies<- subset(OGCompanies, !Technology %in%  "Coal")
-    OGCompanies$Production[OGCompanies$Technology == "Oil"]<- OGCompanies$Production[OGCompanies$Technology == "Oil"]*6.12
-    OGCompanies$Production[OGCompanies$Technology == "Gas"]<- OGCompanies$Production[OGCompanies$Technology == "Gas"]*0.0372
+    # OGCompanies$Production[OGCompanies$Technology == "Oil"]<- OGCompanies$Production[OGCompanies$Technology == "Oil"]*6.12
+    # OGCompanies$Production[OGCompanies$Technology == "Gas"]<- OGCompanies$Production[OGCompanies$Technology == "Gas"]*0.0372
     
     OGCompanies <- ddply(OGCompanies, . (EQY_FUND_TICKER),summarise, Size = sum(Production))
     
@@ -2136,9 +1130,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     alphaStart = 0.02
     spaceFamily = .8
     
-    if(NoInPort == 0){PortFirmY <-0}else{PortFirmY <- 18}
-    
-    PlotData
+    if(NoInPort == 0){PortFirmY <-0}else{PortFirmY <- NoInPort}
     
     Plot<- WheelofFortune(PlotData, family = NULL, columnNames = NULL, binSize = 1, spaceItem = 0.22,techorder=techorder,PortFirmY=PortFirmY,OtherFirmY=5,
                           spaceFamily = spaceFamily, innerRadius = 0.18, outerRadius = 1, guides = seq(0,100,by = 25), alphaStart = alphaStart,
@@ -2411,13 +1403,15 @@ sector_processing <- function(){
     
     ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
     
+    #Filter to our region, scenario, and year
     CB <- unique(subset(CBBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                          Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS)))
     EQ <- unique(subset(EQBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                          Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS)))
 
+    #Aggregat by sector, breaking down by the type (equity vs debt)
     df <- rbind(CB,EQ)
     df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
     df$Sector<-as.factor(df$Sector)
@@ -2475,10 +1469,12 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
   library(dplyr)
   if (ChartType == "EQ"){
     Portfolio <- EQCombin
-    Batch <- EQBatchTest[EQBatchTest$PortName != PortName,]
+    Batch <- EQBatchTest
   }else if (ChartType == "CB"){
     Portfolio <- CBCombin
-    Batch <- CBBatchTest[CBBatchTest$PortName != PortName,]
+    Batch <- CBBatchTest
+  #This summary combination is a straight average of EQ/CB.
+  #Not neccesarily correct
   }else if (ChartType == "Summary") {
     Portfolio <- rbind(subset(EQCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology","CarstenMetric_Port","ComparisonType")),
                        subset(CBCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology","CarstenMetric_Port","ComparisonType")))
@@ -2488,9 +1484,10 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
                           select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology","CarstenMetric_Port","ComparisonType")))
     Batch <- Batch[Batch$PortName != PortName,]
   }
+  
   #Tag Target portfolio, benchmark
   Portfolio$ComparisonType = "Portfolio"
-  Batch$ComparisonType = "Peers"
+  Batch$ComparisonType = "Average California Insurer"
   Combin <- rbind(Portfolio,Batch)
   Production <- subset(Combin, Year == Startyear & 
                          BenchmarkRegion %in% BenchmarkRegionchoose & 
@@ -2506,7 +1503,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
   if(nrow(Production)>0){
     Production$TechName <- Production$Technology
     Production[Production$Sector=="Oil&Gas","TechName"] <- revalue(Production[Production$Sector=="Oil&Gas","TechName"],
-                                                                        c("Coal" = "CoalProd",
+                                                                        c("Coal"= "CoalProd",
                                                                           "Gas" = "GasProd",
                                                                           "Oil" = "OilProd"))
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
@@ -2863,7 +1860,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
  
-  year_lab = 2017 #2018
+  year_lab = Startyear
   LineVector <- setNames(LineColours,LinesToPlot)
   
   ylabel <- "Normalized Built Out"
@@ -2918,7 +1915,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     ID.COLS = c("PortName","Year","Sector","Technology")
     BarColors <- c("Orange")
     df <- unique(subset(BatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                          Scenario %in% Scenariochoose & Year %in% (Startyear+5), 
+                          Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS,MetricCol)))
     
   } else if (MetricName == "Risk Exposure") {
@@ -2936,8 +1933,9 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     
     ID.COLS = c("PortName")
     BarColors <- c("Orange","Red")
-    df <- subset(df, select = c(ID.COLS,MetricCol))
-    
+    df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                   Scenario %in% Scenariochoose & Year == Startyear,
+                 select = c(ID.COLS,MetricCol)))
   }
   
   BarColors <- c(BarColors,"Black","skyblue")
@@ -3008,180 +2006,4 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   
 }
 
-
-#----------- CA Report Data------------------ #
-CAReportData <- function(){
-  
-  # Output is a dataframe with the values for the text
-
-  ### Exec Summary Data ###
-  ReportInsuranceName <- PortfolioNameLong
-  SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  NoPeers <- nrow(TestList)
-  
-
-  ### Port Weights ###
-  SectorData$ChartType<- "CB"
-  SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
-  
-  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
-  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
-  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
-
-  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
-  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
-  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
-
-  # Need to add the averages in
-  
-  FFSectorPeerEQ <- 1
-  PowerSectorPeerEQ<- 1
-  AutoSectorPeerEQ<- 1
-  FFSectorPeerCB<- 1
-  PowerSectorPeerCB<- 1
-  AutoSectorPeerCB<- 1
-  
-  ### RANKINGS ###
-  
-  EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
-  EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
-  EQPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(EQPortRanks)[2:12])
-  EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
-  colnames(EQReportRanks) <- techlist
-  
-  CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
-  CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
-  CBPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(CBPortRanks)[2:12])
-  CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
-  colnames(CBReportRanks) <- paste0("CB",techlist)
-  
-  
-  ### MERGE ALL RESULTS ###
-  # reportdata <- data.frame(
-  #          c("ReportInsuranceName",ReportInsuranceName), 
-  #          c("SizeofPortfolio",SizeofPortfolio),
-  #          c("NoPeers",NoPeers),
-  #          c("FFSectorPortEQ",FFSectorPortEQ),
-  #          c("PowerSectorPortEQ",PowerSectorPortEQ),
-  #          c("AutoSectorPortEQ",AutoSectorPortEQ),
-  #          c("FFSectorPortCB",FFSectorPortCB),
-  #          c("PowerSectorPortCB",PowerSectorPortCB),
-  #          c("AutoSectorPortCB",AutoSectorPortCB)
-  #          )
-  # 
-  # colnames(reportdata) <- as.character(unlist(reportdata[1,]))
-  # reportdata = reportdata[-1, ]
-  # 
-  # reportdata <- cbind(reportdata,EQReportRanks)
-  # reportdata <- cbind(reportdata,CBReportRanks)
-  # 
-  # return(reportdata)
-  
-}
-
-CAReport <- function(){
-  
-  CAReportData()
-  
-  # Copy in the template for the report
-  text <- as.data.frame(template,stringsAsFactors = FALSE)  
-  colnames(text) <- "text"
-  
-  # Function removes text lines between 
-  # "handlenameS" and "handlenameE" ie CBPowerS, CBPowerE
-  # Need to add these handles into the final doc when ready. Also determine what will be kicked out/what will remain. 
-  removetextlines <- function(handlename){
-    startpage <- which(grepl(paste0(handlename,"S"),text$text))
-    endpage <- which(grepl(paste0(handlename,"E"),text$text))
-    
-    if (length(startpage) >0 ){
-      
-      removelist <- lapply(1:length(startpage), function(x) c(startpage[c(x)]:endpage[c(x)]))
-      removelist <- melt(removelist[1:length(startpage)])
-      text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-      colnames(text) <- "text"
-    }else{
-      removeline <- which(grepl(handlename,text$text))
-      text <- as.data.frame(text[-removeline,],stringsAsFactors =FALSE)
-      colnames(text) <- "text"
-    }
-    return(text)
-  }
-  
-  
-  # Ranks
-  techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
-  }
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
-  }
-  
-  # Exec Summary Values
-  execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
-  for (j in execsummarylist){
-    text$text <- gsub(j,eval(as.symbol(as.character(j))),text$text)
-  }
-  
-  # Replace Sector Weight Values
-  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=4),"Sector",rep(c("Port","Peer"),3,each=2),rep(c("EQ","CB"),6)))
-  for (j in 1:nrow(a)){
-    text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
-  }  
-  
-  # Replace Insurer Name
-  text$text <- gsub("InsurerSampleReport",PortfolioNameLong,text$text)
-  
-  # Figures
-  # Replace CAFigures
-  
-  # Update the template to reflect figure names
-  
-  # FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
-  # colnames(FigNames) <- "Name"
-  # FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
-  # FigNames$Fig <- substring(FigNames$Name,1,2)
-  # FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
-  # 
-  # for (f in 1:nrow(FigNames)){
-  #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
-  # }
-  
-  
-  ##### PRINT REPORT ######
-  
-  # Copy in the graphics folder for the report
-  originalloc <- paste0(GIT.PATH,"Templates/ReportGraphics/")
-  graphicsloc <- paste0(LANGUAGE.PATH ,"ReportGraphics/")
-  flist <- list.files(originalloc, full.names = TRUE)
-  
-  if(!dir.exists(file.path(graphicsloc))){
-    dir.create(file.path(graphicsloc), showWarnings = TRUE, recursive = FALSE, mode = "0777")
-    for (file in flist){file.copy(file, graphicsloc)}
-  }  
-  
-  # Save the template file
-  TemplateNameNew <- paste0("Template_",PortfolioName,"_",Languagechoose)
-  write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
-  
-  # Create the PDF
-  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
-  
-  # Delete remaining files and ReportGraphics Folder
-  unlink("ReportGraphics",recursive = TRUE)
-  excessfileendings <- c(".log",".rnw",".tex",".aux")
-  file.remove(paste0(TemplateNameNew,excessfileendings))
-  file.remove("FigureList.txt")
-  
-  # Rename output file
-  if (InvestorName == PortfolioName){
-    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
-      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,"_",Languagechoose,".pdf"))}
-  
-  
-  
-}
 

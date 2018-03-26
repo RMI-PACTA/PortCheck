@@ -171,60 +171,6 @@ if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
   CompanyNames <- unique(subset(AllCompanyData, select=c("EQY_FUND_TICKER","Name")))
   EQBatchTest_PortSnapshots <- merge(CompanyNames, EQBatchTest_PortSnapshots, by = "EQY_FUND_TICKER", all.y = TRUE)}
 
-### Funds Heat Map Data
-### This should be updated
-# FundsDataAll <- read.csv(paste0(RESULTS.PATH,"/01_BatchResults/Swiss_FundData/2016Q4/Swiss_FundData_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"), stringsAsFactors = FALSE)
-
-### Add Comparative Portfolios 
-### Add a code to update the Index results
-# if (ComparisonFile %in% c("FundComparison","BatchComparison")){
-#   if (ComparisonFile == "FundComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",AssessmentDate,"/")
-#   
-#   
-#   # ie. if the results are being compared to themselves (CA, Swiss, etc.)
-#   if (ComparisonFile == "BatchComparison")COMPARISON.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",ComparisonFile,"/",AssessmentDate,"/")
-#   
-#   if (BatchName == "CA-INS"){COMPARISON.PATH <- BATCH.RES.PATH}
-#   
-#   if (ImportNewComparisonList == TRUE){
-#     
-#     EQComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_EquityAnalysisResults_450S_GlobalAggregate_Global.csv"),stringsAsFactors = FALSE)
-#     EQComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_PortfolioData_Snapshot2017.csv"),stringsAsFactors = FALSE)
-#     CBComparisonBatchTestLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors = FALSE)
-#     CBComparisonPortSSLong <- read.csv(paste0(COMPARISON.PATH,ComparisonFile,"_DebtPortfolioData_Snapshot",Startyear,".csv"),stringsAsFactors = FALSE)
-#     
-#     # Limits the number of portfolio to be compared to to this number. If swiss - includes all. 
-#     comparisonNumber <- 100
-#     if (ComparisonFile != "FundComparison"){comparisonNumber <- length(unique(EQComparisonBatchTestLong$PortName))}
-#     
-#     ComparisonList <- comparisonlist(comparisonNumber, EQComparisonBatchTestLong,CBComparisonBatchTestLong)
-#     
-#     EQComparisonBatchTest <- EQComparisonBatchTestLong[EQComparisonBatchTestLong$PortName %in% ComparisonList$PortName[ComparisonList$Type =="EQ"],] 
-#     EQComparisonPortSS <- EQComparisonPortSSLong[EQComparisonPortSSLong$PortName %in% ComparisonList$PortName[ComparisonList$Type =="EQ"],] 
-#     CBComparisonBatchTest <- CBComparisonBatchTestLong[CBComparisonBatchTestLong$PortName %in% ComparisonList$PortName[ComparisonList$Type =="CB"],] 
-#     CBComparisonPortSS <-CBComparisonPortSSLong[CBComparisonPortSSLong$PortName %in% ComparisonList$PortName[ComparisonList$Type =="CB"],] 
-#     
-#     write.csv(EQComparisonBatchTest,paste0(COMPARISON.PATH, "EQComparisonBatchTest.csv"),row.names = F)
-#     write.csv(EQComparisonPortSS,paste0(COMPARISON.PATH, "EQComparisonPortSS.csv"),row.names = F)
-#     write.csv(CBComparisonBatchTest,paste0(COMPARISON.PATH, "CBComparisonBatchTest.csv"),row.names = F)
-#     write.csv(CBComparisonPortSS,paste0(COMPARISON.PATH, "CBComparisonPortSS.csv"),row.names = F)
-#     
-#   }else{
-    # EQComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"EQComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
-    # EQComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"EQComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
-    # CBComparisonBatchTest<- read.csv(paste0(COMPARISON.PATH,"CBComparisonBatchTest.csv"),strip.white = T,stringsAsFactors = F)
-    # CBComparisonPortSS <- read.csv(paste0(COMPARISON.PATH,"CBComparisonPortSS.csv"),strip.white = T,stringsAsFactors = F)
-#   }
-# }
-
-
-### Hangover from the Fund/Brand 
-### If true - changes Fund to Portfolio; Brand to Investor
-# EQComparisonBatchTest <- ChangeFundPort(EQComparisonBatchTest)
-# CBComparisonBatchTest <- ChangeFundPort(CBComparisonBatchTest)
-# EQComparisonPortSS <- ChangeFundPort(EQComparisonPortSS)
-# CBComparisonPortSS <- ChangeFundPort(CBComparisonPortSS)
-
 # ------
 # Bench Regions and Indicies and Sector Classifications
 # ------
@@ -507,7 +453,7 @@ for (i in 1:nrow(TestList)){
       SectorData <- sector_processing()
       
       sector_bar_chart("01", SectorData)
-      stacked_bar_chart_vertical(2,"Summary","All") #Combined EQ/CB
+      stacked_bar_chart_vertical(2,"Summary","All") #Combined EQ/CB, needs to be updated
       # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
       distribution_chart("05", "Risk Exposure", "CB")
@@ -515,29 +461,31 @@ for (i in 1:nrow(TestList)){
       stacked_bar_chart_vertical("07","CB","All")
       distribution_chart("08", "Carsten's Metric", "CB")
       distribution_chart("09", "Carsten's Metric", "EQ")
-      # Graph246(10, "EQ", "CoalCap")
-      # Graph246(11, "EQ", "RenewablesCap")
-      # Graph246(12, "EQ", "GasCap")
-      # Graph246(13, "EQ", "NuclearCap") #246 currently not working
-      # Graph246(14, "EQ", "OilProd")
-      # Graph246(15, "EQ", "GasProd")
-      # Graph246(16, "EQ", "ICE")
-      # Graph246(17, "EQ", "EV")
-      # Graph246(18, "CB", "CoalCap")
-      # Graph246(19, "CB", "RenewablesCap")
-      # Graph246(20, "CB", "GasCap")
-      # Graph246(21, "CB", "NuclearCap")
-      # Graph246(22, "CB", "OilProd")
-      # Graph246(23, "CB", "GasProd")
-      # Graph246(24, "CB", "ICE")
-      # Graph246(25, "CB", "EV")
+      Graph246(10, "EQ", "CoalCap")
+      Graph246(11, "EQ", "RenewablesCap")
+      Graph246(12, "EQ", "GasCap")
+      Graph246(13, "EQ", "NuclearCap") #246 currently not working
+      Graph246(14, "EQ", "OilProd")
+      Graph246(15, "EQ", "GasProd")
+      Graph246(16, "EQ", "ICE")
+      Graph246(17, "EQ", "EV")
+      Graph246(18, "CB", "CoalCap")
+      Graph246(19, "CB", "RenewablesCap")
+      Graph246(20, "CB", "GasCap")
+      Graph246(21, "CB", "NuclearCap")
+      Graph246(22, "CB", "OilProd")
+      Graph246(23, "CB", "GasProd")
+      Graph246(24, "CB", "ICE")
+      Graph246(25, "CB", "EV")
       ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
       ranking_chart_alignment(27, "CB", "All") #Carstens Metric
       flat_wheel_chart(28, 20, "EQ", "Power")
       flat_wheel_chart(29, 20, "EQ", "Automotive")
       flat_wheel_chart(30, 20, "EQ", "OG")
-      flat_wheel_chart(31, 20, "EQ", "Oil")
-      
+      flat_wheel_chart(31, 20, "CB", "Power")
+      flat_wheel_chart(32, 20, "CB", "Automotive")
+      flat_wheel_chart(33, 20, "CB", "OG")
+
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
