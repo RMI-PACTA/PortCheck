@@ -1907,7 +1907,10 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
 # ------------- FLAT WHEEL CHARTS ----------- #
 
 flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot){
-  
+  # ChartType = "EQ"
+  # plotnumber = 99
+  # companiestoprint = 20
+  # SectorToPlot = "Automotive"
    if (ChartType == "EQ"){
     PortSnapshot <- EQPortSnapshot
     combin <- EQCombin
@@ -2075,7 +2078,8 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     CompProdSnapshot <- combin
     OG$InPort <- "AllCompanies"
     
-    if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
+    if (ChartType == "EQ"){
+      AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
     }else{
       AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "EquityTicker"]
     }
@@ -2192,11 +2196,14 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     if (SectorToPlot %in% c("Automotive","Power")){
       Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
       
-      if (ChartType == "EQ"){ 
-        Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))
-      }else{
-        Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
-        Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
+      if (ChartType %in% c("EQ","CB")){ 
+        Targetmix <- subset(Targetmix,  BenchmarkRegion == BenchmarkRegionchoose, 
+                            select = c("Technology", "ProjMarketProd","PortWt","MarketTechShare"))
+        Targetmix$TargetProductionAlignment <- Targetmix$ProjMarketProd*Targetmix$PortWt*Targetmix$MarketTechShare
+        Targetmix <- subset(Targetmix, select=c("Technology","TargetProductionAlignment"))
+      # }else{
+      #   Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
+      #   Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
       }
       
       Targetmix$Classification<-"Portfolio"
@@ -2379,7 +2386,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     } 
     
   }
-  
+  print(Plot)
   Plot <- ggplot_gtable(ggplot_build(Plot))
   Plot$layout$clip[Plot$layout$name == "panel"] <- "off"
   
@@ -2389,9 +2396,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
   png(paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_',SectorToPlot,'_WheelofFortune.png'), height = 2600, width = 5500,res=ppi,bg="transparent") 
   grid.draw(Plot)
   dev.off()  
-  
-  # return(png(paste(PortfolioName,"_",SectorToPlot,'_WheelofFortune.png'), height = 3.300, width = 3300,res=ppi,bg="transparent") )
-  return()  
+
 }
 
 #------------- SECTOR BAR CHARTS ------------ #

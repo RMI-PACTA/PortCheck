@@ -370,7 +370,6 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # Loop through Portfolios
 #--------
 for (i in 1:nrow(TestList)){
-  
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortfolioNameLong"]
   TestType <- TestList[i,"PortfolioType"]
