@@ -1501,6 +1501,9 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
                          Scenario %in% Scenariochoose &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","CarstenMetric_Port","ComparisonType"))
+  Production$Sector <- as.factor(Production$Sector)
+  levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"FossilFuels"
+  levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"FossilFuels"
   # Aggregate and rename CarstenMetric_Port
   ID.COLS = c("Sector","Technology","ComparisonType")
   Production <- Production %>% gather(key=Metric, value=Value, "CarstenMetric_Port")
@@ -1509,10 +1512,8 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
   
   if(nrow(Production)>0){
     Production$TechName <- Production$Technology
-    Production[Production$Sector=="Oil&Gas","TechName"] <- revalue(Production[Production$Sector=="Oil&Gas","TechName"],
-                                                                        c("Coal"= "CoalProd",
-                                                                          "Gas" = "GasProd",
-                                                                          "Oil" = "OilProd"))
+    Production[Production$Sector=="FossilFuels",]$TechName <- paste0(Production$TechName[Production$Sector %in%"FossilFuels"],"Prod")
+    
     ylabel <- GT["StackedBarYLabel_FF"][[1]]
     technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","CoalProd","GasProd","OilProd")
     colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
@@ -1562,7 +1563,7 @@ stacked_bar_chart_vertical <- function(plotnumber,ChartType,SectorToPlot){
       p1 <- templete %+% dat +
         ggtitle("Automotive Production")
       
-      dat<- subset(Production,Sector=="Oil&Gas")
+      dat<- subset(Production,Sector=="FossilFuels")
       p2 <- templete %+% dat +
         ggtitle("Fossil Fuels Production")
       
