@@ -96,30 +96,41 @@ REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
+
+Filtered <- c("MetaPort","MetaPortfolio","Listed Market","GlobalBondUniverse")
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & InvestorName != "GlobalBondUniverse" & PortName != "MetaPort")
+CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose &
+                        !(InvestorName %in% Filtered) & !(PortName %in% Filtered))
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
+
 CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio" & InvestorName != "GlobalBondUniverse" & PortName != "MetaPort")
+CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio" &
+                                      !(InvestorName %in% Filtered) & !(PortName %in% Filtered))
 print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
+
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & PortName != "MetaPort")
+CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & !(PortName %in% Filtered))
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
 
 ### Get Equity Batch Results
 EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_PortfolioWeightedAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & PortName != "MetaPort")
+EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose &
+                        !(InvestorName %in% Filtered) & !(PortName %in% Filtered))
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
+
 EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio" & PortName != "MetaPort")
+EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio" &
+                                      !(InvestorName %in% Filtered) & !(PortName %in% Filtered))
 print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
+
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & PortName != "MetaPort")
+EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & !(PortName %in% Filtered))
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
-InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
 
+#Process (remove later)
+InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
 
 EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
 EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
@@ -137,8 +148,6 @@ CBBatchTest$PortName <- gsub(paste0("_",InvestorName),"",CBBatchTest$PortName)
 CBBatchTest_PortSnapshots$PortName <- gsub(paste0("_",InvestorName),"",CBBatchTest_PortSnapshots$PortName)
 CBCompProdSnapshots$PortName <- gsub(paste0("_",InvestorName),"",CBCompProdSnapshots$PortName)
 
-CBCompProdSnapshots <- unique(subset(CBCompProdSnapshots, BenchmarkRegion == "Global"))
-CBCompProdSnapshots$BenchmarkRegion <- revalue(CBCompProdSnapshots$BenchmarkRegion,c("Global" = "GlobalAggregate"))
 
 ### External Data Read In
 setwd(PROC.DATA.PATH)
@@ -277,21 +286,21 @@ if (ComparisonFile != "BatchComparison"){
 
 ### Calculates Exposure, AUM, Coverage Weight and Weighted Mean of Coverage Weight 
 
-if (nrow(EQBatchTest) >0){
-  EQResults <- company.comparison("EQ")
-  # EQExposures <- EQResults[[1]]
-  EQAUMs <- EQResults[[1]]
-  EQCoverageWeights <- EQResults[[2]]
-  EQWMCoverageWeights <- EQResults[[3]]
-}
-
-if (nrow(CBBatchTest) >0){
-  CBResults <- company.comparison("CB")
-  # CBExposures <- CBResults[[1]]
-  CBAUMs <- CBResults[[1]]
-  CBCoverageWeights <- CBResults[[2]]
-  CBWMCoverageWeights <- CBResults[[3]]
-}
+# if (nrow(EQBatchTest) >0){
+#   EQResults <- company.comparison("EQ")
+#   # EQExposures <- EQResults[[1]]
+#   EQAUMs <- EQResults[[1]]
+#   EQCoverageWeights <- EQResults[[2]]
+#   EQWMCoverageWeights <- EQResults[[3]]
+# }
+# 
+# if (nrow(CBBatchTest) >0){
+#   CBResults <- company.comparison("CB")
+#   # CBExposures <- CBResults[[1]]
+#   CBAUMs <- CBResults[[1]]
+#   CBCoverageWeights <- CBResults[[2]]
+#   CBWMCoverageWeights <- CBResults[[3]]
+# }
 
 ###### END NEW SECTION
 
@@ -385,31 +394,31 @@ for (i in 1:nrow(TestList)){
   ##### NEW SECTION
   ### Selects the current portfolio from the Comparative Results
   #EQComparisonExposures <- EQExposures[which(EQExposures$Type == TestType & EQExposures$ComparisonType == ComparisonFile & EQExposures$PortName != PortName),]
-  EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == ComparisonFile),]
+  # EQComparisonAUMs <- EQAUMs[which(EQAUMs$ComparisonType == ComparisonFile),]
   #EQWMCoverageWeight <- EQWMCoverageWeights[which(EQWMCoverageWeights$Type == TestType),]
-  
-  if (EQCoverageWeights != "NoCoverageWeight"){
-    EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == ComparisonFile),]
-    EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == ComparisonFile),]
-    EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName  &EQCoverageWeights$ComparisonType == ComparisonFile),]
-    EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
-    EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
-    EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
-  }
+  # 
+  # if (EQCoverageWeights != "NoCoverageWeight"){
+  #   EQExposure <- EQExposures[which(EQExposures$PortName == PortName & EQExposures$ComparisonType == ComparisonFile),]
+  #   EQAUMData <- EQAUMs[which(EQAUMs$PortName == PortName & EQAUMs$ComparisonType == ComparisonFile),]
+  #   EQCoverageWeight <- EQCoverageWeights[which(EQCoverageWeights$PortName == PortName  &EQCoverageWeights$ComparisonType == ComparisonFile),]
+  #   EQRanks <- RankPortfolios(EQComparisonExposures, EQExposure, PortName)
+  #   EQExposureRange <- rbind(EQExposure,EQComparisonExposures) 
+  #   EQAUMDatarange <- rbind(EQAUMData,EQComparisonAUMs)
+  # }
   
   #CBComparisonExposures <- CBExposures[which(CBExposures$Type == TestType & CBExposures$ComparisonType == ComparisonFile & CBExposures$PortName != PortName),]
-  CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == ComparisonFile),]
+  # CBComparisonAUMs <- CBAUMs[which(CBAUMs$ComparisonType == ComparisonFile),]
   #CBWMCoverageWeight <- CBWMCoverageWeights[which(CBWMCoverageWeights$Type == TestType),]
   ### Could add additional filter in at this point. 
-  
-  if (CBCoverageWeights != "NoCoverageWeight"){  
-    CBExposure <- CBExposures[CBExposures$PortName == PortName & CBExposures$ComparisonType == "BatchResults",]  
-    CBAUMData <- CBAUMs[which(CBAUMs$PortName == PortName & CBAUMs$ComparisonType == "BatchResults"),] 
-    CBCoverageWeight <- CBCoverageWeights[which(CBCoverageWeights$PortName == PortName & CBCoverageWeights$ComparisonType == "BatchResults"),]
-    CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
-    CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
-    CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs) 
-  } 
+  # 
+  # if (CBCoverageWeights != "NoCoverageWeight"){  
+  #   CBExposure <- CBExposures[CBExposures$PortName == PortName & CBExposures$ComparisonType == "BatchResults",]  
+  #   CBAUMData <- CBAUMs[which(CBAUMs$PortName == PortName & CBAUMs$ComparisonType == "BatchResults"),] 
+  #   CBCoverageWeight <- CBCoverageWeights[which(CBCoverageWeights$PortName == PortName & CBCoverageWeights$ComparisonType == "BatchResults"),]
+  #   CBRanks <- RankPortfolios(CBComparisonExposures, CBExposure, PortName)
+  #   CBExposureRange <- rbind(CBExposure,CBComparisonExposures) 
+  #   CBAUMDatarange <- rbind(CBAUMData,CBComparisonAUMs) 
+  # } 
   
   ##### NEW SECTION END  
 
