@@ -900,7 +900,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
 # ------------- FLAT WHEEL CHARTS ----------- #
 
 flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot){
-  # ChartType = "EQ"
+  # ChartType = "CB"
   # plotnumber = 99
   # companiestoprint = 20
   # SectorToPlot = "Automotive"
@@ -1396,36 +1396,43 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
 
 sector_processing <- function(){
   
+  ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
+  
+  #Filter to our region, scenario, and year
+  if(nrow(EQCombin) > 0) {
     EQBatchTest <- EQCombin
     EQBatchTest$Type <- "Equity Portfolio"
-    CBBatchTest <- CBCombin
-    CBBatchTest$Type <- "Corporate Bond Portfolio"
-    
-    ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
-    
-    #Filter to our region, scenario, and year
-    CB <- unique(subset(CBBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                          Scenario %in% Scenariochoose & Year == Startyear, 
-                        select = c(ID.COLS)))
     EQ <- unique(subset(EQBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS)))
-
-    #Aggregat by sector, breaking down by the type (equity vs debt)
-    df <- rbind(CB,EQ)
-    df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
-    df$Sector<-as.factor(df$Sector)
-    levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
-    levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
-    dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
-    
-    return(dfagg)
-    }                                       
+  } else {
+    EQ <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Equity Portfolio")
+    colnames(EQ) <- ID.COLS
+  }
+  if(nrow(CBCombin) > 0) {
+    CBBatchTest <- CBCombin
+    CBBatchTest$Type <- "Corporate Bond Portfolio"
+    CB <- unique(subset(CBBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+                          Scenario %in% Scenariochoose & Year == Startyear, 
+                        select = c(ID.COLS)))
+  } else {
+    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Corporate Bond Portfolio")
+    colnames(CB) <- ID.COLS
+  }
+  
+  #Aggregate by sector, breaking down by the type (equity vs debt)
+  df <- rbind(CB,EQ)
+  df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
+  df$Sector<-as.factor(df$Sector)
+  levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
+  levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
+  dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
+  
+  return(dfagg)
+}                                       
    
 sector_bar_chart <- function(plotnumber, dfagg){
 
-  ### Need to be changed!
-  
   sectorpalette <- c(energy,pow,trans)
   sectororder <-c("Fossil Fuels","Utility Power","Automotive")
   colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
@@ -1933,9 +1940,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     
     ID.COLS = c("PortName")
     BarColors <- c("Orange","Red")
-    df <- unique(subset(df, BenchmarkRegion %in% BenchmarkRegionchoose  & 
-                   Scenario %in% Scenariochoose & Year == Startyear,
-                 select = c(ID.COLS,MetricCol)))
+    df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   }
   
   BarColors <- c(BarColors,"Black","skyblue")
@@ -2005,5 +2010,3 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
   
 }
-
-

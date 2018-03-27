@@ -96,27 +96,49 @@ REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
-### Get Equity Batch Results
-EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_PortfolioWeightedAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest <- subset(EQBatchTest, Type == "Portfolio")
-print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
-EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio")
-print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
-EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio")
-print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
-
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest <- subset(CBBatchTest, Type == "Portfolio")
+CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & InvestorName != "GlobalBondUniverse" & PortName != "MetaPort")
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio")
+CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio" & InvestorName != "GlobalBondUniverse" & PortName != "MetaPort")
 print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio")
+CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & PortName != "MetaPort")
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
+
+### Get Equity Batch Results
+EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_PortfolioWeightedAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & PortName != "MetaPort")
+print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
+EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio" & PortName != "MetaPort")
+print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
+EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
+EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & PortName != "MetaPort")
+print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
+
+InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
+
+
+EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
+EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
+EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
+
+CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
+CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
+CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
+
+EQBatchTest$PortName <- gsub(paste0("_",InvestorName),"",EQBatchTest$PortName)
+EQBatchTest_PortSnapshots$PortName <- gsub(paste0("_",InvestorName),"",EQBatchTest_PortSnapshots$PortName)
+EQCompProdSnapshots$PortName <- gsub(paste0("_",InvestorName),"",EQCompProdSnapshots$PortName)
+
+CBBatchTest$PortName <- gsub(paste0("_",InvestorName),"",CBBatchTest$PortName)
+CBBatchTest_PortSnapshots$PortName <- gsub(paste0("_",InvestorName),"",CBBatchTest_PortSnapshots$PortName)
+CBCompProdSnapshots$PortName <- gsub(paste0("_",InvestorName),"",CBCompProdSnapshots$PortName)
+
+CBCompProdSnapshots <- unique(subset(CBCompProdSnapshots, BenchmarkRegion == "Global"))
+CBCompProdSnapshots$BenchmarkRegion <- revalue(CBCompProdSnapshots$BenchmarkRegion,c("Global" = "GlobalAggregate"))
 
 ### External Data Read In
 setwd(PROC.DATA.PATH)
@@ -141,8 +163,7 @@ PortfolioBreakdown$PortfolioName<- gsub("[ _.-]","",PortfolioBreakdown$Portfolio
 PortfolioBreakdown$InvestorName<- gsub("[()]","",PortfolioBreakdown$InvestorName)
 PortfolioBreakdown$PortfolioName<- gsub("[()]","",PortfolioBreakdown$PortfolioName)
 
-PortfolioBreakdown$PortName <- paste0(PortfolioBreakdown$PortfolioName,"_",PortfolioBreakdown$InvestorName)
-PortfolioBreakdown$PortName <- gsub(" ","",PortfolioBreakdown$PortName)
+PortfolioBreakdown$PortName <- PortfolioBreakdown$PortfolioName
 TestList<-PortfolioBreakdown
 print(paste0("Test List: ", nrow(TestList), " rows."))
 
@@ -159,12 +180,6 @@ if (file.exists(paste0(PORTS.PATH,ProjectName,"/",BatchName,"/",BatchName,"_Port
 # EQBatchTest <- EQBatchTest[EQBatchTest$InvestorName != c("MetaPortfolio"),]    #"ListedMarket"
 # CBBatchTest <- CBBatchTest[CBBatchTest$InvestorName != c("MetaPortfolio"),]     #"ListedMarket", 
 
-EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
-EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
-EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
-CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
-CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
-CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
 
 ### Add Company Names to BatchTest_PortSnapshot -  should be superceded with changes to EQY Code
 if (!"Name" %in% colnames(EQBatchTest_PortSnapshots)){
@@ -449,10 +464,7 @@ for (i in 1:nrow(TestList)){
       # 
       # Graph246(99, "RenewablesCap")
       
-      # Required for the report data
-      SectorData <- sector_processing()
-      
-      sector_bar_chart("01", SectorData)
+      sector_bar_chart("01", sector_processing())
       stacked_bar_chart_vertical(2,"Summary","All") #Combined EQ/CB, needs to be updated
       # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
@@ -481,10 +493,10 @@ for (i in 1:nrow(TestList)){
       ranking_chart_alignment(27, "CB", "All") #Carstens Metric
       flat_wheel_chart(28, 20, "EQ", "Power")
       flat_wheel_chart(29, 20, "EQ", "Automotive")
-      flat_wheel_chart(30, 20, "EQ", "OG")
+      # flat_wheel_chart(30, 20, "EQ", "OG")
       flat_wheel_chart(31, 20, "CB", "Power")
       flat_wheel_chart(32, 20, "CB", "Automotive")
-      flat_wheel_chart(33, 20, "CB", "OG")
+      # flat_wheel_chart(33, 20, "CB", "OG")
 
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
