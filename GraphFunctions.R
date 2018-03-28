@@ -1,6 +1,4 @@
-# --------
-# REPORTING FUNCTIONS
-# --------
+# --------REPORT FUNCTIONS--------------------
 
 #----------- Creates the figure list for the report
 figure_list <- function(figurelist){
@@ -12,304 +10,6 @@ figure_list <- function(figurelist){
   figurelist$FigName <- gsub(".png","",figurelist$FigName)
   
   write.table(figurelist,"FigureList.txt",row.names = FALSE, col.names = FALSE)
-}
-
-# ------------- REPORT DATA ----------------- #
-report_data <- function(ChartType){
-  
-  if (ChartType =="EQ"){
-    combin <- EQCombin
-    Exposures<-EQExposures
-    AUMData<-EQAUMData
-    Ranks<-EQRanks
-    PortSnapshot<-EQPortSnapshot
-  }else if (ChartType == "CB"){
-    combin <- CBCombin
-    Exposures <- CBExposureRange
-    AUMData <-CBAUMDatarange
-    Ranks<-CBRanks
-    PortSnapshot<-CBPortSnapshot
-  }
-  
-  
-  if (nrow(combin)>0){
-    
-    PortSnapshot <- rename(PortSnapshot, c("IssLvlPortWeight"="PortWeight"),warn_missing = FALSE)
-    # Pie Share Data
-    PortSnapshotSub <- subset(PortSnapshot, CNTRY_OF_DOMICILE %in% IndexUniverses[,names(IndexUniverses) == eval(paste0(CompanyDomicileRegionchoose,"_ISO"))])
-    piesub_tech <- unique(subset(PortSnapshotSub,select=c("ISIN","piesector","PortWeight")))
-    piesub_tech$piesector<-gsub("NonUtility Power", "Non-Utility Power", piesub_tech$piesector)
-    piesub_tech$piesector[is.na(piesub_tech$piesector)] <- "Not Assessed"
-    pieshares <- ddply(piesub_tech, .(piesector),summarize,Portfolio_weight=sum(PortWeight, na.rm=TRUE))
-    # Numbers to print
-    PieAssessedShare <- round((sum(pieshares$Portfolio_weight)-pieshares$Portfolio_weight[pieshares$piesector %in% "Not Assessed"]),2)*100
-    if(length(pieshares$Portfolio_weight[pieshares$piesector%in% "Not Assessed"])==0){PieAssessedShare<-100}
-    
-    # Line Chart Data
-    if (ChartType == "EQ"){
-      LineData <- subset(combin, BenchmarkRegion %in% BenchmarkRegionchoose & CompanyDomicileRegion %in% CompanyDomicileRegionchoose & Scenario %in% Scenariochoose & Year %in% (Startyear+5))  
-      LineData <- subset(LineData, select = c("Sector","Technology","Year","Production","TargetProductionAlignment","TargetProductionAUMIntensity"))
-      LineData$Check <- LineData$Production-LineData$TargetProductionAlignment
-      LineData$Check[LineData$Sector %in% "Fossil Fuels"] <- LineData$Production[LineData$Sector %in% "Fossil Fuels"]-LineData$TargetProductionAUMIntensity[LineData$Sector %in% "Fossil Fuels"]
-      
-    }else{
-      LineData <- subset(combin, Year %in% (Startyear+5) & BenchmarkRegion %in% BenchmarkRegionchoose  & Scenario %in% Scenariochoose)    
-      LineData <- subset(LineData, select = c("Sector","Technology","Year","WtTechShareTechShare","Benchmark_WtTechShareTechShare","Benchmark_OGC","OGCMetrik_Portfolio")) 
-      LineData$Check <- LineData$WtTechShareTechShare - LineData$Benchmark_WtTechShareTechShare
-      LineData$Check[LineData$Sector %in% c("Oil&Gas","Coal")]<- LineData$OGCMetrik_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")] - LineData$Benchmark_OGC[LineData$Sector %in% c("Oil&Gas","Coal")]
-      LineData$Production <- LineData$WtTechShareTechShare
-      LineData$Production[LineData$Sector %in% c("Oil&Gas","Coal")] <-LineData$OGCMetrik_Portfolio[LineData$Sector %in% c("Oil&Gas","Coal")]
-    } 
-    
-    LineData$Technology <- revalue(LineData$Technology, c("Coal"="CoalProd","Gas"="GasProd","Oil"="OilProd"))
-    
-    # 1 indicates it is aligned, 0 is misaligned
-    # # Rating = to 1 if the Production is higher than the target for Good Techs
-    goodtech <- c("RenewablesCap","HydroCap","NuclearCap","Hybrid","Electric")
-    badtech <- c("ICE","OilProd","GasProd","CoalProd","GasCap","CoalCap")
-    # 
-    LineData$Rating <- "Check"
-    # LineData$Rating[LineData$Check > 0 & LineData$Technology %in% badtech] <- 0
-    # LineData$Rating[LineData$Check < 0 & LineData$Technology %in% badtech] <- 1
-    # LineData$Rating[LineData$Check < 0 & LineData$Technology %in% goodtech] <- 0
-    # LineData$Rating[LineData$Check > 0 & LineData$Technology %in% goodtech] <- 1
-    LineData$Rating[LineData$Check < 0] <- 0
-    LineData$Rating[LineData$Check > 0] <- 1
-    LineData$Rating[is.na(LineData$Production)] <- NA
-    LineData <- subset(LineData,!Technology %in% "OilCap", select = c("Technology","Rating"))
-    LD <- setNames(data.frame(t(LineData[,-1])), LineData[,1]) 
-    
-    
-    # Ranking Chart
-    TechList <- c("Electric","Hybrid","ICE","Coal","Oil","Gas","RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap")
-    
-    AUMData <- subset(AUMData, select = c("PortName","PortAUM"))
-    Exposures <- Exposures[, -which(colnames(Exposures) %in% c("ComparisonType","Type"))]
-    
-    df <- Exposures
-    df <- merge(df,AUMData, by= "PortName")
-    df <- rename(x = df, c("PortAUM"="AUM"),warn_missing = FALSE)
-    
-    WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
-    WM$PortName <- "WeightedMean"
-    df$AUM <- NULL
-    df <- df[df$PortName %in% PortfolioNameLong,]
-    df <- rbind(df,WM)
-    
-    df <- setNames(data.frame(t(df[,-1])), df[,1]) 
-    df$Check <- df$WeightedMean - df[,1]
-    df$Rating <- 1
-    df$Rating[df$Check > 0] <- 0
-    df$Rating[is.na(df[,1])] <- NA
-    
-    TechsAboveAlignment <- as.integer(sum(as.numeric(LineData$Rating), na.rm = TRUE))
-    TechsAboveMean <- as.integer(sum(as.numeric(df$Rating), na.rm = TRUE))
-    TechsInPort <- as.integer(length(which(!is.na(LineData$Rating))))
-    
-    
-    ReportData <- data.frame(row.names=c("PieAssessedShare","TechsAboveAlignment", "TechsAboveMean", "TechsInPort"))
-    ReportData$Values <- c(PieAssessedShare,TechsAboveAlignment,TechsAboveMean,TechsInPort)
-    ReportData <- data.frame(t(ReportData))
-    ReportData <- cbind(ReportData,LD)
-  }else{
-    
-    ReportData <- data.frame()
-  }
-  
-  return(ReportData)
-}
-
-# ------------ Report Generator ------------- #
-report <- function(){
-  
-  PORTFOLIONAME <- toupper(ReportName)
-  
-  # Copy in the template for the report
-  text <- as.data.frame(template,stringsAsFactors = FALSE)  
-  colnames(text) <- "text"
-  
-  
-  removetextlines <- function(handlename){
-    startpage <- which(grepl(paste0(handlename,"S"),text$text))
-    endpage <- which(grepl(paste0(handlename,"E"),text$text))
-    
-    if (length(startpage) >0 ){
-      
-      removelist <- lapply(1:length(startpage), function(x) c(startpage[c(x)]:endpage[c(x)]))
-      removelist <- melt(removelist[1:length(startpage)])
-      text <- as.data.frame(text[-removelist$value,],stringsAsFactors =FALSE)
-      colnames(text) <- "text"
-    }else{
-      removeline <- which(grepl(handlename,text$text))
-      text <- as.data.frame(text[-removeline,],stringsAsFactors =FALSE)
-      colnames(text) <- "text"
-    }
-    return(text)
-  }
-  
-  # Add in numerics/conditionals
-  # Changes the more or less for each Technology
-  if (nrow(EQReportData)>0){
-    EQTechList <- as.data.frame(paste0("EQCaption",colnames(EQReportData)[5:length(EQReportData)]))  
-    colnames(EQTechList) <- "CaptionTitle" 
-    EQTechList$Test <- t(EQReportData[5:length(EQReportData)])
-    EQTechList$Caption <- RT["CaptionMore"][[1]]
-    EQTechList$Caption[EQTechList$Test == 0] <- RT["CaptionLess"][[1]]
-    EQTechList$Test <- NULL
-    EQTechList<- setNames(data.frame(t(EQTechList[,-1])), EQTechList[,1])
-    
-    RT$EQCoverage <- paste(EQReportData$PieAssessedShare,as.character(" \\\\\\%"))
-    
-    RT$EQTechsAlign <- EQReportData$TechsAboveAlignment
-    RT$EQTechsWM <- EQReportData$TechsAboveMean
-    RT$EQTechsPort <- EQReportData$TechsInPort  
-    RT <- cbind(RT,EQTechList)  
-  }
-  
-  if (nrow(CBReportData)>0){
-    CBTechList <- as.data.frame(paste0("CBCaption",colnames(CBReportData)[5:length(CBReportData)]))  
-    colnames(CBTechList) <- "CaptionTitle" 
-    CBTechList$Test <- t(CBReportData[5:length(CBReportData)])
-    CBTechList$Caption <- RT["CaptionMore"][[1]]
-    CBTechList$Caption[CBTechList$Test == 0] <- RT["CaptionLess"][[1]]
-    CBTechList$Test <- NULL
-    CBTechList<- setNames(data.frame(t(CBTechList[,-1])), CBTechList[,1])
-    
-    RT$CBCoverage <- paste(CBReportData$PieAssessedShare,as.character(" \\\\\\%"))
-    RT$CBTechsAlign <- CBReportData$TechsAboveAlignment
-    RT$CBTechsWM <- CBReportData$TechsAboveMeanreport_da
-    RT$CBTechsPort <- CBReportData$TechsInPort  
-    
-    RT <- cbind(RT,CBTechList)
-  }
-  
-  RT$Languagechoose <- Languagechoose
-  
-  # Update the template to reflect figure names
-  FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
-  colnames(FigNames) <- "Name"
-  FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
-  FigNames$Fig <- substring(FigNames$Name,1,2)
-  FigNames$Fig <- paste0("SwissFigures/Fig",FigNames$Fig)
-  
-  for (f in 1:nrow(FigNames)){
-    text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
-  }
-  
-  RenewAdds<-0
-  if (length(grep("Fig51", FigNames$Fig))>0){RenewAdds <- 1}
-  
-  # Check for each technology, 
-  techpageremoval <- data.frame("PowerEQ"=EQSectorProd$Production[EQSectorProd$Sector == "Power"],
-                                "PowerCB"=CBSectorProd$Production[CBSectorProd$Sector == "Power"],
-                                "AutomotiveEQ"=EQSectorProd$Production[EQSectorProd$Sector == "Automotive"],
-                                "AutomotiveCB"=CBSectorProd$Production[CBSectorProd$Sector == "Automotive"],
-                                "FossilFuelsEQ"=1,
-                                "FossilFuelsCB"=CBSectorProd$Production[CBSectorProd$Sector == "Fossil Fuels"])
-  removesectors <- colnames(techpageremoval[which(techpageremoval == 0)]) 
-  
-  # removes the sectors  
-  if(length(removesectors)>0){
-    for (i in 1:length(removesectors)){
-      text <- removetextlines(removesectors[i])
-    }}
-  
-  # removes bond pages
-  if (nrow(CBReportData)==0){
-    text <- removetextlines("CBPage")
-    text <- removetextlines("CBPie")
-  }
-  
-  # removes equity pages
-  if (nrow(EQReportData)==0){
-    # pages <- c(9,11,13,15)
-    text <- removetextlines("EQPage")
-    text <- removetextlines("EQPie")
-    text <- removetextlines("RenewAddsOut")
-    
-    renewvspace<- which(grepl("renewspacingworkaround",text$text))
-    text$text[renewvspace] <- "\t\\vspace{-2.9cm} %renewspacingworkaround"
-  }
-  
-  # removes renewable chart 
-  if (RenewAdds==0 & nrow(EQReportData)>0){
-    text <- removetextlines("RenewAddsOut")
-    
-    renewvspace<- which(grepl("renewspacingworkaround",text$text))
-    text$text[renewvspace] <- gsub(".9cm","2.9cm",text$text[renewvspace])
-  }
-  
-  # removes Fund Page
-  if (typeof(FundsInPort)!="list"){
-    text <- removetextlines("FundCheck")
-  }
-  
-  # removes Other Sector Pages - materials
-  if ((OtherSectors$Steel+OtherSectors$Cement==0)){
-    text <- removetextlines("OtherSectorsMaterial")
-  }
-  
-  # removes Other Sector Pages - transportation
-  if ((OtherSectors$Aviation+OtherSectors$Shipping==0)){
-    text <- removetextlines("OtherSectorsTransport")
-  }  
-  
-  # Set Report Language
-  replacelist <- colnames(RT)  
-  for (i in 1:length(replacelist)){
-    text$text <- gsub(replacelist[i],RT[replacelist[i]][[1]], text$text)
-  }
-  
-  
-  
-  text$text <- gsub("SamplePort",PortfolioName,text$text)
-  text$text <- gsub("SAMPLEPORT",PORTFOLIONAME,text$text)
-  text$text <- gsub("CO2","CO\\\\textsubscript{2}",text$text)
-  text$text <- gsub("ÃÂ°","Â°",text$text)
-  
-  if (Languagechoose == "DE"){
-    text$text[grepl("KLIMAVER",text$text)][1]<- "KLIMAVERTRÃGLICHKEITS-PILOTTEST"
-  }
-  
-  if (Languagechoose == "FR"){
-    text$text[grepl("TEST PILOTE DE COMPATIBILITÃ  CLIMATIQUE",text$text)] <- "TEST PILOTE\\\\ DE COMPATIBILITÃ  CLIMATIQUE"
-    text$text[grepl("POSSIBILIT",text$text)][1]<- "\\SectionHeading{PARTIE 3:}{POSSIBILITÃS D'ACTION}"
-    text$text[grepl("POSSIBILIT",text$text)][2]<- "\\PageHeading{POSSIBILITÃS D'ACTION - SÃLECTION DES FONDS}"
-  }
-  
-  # Copy in the graphics folder for the report
-  originalloc <- paste0(TEMPLATE.PATH,"ReportGraphics/")
-  graphicsloc <- paste0(LANGUAGE.PATH ,"/","ReportGraphics/")
-  flist <- list.files(originalloc, full.names = TRUE)
-  
-  if(!dir.exists(file.path(graphicsloc))){
-    dir.create(file.path(graphicsloc), showWarnings = TRUE, recursive = FALSE, mode = "0777")
-    for (file in flist){file.copy(file, graphicsloc)}
-  }  
-  
-  # Save the template file
-  TemplateNameNew <- paste0("Template_",PortfolioName,"_",Languagechoose)
-  write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
-  
-  # Create the PDF
-  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
-  
-  # knit(input = paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"), output = "test.tex")
-  # tinytex::xelatex("test.tex")
-  # 
-  
-  # Delete remaining files and ReportGraphics Folder
-  unlink("ReportGraphics",recursive = TRUE)
-  excessfileendings <- c(".log",".rnw",".tex",".aux")
-  file.remove(paste0(TemplateNameNew,excessfileendings))
-  file.remove("FigureList.txt")
-  
-  # Rename output file
-  if (InvestorName == PortfolioName){
-    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
-      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,"_",Languagechoose,".pdf"))}
-  
-  return()
 }
 
 #----------- CA Report Data------------------ #
@@ -488,8 +188,7 @@ CAReport <- function(){
   
 }
 
-# --------
-# GENERAL PLOT FUNCTIONS
+# --------GENERAL PLOT FUNCTIONS---------
 # ------------ Theme -------------------------#
 
 themecolor <- function() {
@@ -926,19 +625,12 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   Targetmix$TechShare <- as.numeric(Targetmix$TechShare)
   Targetmix$TechShare <- Targetmix$TechShare*100
   
-  # Add Index
-  if (SectorToPlot %in% c("Automotive","Power", "Fossil Fuels")){
-    Indexmix <- subset(IndexData, Sector == SectorToPlot)
-  } else if (SectorToPlot == "Oil") {
-    Indexmix <- subset(IndexData, Technology == "Oil")
+  # Add Benchmark / Global Market
+  if (ChartType == "EQ"){
+    #Stock Market
+  } else if (ChartType == "CB") {
+    #Bond Market
   }
-  Indexmix <- ddply(Indexmix, .(CompanyDomicileRegion,Technology), summarize, Capacity = sum(Production))
-  Indexmix$Classification <- "Portfolio"
-  Indexmix <- subset(Indexmix, select =c("CompanyDomicileRegion","Classification","Technology","Capacity"))
-  colnames(Indexmix) <- c("Name","Classification","Technology","TechShare")  
-  Indexmix$TechShare <- as.numeric(Indexmix$TechShare)
-  Indexmix$TechShare <- (Indexmix$TechShare/sum(Indexmix$TechShare))*100
-  Indexmix$Name <- Indexchoose
   
   # Percentage share of each technology  
   Companies <- subset(CompProdSS, select=c("Ticker","Technology","CompanyLvlProd","CompanyLvlSecProd"))
@@ -952,7 +644,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   TopPortCompanies[TopPortCompanies$item == "NA"] <- "NoName"
   
   
-  AllCompanies <- rbind(TopPortCompanies,Portfoliomix,Targetmix,Indexmix)
+  AllCompanies <- rbind(TopPortCompanies,Portfoliomix,Targetmix)
   
   if (SectorToPlot == "Power"){  
     
@@ -1142,15 +834,15 @@ portfolio_sectorshare <- function(plotnumber){
 sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   library(dplyr)
   if (ChartType == "EQ"){
-    Portfolio <- EQCombin
+    Combin <- EQCombin
     Batch <- EQBatchTest
   }else if (ChartType == "CB"){
-    Portfolio <- CBCombin
+    Combin <- CBCombin
     Batch <- CBBatchTest
     #This summary combination is a straight average of EQ/CB.
     #Not neccesarily correct
   }else if (ChartType == "Summary") {
-    Portfolio <- rbind(subset(EQCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
+    Combin <- rbind(subset(EQCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
                                                 "Technology","CarstenMetric_Port","ComparisonType")),
                        subset(CBCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
                                                 "Technology","CarstenMetric_Port","ComparisonType")))
@@ -1163,10 +855,10 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   #Tag Target portfolio, benchmark
-  Portfolio$ComparisonType = "Portfolio"
+  Combin$ComparisonType = "Portfolio"
   Batch$ComparisonType = "Average California Insurer"
-  Combin <- rbind(Portfolio,Batch)
-  Production <- subset(Combin, Year == Startyear & 
+  Portfolios <- rbind(Combin,Batch)
+  Production <- subset(Portfolios, Year == Startyear & 
                          BenchmarkRegion %in% BenchmarkRegionchoose & 
                          Scenario %in% Scenariochoose &
                          Technology != "OilCap",
@@ -1179,6 +871,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   Production <- Production %>% gather(key=Metric, value=Value, "CarstenMetric_Port")
   Production <- aggregate(Production["Value"],by=Production[c(ID.COLS)],FUN=sum)
   #Created an average for the peers (or even just use fill!)
+  
+  
   
   if(nrow(Production)>0){
     Production[Production$Sector=="Fossil Fuels",]$Technology <- paste0(Production$Technology[Production$Sector %in%"Fossil Fuels"],"Prod")
