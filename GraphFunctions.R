@@ -514,7 +514,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
   return()
 }
 
-
 # ------------- TECH SHARE CHARTS ----------- #
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
@@ -796,15 +795,15 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     #Not neccesarily correct
   }else if (ChartType == "Summary") {
     Combin <- rbind(subset(EQCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
-                                                "Technology","CarstenMetric_Port","ComparisonType")),
+                                                "Technology","CarstenMetric_Port","Type")),
                        subset(CBCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
-                                                "Technology","CarstenMetric_Port","ComparisonType")))
+                                                "Technology","CarstenMetric_Port","Type")))
     Batch <- rbind(subset(EQBatchTest,
                           select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
-                                   "CarstenMetric_Port","ComparisonType")),
+                                   "CarstenMetric_Port","Type")),
                    subset(CBBatchTest,
                           select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
-                                   "CarstenMetric_Port","ComparisonType")))
+                                   "CarstenMetric_Port","Type")))
   }
   
   #Tag Target portfolio, benchmark
