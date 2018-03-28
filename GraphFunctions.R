@@ -1400,6 +1400,7 @@ sector_processing <- function(){
   df <- rbind(CB,EQ)
   df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
   df$Sector<-as.factor(df$Sector)
+  levels(df$Sector)[levels(df$Sector)=="Coal"] <- "Fossil Fuels"
   levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
   levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
   dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
