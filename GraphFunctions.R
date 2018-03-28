@@ -311,11 +311,9 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
                           
 # ------------- RANKING CHART - ALIGNMENT ----#
 
-ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
+ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear){
   
   
-  
- 
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
     Ranks<- RankPortfolios("EQ",PortName)
@@ -326,6 +324,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
+  EQBatchTest<-EQBatchTest[!EQBatchTest$Technology %in% "OilCap",]
    Mins<- aggregate(CarstenMetric_Port ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], min)
    Maxs <- aggregate(CarstenMetric_Port ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], max)
    MinMax <- merge(Mins,Maxs, by="Technology")
@@ -372,7 +371,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     barwidth <- .03
     bh <-0.6
     tbwid <- .25
-    #benchmark<-aggregate(CarstenMetric_ProjMarket ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], min)
     # Label Wrapping Functions  
     # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
     # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
@@ -386,17 +384,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     Exposures$TechTitle[Exposures$Sector %in% "Automotive"] <- paste0(t(GT[Exposures$b[Exposures$Sector %in% "Automotive"] ]))
     
     Exposures$TechLabel <- Exposures$TechTitle
-    # 
-    # Exposures$TechLabel<- as.factor(Exposures$TechLabel)
-    # ordr<- c("Renewable Power","Hydropower","Nuclear power","Gas Power","Coal Power",
-    #              "Oil","Gas",
-    #              "ICE vehicles","Hybrid vehicles","Electric vehicles")
-    # ordr<-as.factor(ordr)
-    # Exposures$TechLabel<- factor(Exposures$TechLabel, levels = ordr)
-    
-    # Exposures <- Exposures[order(Exposures$order),]
-    # Exposures$order <- factor(Exposures$order, levels = Exposures$order)
-    # 
+   
     Exposures$Locations <- locations
     
     Exposures$LowLim <- rowMins(as.matrix(Exposures[,colnames(Exposures) %in% c("Minimum","LowLim")]))
@@ -426,10 +414,14 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     
     repval = 100
     redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
-    xvals <- rep(seq(0,1,1/(repval-1)),length(locations))
+    xvals <- rep(seq(0,1,1/(repval)),length(locations))
+    xvals <- xvals[which(xvals<1)]
     yvals <- sort(rep(locations,repval))
     plotdf <- data.frame(x=xvals+0.01,y=yvals,w=2/repval,h=bh, colbar=rep(redgreen,length(locations)))
-    plotdf <- plotdf[which(plotdf$x<0.99),]
+    plotdf <- plotdf[which(plotdf$x<1),]
+    
+    
+    xmx<- as.numeric(aggregate(CarstenMetric_ProjMarket ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], min)[2][,1])
     
     outputplot <-    ggplot()+
       geom_tile(data=plotdf, aes(x=x,y=y),height=plotdf$h,width=plotdf$w,fill=plotdf$colbar) +
@@ -443,18 +435,19 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       geom_point(data=Exposures,aes(x=xupploc,y=Locations),  fill="black",colour="black",size=2)+
       
       # centre alignment line    # xmax
-      annotate(geom="rect",xmin = 0,xmax=0.001,ymin = 0.7,ymax=1.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 1.7,ymax=2.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.01,ymin = 2.7,ymax=3.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.019,ymin = 4.2,ymax=4.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.021,ymin = 5.2,ymax=5.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.004,ymin = 6.2,ymax=6.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.007,ymin = 7.7,ymax=8.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      annotate(geom="rect",xmin =0,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
-      
+      annotate(geom="rect",xmin = 0,xmax=xmx,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
+     annotate(geom="rect",xmin =0,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
+      # annotate(geom="rect",xmin = 0,xmax=0.001,ymin = 0.7,ymax=1.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 1.7,ymax=2.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.01,ymin = 2.7,ymax=3.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.019,ymin = 4.2,ymax=4.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.021,ymin = 5.2,ymax=5.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.004,ymin = 6.2,ymax=6.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.007,ymin = 7.7,ymax=8.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+      # 
       # Company Circles
       geom_point(data=Exposures,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
       annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc, y= Exposures$Locations, colour="white",size=rel(3))+ 
@@ -510,57 +503,17 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
         annotate(geom="text",x=-0.8,y=PlotData$Locations[PlotData$Technology %in% goodtech],label=wrap.labels(PlotData$TechLabel[PlotData$Technology %in% goodtech],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
       
       }
-      
-      # Leaf Icon
-      # annotation_custom(leafg,xmin=leafxmin,xmax=leafxmax,ymin=leafloc[1]-leafh,ymax = leafloc[1]+leafh)+
-      # annotation_custom(leafg,xmin=leafxmin,xmax=leafxmax,ymin=leafloc[2]-leafh,ymax = leafloc[2]+leafh)#+
-      
-      # Sector Boxes
-      # annotate(geom="rect",xmin=-2.4, xmax=1.6, ymin=0.2, ymax=ymax, fill="transparent", colour="black") 
+     
     }
     
     outputplot <- ggplot_gtable(ggplot_build(outputplot))
     outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
     grid.draw(outputplot)  
-    
-  #   if (PortfolioNameLong %in% c("PK","V")){
-  #     PortfolioName<- PortfolioNameLong}
-  #   
-  #   if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-  #   
-  #   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_RankingChart.png', sep=""),bg="transparent",height=graphheight,width=7,plot=outputplot)
-  # }else{
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
-    # 
-    # if (ChartType == "CB"){
-    #   Label <- GT["NoDebt"][[1]]
-    # }else{Label <- GT["NoEquity"][[1]]}
-    # 
-    # outputplot <- 
-    #   ggplot()+
-    #   annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,15), size=3)+
-    #   geom_blank()+
-    #   theme(
-    #     axis.title.x=element_blank(),
-    #     axis.title.y=element_blank(),
-    #     axis.text.x=element_blank(),
-    #     axis.text.y=element_blank(),
-    #     axis.ticks = element_blank(),
-    #     panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     #panel.background = element_blank(),
-    #     panel.background = element_rect(fill = "transparent",colour = NA))
-    # 
-    # if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_RankingChart.png', sep=""),bg="transparent",height=2.5,width=7,plot=outputplot)
-    # print("nochart")
-    
-    
-  #}
+
   
   return()
 }
+
 
 # ------------- TECH SHARE CHARTS ----------- #
 
