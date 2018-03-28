@@ -522,10 +522,10 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   # companiestoprint = 20
   # SectorToPlot = "Fossil Fuels"
    if (ChartType == "EQ"){
-    CompProdSS <- EQCompProdSnapshot
+    CompProdSS <- subset(EQCompProdSnapshot, Type == "Portfolio")
     combin <- EQCombin
   } else if(ChartType == "CB"){
-    CompProdSS <- CBCompProdSnapshot
+    CompProdSS <- subset(CBCompProdSnapshot, Type == "Portfolio")
     combin <- CBCombin
   }
 
@@ -711,9 +711,9 @@ sector_processing <- function(){
   
   #Filter to our region, scenario, and year
   if(nrow(EQCombin) > 0) {
-    EQBatchTest <- EQCombin
-    EQBatchTest$Type <- "Equity Portfolio"
-    EQ <- unique(subset(EQBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+    EQ <- EQCombin
+    EQ$Type <- "Equity Portfolio"
+    EQ <- unique(subset(EQ, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS)))
   } else {
@@ -721,9 +721,9 @@ sector_processing <- function(){
     colnames(EQ) <- ID.COLS
   }
   if(nrow(CBCombin) > 0) {
-    CBBatchTest <- CBCombin
-    CBBatchTest$Type <- "Corporate Bond Portfolio"
-    CB <- unique(subset(CBBatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
+    CB <- CBCombin
+    CB$Type <- "Corporate Bond Portfolio"
+    CB <- unique(subset(CB, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS)))
   } else {
@@ -787,10 +787,10 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   library(dplyr)
   if (ChartType == "EQ"){
     Combin <- EQCombin
-    Batch <- EQBatchTest
+    Batch <- subset(EQBatchTest, Type == "Portfolio")
   }else if (ChartType == "CB"){
     Combin <- CBCombin
-    Batch <- CBBatchTest
+    Batch <- subset(CBBatchTest, Type == "Portfolio")
     #This summary combination is a straight average of EQ/CB.
     #Not neccesarily correct
   }else if (ChartType == "Summary") {
@@ -798,28 +798,26 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
                                                 "Technology","CarstenMetric_Port","Type")),
                        subset(CBCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
                                                 "Technology","CarstenMetric_Port","Type")))
-    Batch <- rbind(subset(EQBatchTest,
+    Batch <- rbind(subset(EQBatchTest, Type == "Portfolio",
                           select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
                                    "CarstenMetric_Port","Type")),
-                   subset(CBBatchTest,
+                   subset(CBBatchTest, Type == "Portfolio",
                           select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
                                    "CarstenMetric_Port","Type")))
   }
   
   #Tag Target portfolio, benchmark
-  Combin$ComparisonType = "Portfolio"
-  Batch$ComparisonType = "Average California Insurer"
   Portfolios <- rbind(Combin,Batch)
   Production <- subset(Portfolios, Year == Startyear & 
                          BenchmarkRegion %in% BenchmarkRegionchoose & 
                          Scenario %in% Scenariochoose &
                          Technology != "OilCap",
-                       select=c("PortName","Sector","Technology","CarstenMetric_Port","ComparisonType"))
+                       select=c("PortName","Sector","Technology","CarstenMetric_Port","Type"))
   Production$Sector <- as.factor(Production$Sector)
   levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"Fossil Fuels"
   levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"Fossil Fuels"
   # Aggregate and rename CarstenMetric_Port
-  ID.COLS = c("Sector","Technology","ComparisonType")
+  ID.COLS = c("Sector","Technology","Type")
   Production <- Production %>% gather(key=Metric, value=Value, "CarstenMetric_Port")
   Production <- aggregate(Production["Value"],by=Production[c(ID.COLS)],FUN=sum)
   #Created an average for the peers (or even just use fill!)
@@ -840,14 +838,14 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     Production$Technology<-as.factor(Production$Technology)
     Production$Sector<-as.factor(Production$Sector)
     
-    Production$ComparisonType <- wrap.labels(Production$ComparisonType,20)
+    Production$Type <- wrap.labels(Production$Type,20)
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
-    Production$ComparisonType <- factor(Production$ComparisonType)
+    Production$Type <- factor(Production$Type)
     detach("package:dplyr",unload=TRUE)
     
-    Production <- subset(Production, select = c("ComparisonType", "Sector", "Technology", "Value"))
+    Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
     colnames(Production) <- c("item", "family", "score", "value")
     
     template <- stacked_bar_chart(Production)+
@@ -1097,7 +1095,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     } else if (ChartType == "EQ") {
       BatchTest <- EQBatchTest
     }
-    ID.COLS = c("PortName","Year","Sector","Technology")
+    ID.COLS = c("PortName","Year","Sector","Technology", "Type")
     BarColors <- c("Orange")
     df <- unique(subset(BatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year == Startyear, 
@@ -1116,7 +1114,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
       spread("MoodysRiskLvl", "AUM", fill = 0) %>%
       rename("Risk 1" = "1", "Risk 2" = "2")
     
-    ID.COLS = c("PortName")
+    ID.COLS = c("PortName", "Type")
     BarColors <- c("Orange","Red")
     df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   }
@@ -1124,8 +1122,8 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   BarColors <- c(BarColors,"Black","skyblue")
   names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
   
-  LineHighl <- c("Market_Benchmark")
-  LineLabels <- c("Market Benchmark")
+  LineHighl <- c("Market")
+  LineLabels <- c("Market")
   names(LineLabels) <- LineHighl
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
@@ -1133,17 +1131,17 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
 
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
-  dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric")],FUN=sum)
-  dfagg[dfagg$PortName %in% LineHighl,"Metric"] <- "Reference"
+  dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
+  dfagg[dfagg$Type == LineHighl,"Metric"] <- "Reference"
   dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
   dfagg$Value <- as.numeric(dfagg$Value)
 
   dfagg <- dfagg %>%
     filter(Metric != "Reference") %>%
-    group_by(PortName) %>%
+    group_by(PortName,Type) %>%
     summarise("Value" = 1-sum(Value)) %>%
     mutate("Metric" = "Unexposed") %>%
-    select(PortName,Metric,Value) %>%
+    select(PortName,Metric,Type,Value) %>%
     rbind(dfagg)
   
   values = subset(dfagg, Metric=="Comparison" & PortName==PortName)[["Value"]]

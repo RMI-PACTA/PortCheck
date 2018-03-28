@@ -289,8 +289,8 @@ for (i in 1:nrow(TestList)){
       Graph246(24, "CB", "ICE")
       Graph246(25, "CB", "EV")
       
-      ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
-      ranking_chart_alignment(27, "CB", "All") #Carstens Metric
+      ranking_chart_alignment(26, "EQ", "All", Startyear) #Carstens Metric
+      ranking_chart_alignment(27, "CB", "All", Startyear) #Carstens Metric
       
       company_techshare(28, 20, "EQ", "Power")
       company_techshare(29, 20, "EQ", "Automotive")
