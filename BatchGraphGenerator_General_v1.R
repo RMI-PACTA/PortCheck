@@ -473,13 +473,13 @@ for (i in 1:nrow(TestList)){
       # 
       # Graph246(99, "RenewablesCap")
       
-      sector_bar_chart("01", sector_processing())
-      stacked_bar_chart_vertical(2,"Summary","All") #Combined EQ/CB, needs to be updated
+      portfolio_sectorshare("01")
+      sector_techshare(2,"Summary","All") #Combined EQ/CB, needs to be updated
       # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
       distribution_chart("05", "Risk Exposure", "CB")
-      stacked_bar_chart_vertical("06","EQ","All")
-      stacked_bar_chart_vertical("07","CB","All")
+      sector_techshare("06","EQ","All")
+      sector_techshare("07","CB","All")
       distribution_chart("08", "Carsten's Metric", "CB")
       distribution_chart("09", "Carsten's Metric", "EQ")
       Graph246(10, "EQ", "CoalCap")
@@ -500,13 +500,14 @@ for (i in 1:nrow(TestList)){
       Graph246(25, "CB", "EV")
       ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
       ranking_chart_alignment(27, "CB", "All") #Carstens Metric
-      flat_wheel_chart(28, 20, "EQ", "Power")
-      flat_wheel_chart(29, 20, "EQ", "Automotive")
-      # flat_wheel_chart(30, 20, "EQ", "OG")
-      flat_wheel_chart(31, 20, "CB", "Power")
-      flat_wheel_chart(32, 20, "CB", "Automotive")
-      # flat_wheel_chart(33, 20, "CB", "OG")
-
+      company_techshare(28, 20, "EQ", "Power")
+      company_techshare(29, 20, "EQ", "Automotive")
+      company_techshare(30, 20, "EQ", "Fossil Fuels")
+      company_techshare(31, 20, "CB", "Power")
+      company_techshare(32, 20, "CB", "Automotive")
+      company_techshare(33, 20, "CB", "Fossil Fuels")
+      
+      
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
