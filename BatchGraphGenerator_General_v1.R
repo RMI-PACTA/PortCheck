@@ -172,9 +172,9 @@ IndexUniversesList <- data.frame(IndexUniverse = IndexUniverses$IndexUniverse[!i
                                  IndexUniversesColname = IndexUniverses$IndexUniverseColname[!is.na(IndexUniverses$IndexUniverseColname) & 
                                                                                                IndexUniverses$IndexUniverseColname != ""])
 
-IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(Startyear, Startyear+5, Startyear+10,Startyear+15)  & 
-                          Scenario == Scenariochoose, select = c("Sector","Technology","AnnualvalIEAtech","Year")) 
-IEATargetsAll <- IEATargetsAll[!IEATargetsAll$Technology %in% "OilCap",]
+# IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(Startyear, Startyear+5, Startyear+10,Startyear+15)  & 
+#                           Scenario == Scenariochoose, select = c("Sector","Technology","AnnualvalIEAtech","Year")) 
+# IEATargetsAll <- IEATargetsAll[!IEATargetsAll$Technology %in% "OilCap",]
 
 OilData <- cleanOGData(OGData,Startyear)
 
@@ -279,7 +279,7 @@ for (i in 1:nrow(TestList)){
       Graph246(11, "EQ", "RenewablesCap")
       Graph246(12, "EQ", "GasCap")
       Graph246(13, "EQ", "NuclearCap") #246 currently not working
-      Graph246(14, "EQ", "OilProd")
+      # Graph246(14, "EQ", "OilProd")
       Graph246(15, "EQ", "GasProd")
       Graph246(16, "EQ", "ICE")
       Graph246(17, "EQ", "EV")
@@ -288,7 +288,7 @@ for (i in 1:nrow(TestList)){
       Graph246(19, "CB", "RenewablesCap")
       Graph246(20, "CB", "GasCap")
       Graph246(21, "CB", "NuclearCap")
-      Graph246(22, "CB", "OilProd")
+      # Graph246(22, "CB", "OilProd")
       Graph246(23, "CB", "GasProd")
       Graph246(24, "CB", "ICE")
       Graph246(25, "CB", "EV")

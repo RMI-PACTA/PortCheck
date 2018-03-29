@@ -324,7 +324,7 @@ RankPortfolios <- function( ChartType, Name){
     mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
            mx = max(my_ranks))
   #order(forrank,decreasing=TRUE),
-  
+  detach("package:dplyr",unload=TRUE)
 
   # colnames(rankingtable)[1] <- "PortName"
   rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))

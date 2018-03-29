@@ -312,8 +312,6 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 # ------------- RANKING CHART - ALIGNMENT ----#
 
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear){
-  
-  
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
     Ranks<- RankPortfolios("EQ",PortName)
@@ -513,7 +511,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
     outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
     grid.draw(outputplot)  
 
-  
   return()
 }
 
@@ -956,6 +953,10 @@ Inputs246 <- function(ChartType, TechToPlot){
   
   
   ### Inputs to the 246 chart. 
+  
+  IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" & Year %in% Startyear:(Startyear+5)  & 
+                            Scenario %in% c("450S","NPS","CPS"), select = c("Sector","Technology","Scenario","Year","AnnualvalIEAtech")) 
+  
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
   IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
   IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
