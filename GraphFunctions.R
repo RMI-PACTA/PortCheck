@@ -520,12 +520,12 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   # ChartType = "CB"
   # plotnumber = 99
   # companiestoprint = 20
-  # SectorToPlot = "Fossil Fuels"
+  # SectorToPlot = "Power"
    if (ChartType == "EQ"){
-    CompProdSS <- subset(EQCompProdSnapshot, Type == "Portfolio")
+    CompProdSS <- EQCompProdSnapshot
     combin <- EQCombin
   } else if(ChartType == "CB"){
-    CompProdSS <- subset(CBCompProdSnapshot, Type == "Portfolio")
+    CompProdSS <- CBCompProdSnapshot
     combin <- CBCombin
   }
 
