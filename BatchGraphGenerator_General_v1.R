@@ -103,11 +103,11 @@ print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose)
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
-CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"-ALD-Agg-Production.csv"),stringsAsFactors=FALSE,strip.white = T)
+CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 
 ### Get Equity Batch Results
-EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_PortfolioWeightedAnalysisResults-450S-only.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 
@@ -118,6 +118,8 @@ print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " r
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
+
+EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
 
 # Comparison Flags
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
