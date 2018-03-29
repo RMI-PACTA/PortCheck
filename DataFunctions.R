@@ -293,45 +293,41 @@ filterports <- function(PortData, PortfolioInfo, BrandType){
 }
 
 # -------- Seperate Ranking chart -----------
-RankPortfolios <- function(ComparisonExposures, PortfolioExposures, PortName){
-  
-  # ComparisonExposures<- EQComparisonExposures
-  # PortfolioExposures <- EQExposure
-  
-  ComparisonPositive <- rbind(ComparisonExposures,PortfolioExposures)
-  TechList <- c("Electric","Hybrid","ICE","Coal","Oil","Gas","RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap")
-  
-  ComparisonPositive[colnames(ComparisonPositive) %in% TechList] <- ComparisonPositive[colnames(ComparisonPositive) %in% TechList]+max(abs(ComparisonPositive[colnames(ComparisonPositive) %in% TechList]),na.rm = TRUE)+1
-  
+RankPortfolios <- function( ChartType, Name){
+  a<-Name
+  if (ChartType == "EQ"){
+    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear+5),]
+    
+    
+  }else if (ChartType == "CB"){
+    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
+    
+  }
+
   # Order the table for Green vs Brown Tech
-  goodtech <- c("RenewablesCap","HydroCap","NuclearCap","Hybrid","Electric")  
+
   badtech <- c("CoalCap","GasCap","ICE","Oil","Gas","Coal")
+  goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
+  PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
+  PortfolioExposures<-PortfolioExposures[!PortfolioExposures$Technology %in% "OilCap",]
+  PortfolioExposures$forrank <- NA
+  PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
+  PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
   
-  CompGood <- ComparisonPositive[colnames(ComparisonPositive) %in% c("PortName",goodtech)]
-  CompBad <- ComparisonPositive[colnames(ComparisonPositive) %in% c("PortName","CoalCap","GasCap","ICE")]
-  CompFF <- ComparisonPositive[colnames(ComparisonPositive) %in% c("PortName","Oil","Gas","Coal")]
-  
-  rownames(CompGood)<- CompGood$PortName
-  rownames(CompBad)<- CompBad$PortName
-  rownames(CompFF)<- CompFF$PortName
-  
+  PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
   
   # ranking
   # smallest number is number 1
-  rankingbad <- data.frame(apply(CompBad[2:4],2,rank, ties.method="min",na.last="keep"))
-  rankingff <- data.frame(apply(CompFF[2:4],2,rank, ties.method="min",na.last="keep"))
-  rankinggood <- data.frame(apply(-CompGood[2:6],2,rank, ties.method="min",na.last="keep"))
+  library(dplyr)
+  PortfolioExposures<-PortfolioExposures %>%
+    group_by(Technology) %>%
+    mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
+           mx = max(my_ranks))
+  #order(forrank,decreasing=TRUE),
   
-  rankingbad$PortName <- row.names(rankingbad)
-  rankinggood$PortName <- row.names(rankinggood)
-  rankingff$PortName <- row.names(rankingff)
-  
-  rankingtable <- merge(rankingbad,rankingff, by="PortName")
-  rankingtable <- merge(rankingtable, rankinggood,by="PortName")
-  
-  
+
   # colnames(rankingtable)[1] <- "PortName"
-  rankingtable <- subset(rankingtable, select = c("PortName",TechList))
+  rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
   # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
   
   return(rankingtable)
