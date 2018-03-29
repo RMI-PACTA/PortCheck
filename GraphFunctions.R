@@ -314,17 +314,18 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear){
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
-    Ranks<- RankPortfolios("EQ",PortName)
-    
+    Ranks<- RankPortfolios("EQ",PortName
+    BatchTest<-EQBatchTest[!EQBatchTest$Technology %in% "OilCap",]
   }else if (ChartType == "CB"){
     Exposures <- CBCombin[which(CBCombin$Year==Startyear+5),]
     Ranks<- RankPortfolios("CB",PortName)
+    BatchTest<-CBBatchTest[!CBBatchTest$Technology %in% "OilCap",]
+
   }
   
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
-  EQBatchTest<-EQBatchTest[!EQBatchTest$Technology %in% "OilCap",]
-   Mins<- aggregate(CarstenMetric_Port ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], min)
-   Maxs <- aggregate(CarstenMetric_Port ~ Technology, data = EQBatchTest[which(EQBatchTest$Year==Startyear+5),], max)
+   Mins<- aggregate(CarstenMetric_Port ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)
+   Maxs <- aggregate(CarstenMetric_Port ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max)
    MinMax <- merge(Mins,Maxs, by="Technology")
    colnames(MinMax)[2] <- "Minimum"
    colnames(MinMax)[3] <- "Maximum"
@@ -358,11 +359,11 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
 
    
      if (SectorToPlot != "All"){
-        PlotData <- subset(PlotData, PlotData$Sector %in% SectorToPlot)
+        Exposures <- subset(Exposures, Exposures$Sector %in% SectorToPlot)
         if (SectorToPlot == "Power"){
-          PlotData <- subset(PlotData, PlotData$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
+          Exposures <- subset(Exposures, Exposures$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
         }
-        locations <- c(1:nrow(PlotData))
+        locations <- c(1:nrow(Exposures))
      }else{
        locations <- c(1:3,4.5:6.5,8:12)
      }
@@ -497,11 +498,11 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
       
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL,  title= NULL)+
-        annotate(geom="text",x=-0.8,y=PlotData$Locations[PlotData$Technology %in% badtech],label=wrap.labels(PlotData$TechLabel[PlotData$Technology %in% badtech],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
+        annotate(geom="text",x=-0.8,y=Exposures$Locations[Exposures$Technology %in% badtech],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% badtech],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
       
       if (SectorToPlot != "Fossil Fuels"){outputplot <-outputplot+
         # Technology Label - Black
-        annotate(geom="text",x=-0.8,y=PlotData$Locations[PlotData$Technology %in% goodtech],label=wrap.labels(PlotData$TechLabel[PlotData$Technology %in% goodtech],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
+        annotate(geom="text",x=-0.8,y=Exposures$Locations[Exposures$Technology %in% goodtech],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% goodtech],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
       
       }
      
