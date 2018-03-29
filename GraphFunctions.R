@@ -486,7 +486,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
         geom_hline(yintercept = c(3.75,7.25))
     
       
-      write.csv(PlotData,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
+      write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
       
       graphheight <- 7.2
     }
