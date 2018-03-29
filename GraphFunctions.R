@@ -517,50 +517,59 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
 # ------------- TECH SHARE CHARTS ----------- #
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
-  # ChartType = "CB"
-  # plotnumber = 99
-  # companiestoprint = 20
-  # SectorToPlot = "Power"
+  ChartType = "EQ"
+  plotnumber = 99
+  companiestoprint = 20
+  SectorToPlot = "Power"
    if (ChartType == "EQ"){
     CompProdSS <- EQCompProdSnapshot
     combin <- EQCombin
+    market <- EQBatchTest[EQBatchTest$Type == "Market",]
+
   } else if(ChartType == "CB"){
     CompProdSS <- CBCompProdSnapshot
     combin <- CBCombin
+    market <- CBBatchTest[CBBatchTest$Type == "Market",]
   }
 
   if (SectorToPlot == "Power"){
     techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
     CompProdSS <- subset(CompProdSS, Sector == "Power")
     combin <- subset(combin, Sector == "Power")
+    market <- subset(market, Sector == "Power")
   }
   
   if (SectorToPlot == "Automotive"){
     techorder <- c("ICE","Hybrid","Electric")
     CompProdSS <- subset(CompProdSS, Sector == "Automotive")
     combin <- subset(combin, Sector == "Automotive")
+    market <- subset(combin, Sector == "Automotive")
   }
   
   if (SectorToPlot == "Fossil Fuels") {
     techorder <- c("Coal", "Gas", "Oil")
     CompProdSS <- subset(CompProdSS, Sector %in% c("Coal","Oil&Gas"))
     combin <- subset(combin, Sector %in% c("Coal","Oil&Gas"))
+    market <- subset(market, Sector %in% c("Coal","Oil&Gas"))
     CompProdSS$Sector <- revalue(CompProdSS$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
     combin$Sector <- revalue(combin$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
+    market$Sector <- revalue(market$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
   }
   
   if (SectorToPlot == "Oil"){
     techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
     CompProdSS <- subset(CompProdSS, Technology == "Oil")
     combin <- subset(combin, Technology == "Oil")
+    market <- subset(market, Technology == "Oil")
   }
 
   CompProdSS <- subset(CompProdSS, Year == (Startyear+5))
   combin <- subset(combin, Year == (Startyear+5))
+  market <- subset(market, Year == (Startyear+5))
   
   colnames(CompProdSS)[colnames(CompProdSS) %in% c("EQY_FUND_TICKER","DebtTicker")] <- "Ticker"
 
-  # Portfolio Average
+  # Portfolio (Weighted by the AUM)
   Portfoliomix <- subset(combin, select=c("Technology","PortWtTechShare"))
   Portfoliomix$Classification <- "Portfolio"
   Portfoliomix$Name <- PortfolioNameLong
@@ -568,7 +577,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
   Portfoliomix$TechShare <- as.numeric(Portfoliomix$TechShare)
   Portfoliomix$TechShare <- Portfoliomix$TechShare*100
-
+  
+  # Add 2D Target (Global Market under 2D Scenario)
   Targetmix <- subset(combin, select = c("Technology","MarketTechShare"))
   Targetmix$Classification <- "Portfolio"
   Targetmix$Name<-GT["X2Target"][[1]]
@@ -578,31 +588,33 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   Targetmix$TechShare <- Targetmix$TechShare*100
   
   # Add Benchmark / Global Market
-  if (ChartType == "EQ"){
-    #Stock Market
-  } else if (ChartType == "CB") {
-    #Bond Market
-  }
+  Marketmix <- subset(market, select=c("Technology","PortWtTechShare"))
+  Marketmix$Classification <- "Portfolio"
+  Marketmix$Name <- "Market"
+  Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","PortWtTechShare"))
+  colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
+  Marketmix$TechShare <- as.numeric(Marketmix$TechShare)
+  Marketmix$TechShare <- Marketmix$TechShare*100
   
-  # Percentage share of each technology  
+  # Percentage share of each technology for each company in the portfolio
   Companies <- subset(CompProdSS, select=c("Ticker","Technology","CompanyLvlProd","CompanyLvlSecProd"))
   Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
-  Companies$Classification <- "PortCompanies"
+  Companies$Classification <- "Companies"
   TopPortCompanies <- Companies[rev(order(Companies$CompanyLvlProd)),]
   TopPortCompanies <- TopPortCompanies[1:companiestoprint,]
   
   TopPortCompanies <- subset(TopPortCompanies, select = c("Ticker","Classification","Technology","TechShare"))
   colnames(TopPortCompanies) <- c("Name","Classification","Technology","TechShare")
   TopPortCompanies[TopPortCompanies$item == "NA"] <- "NoName"
-  
-  
-  AllCompanies <- rbind(TopPortCompanies,Portfoliomix,Targetmix)
+  AllData <- rbind(Marketmix, Targetmix, Portfoliomix, TopPortCompanies)
+  AllData$Name <- factor(AllData$Name, levels=rev(unique(AllData$Name)))
+
   
   if (SectorToPlot == "Power"){  
     
-    AllCompanies$Technology <- gsub("Cap","",AllCompanies$Technology)
-    AllCompanies <- subset(AllCompanies, AllCompanies$Technology != "Oil")
-    AllCompanies$Technology <- factor(AllCompanies$Technology, levels=techorder)
+    AllData$Technology <- gsub("Cap","",AllData$Technology)
+    AllData <- subset(AllData, AllData$Technology != "Oil")
+    AllData$Technology <- factor(AllData$Technology, levels=techorder)
     
     tech_labels <- c(paste0("% ", GT["T_CoalCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
                     paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
@@ -611,97 +623,77 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     tech_labels <- factor(tech_labels, levels=tech_labels)
     colors <- c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour)
     names(colors) <- techorder
-    
-    Plot<- stacked_bar_chart(AllCompanies)+
-      scale_fill_manual(values=colors,labels = tech_labels, name = "Technology")+
-      ggtitle("Templete")+
-      ylab("TechShare")+
-      coord_flip()+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank())
-    
   }
   
   if (SectorToPlot == "Automotive"){
     
-    AllCompanies$Technology <- factor(AllCompanies$Technology, levels=techorder)
+    AllData$Technology <- factor(AllData$Technology, levels=techorder)
     
     tech_labels <- c(paste0("% ", GT["T_ICE"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_Electric"][[1]]))
     names(tech_labels) <- techorder
     tech_labels <- factor(tech_labels, levels=tech_labels)
     colors <- c(ICEColour,HybridColour,ElectricColour)
     names(colors) <- techorder
-    
-    Plot<- stacked_bar_chart(AllCompanies)+
-      scale_fill_manual(values = colors,labels = tech_labels, name = "Technology")+
-      ggtitle("Templete")+
-      ylab("TechShare")+
-      coord_flip()+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank())
-    
   }
   
   if (SectorToPlot == "Fossil Fuels") {
     
-    AllCompanies$Technology <- factor(AllCompanies$Technology, levels=techorder)
+    AllData$Technology <- factor(AllData$Technology, levels=techorder)
     
     labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
     names(labels) <- techorder
     # labels <- factor(labels, levels=labels)
     colors <- c(CoalProdColour,GasProdColour,OilProdColour)
     names(colors) <- techorder
-    
-    Plot<- stacked_bar_chart(AllCompanies)+
-      scale_fill_manual(values = colors,labels = labels, name = "Technology")+
-      ggtitle("Templete")+
-      ylab("TechShare")+
-      coord_flip()+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank())
   }
-  
-  if (SectorToPlot == "Oil"){
-    
-    # Portfoliomix <- as.data.frame(sapply(Portfoliomix, function(x) gsub("Cap", "", x)))
-    Portfoliomix$value <- as.numeric(as.character(Portfoliomix$value))
-    
-    AllCompanies$value <- as.numeric(as.character(AllCompanies$value))
-    
-    AllCompanies <- AllCompanies[rev(order(AllCompanies$item)),]
-    # AllCompanies$item <- factor(AllCompanies$item, levels=AllCompanies$item)
-    
-    AllCompanies <- rbind(AllCompanies, Portfoliomix)
-    
-    circleProportion = 1
-    alphaStart = 0
-    spaceFamily = 1
-    
-    oilcolours = brewer.pal(9, "YlGnBu")[5:9]
-    
-    TechLabels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]), paste0(GT["Unconv_Oil"][[1]]), paste0(GT["Other_Oil"][[1]]))
-    
-    Plot<- WheelofFortune(AllCompanies,othercompanies = FALSE , family = NULL, columnNames = NULL, binSize = 1.0, spaceItem = 0.2,techorder = techorder,PortFirmY=PortFirmY,OtherFirmY=OtherFirmY,
-                          spaceFamily = spaceFamily, innerRadius = 0.18, outerRadius = 1., guides = seq(0,100,by = 25), alphaStart = alphaStart,
-                          circleProportion = circleProportion, direction = "inwards", familyLabels = FALSE,normalised = TRUE)+
-      scale_fill_manual(values=oilcolours,labels = TechLabels, name = "Technology")+
-      coord_flip()
-    
-  } 
+  # 
+  # if (SectorToPlot == "Oil"){
+  #   
+  #   # Portfoliomix <- as.data.frame(sapply(Portfoliomix, function(x) gsub("Cap", "", x)))
+  #   Portfoliomix$value <- as.numeric(as.character(Portfoliomix$value))
+  #   
+  #   AllData$value <- as.numeric(as.character(AllData$value))
+  #   
+  #   AllData <- AllData[rev(order(AllData$item)),]
+  #   # AllData$item <- factor(AllData$item, levels=AllData$item)
+  #   
+  #   AllData <- rbind(AllData, Portfoliomix)
+  #   
+  #   circleProportion = 1
+  #   alphaStart = 0
+  #   spaceFamily = 1
+  #   
+  #   oilcolours = brewer.pal(9, "YlGnBu")[5:9]
+  #   
+  #   TechLabels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]), paste0(GT["Unconv_Oil"][[1]]), paste0(GT["Other_Oil"][[1]]))
+  #   
+  #   Plot<- WheelofFortune(AllData,othercompanies = FALSE , family = NULL, columnNames = NULL, binSize = 1.0, spaceItem = 0.2,techorder = techorder,PortFirmY=PortFirmY,OtherFirmY=OtherFirmY,
+  #                         spaceFamily = spaceFamily, innerRadius = 0.18, outerRadius = 1., guides = seq(0,100,by = 25), alphaStart = alphaStart,
+  #                         circleProportion = circleProportion, direction = "inwards", familyLabels = FALSE,normalised = TRUE)+
+  #     scale_fill_manual(values=oilcolours,labels = TechLabels, name = "Technology")+
+  #     coord_flip()
+  #   
+  # } 
 
-  print(Plot)
-  Plot <- ggplot_gtable(ggplot_build(Plot))
-  Plot$layout$clip[Plot$layout$name == "panel"] <- "off"
+  PortfolioData <- subset(AllData, Classification == "Portfolio")
   
-  # PortfolioName <- gsub("_.*", "\\1", PortfolioName)
+  CompanyData <- subset(AllData, Classification == "Market")
+  
+  PortPlot <- stacked_bar_chart(PortfolioData)+
+    scale_fill_manual(values=colors,labels = tech_labels, name = "Technology")+
+    ggtitle("Templete")+
+    ylab("TechShare")+
+    coord_flip()+
+    theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
+          legend.position = "bottom",legend.title = element_blank(),
+          axis.line = element_blank())
+  
+  CompPlot <- PortPlot %+% CompanyData
+
+  cmd<-grid.arrange(PortPlot+theme(axis.text.x = element_blank()),CorpPlot,ncol=1)
+
   if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-  
-  png(paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_',SectorToPlot,'_WheelofFortune.png'), height = 2600, width = 5500,res=ppi,bg="transparent") 
-  grid.draw(Plot)
-  dev.off()  
+  ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
 
 }
 
@@ -1200,6 +1192,7 @@ stacked_bar_chart <- function(dat){
   
   template <- ggplot(data=dat, aes(x=item, y=value,fill=score),show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
+    geom_hline(yintercept = c(.25,.50,.75), color="white")+
     theme_minimal()+
     scale_y_continuous(expand=c(0,0), labels=percent)+
     # expand_limits(0,0)+

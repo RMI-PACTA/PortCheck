@@ -119,28 +119,19 @@ EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionComp
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
-#EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"-ALD-Agg-Production.csv"),stringsAsFactors=FALSE,strip.white = T)
-
-#Process (remove later)
-EQBatchTest$PortName <- gsub(paste0("_",InvestorName),"",EQBatchTest$PortName)
-EQCompProdSnapshots$PortName <- gsub(paste0("_",InvestorName),"",EQCompProdSnapshots$PortName)
-
-CBBatchTest$PortName <- gsub(paste0("_",InvestorName),"",CBBatchTest$PortName)
-CBCompProdSnapshots$PortName <- gsub(paste0("_",InvestorName),"",CBCompProdSnapshots$PortName)
-
 # Comparison Flags
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
-EQBatchTest$Type[EQBatchTest$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+EQBatchTest$Type[EQBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
 CBBatchTest$Type[CBBatchTest$InvestorName != "California Insurers"] <- "Market"
-CBBatchTest$Type[CBBatchTest$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+CBBatchTest$Type[CBBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
 EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
-EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
-CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
-EQCompProdSnapshots$Type[EQCompProdSnapshots$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+EQCompProdSnapshots$Type[EQCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 CBCompProdSnapshots$Type[CBCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
-CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName %in% c("MetaPort","MetaPortfolio")] <- "MetaPortfolio"
+CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 
 
 ### External Data Read In
@@ -171,10 +162,6 @@ RegionCountries <- rename(RegionCountries, c("BenchmarkRegionList.Global"="Globa
 IndexUniversesList <- data.frame(IndexUniverse = IndexUniverses$IndexUniverse[!is.na(IndexUniverses$IndexUniverse) & IndexUniverses$IndexUniverse != ""], 
                                  IndexUniversesColname = IndexUniverses$IndexUniverseColname[!is.na(IndexUniverses$IndexUniverseColname) & 
                                                                                                IndexUniverses$IndexUniverseColname != ""])
-
-# IEATargetsAll <- subset(AllIEATargets, BenchmarkRegion == "Global" &Year %in% c(Startyear, Startyear+5, Startyear+10,Startyear+15)  & 
-#                           Scenario == Scenariochoose, select = c("Sector","Technology","AnnualvalIEAtech","Year")) 
-# IEATargetsAll <- IEATargetsAll[!IEATargetsAll$Technology %in% "OilCap",]
 
 OilData <- cleanOGData(OGData,Startyear)
 
@@ -280,18 +267,18 @@ for (i in 1:nrow(TestList)){
       Graph246(12, "EQ", "GasCap")
       Graph246(13, "EQ", "NuclearCap") #246 currently not working
       # Graph246(14, "EQ", "OilProd")
-      Graph246(15, "EQ", "GasProd")
+      Graph246(15, "EQ", "Gas")
       Graph246(16, "EQ", "ICE")
-      Graph246(17, "EQ", "EV")
+      Graph246(17, "EQ", "Electric")
       
       Graph246(18, "CB", "CoalCap")
       Graph246(19, "CB", "RenewablesCap")
       Graph246(20, "CB", "GasCap")
       Graph246(21, "CB", "NuclearCap")
       # Graph246(22, "CB", "OilProd")
-      Graph246(23, "CB", "GasProd")
+      Graph246(23, "CB", "Gas")
       Graph246(24, "CB", "ICE")
-      Graph246(25, "CB", "EV")
+      Graph246(25, "CB", "Electric")
       
       ranking_chart_alignment(26, "EQ", "All", Startyear) #Carstens Metric
       ranking_chart_alignment(27, "CB", "All", Startyear) #Carstens Metric
