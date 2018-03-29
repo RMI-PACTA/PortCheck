@@ -1060,7 +1060,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
                       values=unique(as.character(dftargets$colour)))+
     
-    scale_color_manual(name="",values = c("Equity Portfolio"=eq_port,"Stock Market"=stock_market))+
+    scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
     
     xlab(year_lab) +
     ylab(ylabel)+
