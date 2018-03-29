@@ -319,7 +319,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
     Ranks<- RankPortfolios("EQ",PortName)
     
   }else if (ChartType == "CB"){
-    Exposures <- CBCombin[which(EQCombin$Year==Startyear),]
+    Exposures <- CBCombin[which(CBCombin$Year==Startyear),]
     Ranks<- RankPortfolios("CB",PortName)
   }
   
