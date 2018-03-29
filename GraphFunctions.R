@@ -360,9 +360,11 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
 
    
      if (SectorToPlot != "All"){
-       PlotData <- subset(PlotData, PlotData$Sector %in% SectorToPlot)
-       if (SectorToPlot == "Power"){PlotData <- subset(PlotData, PlotData$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))}
-       locations <- c(1:nrow(PlotData))
+        PlotData <- subset(PlotData, PlotData$Sector %in% SectorToPlot)
+        if (SectorToPlot == "Power"){
+          PlotData <- subset(PlotData, PlotData$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
+        }
+        locations <- c(1:nrow(PlotData))
      }else{
        locations <- c(1:3,4.5:6.5,8:12)
      }
@@ -1140,7 +1142,8 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   dfagg <- dfagg %>%
     filter(Metric != "Reference") %>%
     group_by(PortName,Type) %>%
-    summarise("Value" = 1-sum(Value)) %>%
+    summarise("Value" = 1-sum(Value), "Metric" = "Unexposed") %>%
+    ungroup() %>%
     mutate("Metric" = "Unexposed") %>%
     select(PortName,Metric,Type,Value) %>%
     rbind(dfagg)
