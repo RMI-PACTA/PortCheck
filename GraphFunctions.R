@@ -774,6 +774,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   #Tag Target portfolio, benchmark
+  Batch <- subset(Batch, Type != "Portfolio")
   Portfolios <- rbind(Combin,Batch)
   Production <- subset(Portfolios, Year == Startyear & 
                          Aggregation == BenchmarkRegionchoose & 
@@ -850,8 +851,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
         ggtitle("Power Capacity")
       
       cmd<-grid.arrange(p2,
-                        p3+theme(axis.text.y = element_blank(), title = element_blank()),
-                        p1+theme(axis.text.y = element_blank(), title = element_blank()),nrow=1)
+                        p3+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),
+                        p1+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),nrow=1)
       
       ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
