@@ -995,11 +995,15 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   dfwide <- dcast(df,Year~Label, value.var="Plan.Pct.Build.Out",fun=sum)
   
   
-  if (GoodBad == "Green"){
+   if (GoodBad == "Green"){
     dfwide$Line1 <- dfwide$CPS
     dfwide$Line2 <- dfwide$NPS-dfwide$CPS
     dfwide$Line3 <- dfwide$`450S`-dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue-dfwide$`450S`
+    dfwide$Line5 <- -dfwide$MaxValue+dfwide$`450S`
+    dfwide$Line6 <- -dfwide$`450S`+dfwide$NPS
+    dfwide$Line7 <- -dfwide$NPS+dfwide$CPS
+    dfwide$Line8 <- -dfwide$CPS
     # dfwide$Line1 <- dfwide$`450S`
     # dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
@@ -1011,20 +1015,24 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS - dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS   
-    Palette <- c(area_2,area_2_4,area_4_6,area_6)
-    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
+    dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS 
+    dfwide$Line5 <- -dfwide$MaxValue + dfwide$CPS
+    dfwide$Line6 <- -dfwide$CPS + dfwide$NPS
+    dfwide$Line7 <- - dfwide$NPS + dfwide$`450S`
+    dfwide$Line8 <- -dfwide$`450S` 
+    Palette <- c(area_2,area_2_4,area_4_6,area_6,area_6,area_4_6,area_2_4,area_2)
+    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C","> 6°C","4-6°C","2-4°C","< 2°C") 
     # lineorder <-c("Line4","Line3","Line2","Line1")
   }
   
   
-  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
+  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4","Line5","Line6","Line7","Line8"))
   dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
   # dftargets <- rev(dftargets)
   
   # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
   # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  lineorder <-c("Line4","Line3","Line2","Line1")
+  lineorder <-c("Line4","Line3","Line2","Line1","Line5","Line6","Line7","Line8")
   colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
   
   dftargets$Target<-as.factor(dftargets$Target)
@@ -1049,14 +1057,14 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
     #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[3])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
     
-    scale_fill_manual(labels=unique(as.character(dftargets$Labels)),
-                      values=unique(as.character(dftargets$colour)))+
+    scale_fill_manual(labels=rep(unique(as.character(dftargets$Labels)),2),
+                      values=rep(unique(as.character(dftargets$colour)),2))+
     
     scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
     
     xlab(year_lab) +
     ylab(ylabel)+
-    coord_cartesian(ylim=c(0,maxval))+
+    coord_cartesian(ylim=c(-maxval,maxval))+
     theme_minimal()+
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
