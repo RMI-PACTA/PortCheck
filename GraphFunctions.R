@@ -410,7 +410,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
     
     #Exposures$my_ranks[!is.na(Exposures$my_ranks)]<- round(Exposures$Rank[!is.na(Exposures$my_ranks)],0)
     Exposures$my_ranks[is.na(Exposures$my_ranks)]<- "-"
-    
+    #Exposures$mx[is.na(Exposures$mx)]<- "-"
     GraphTitle <- GT["Rank_Title"][[1]]
     
     repval = 100
@@ -459,7 +459,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
       
       # Ranking box and label
       annotate("text", label = GT["RankTitle"][[1]], x= 1.1,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
-      annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ","237"), x= 1.1,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
+      annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.1,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
       
       theme(panel.background = element_rect(fill="transparent"),
             panel.grid.major.x = element_blank() ,
