@@ -103,6 +103,7 @@ print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose)
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
+
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 
@@ -115,7 +116,7 @@ EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Portfoli
 EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio")
 print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 
-EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_ProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
+EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
@@ -253,7 +254,7 @@ for (i in 1:nrow(TestList)){
       ### CA TEMPLATE #######
       #######################
       portfolio_sectorshare("01")
-      sector_techshare(2,"Summary","All") #Combined EQ/CB, needs to be updated
+      # sector_techshare(2,"Summary","All") #Combined EQ/CB, needs to be updated
       # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
       # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
       distribution_chart("05", "Risk Exposure", "CB")
