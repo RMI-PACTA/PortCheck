@@ -479,9 +479,10 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
       
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=-0.2,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
+        annotate(geom="text",x=-0.2,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
         annotate(geom="text",x=-0.2,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
         geom_hline(yintercept = c(3.75,7.25))
+    
       
       write.csv(PlotData,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
       
