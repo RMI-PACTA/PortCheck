@@ -1094,6 +1094,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     }
     ID.COLS = c("PortName","Year","Sector","Technology", "Type")
     BarColors <- c("Orange")
+    Labels <- c("Unexposed", "Exposed", PortName)
     df <- unique(subset(BatchTest, BenchmarkRegion %in% BenchmarkRegionchoose  & 
                           Scenario %in% Scenariochoose & Year == Startyear, 
                         select = c(ID.COLS,MetricCol)))
@@ -1113,6 +1114,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     
     ID.COLS = c("PortName", "Type")
     BarColors <- c("Orange","Red")
+    Labels <- c("Insubstantial Risk","Elevated Risk", "Substatial Risk", PortName)
     df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   }
   
@@ -1162,7 +1164,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
              aes(x=PortName, y=Value, fill=Metric),
              stat = "identity", position = "fill", width=1)+
-    scale_fill_manual(values=BarColors)+
+    scale_fill_manual(values=BarColors,labels=Labels)+
     geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
                aes(yintercept=Value),color=LineColors,linetype=2)+
     geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
@@ -1176,7 +1178,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     expand_limits(0,0)+
     # guides(fill=FALSE)+
     ggtitle(Title)+
-    xlab(paste0(BatchName," Portfolios"))+
+    xlab(paste0("California Insurers"))+
     ylab(MetricName)+
     theme_distribution()
   
