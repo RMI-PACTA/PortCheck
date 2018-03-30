@@ -308,7 +308,50 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         plot.title = element_text(hjust = 0.5)
   )
 }
-                          
+
+                           
+# -------- Seperate Ranking chart -----------
+RankPortfolios <- function( ChartType, Name){
+  a<-Name
+  if (ChartType == "EQ"){
+    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear+5),]
+    
+    
+  }else if (ChartType == "CB"){
+    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
+    
+  }
+
+  # Order the table for Green vs Brown Tech
+
+  badtech <- c("CoalCap","GasCap","ICE","Oil","Gas","Coal")
+  goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
+  PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
+  PortfolioExposures<-PortfolioExposures[!PortfolioExposures$Technology %in% "OilCap",]
+  PortfolioExposures$forrank <- NA
+  PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
+  PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
+  
+  PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
+  
+  # ranking
+  # smallest number is number 1
+  PortfolioExposures<-PortfolioExposures %>%
+    group_by(Technology) %>%
+    mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
+           mx = max(my_ranks))
+  #order(forrank,decreasing=TRUE),
+
+  # colnames(rankingtable)[1] <- "PortName"
+  rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
+  # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
+  
+  return(rankingtable)
+}                           
+                           
+                           
+                           
+                           
 # ------------- RANKING CHART - ALIGNMENT ----#
 
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear){
@@ -936,7 +979,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
   IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
-  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
+  names(IEATargetsRef)[names(IEATargetsRef)=="AnnualvalIEAtech"] <- "TargetProd"
   IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
   
   
@@ -944,7 +987,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   IEATargets <- do.call("rbind", IEATargets)
   
   IEATargets <- subset(IEATargets, select = c("Label","Year","Value"))
-  IEATargets <- rename(IEATargets,c("Value"="Plan.Pct.Build.Out"))
+  names(IEATargets)[names(IEATargets)=="Value"] <- "Plan.Pct.Build.Out"
   
   df <- rbind(Production,MarketBuildOut,IEATargets)
   

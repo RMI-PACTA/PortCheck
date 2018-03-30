@@ -318,13 +318,11 @@ RankPortfolios <- function( ChartType, Name){
   
   # ranking
   # smallest number is number 1
-  library(dplyr)
   PortfolioExposures<-PortfolioExposures %>%
     group_by(Technology) %>%
     mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
            mx = max(my_ranks))
   #order(forrank,decreasing=TRUE),
-  detach("package:dplyr",unload=TRUE)
 
   # colnames(rankingtable)[1] <- "PortName"
   rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
@@ -368,20 +366,20 @@ preptranslations <- function(TranslationType,GraphTranslation, Languagechoose, S
 }
 
 # ---------- Match OS Data ------------------ #
-matchOS <- function(OSdata, PortSnapshot){
+#matchOS <- function(OSdata, PortSnapshot){
   
-  OSdatared <- unique(subset(OSdata, select = c("Issuer","Sector","ISIN","Weighted.Emissions.Factor","Weighted.Target.Emissions.Factor")) )
+#  OSdatared <- unique(subset(OSdata, select = c("Issuer","Sector","ISIN","Weighted.Emissions.Factor","Weighted.Target.Emissions.Factor")) )
   
-  PortSnapshot$Sector <- NULL
+#  PortSnapshot$Sector <- NULL
   
-  OS <- merge(PortSnapshot,OSdatared,by = "ISIN")
+#  OS <- merge(PortSnapshot,OSdatared,by = "ISIN")
   
-  WEF <- ddply(OS,.(PortName,Sector),summarise,
-               EmissionsFactor =weighted.mean(Weighted.Emissions.Factor,AUM),
-               TargetEmissionsFactor =weighted.mean(Weighted.Target.Emissions.Factor,AUM))
+#  WEF <- ddply(OS,.(PortName,Sector),summarise,
+#               EmissionsFactor =weighted.mean(Weighted.Emissions.Factor,AUM),
+#               TargetEmissionsFactor =weighted.mean(Weighted.Target.Emissions.Factor,AUM))
   # Returns the WEF for each company by sector
-  return(WEF)    
-}
+#  return(WEF)    
+#}
 
 # ------------ Sector Selector
 SectorSelect <- function(TechToPlot){
