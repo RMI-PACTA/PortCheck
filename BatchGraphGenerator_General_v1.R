@@ -104,7 +104,7 @@ CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProduction
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
 
-CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
+CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 
 ### Get Equity Batch Results
