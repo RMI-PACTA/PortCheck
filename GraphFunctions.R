@@ -308,7 +308,50 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         plot.title = element_text(hjust = 0.5)
   )
 }
-                          
+
+                           
+# -------- Seperate Ranking chart -----------
+RankPortfolios <- function( ChartType, Name){
+  a<-Name
+  if (ChartType == "EQ"){
+    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear+5),]
+    
+    
+  }else if (ChartType == "CB"){
+    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
+    
+  }
+
+  # Order the table for Green vs Brown Tech
+
+  badtech <- c("CoalCap","GasCap","ICE","Oil","Gas","Coal")
+  goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
+  PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
+  PortfolioExposures<-PortfolioExposures[!PortfolioExposures$Technology %in% "OilCap",]
+  PortfolioExposures$forrank <- NA
+  PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
+  PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
+  
+  PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
+  
+  # ranking
+  # smallest number is number 1
+  PortfolioExposures<-PortfolioExposures %>%
+    group_by(Technology) %>%
+    mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
+           mx = max(my_ranks))
+  #order(forrank,decreasing=TRUE),
+
+  # colnames(rankingtable)[1] <- "PortName"
+  rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
+  # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
+  
+  return(rankingtable)
+}                           
+                           
+                           
+                           
+                           
 # ------------- RANKING CHART - ALIGNMENT ----#
 
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear){
