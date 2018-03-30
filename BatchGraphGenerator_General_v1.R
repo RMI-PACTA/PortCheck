@@ -96,7 +96,6 @@ CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == Benc
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 
 CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio")
 print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
@@ -112,7 +111,6 @@ EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == Benc
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 
 # EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-# EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots)
 # print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
