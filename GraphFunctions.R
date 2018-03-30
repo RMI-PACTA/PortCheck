@@ -931,7 +931,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
   IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
-  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
+  names(IEATargetsRef)[names(IEATargetsRef)=="AnnualvalIEAtech"] <- "TargetProd"
   IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
   
   
@@ -939,7 +939,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   IEATargets <- do.call("rbind", IEATargets)
   
   IEATargets <- subset(IEATargets, select = c("Label","Year","Value"))
-  IEATargets <- rename(IEATargets,c("Value"="Plan.Pct.Build.Out"))
+  names(IEATargets)[names(IEATargets)=="Value"] <- "Plan.Pct.Build.Out"
   
   df <- rbind(Production,MarketBuildOut,IEATargets)
   
