@@ -1129,21 +1129,40 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
     
   } else if (MetricName == "Risk Exposure") {
     Title <- "Risk Exposure of Portfolios"
-    MetricCol <- c("Risk 2", "Risk 1")
+    MetricCol <- c("Risk2", "Risk1")
     if(ChartType == "CB") {
       PortSS <- CBBatchTest_PortSnapshots
     } else if (ChartType == "EQ") {
       PortSS <- EQBatchTest_PortSnapshots
     }
-    df <- PortSS %>% 
-      mutate("AUM" = AUM/PortfolioAUMAnalyzed) %>%
-      spread("MoodysRiskLvl", "AUM", fill = 0) %>%
-      rename("Risk 1" = "1", "Risk 2" = "2")
+    PortSS$MoodysRiskLvl[is.na(PortSS$MoodysRiskLvl)] <- "5"
     
+    metaport <- PortSS %>%
+      group_by(MoodysRiskLvl) %>%
+      summarise("PortName" = "MetaPort",
+                "ValueUSD" = sum(ValueUSD))
+    
+    cols <- setdiff(colnames(PortSS),names(metaport))
+    metaport[cols] <- 0
+    metaport <- metaport[colnames(PortSS)]
+    
+    PortSS <- rbind(PortSS,metaport)
+    
+    df <- PortSS %>% 
+      group_by(PortName) %>%
+      summarise("TotalPortValue" = sum(ValueUSD)) %>%
+      ungroup() %>%
+      merge(PortSS, by="PortName") %>%
+      mutate("PortWeight" = ValueUSD / TotalPortValue) %>%
+      spread("MoodysRiskLvl", "PortWeight", fill = 0) %>%
+      rename("Risk1" = "1", "Risk2" = "2", "Risk3" = "3", "Risk4" = "4", "Risk5" = "5")
+
     ID.COLS = c("PortName", "Type")
-    BarColors <- c("Orange","Red")
-    Labels <- c("Insubstantial Risk","Elevated Risk", "Substatial Risk", PortName)
     df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
+        
+    BarColors <- c("Orange","Red")
+    Labels <- c("Insubstantial Risk","Elevated Risk", "Substantial Risk", PortName)
+    
   }
   
   BarColors <- c(BarColors,"Black","skyblue")
@@ -1178,8 +1197,8 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
                              "Carsten's Metric: ",percent(values[1]))
   } else if (MetricName == "Risk Exposure") {
     portfolio_label = paste0("Your Portfolio\n",
-                             "Risk 1: ",percent(values[1]),"\n",
-                             "Risk 2: ",percent(values[2]))
+                             "Substantial Risk: ",percent(values[1]),"\n",
+                             "Elevated Risk: ",percent(values[2]))
   }
   order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
   dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
