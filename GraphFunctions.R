@@ -519,7 +519,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot,Startyear)
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
   # ChartType = "EQ"
-  # plotnumber = 99
+  # # plotnumber = 99
   # companiestoprint = 20
   # SectorToPlot = "Power"
    if (ChartType == "EQ"){
@@ -552,9 +552,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     CompProdSS <- subset(CompProdSS, Sector %in% c("Coal","Oil&Gas"))
     combin <- subset(combin, Sector %in% c("Coal","Oil&Gas"))
     market <- subset(market, Sector %in% c("Coal","Oil&Gas"))
-    CompProdSS$Sector <- revalue(CompProdSS$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
-    combin$Sector <- revalue(combin$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
-    market$Sector <- revalue(market$Sector, c("Coal" = "Fossil Fuels", "Oil&Gas" = "Fossil Fuels"))
+    CompProdSS$Sector <- recode(CompProdSS$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = CompProdSS$Sector)
+    combin$Sector <- recode(combin$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = combin$Sector)
+    market$Sector <- recode(market$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = market$Sector)
   }
   
   # if (SectorToPlot == "Oil"){
@@ -598,13 +598,14 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   Companies <- subset(CompProdSS, select=c("Ticker","Technology","CompanyLvlProd","CompanyLvlSecProd"))
   Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
   Companies$Classification <- "Companies"
-  TopPortCompanies <- Companies[rev(order(Companies$CompanyLvlProd)),]
-  TopPortCompanies <- TopPortCompanies[1:companiestoprint,]
-  
-  TopPortCompanies <- subset(TopPortCompanies, select = c("Ticker","Classification","Technology","TechShare"))
-  colnames(TopPortCompanies) <- c("Name","Classification","Technology","TechShare")
-  TopPortCompanies[TopPortCompanies$item == "NA"] <- "NoName"
-  AllData <- rbind(Marketmix, Targetmix, Portfoliomix, TopPortCompanies)
+  Companies <- Companies[rev(order(Companies$CompanyLvlProd)),]
+  TopPortCompanies <- unique(Companies$Ticker)[1:companiestoprint]
+  Companies <- subset(Companies, Ticker %in% TopPortCompanies, select = c("Ticker","Classification","Technology","TechShare"))
+  colnames(Companies) <- c("Name","Classification","Technology","TechShare")
+  Companies[Companies$item == "NA"] <- "NoName"
+  Companies$Name <- factor(Companies$Name, levels=TopPortCompanies)
+  Companies <- Companies[order(Companies$Name),]
+  AllData <- rbind(Marketmix, Targetmix, Portfoliomix, Companies)
   AllData$Name <- factor(AllData$Name, levels=rev(unique(AllData$Name)))
 
   
@@ -651,23 +652,29 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
 
   PortfolioData <- subset(AllData, Classification == "Portfolio")
   
-  CompanyData <- subset(AllData, Classification == "Market")
+  CompanyData <- subset(AllData, Classification == "Companies")
   
   PortPlot <- stacked_bar_chart(PortfolioData)+
-    scale_fill_manual(values=colors,labels = tech_labels, name = "Technology")+
+    scale_fill_manual(values=colors)+
     ggtitle("Templete")+
-    ylab("TechShare")+
+    xlab("Portfolio")+
     coord_flip()+
     theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-          legend.position = "bottom",legend.title = element_blank(),
-          axis.line = element_blank())
+          axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
   
-  CompPlot <- PortPlot %+% CompanyData
+  CompPlot <- stacked_bar_chart(CompanyData)+
+    scale_fill_manual(values=colors,labels = tech_labels, name = "Technology")+
+    xlab("Companies")+
+    ylab("TechShare")+
+    coord_flip()+
+    theme(legend.position = "bottom",legend.title = element_blank(),
+          axis.line = element_blank(), plot.title = element_blank())
 
-  cmd<-grid.arrange(PortPlot+theme(axis.text.x = element_blank()),CorpPlot,ncol=1)
+  cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
 
   if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-  ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+  ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
+         bg="transparent",height=3.2,width=9.7,dpi=ppi)
 
 }
 
@@ -753,7 +760,6 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   # plotnuber = 99
   # ChartType = "EQ"
   # SectorToPlot = "All"
-  library(dplyr)
   if (ChartType == "EQ"){
     Combin <- EQCombin
     Batch <- EQBatchTest
@@ -811,8 +817,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
     Production$Type <- factor(Production$Type)
-    detach("package:dplyr",unload=TRUE)
-    
+
     Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
     colnames(Production) <- c("item", "family", "score", "value")
     
@@ -1067,7 +1072,6 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 #----------- Distribution Chart ------------- #
 
 distribution_chart <- function(plotnumber, MetricName, ChartType){
-  library(dplyr)
   # MetricName = "Risk Exposure"
   # plotnumber = 99
   # ChartType ="CB"
@@ -1145,8 +1149,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType){
   dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
   
   x_coord <- length(unique(order$PortName))
-  detach("package:dplyr",unload=TRUE)
-  
+
   distribution_plot<- ggplot(dfagg)+
     geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
              aes(x=PortName, y=Value, fill=Metric),

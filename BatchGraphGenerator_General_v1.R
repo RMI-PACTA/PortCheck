@@ -13,8 +13,7 @@
 library(grid)
 library(ggplot2)
 library(ggthemes)
-library(plyr)
-# library(dplyr)
+library(dplyr)
 library(reshape2)
 library(gridExtra)
 library(scales)
@@ -126,7 +125,7 @@ EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildO
 InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
 
 EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
-EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
+# EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
 EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
 
 CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
@@ -170,7 +169,7 @@ print(paste0("Test List: ", nrow(TestList), " rows."))
 # ------
 ### Get Bench Regions
 RegionCountries <- data.frame(BenchmarkRegionList$Global, BenchmarkRegionList$OECD)
-RegionCountries <- rename(RegionCountries, c("BenchmarkRegionList.Global"="Global","BenchmarkRegionList.OECD"="OECD"))
+RegionCountries <- rename(RegionCountries, "Global" = BenchmarkRegionList.Global,"OECD" = BenchmarkRegionList.OECD)
 
 #IndexUniverses[is.na(IndexUniverses)] <- ""
 IndexUniversesList <- data.frame(IndexUniverse = IndexUniverses$IndexUniverse[!is.na(IndexUniverses$IndexUniverse) & IndexUniverses$IndexUniverse != ""], 
