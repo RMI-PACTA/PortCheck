@@ -108,35 +108,29 @@ CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-ALD-BuildOut.csv"
 
 
 ### Get Equity Batch Results
-EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_EquityAnalysisResults-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
+EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 
-EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_PortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots, Type == "Portfolio")
-print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
+# EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+# EQBatchTest_PortSnapshots <- subset(EQBatchTest_PortSnapshots)
+# print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
+EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
-EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
+EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
 
 # Remove later
 InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
 
 EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
-
 EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
-
 EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
 
-
-
 CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
-
 CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
-
 CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
 
 # Comparison Flags
@@ -144,8 +138,8 @@ EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
 EQBatchTest$Type[EQBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
 CBBatchTest$Type[CBBatchTest$InvestorName != "California Insurers"] <- "Market"
 CBBatchTest$Type[CBBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
-EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
-EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
+# EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
+# EQBatchTest_PortSnapshots$Type[EQBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
 CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
