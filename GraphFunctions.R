@@ -311,6 +311,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 
                            
 # -------- Seperate Ranking chart -----------
+
 RankPortfolios <- function( ChartType, Name){
   a<-Name
   if (ChartType == "EQ"){
@@ -348,9 +349,6 @@ RankPortfolios <- function( ChartType, Name){
   
   return(rankingtable)
 }                           
-                           
-                           
-                           
                            
 # ------------- RANKING CHART - ALIGNMENT ----#
 
@@ -923,28 +921,24 @@ Inputs246 <- function(ChartType, TechToPlot){
   
   #Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
-  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Build.Out","InvestorName.x","Scenario.x"))
+  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Build.Out","InvestorName.x","Scenario.y"))
   Combin <- subset(Combin,Scenario %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
   BuildOutCalc <- function(df, Label){
-    GoodBad <- GreenBrown(TechToPlot)
-
-    df <- rename(df, c("Production"="Prod","TargetProductionAlignment"="TargetProd",
-                       "WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd",
-                       "AnnualvalIEAtech"="Prod"),warn_missing = F)
-
-    if (GoodBad == "Green") {
-      df$Value <- 1+(df$Prod - df$Prod[df$Year == Startyear])/(df$TargetProd[df$Year == (Startyear+5)]-df$TargetProd[df$Year == Startyear])
-    } else if(GoodBad == "Brown"){
-      df$Value <- (df$Prod/df$Prod[df$Year == Startyear])
-    }
-
+    
+    names(df)[names(df)== "AnnualvalIEAtech"]<-"Prod"
+    df$Scenario <- as.factor(df$Scenario)
+    df<- df%>%
+      group_by (Scenario) %>%
+      mutate(Diff =c(NA,diff(Prod)/(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod)))
+    df[is.na(df$Diff),]$Diff <- 0
+    
+    
     df$Label <- Label
     df$Prod <- df$TargetProd <- NULL
     return(df)
-  }
-  # 
+  }  # 
   ### Production Inputs - normalised to the start year
   Production <- subset(Combin, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
   Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out"))
@@ -986,8 +980,8 @@ Inputs246 <- function(ChartType, TechToPlot){
   IEATargets <- lapply(unique(IEATargets$Scenario), function(x) BuildOutCalc(IEATargets[IEATargets$Scenario == x,],x))
   IEATargets <- do.call("rbind", IEATargets)
   
-  IEATargets <- subset(IEATargets, select = c("Label","Year","Value"))
-  names(IEATargets)[names(IEATargets)=="Value"] <- "Plan.Pct.Build.Out"
+  IEATargets <- subset(IEATargets, select = c("Label","Year","Diff"))
+  names(IEATargets)[names(IEATargets)=="Diff"] <- "Plan.Pct.Build.Out"
   
   df <- rbind(Production,MarketBuildOut,IEATargets)
   

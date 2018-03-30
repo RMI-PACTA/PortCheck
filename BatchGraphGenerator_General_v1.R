@@ -91,11 +91,11 @@ if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showW
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
 ### Get Debt Batch Results
-CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtAnalysisResults-450S-only.csv"),stringsAsFactors=FALSE,strip.white = T)
+CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 
-CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtPortfolioData_Snapshot",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
+CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest_PortSnapshots <- subset(CBBatchTest_PortSnapshots, Type == "Portfolio")
 print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 
