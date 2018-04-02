@@ -371,8 +371,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
    colnames(MinMax)[2] <- "Minimum"
    colnames(MinMax)[3] <- "Maximum"
    
-   AbsMax <- max(Maxs)
-   
    Exposures <- merge(Exposures,MinMax,by="Technology")
    Exposures$Technology<- as.factor(Exposures$Technology)
    Exposures$Sector<- as.factor(Exposures$Sector)
