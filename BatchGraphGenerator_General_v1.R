@@ -206,6 +206,14 @@ RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 # b<- c("Pensionskassen")
 # ToTest2 <- which(TestList$PortfolioName %in% b)
 
+#Asserts
+unique(intersect(CBBatchTest$Technology, CBCompProdSnapshots$Technology))
+unique(intersect(EQBatchTest$Technology, EQCompProdSnapshots$Technology))
+unique(intersect(CBBatchTest$BenchmarkRegion, CBCompProdSnapshots$BenchmarkRegion))
+unique(intersect(EQBatchTest$BenchmarkRegion, EQCompProdSnapshots$BenchmarkRegion))
+unique(intersect(CBBatchTest$Scenario, CBCompProdSnapshots$Scenario))
+unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
+
 
 #-------
 # Loop through Portfolios
@@ -219,6 +227,8 @@ for (i in 1:nrow(TestList)){
   InvestorName <-  TestList[i,"InvestorName"]
   PortfolioName <- TestList[i,"PortName"]
   PortName <- TestList[i,"PortName"]
+  HasEquity <- TestList[i,"HasEquity"]
+  HasDebt <- TestList[i,"HasDebt"]
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -276,37 +286,43 @@ for (i in 1:nrow(TestList)){
       distribution_chart("08", "Carsten's Metric", "EQ")
       distribution_chart("09", "Carsten's Metric", "CB")
       
-      Graph246(10, "EQ", "CoalCap")
-      Graph246(11, "EQ", "RenewablesCap")
-      Graph246(12, "EQ", "GasCap")
-      Graph246(13, "EQ", "NuclearCap") #246 currently not working
-      # Graph246(14, "EQ", "OilProd")
-      Graph246(15, "EQ", "Gas")
-      Graph246(16, "EQ", "ICE")
-      Graph246(17, "EQ", "Electric")
+      if (HasEquity) {
+        Graph246(10, "EQ", "CoalCap")
+        Graph246(11, "EQ", "RenewablesCap")
+        Graph246(12, "EQ", "GasCap")
+        Graph246(13, "EQ", "NuclearCap")
+        # Graph246(14, "EQ", "OilProd")
+        Graph246(15, "EQ", "Gas")
+        Graph246(16, "EQ", "ICE")
+        Graph246(17, "EQ", "Electric")
+      }
       
-      Graph246(18, "CB", "CoalCap")
-      Graph246(19, "CB", "RenewablesCap")
-      Graph246(20, "CB", "GasCap")
-      Graph246(21, "CB", "NuclearCap")
-      # Graph246(22, "CB", "OilProd")
-      Graph246(23, "CB", "Gas")
-      Graph246(24, "CB", "ICE")
-      Graph246(25, "CB", "Electric")
+      if (HasDebt) {
+        Graph246(18, "CB", "CoalCap")
+        Graph246(19, "CB", "RenewablesCap")
+        Graph246(20, "CB", "GasCap")
+        Graph246(21, "CB", "NuclearCap")
+        # Graph246(22, "CB", "OilProd")
+        Graph246(23, "CB", "Gas")
+        Graph246(24, "CB", "ICE")
+        Graph246(25, "CB", "Electric")
+      }
       
-      ranking_chart_alignment(26, "EQ", "All", Startyear) #Carstens Metric
-      ranking_chart_alignment(27, "CB", "All", Startyear) #Carstens Metric
+      ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
+      ranking_chart_alignment(27, "CB", "All") #Carstens Metric
       
-      company_techshare(28, 20, "EQ", "Power")
-      company_techshare(29, 20, "EQ", "Automotive")
-      company_techshare(30, 20, "EQ", "Fossil Fuels")
-      # company_techshare(31, 20, "EQ", "Oil")
-      
-      company_techshare(32, 20, "CB", "Power")
-      company_techshare(33, 20, "CB", "Automotive")
-      company_techshare(34, 20, "CB", "Fossil Fuels")
-      # company_techshare(35, 20, "CB", "Oil")
-      
+      if (HasEquity) {
+        company_techshare(28, 20, "EQ", "Power")
+        company_techshare(29, 20, "EQ", "Automotive")
+        company_techshare(30, 20, "EQ", "Fossil Fuels")
+        # company_techshare(31, 20, "EQ", "Oil")
+      }
+      if (HasDebt) {
+        company_techshare(32, 20, "CB", "Power")
+        company_techshare(33, 20, "CB", "Automotive")
+        company_techshare(34, 20, "CB", "Fossil Fuels")
+        # company_techshare(35, 20, "CB", "Oil")
+      }
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
