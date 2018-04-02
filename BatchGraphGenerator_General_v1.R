@@ -98,7 +98,7 @@ print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
 print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 
-CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_DebtProductionCompanies_Snapshot2023.csv"),stringsAsFactors = FALSE,strip.white = T)
+CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
 
