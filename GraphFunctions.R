@@ -942,25 +942,23 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 # ------------ 246 Chart -------------------- #
-
 Inputs246 <- function(ChartType, TechToPlot){
-  
-  if (ChartType == "EQ"){  
+
+  if (ChartType == "EQ"){
     Combin <- EQCombin
     Aldprod <- EQALDAggProd
   }else if(ChartType == "CB"){
     Combin <- CBCombin
     Aldprod <- CBALDAggProd
   }
-  
-  
-  #Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
+
+
+  Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
   Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Build.Out","InvestorName.x","Scenario.y"))
-  # Combin <- subset(Combin,Scenario %in% Scenariochoose)
+  Combin <- subset(Combin,Scenario.y %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
-  
   BuildOutCalc <- function(df, TechToPlot){
     Tech <- c("RenewablesCap","HydroCap","NuclearCap",
                   "Coal","CoalCap","Gas","GasCap","Oil","OilCap")
@@ -974,6 +972,13 @@ Inputs246 <- function(ChartType, TechToPlot){
         mutate(Diff=(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod),
                value=Prod- first(Prod))
       
+      # library(data.table)
+      # df<-data.table(df)
+      # setkey(df,Scenario)
+      # df[, value:= c(NA, diff(Prod)), by = Scenario]
+      # setDF(df)
+      #df[is.na(df$value),]$value <- 0
+      #df$Diff=(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod)
       if (df$Diff <0){df$Diff<- df$Diff*-1}
       df$Plan.Pct.Build.Out<-df$value/df$Diff
       names(df)[names(df)=="Scenario"]<-"Label"
@@ -995,37 +1000,37 @@ Inputs246 <- function(ChartType, TechToPlot){
     }
     return(df)
   }
-  
+  #
   ### Production Inputs - normalised to the start year
   Production <- subset(Combin, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
   Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out"))
   Production$Label <- "Portfolio"
 
-  
-  
-  if (ChartType == "EQ"){  
-    
+
+
+  if (ChartType == "EQ"){
+
     ### Stock Market Build Out
-    MarketBuildOut <- subset( Aldprod, InvestorName == "Market" & Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
+    MarketBuildOut <- subset( Aldprod, InvestorName == "Market"& Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
     MarketBuildOut <- subset(MarketBuildOut, select =  c("Year","Plan.Pct.Build.Out"))
     MarketBuildOut$Label <- "Stock Market"
-    
+
   }else{
     ### Debt Market Build Out
-    MarketBuildOut <- subset(Aldprod, InvestorName == "GlobalBondUniverse" & Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
+    MarketBuildOut <- subset(Aldprod, InvestorName == "Market"& Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
     MarketBuildOut <- subset(MarketBuildOut, select =  c("Year","Plan.Pct.Build.Out"))
     MarketBuildOut$Label <- "Debt Market"
 
   }
-  
+
   ### Global Economy Data
   ### To include or not to include...
-  
-  
-  
-  ### Inputs to the 246 chart. 
-  
-    IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" & Year %in% Startyear:(Startyear+5)  &
+
+
+
+  ### Inputs to the 246 chart.
+
+  IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" & Year %in% Startyear:(Startyear+5)  &
                             Scenario %in% c("450S","NPS","CPS"), select = c("Sector","Technology","Scenario","Year","AnnualvalIEAtech"))
 
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)
@@ -1035,19 +1040,21 @@ Inputs246 <- function(ChartType, TechToPlot){
 
 
   IEATargets <- BuildOutCalc(IEATargets,TechToPlot)
+  #IEATargets <- do.call("rbind", IEATargets)
 
   IEATargets <- subset(IEATargets, select = c("Label","Year","Plan.Pct.Build.Out"))
 
 
   df <- rbind(Production,MarketBuildOut,IEATargets)
-  
-  
+
+
   return(df)
 }
 
+
 Graph246 <- function(plotnumber, ChartType, TechToPlot){
-  
-  
+   
+
   if (ChartType == "EQ"){
     BatchTest <- EQBatchTest
     Combin <- EQCombin
@@ -1057,101 +1064,123 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     Combin <- CBCombin
     LinesToPlot <- c("Portfolio", "Debt Market")
   }
-  
+
   # Check whether the tech is a green or brown technology
   GoodBad <- GreenBrown(TechToPlot)
   
   df <- Inputs246(ChartType, TechToPlot)
 
+    IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
+    IEATargetMax$Plan.Pct.Build.Out <- 1.8
+    IEATargetMax$Label<- "MaxValue"
 
-  IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
-  IEATargetMax$Plan.Pct.Build.Out <- max(df$Plan.Pct.Build.Out)+.1
-  IEATargetMax$Label<- "MaxValue"
-  
+
   df <- rbind(df,IEATargetMax)
-  
-  dfwide <- dcast(df,Year~Label, value.var="Plan.Pct.Build.Out",fun=sum)
-  
-  
-   if (GoodBad == "Green"){
-   dfwide$Line1 <- dfwide$CPS
+
+  dfwide <- dcast(df,Year~Label, value.var="Plan.Pct.Build.Out")
+
+
+  if (GoodBad == "Green"){
+    dfwide$Line1 <- dfwide$CPS
     dfwide$Line2 <- dfwide$NPS-dfwide$CPS
     dfwide$Line3 <- dfwide$`450S`-dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue-(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
+    dfwide$Line4 <- dfwide$MaxValue-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
 
     # dfwide$Line1 <- dfwide$`450S`
     # dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
     # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
-    lineorder <-c("Line1","Line2","Line3","Line4")
+    #lineorder <-c("Line4", "Line3","Line2","Line1")
     Palette <- c(area_6,area_4_6,area_2_4,area_2)
-    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C") 
+    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C")
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS - dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue - (dfwide$`450S`+dfwide$NPS+dfwide$CPS)
+    dfwide$Line4 <- dfwide$MaxValue - dfwide$`450S`
 
     Palette <- c(area_2,area_2_4,area_4_6,area_6)
     AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
-    lineorder <-c("Line1","Line2","Line3","Line4")
-  }
-  
-  
-  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4","Line5","Line6","Line7","Line8"))
+    #lineorder <-c("Line1","Line2","Line3","Line4")
+  } 
+
+  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
   dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
   # dftargets <- rev(dftargets)
-  
-  # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C") 
+
+  # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
   # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  #lineorder <-c("Line4","Line3","Line2","Line1","Line5","Line6","Line7","Line8")
+  lineorder <-c("Line4","Line3","Line2","Line1")
   colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
-  
-  dftargets$Target<-as.factor(dftargets$Target)
+
+  #dftargets$Target<-as.factor(dftargets$Target, lestr
   combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
-  dftargets <- merge(dftargets, colourdf, by= "Target") 
-  dftargets$Target<- factor(dftargets$Target,levels = lineorder)
-  
-  
+  dftargets <- merge(dftargets, colourdf, by= "Target")
+  dftargets$Target<- factor(dftargets$Target,levels = lineorder, ordered=TRUE)
+
+
   maxval <- max(dftargets$value) +0.1
-  minval <- min(dftargets$value) +0.1
-  
+  minval <- min(dftargets$value) -0.1
+
   LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-  
+
   year_lab = Startyear
   LineVector <- setNames(LineColours,LinesToPlot)
-  
+
+
+
   ylabel <- "Normalized Built Out"
-  outputplot <-  ggplot()+
-    geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line1",])+
-    geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line2",])+
-    geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line3",])+
-    geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line4",])+
+  if (GoodBad == "Brown"){
+    outputplot<-ggplot(data = dftargets,aes(x=Year,y=value))+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_2)
+  }else if(GoodBad =="Green"){
+    outputplot<-ggplot()+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_6)
+  }
+  outputplot <- outputplot+
+    geom_area(data=dftargets,aes(x=Year,y=value,fill=Target),position = "stack")+
+    #geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-1, fill=area_2)+
+    
+    #geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
+    # #theme(legend.position = "none")+
+    
+    #ggplot() +aes(x=Year,y=value, fill=Target), position="stack", data=dftargets)+
+    
+    
+     #geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line1",])+
+     #geom_area(aes(x=Year,y=value, fill=Target),data=d
+    #geom_area(ftargets[dftargets$Target=="Line2",])+
+    # geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line3",])+
+    # geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line4",])+
     #geom_area(aes(x=Year,y=-value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, size = linesize,linetype="solid")+  # Portfolio
+    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, show.legend=F,size = linesize,linetype="solid")+  # Portfolio
     geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
     #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[3])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
-    
-  scale_fill_manual(labels=unique(dftargets$Labels),
+    #scale_fill_manual(labels = c("< 2°C", "2-4°C","4-6°C","> 6°C"), values = c("blue", "red","yellow","black"))
+    scale_fill_manual(labels=unique(dftargets$Labels),
                       values=rep(unique(as.character(dftargets$colour)),1))+
-      xlab(year_lab) +
-      ylab(ylabel)+
-      coord_cartesian(ylim=c(-maxval,maxval))+
-      theme_minimal()+
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.ticks=element_blank(),
-            panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
     
-    print(outputplot)
-    
-    
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
+    scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
+    #labels=unique(dftargets$Labels)
+    xlab(year_lab) +
+    ylab(ylabel)+
+    coord_cartesian(ylim=c(-0.5,1.5))+
+    theme_minimal()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.ticks=element_blank(),
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+
+  print(outputplot)
+
+
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
+
+
+
 
 }
 
