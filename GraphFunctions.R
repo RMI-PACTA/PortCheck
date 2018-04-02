@@ -944,7 +944,6 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 # ------------ 246 Chart -------------------- #
-# ------------ 246 Chart -------------------- #
 Inputs246 <- function(ChartType, TechToPlot){
 
   if (ChartType == "EQ"){
@@ -1054,6 +1053,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   return(df)
 }
 
+
 Graph246 <- function(plotnumber, ChartType, TechToPlot){
    
 
@@ -1133,8 +1133,13 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
   ylabel <- "Normalized Built Out"
-  outputplot <-  ggplot(data=dftargets,aes(x=Year,y=value))+
-    geom_area(aes(fill=Target),position = "stack")+
+  if (GoodBad == "Brown"){
+    outputplot<-ggplot(data = dftargets,aes(x=Year,y=value))+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_2)
+  }else if(GoodBad =="Green"){
+    outputplot<-ggplot()+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_6)
+  }
+  outputplot <- outputplot+
+    geom_area(data=dftargets,aes(x=Year,y=value,fill=Target),position = "stack")+
     #geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-1, fill=area_2)+
     
     #geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
