@@ -218,7 +218,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in 1:nrow(TestList)){
+for (i in c(1:20,326)){
 
   ### Specify the Names from the Test List
   PortfolioNameLong <- TestList[i,"PortName"]
@@ -291,7 +291,7 @@ for (i in 1:nrow(TestList)){
         Graph246(11, "EQ", "RenewablesCap")
         Graph246(12, "EQ", "GasCap")
         Graph246(13, "EQ", "NuclearCap")
-        # Graph246(14, "EQ", "OilProd")
+        Graph246(14, "EQ", "Oil")
         Graph246(15, "EQ", "Gas")
         Graph246(16, "EQ", "ICE")
         Graph246(17, "EQ", "Electric")
@@ -302,14 +302,18 @@ for (i in 1:nrow(TestList)){
         Graph246(19, "CB", "RenewablesCap")
         Graph246(20, "CB", "GasCap")
         Graph246(21, "CB", "NuclearCap")
-        # Graph246(22, "CB", "OilProd")
+        Graph246(22, "CB", "Oil")
         Graph246(23, "CB", "Gas")
         Graph246(24, "CB", "ICE")
         Graph246(25, "CB", "Electric")
       }
-      
-      ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
-      ranking_chart_alignment(27, "CB", "All") #Carstens Metric
+
+      if (HasEquity) {
+        ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
+      }
+      if (HasDebt) {
+        ranking_chart_alignment(27, "CB", "All") #Carstens Metric
+      }
       
       if (HasEquity) {
         company_techshare(28, 20, "EQ", "Power")
@@ -332,21 +336,21 @@ for (i in 1:nrow(TestList)){
       
       
       # Prepares the data that goes into the report
-      CAReportData()
+      # CAReportData()
 
       
       # Creates the report for California
       # I think it's necessary to seperate from the previous
-      CAReport()
+      # CAReport()
       
       
     })}else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
-  
-  write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
-  write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
-  write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
-  write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  # 
+  # write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
+  # write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  # write.csv(CBCompProdSnapshot,paste0("CBCompProdSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
+  # write.csv(CBPortSnapshot,paste0("CBPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
 }
 
