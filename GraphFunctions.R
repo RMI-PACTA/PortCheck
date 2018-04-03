@@ -1051,6 +1051,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   return(df)
 }
 
+#----------- Graph   246 ------------- #
 
 Graph246 <- function(plotnumber, ChartType, TechToPlot){
    
@@ -1071,7 +1072,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   df <- Inputs246(ChartType, TechToPlot)
 
     IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
-    IEATargetMax$Plan.Pct.Build.Out <- 1.8
+    IEATargetMax$Plan.Pct.Build.Out <- 4
     IEATargetMax$Label<- "MaxValue"
 
 
@@ -1082,46 +1083,32 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
   if (GoodBad == "Green"){
     dfwide$Line1 <- dfwide$CPS
-    dfwide$Line2 <- dfwide$NPS-dfwide$CPS
-    dfwide$Line3 <- dfwide$`450S`-dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
+    dfwide$Line2 <- dfwide$NPS#-dfwide$CPS
+    dfwide$Line3 <- dfwide$`450S`#-dfwide$NPS
+    dfwide$Line4 <- dfwide$MaxValue#-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
 
-    # dfwide$Line1 <- dfwide$`450S`
-    # dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
-    # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
-    # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
-    #lineorder <-c("Line4", "Line3","Line2","Line1")
-    Palette <- c(area_6,area_4_6,area_2_4,area_2)
-    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C")
+   
+    lineorder<- c("Line4","Line3","Line2","Line1")
+   
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
-    dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
-    dfwide$Line3 <- dfwide$CPS - dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue - dfwide$`450S`
+    dfwide$Line2 <- dfwide$NPS #- dfwide$`450S`
+    dfwide$Line3 <- dfwide$CPS #- dfwide$NPS
+    dfwide$Line4 <- dfwide$MaxValue #- dfwide$`450S`
 
-    Palette <- c(area_2,area_2_4,area_4_6,area_6)
-    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
-    #lineorder <-c("Line1","Line2","Line3","Line4")
+   
+    lineorder <-c("Line4","Line3","Line2","Line1")
   } 
 
-  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
-  dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
-  # dftargets <- rev(dftargets)
-
-  # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
-  # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  lineorder <-c("Line4","Line3","Line2","Line1")
+   dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
+   dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
+ 
   colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
-
-  #dftargets$Target<-as.factor(dftargets$Target, lestr
-  combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
-  dftargets <- merge(dftargets, colourdf, by= "Target")
-  dftargets$Target<- factor(dftargets$Target,levels = lineorder, ordered=TRUE)
-
-
-  maxval <- max(dftargets$value) +0.1
-  minval <- min(dftargets$value) -0.1
-
+ 
+   combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
+   dftargets <- merge(dftargets, colourdf, by= "Target")
+   dftargets$Target<- factor(dftargets$Target,levels = lineorder, ordered=TRUE)
+ 
   LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
 
@@ -1131,54 +1118,60 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
   ylabel <- "Normalized Built Out"
+  
+  
   if (GoodBad == "Brown"){
-    outputplot<-ggplot(data = dftargets,aes(x=Year,y=value))+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_2)
-  }else if(GoodBad =="Green"){
-    outputplot<-ggplot()+geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-2, fill=area_6)
+    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
+    outputplot <- ggplot(data = dftargets)+
+      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+      geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, show.legend=F,size = linesize,linetype="solid")+  # Portfolio
+      geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
+      scale_fill_manual(labels=unique(dftargets$Labels),
+                        values=rep(unique(as.character(dftargets$colour)),1))+
+      
+      scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
+      xlab("") +
+      ylab(ylabel)+
+      coord_cartesian(ylim=c(-2,2))+
+      theme_minimal()+
+      theme(panel.grid.major = element_line(color="black", size=1),
+            panel.grid.minor = element_blank(),
+            axis.ticks=element_blank(),
+            panel.border = element_blank(),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank(),
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  } else if (GoodBad =="Green"){
+    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    outputplot <- ggplot(data = dftargets)+
+      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+      geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, show.legend=F,size = linesize,linetype="solid")+  # Portfolio
+      geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
+      scale_fill_manual(labels=unique(dftargets$Labels),
+                                             values=rep(unique(as.character(dftargets$colour)),1))+
+      
+      scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
+      
+      xlab("") +
+      ylab(ylabel)+
+      coord_cartesian(ylim=c(0,1))+
+      theme_minimal()+
+      theme(panel.grid.major = element_line(color="black", size=1),
+            panel.grid.minor = element_blank(),
+            axis.ticks=element_blank(),
+            panel.border = element_blank(),
+            panel.grid = element_blank(),
+            legend.position = "bottom",
+            legend.title = element_blank(),
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   }
-  outputplot <- outputplot+
-    geom_area(data=dftargets,aes(x=Year,y=value,fill=Target),position = "stack")+
-    #geom_rect(xmin=2018, xmax=2023, ymin=0, ymax=-1, fill=area_2)+
-    
-    #geom_area(aes(x=Year,y=value, fill=Target),data=dftargets)+
-    # #theme(legend.position = "none")+
-    
-    #ggplot() +aes(x=Year,y=value, fill=Target), position="stack", data=dftargets)+
-    
-    
-     #geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line1",])+
-     #geom_area(aes(x=Year,y=value, fill=Target),data=d
-    #geom_area(ftargets[dftargets$Target=="Line2",])+
-    # geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line3",])+
-    # geom_area(aes(x=Year,y=value, fill=Target),data=dftargets[dftargets$Target=="Line4",])+
-    #geom_area(aes(x=Year,y=-value, fill=Target),data=dftargets)+
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, show.legend=F,size = linesize,linetype="solid")+  # Portfolio
-    geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
-    #geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[3])],colour =  "Peer Group"), data=dfwide, size = linesize,linetype="longdash")+   # peer
-    #scale_fill_manual(labels = c("< 2°C", "2-4°C","4-6°C","> 6°C"), values = c("blue", "red","yellow","black"))
-    scale_fill_manual(labels=unique(dftargets$Labels),
-                      values=rep(unique(as.character(dftargets$colour)),1))+
-    
-    scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
-    #labels=unique(dftargets$Labels)
-    xlab(year_lab) +
-    ylab(ylabel)+
-    coord_cartesian(ylim=c(-0.5,1.5))+
-    theme_minimal()+
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          axis.ticks=element_blank(),
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          legend.position = "bottom",
-          legend.title = element_blank(),
-          plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-
+  
+ 
   print(outputplot)
 
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
-
 
 
 
