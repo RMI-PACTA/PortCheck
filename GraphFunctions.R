@@ -212,10 +212,10 @@ themecolor <- function() {
   othr<<- "#9793c6"
   
   #trajectory
-  area_6 <<- "#e80942"
-  area_4_6 <<- "#fa8086"
-  area_2_4 <<- "#9bbe9d"
-  area_2 <<- "#6da06f"
+   area_6 <<- "#e07b73"
+  area_4_6 <<- "#fde291"
+  area_2_4 <<- "#FFFFCC"
+  area_2 <<- "#c3d69b"
   eq_port <<- "#1056ff"
   stock_market<<- "black"
   peer_group <<- "black"
