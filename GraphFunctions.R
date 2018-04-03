@@ -1086,29 +1086,28 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     dfwide$Line2 <- dfwide$NPS#-dfwide$CPS
     dfwide$Line3 <- dfwide$`450S`#-dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue#-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
+    lineorder<- c("Line1","Line2","Line3","Line4")
 
-   
-    lineorder<- c("Line4","Line3","Line2","Line1")
-   
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS #- dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS #- dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue #- dfwide$`450S`
 
-   
     lineorder <-c("Line4","Line3","Line2","Line1")
   } 
 
    dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
    dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
- 
+
   colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
- 
+  # 
    combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
    dftargets <- merge(dftargets, colourdf, by= "Target")
    dftargets$Target<- factor(dftargets$Target,levels = lineorder, ordered=TRUE)
- 
+  # 
+
+  # 
   LineColours <- c(eq_port, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
 
@@ -1148,11 +1147,11 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
       geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[1])],colour =  "Portfolio"), data=dfwide, show.legend=F,size = linesize,linetype="solid")+  # Portfolio
       geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Stock Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
-      scale_fill_manual(labels=unique(dftargets$Labels),
-                                             values=rep(unique(as.character(dftargets$colour)),1))+
+      scale_fill_manual(labels=rev(unique(dftargets$Labels)),
+                                             values=rev(unique(as.character(dftargets$colour))))+
       
       scale_color_manual(name="",values = c("Portfolio"=eq_port,"Stock Market"=stock_market))+
-      
+     
       xlab("") +
       ylab(ylabel)+
       coord_cartesian(ylim=c(0,1))+
