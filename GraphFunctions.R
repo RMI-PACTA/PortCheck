@@ -1402,3 +1402,24 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
 }
+
+                           
+                           
+                           
+# ------------- PIE CHART ------------------- #
+pie_chart <- function(plotnumber,ChartType){                           
+                             
+  if (ChartType == "EQ"){
+    pieshare <- EQCombin
+  }else if(ChartType == "CB"){
+    pieshare <- CBCombin
+  }
+
+  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+      geom_bar(stat = "identity",color=NA, width = 1)
+      
+   PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+    
+
+  print(PieChart)
+}
