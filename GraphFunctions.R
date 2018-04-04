@@ -584,8 +584,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
       # 
       # Company Circles
-      geom_point(data=Exposures,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
-      annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc, y= Exposures$Locations, colour="white",size=rel(3))+ 
+      geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
+      annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
+     
       
       # Distribution Range 
       annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
