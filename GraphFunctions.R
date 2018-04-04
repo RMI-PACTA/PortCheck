@@ -329,17 +329,19 @@ RankPortfolios <- function( ChartType, Name){
   goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
   PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
   PortfolioExposures<-PortfolioExposures[!PortfolioExposures$Technology %in% "OilCap",]
-  PortfolioExposures$forrank <- NA
-  PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
-  PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
+  #PortfolioExposures$forrank <- NA
+  #PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
+  #PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
   
-  PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
-  
+  #PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
+  if (PortfolioExposures $Technology %in%  badtech){
+    PortfolioExposures $Exp.Carsten.Market <-PortfolioExposures $Exp.Carsten.Market *-1
+  }
   # ranking
   # smallest number is number 1
   PortfolioExposures<-PortfolioExposures %>%
     group_by(Technology) %>%
-    mutate(my_ranks = order(order(forrank,decreasing = TRUE)),
+    mutate(my_ranks = order(order(Exp.Carsten.Market,decreasing = TRUE)),
            mx = max(my_ranks))
   #order(forrank,decreasing=TRUE),
 
@@ -367,6 +369,13 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
   Exposures$Exp.Carsten.Market <- Exposures$Exp.Carsten.Scen.Port.Scen.Market/Exposures$CarstenMetric_Port.Market  #will be delete once file is updated
   BatchTest$Exp.Carsten.Market <- BatchTest$Exp.Carsten.Scen.Port.Scen.Market/BatchTest$CarstenMetric_Port.Market  #will be delete once file is updated
+  
+  if (Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
+    Exposures$Exp.Carsten.Market <-Exposures$Exp.Carsten.Market *-1
+  }
+  if (BatchTest$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
+    BatchTest$Exp.Carsten.Market <-BatchTest$Exp.Carsten.Market *-1
+  }
   
   Mins<- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)  #
   Maxs <- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max) # need define variable
@@ -410,15 +419,15 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   
    locations<-c(a,b,d)
 
-     if (SectorToPlot != "All"){
-        Exposures <- subset(Exposures, Exposures$Sector %in% SectorToPlot)
-        if (SectorToPlot == "Power"){
-          Exposures <- subset(Exposures, Exposures$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
-        }
-        locations <- c(1:nrow(Exposures))
-     }else{
-       locations <- c(1:3,4.5:6.5,8:12)
-     }
+   #  if (SectorToPlot != "All"){
+   #     Exposures <- subset(Exposures, Exposures$Sector %in% SectorToPlot)
+   #     if (SectorToPlot == "Power"){
+   #       Exposures <- subset(Exposures, Exposures$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
+   #     }
+   #     locations <- c(1:nrow(Exposures))
+   #  }else{
+   #    locations <- c(1:3,4.5:6.5,8:12)
+   #  }
     # 
     # Chart variables
     barwidth <- .03
