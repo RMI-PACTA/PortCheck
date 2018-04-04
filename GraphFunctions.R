@@ -300,7 +300,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         axis.line = element_line(colour = "black",size=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "skyblue",color = NA),
+        #panel.background = element_rect(fill = "skyblue",color = NA),
         legend.title = element_blank(),
         legend.position = "bottom",
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
@@ -309,8 +309,78 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
   )
 }
 
-                           
-# -------- Seperate Ranking chart -----------
+#----------- Distribution Chart ------------- #
+
+distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, MetricCol,
+                               Title, Labels, LineHighl, LineLabels, LineColors, BarColors){
+ 
+  df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
+  
+  dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
+  dfagg[dfagg$Type == LineHighl,"Metric"] <- "Reference"
+  dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
+  dfagg$Value <- as.numeric(dfagg$Value)
+  
+  dfagg <- dfagg %>%
+    filter(Metric != "Reference") %>%
+    group_by(PortName,Type) %>%
+    summarise("Value" = 1-sum(Value), "Metric" = "Unexposed") %>%
+    ungroup() %>%
+    mutate("Metric" = "Unexposed") %>%
+    select(PortName,Metric,Type,Value) %>%
+    rbind(dfagg)
+  
+  order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
+  dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
+  dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
+  
+  x_coord <- length(unique(order$PortName))
+  
+  distribution_plot<- ggplot(dfagg)+
+    geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
+             aes(x=PortName, y=Value, fill=Metric),
+             stat = "identity", position = "fill", width=1)+
+    scale_fill_manual(values=BarColors,labels=Labels,breaks=c(MetricCol,"Comparison"))+
+    # geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
+    #            aes(yintercept=Value),color=LineColors,linetype=2)+
+    # geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
+    #           aes(y=Value),x=x_coord,label=LineLabels,
+    #           color="white",vjust=-.2,hjust=1)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
+    scale_x_discrete(labels=NULL)+
+    expand_limits(0,0)+
+    # guides(fill=FALSE)+
+    ggtitle(Title)+
+    xlab(paste0("California Insurers"))+
+    ylab(MetricName)+
+    coord_cartesian(ylim=c(0,min(1, 1.5*max(filter(dfagg,Metric!="Unexposed")$Value))))+
+    theme_distribution()
+  
+  print(distribution_plot)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
+  
+}
+
+# -------------STACKED BAR CHARTS ---------- #
+
+stacked_bar_chart <- function(dat){
+  
+  colnames(dat) <- c("item", "family", "score", "value")
+  
+  template <- ggplot(data=dat, aes(x=item, y=value,fill=score),show.guide = TRUE)+
+    geom_bar(stat = "identity", position = "fill", width = .6)+
+    geom_hline(yintercept = c(.25,.50,.75), color="white")+
+    theme_minimal()+
+    scale_y_continuous(expand=c(0,0), labels=percent)+
+    # expand_limits(0,0)+
+    guides(fill=guide_legend(nrow = 1))+
+    theme_barcharts()
+  
+  return(template)
+}
+          
+# -------- GRAPHS AND CHARTS -----------------                 
+# -------- Seperate Ranking chart ----------- #
 
 RankPortfolios <- function( ChartType, Name){
   a<-Name
@@ -348,9 +418,7 @@ RankPortfolios <- function( ChartType, Name){
   # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
   
   return(rankingtable)
-}                           
-                           
-# ------------- RANKING CHART - ALIGNMENT ----#
+}        
 
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   if (ChartType == "EQ"){
@@ -554,6 +622,114 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     grid.draw(outputplot)  
 
   return()
+}
+
+# ------------- DISTRIBUTIONS --------------- #
+
+Carstens_Distribution <- function(plotnumber, ChartType){
+  Title <- "Exposure of Portfolios to Climate Relevent Sectors"
+  if(ChartType == "CB") {
+    BatchTest <- CBBatchTest
+  } else if (ChartType == "EQ") {
+    BatchTest <- EQBatchTest
+  }
+  ID.COLS = c("PortName","Year","Sector","Technology", "Type")
+  MetricCol <- "CarstenMetric_Port"
+  
+  BarColors <- c("Grey", "Black")
+  names(BarColors) <- c(MetricCol,"Comparison")
+  Labels <- c("Exposed", PortName)
+  df <- unique(subset(BatchTest, Year == Startyear, 
+                      select = c(ID.COLS,MetricCol)))
+  
+  LineHighl <- c("Market")
+  LineLabels <- c("Market")
+  names(LineLabels) <- LineHighl
+  LineColors <- c("Green")
+  names(LineColors) <- LineLabels
+
+  distribution_chart(plotnumber, "Carsten", ChartType, df, ID.COLS, MetricCol,
+                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  
+}
+
+Risk_Distribution <- function(plotnumber, ChartType){
+  Title <- "Risk Exposure of Portfolios"
+  MetricCol <- c("Risk2", "Risk1")
+  if(ChartType == "CB") {
+    PortSS <- CBBatchTest_PortSnapshots
+  } else if (ChartType == "EQ") {
+    PortSS <- EQBatchTest_PortSnapshots
+  }
+  PortSS$MoodysRiskLvl[is.na(PortSS$MoodysRiskLvl)] <- "5"
+  
+  metaport <- PortSS %>%
+    group_by(MoodysRiskLvl) %>%
+    summarise("PortName" = "MetaPort",
+              "ValueUSD" = sum(ValueUSD))
+  
+  cols <- setdiff(colnames(PortSS),names(metaport))
+  metaport[cols] <- 0
+  metaport <- metaport[colnames(PortSS)]
+  
+  PortSS <- rbind(PortSS,metaport)
+  
+  df <- PortSS %>% 
+    group_by(PortName) %>%
+    summarise("TotalPortValue" = sum(ValueUSD)) %>%
+    ungroup() %>%
+    merge(PortSS, by="PortName") %>%
+    mutate("PortWeight" = ValueUSD / TotalPortValue) %>%
+    spread("MoodysRiskLvl", "PortWeight", fill = 0) %>%
+    rename("Risk1" = "1", "Risk2" = "2", "Risk3" = "3", "Risk4" = "4", "Risk5" = "5")
+  
+  ID.COLS = c("PortName", "Type")
+  df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
+  
+  BarColors <- c("Orange","Red", "Black")
+  names(BarColors) <- c(MetricCol,"Comparison")
+  Labels <- c("Elevated Risk", "Substantial Risk", PortName)
+  
+  LineHighl <- c("Market")
+  LineLabels <- c("Market")
+  names(LineLabels) <- LineHighl
+  LineColors <- c("Green")
+  names(LineColors) <- LineLabels
+  
+  distribution_chart(plotnumber, "Risk", ChartType, df, ID.COLS, MetricCol,
+                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  
+}
+
+Fossil_Distribution <- function(plotnumber, ChartType){
+  Title <- "Fossil Fuel Breakdown of Portfolios"
+  if (ChartType == "EQ"){
+    Batch <- EQBatchTest
+  }else if (ChartType == "CB"){
+    Batch <- CBBatchTest
+  }
+  
+  #Tag Target portfolio, benchmark
+  Batch <- subset(Batch, Year == Startyear & Sector %in% c("Coal","Oil&Gas"),
+                       select=c("PortName","Technology","CarstenMetric_Port","Type"))
+  ID.COLS = c("PortName","Type")
+  MetricCol <- c("Coal","Gas","Oil")
+  
+  BarColors <- c(CoalProdColour, GasProdColour, OilProdColour, "Black")
+  names(BarColors) <- c(MetricCol,"Comparison")
+  Labels <- c("Coal", "Gas", "Oil", PortName)
+  df <- unique(subset(Batch, select = c(ID.COLS,"CarstenMetric_Port","Technology")))
+  df <- spread(df, "Technology", "CarstenMetric_Port", fill = 0) 
+  
+  
+  LineHighl <- c("Market")
+  LineLabels <- c("Market")
+  names(LineLabels) <- LineHighl
+  LineColors <- c("Green")
+  names(LineColors) <- LineLabels
+  
+  distribution_chart(plotnumber, "Fossil", ChartType, df, ID.COLS, MetricCol,
+                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
 }
 
 # ------------- TECH SHARE CHARTS ----------- #
@@ -799,31 +975,20 @@ portfolio_sectorshare <- function(plotnumber){
 }
 
 sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
-  # plotnuber = 99
-  # ChartType = "EQ"
-  # SectorToPlot = "All"
+
   if (ChartType == "EQ"){
     Combin <- EQCombin
     Batch <- EQBatchTest
   }else if (ChartType == "CB"){
     Combin <- CBCombin
     Batch <- CBBatchTest
-  }else if (ChartType == "Summary") {
-    Combin <- rbind(subset(EQCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
-                                                "Technology","WtProduction","Type")),
-                       subset(CBCombin,select=c("Year","BenchmarkRegion","Scenario","PortName","Sector",
-                                                "Technology","WtProduction","Type")))
-    Batch <- rbind(subset(EQBatchTest,
-                          select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
-                                   "WtProduction","Type")),
-                   subset(CBBatchTest,
-                          select=c("Year","BenchmarkRegion","Scenario","PortName","Sector","Technology",
-                                   "WtProduction","Type")))
   }
   
-  #Tag Target portfolio, benchmark
+  #Remove all portfolios other than Market, Average
   Batch <- subset(Batch, Type != "Portfolio")
+  #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch)
+  #Filter and select
   Production <- subset(Portfolios, Year == Startyear &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
@@ -1051,8 +1216,6 @@ Inputs246 <- function(ChartType, TechToPlot){
   return(df)
 }
 
-#----------- Graph   246 ------------- #
-
 Graph246 <- function(plotnumber, ChartType, TechToPlot){
    
 
@@ -1174,148 +1337,4 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
 
-}
-
-#----------- Distribution Chart ------------- #
-
-distribution_chart <- function(plotnumber, MetricName, ChartType){
-  # MetricName = "Risk Exposure"
-  # plotnumber = 99
-  # ChartType ="CB"
-  if (MetricName == "Carsten's Metric") {
-    Title <- "Exposure of Portfolios to Climate Relevent Sectors"
-    MetricCol <- "CarstenMetric_Port"
-    if(ChartType == "CB") {
-      BatchTest <- CBBatchTest
-    } else if (ChartType == "EQ") {
-      BatchTest <- EQBatchTest
-    }
-    ID.COLS = c("PortName","Year","Sector","Technology", "Type")
-    BarColors <- c("Orange")
-    Labels <- c("Unexposed", "Exposed", PortName)
-    df <- unique(subset(BatchTest, Year == Startyear, 
-                        select = c(ID.COLS,MetricCol)))
-    
-  } else if (MetricName == "Risk Exposure") {
-    Title <- "Risk Exposure of Portfolios"
-    MetricCol <- c("Risk2", "Risk1")
-    if(ChartType == "CB") {
-      PortSS <- CBBatchTest_PortSnapshots
-    } else if (ChartType == "EQ") {
-      PortSS <- EQBatchTest_PortSnapshots
-    }
-    PortSS$MoodysRiskLvl[is.na(PortSS$MoodysRiskLvl)] <- "5"
-    
-    metaport <- PortSS %>%
-      group_by(MoodysRiskLvl) %>%
-      summarise("PortName" = "MetaPort",
-                "ValueUSD" = sum(ValueUSD))
-    
-    cols <- setdiff(colnames(PortSS),names(metaport))
-    metaport[cols] <- 0
-    metaport <- metaport[colnames(PortSS)]
-    
-    PortSS <- rbind(PortSS,metaport)
-    
-    df <- PortSS %>% 
-      group_by(PortName) %>%
-      summarise("TotalPortValue" = sum(ValueUSD)) %>%
-      ungroup() %>%
-      merge(PortSS, by="PortName") %>%
-      mutate("PortWeight" = ValueUSD / TotalPortValue) %>%
-      spread("MoodysRiskLvl", "PortWeight", fill = 0) %>%
-      rename("Risk1" = "1", "Risk2" = "2", "Risk3" = "3", "Risk4" = "4", "Risk5" = "5")
-
-    ID.COLS = c("PortName", "Type")
-    df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
-        
-    BarColors <- c("Orange","Red")
-    Labels <- c("Insubstantial Risk","Elevated Risk", "Substantial Risk", PortName)
-    
-  }
-  
-  BarColors <- c(BarColors,"Black","skyblue")
-  names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
-  
-  LineHighl <- c("Market")
-  LineLabels <- c("Market")
-  names(LineLabels) <- LineHighl
-  LineColors <- c("Green")
-  names(LineColors) <- LineLabels
-  
-
-  df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
-  
-  dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
-  dfagg[dfagg$Type == LineHighl,"Metric"] <- "Reference"
-  dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
-  dfagg$Value <- as.numeric(dfagg$Value)
-
-  dfagg <- dfagg %>%
-    filter(Metric != "Reference") %>%
-    group_by(PortName,Type) %>%
-    summarise("Value" = 1-sum(Value), "Metric" = "Unexposed") %>%
-    ungroup() %>%
-    mutate("Metric" = "Unexposed") %>%
-    select(PortName,Metric,Type,Value) %>%
-    rbind(dfagg)
-  
-  values = subset(dfagg, Metric=="Comparison" & PortName==PortName)[["Value"]]
-  if (MetricName == "Carsten's Metric") {
-    portfolio_label = paste0("Your Portfolio\n",
-                             "Carsten's Metric: ",percent(values[1]))
-  } else if (MetricName == "Risk Exposure") {
-    portfolio_label = paste0("Your Portfolio\n",
-                             "Substantial Risk: ",percent(values[1]),"\n",
-                             "Elevated Risk: ",percent(values[2]))
-  }
-  order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
-  dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
-  dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
-  
-  x_coord <- length(unique(order$PortName))
-
-  distribution_plot<- ggplot(dfagg)+
-    geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
-             aes(x=PortName, y=Value, fill=Metric),
-             stat = "identity", position = "fill", width=1)+
-    scale_fill_manual(values=BarColors,labels=Labels)+
-    geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
-               aes(yintercept=Value),color=LineColors,linetype=2)+
-    geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
-              aes(y=Value),x=x_coord,label=LineLabels,
-              color="white",vjust=-.2,hjust=1)+
-    annotate("label", x = x_coord, y = 1, 
-             label = portfolio_label,
-             hjust=1.05,vjust=1.05)+ 
-    scale_y_continuous(expand=c(0,0), limits = c(0,1.0001), labels=percent)+
-    scale_x_discrete(labels=NULL)+
-    expand_limits(0,0)+
-    # guides(fill=FALSE)+
-    ggtitle(Title)+
-    xlab(paste0("California Insurers"))+
-    ylab(MetricName)+
-    theme_distribution()
-  
-  print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
-  
-}
-
-# -------------STACKED BAR CHARTS ---------- #
-
-stacked_bar_chart <- function(dat){
-  
-  colnames(dat) <- c("item", "family", "score", "value")
-  
-  template <- ggplot(data=dat, aes(x=item, y=value,fill=score),show.guide = TRUE)+
-    geom_bar(stat = "identity", position = "fill", width = .6)+
-    geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    theme_minimal()+
-    scale_y_continuous(expand=c(0,0), labels=percent)+
-    # expand_limits(0,0)+
-    guides(fill=guide_legend(nrow = 1))+
-    theme_barcharts()
-  
-  return(template)
 }

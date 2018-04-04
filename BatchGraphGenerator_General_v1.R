@@ -278,13 +278,16 @@ for (i in c(1:20,326)){
       #######################
       portfolio_sectorshare("01")
 
-      distribution_chart("05", "Risk Exposure", "CB")
+      Risk_Distribution("05", "CB")
       
       sector_techshare("06","EQ","All")
       sector_techshare("07","CB","All")
       
-      distribution_chart("08", "Carsten's Metric", "EQ")
-      distribution_chart("09", "Carsten's Metric", "CB")
+      Carstens_Distribution("08", "EQ")
+      Carstens_Distribution("09", "CB")
+      
+      Fossil_Distribution("99", "EQ")
+      Fossil_Distribution("99", "CB")
       
       if (HasEquity) {
         Graph246(10, "EQ", "CoalCap")
