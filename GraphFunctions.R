@@ -365,11 +365,14 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
-   Mins<- aggregate(CarstenMetric_Port ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)
-   Maxs <- aggregate(CarstenMetric_Port ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max)
-   MinMax <- merge(Mins,Maxs, by="Technology")
-   colnames(MinMax)[2] <- "Minimum"
-   colnames(MinMax)[3] <- "Maximum"
+  Exposures$Exp.Carsten.Market <- Exposures$Exp.Carsten.Scen.Port.Scen.Market/Exposures$CarstenMetric_Port.Market  #will be delete once file is updated
+  BatchTest$Exp.Carsten.Market <- BatchTest$Exp.Carsten.Scen.Port.Scen.Market/BatchTest$CarstenMetric_Port.Market  #will be delete once file is updated
+  
+  Mins<- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)  #
+  Maxs <- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max) # need define variable
+  MinMax <- merge(Mins,Maxs, by="Technology")
+  colnames(MinMax)[2] <- "Minimum"
+  colnames(MinMax)[3] <- "Maximum"
    
    Exposures <- merge(Exposures,MinMax,by="Technology")
    Exposures$Technology<- as.factor(Exposures$Technology)
@@ -398,7 +401,15 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
    Exposures$Technology<- factor(Exposures$Technology, levels = ordrtech)
    Exposures<- Exposures[order(Exposures$Technology),]
 
-   
+   n1<-n_distinct(Exposures[which(Exposures$Sector=="Automotive"),]$Technology)
+   if(n1 >0){a<-c(1:n1)}else{a<-c(n1:1)}
+   n2<-n_distinct(Exposures[which(Exposures$Sector=="FossilFuels"),]$Technology)
+   if((4.5+n2-1) >4.5){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
+   n3<-n_distinct(Exposures[which(Exposures$Sector=="Power"),]$Technology)
+   if((4.5+n2+0.5) >((4.5+n2+0.5)+n3-1)){d<-c(((4.5+n2+0.5)+n3-1):(4.5+n2+0.5))}else{d<-c((4.5+n2+0.5):((4.5+n2+0.5)+n3-1))}
+  
+   locations<-c(a,b,d)
+
      if (SectorToPlot != "All"){
         Exposures <- subset(Exposures, Exposures$Sector %in% SectorToPlot)
         if (SectorToPlot == "Power"){
@@ -432,18 +443,18 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     Exposures$LowLim <- rowMins(as.matrix(Exposures[,colnames(Exposures) %in% c("Minimum","LowLim")]))
     Exposures$UppLim <- rowMaxs(as.matrix(Exposures[,colnames(Exposures) %in% c("Maximum","UppLim")]))
     
-    Exposures$xlowloc <- Exposures$LowLim
-    Exposures$xupploc <- Exposures$UppLim
+    Exposures$xlowloc <- Exposures$LowLim/100
+    Exposures$xupploc <- Exposures$UppLim/100
     # PlotData$comploc <- PlotData[,PortName]/100
     # PlotData$comploc[PlotData$comploc < 0] <- 0
     # PlotData$comploc[PlotData$comploc > 2] <- 2
     
-    Exposures$comploc<-Exposures$CarstenMetric_Port 
+    Exposures$comploc<-Exposures$Exp.Carsten.Market/100
     # PlotData$complabel[PlotData$complabel>200]<-200
     # PlotData$complabel[PlotData$complabel<0]<-0    
     
-    Exposures$complabel <- paste0(round(Exposures$comploc*100,0),"%")
-    Exposures$minlabel<- 0 #round(PlotData$LowLim*100,0)
+    Exposures$complabel <-paste0(round(Exposures$comploc,1),"%")
+    Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
     Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0)        
     
     Exposures$minlabel <- paste0(Exposures$minlabel, " %")
@@ -454,16 +465,16 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     #Exposures$mx[is.na(Exposures$mx)]<- "-"
     GraphTitle <- GT["Rank_Title"][[1]]
     
-    repval = 100
+    repval = 200
     redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
-    xvals <- rep(seq(0,1,1/(repval)),length(locations))
-    xvals <- xvals[which(xvals<1)]
+    xvals <- rep(seq(-1,1,2/(repval-1)),length(locations))
+    #xvals <- xvals[which(xvals<1)]
     yvals <- sort(rep(locations,repval))
-    plotdf <- data.frame(x=xvals+0.01,y=yvals,w=2/repval,h=bh, colbar=rep(redgreen,length(locations)))
-    plotdf <- plotdf[which(plotdf$x<1),]
+    plotdf <- data.frame(x=xvals,y=yvals,w=2.05/repval,h=bh, colbar=rep(redgreen,length(locations)))
+    #plotdf <- plotdf[which(plotdf$x<1),]
     
     
-    xmx<- as.numeric(aggregate(CarstenMetric_Port.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)[2][,1])
+    #xmx<- as.numeric(aggregate(CarstenMetric_Port.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)[2][,1])
     
     outputplot <-    ggplot()+
       geom_tile(data=plotdf, aes(x=x,y=y),height=plotdf$h,width=plotdf$w,fill=plotdf$colbar) +
@@ -475,10 +486,10 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       geom_segment(data=Exposures,aes(x=xlowloc, xend=xupploc,y=Locations,yend=Locations), linetype="dashed",colour="black")+
       geom_point(data=Exposures,aes(x=xlowloc,y=Locations), fill="black",colour="black", size=2)+
       geom_point(data=Exposures,aes(x=xupploc,y=Locations),  fill="black",colour="black",size=2)+
-      
+    
       # centre alignment line    # xmax
-      annotate(geom="rect",xmin = 0,xmax=xmx,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
-     annotate(geom="rect",xmin =0,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
+      annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
+      annotate(geom="rect",xmin =-1,xmax=0,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour=Tar2DColour)+ # Box around the bars
       # annotate(geom="rect",xmin = 0,xmax=0.001,ymin = 0.7,ymax=1.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
       # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 1.7,ymax=2.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
       # annotate(geom="rect",xmin = 0,xmax=0.01,ymin = 2.7,ymax=3.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
@@ -495,12 +506,12 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc, y= Exposures$Locations, colour="white",size=rel(3))+ 
       
       # Distribution Range 
-      annotate(geom="text",x= 0, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
-      annotate(geom="text",x= 1, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour="black")+     # Maximum
+      annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
+      annotate(geom="text",x= 1.1, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour="black")+     # Maximum
       
       # Ranking box and label
-      annotate("text", label = GT["RankTitle"][[1]], x= 1.1,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
-      annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.1,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
+      annotate("text", label = GT["RankTitle"][[1]], x= 1.5,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
+      annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.5,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
       
       theme(panel.background = element_rect(fill="transparent"),
             panel.grid.major.x = element_blank() ,
@@ -515,7 +526,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
             plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
     
     
-    if (SectorToPlot == "All"){
+   
       
       leafloc <- c(11,12,2,3)
       
@@ -526,34 +537,20 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
         geom_hline(yintercept = c(3.75,7.25))
     
       
-      write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
+      #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
       
       graphheight <- 7.2
-    }
-    
-    if (SectorToPlot != "All"){
-      
-      if (SectorToPlot == "Power"){leafloc <- c(3,-10); ymax = 5.7; graphheight <- 2.3}
-      if (SectorToPlot == "Automotive"){leafloc <- c(3,2); ymax = 3.7; graphheight <- 2.3}
-      if (SectorToPlot == "Fossil Fuels"){leafloc <- c(-10,-10); ymax = 3.7; graphheight <- 2.3}
-      
-      outputplot<-    outputplot+
-        labs(x=NULL,y= NULL,  title= NULL)+
-        annotate(geom="text",x=-0.8,y=Exposures$Locations[Exposures$Technology %in% badtech],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% badtech],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
-      
-      if (SectorToPlot != "Fossil Fuels"){outputplot <-outputplot+
-        # Technology Label - Black
-        annotate(geom="text",x=-0.8,y=Exposures$Locations[Exposures$Technology %in% goodtech],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% goodtech],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
-      
-      }
+   
      
-    }
-    
-    outputplot <- ggplot_gtable(ggplot_build(outputplot))
-    outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
-    grid.draw(outputplot)  
 
-  return()
+    
+   #outputplot <- ggplot_gtable(ggplot_build(outputplot))
+   # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
+   # grid.draw(outputplot)  
+  
+    print(outputplot)
+
+  #return()
 }
 
 # ------------- TECH SHARE CHARTS ----------- #
@@ -1004,7 +1001,9 @@ Inputs246 <- function(ChartType, TechToPlot){
   ### Production Inputs - normalised to the start year
   Production <- subset(Combin, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
   Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out"))
-  Production$Label <- "Portfolio"
+   if (nrow(Production)>0){
+    Production$Label <- "Portfolio"
+  }
 
 
 
@@ -1087,13 +1086,15 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
     dfwide$Line3 <- dfwide$`450S`#-dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue#-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
     lineorder<- c("Line1","Line2","Line3","Line4")
-
+    Palette <- c(area_6,area_4_6,area_2_4,area_2)
+    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C")
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS #- dfwide$`450S`
     dfwide$Line3 <- dfwide$CPS #- dfwide$NPS
     dfwide$Line4 <- dfwide$MaxValue #- dfwide$`450S`
-
+    Palette <- c(area_2,area_2_4,area_4_6,area_6)
+    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
     lineorder <-c("Line4","Line3","Line2","Line1")
   } 
 
@@ -1118,7 +1119,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
   ylabel <- "Normalized Built Out"
   
-  
+  if(('Portfolio' %in% colnames(dfwide)) == TRUE)  {
   if (GoodBad == "Brown"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
     outputplot <- ggplot(data = dftargets)+
@@ -1165,6 +1166,54 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   }
+    }else{
+    if (GoodBad == "Brown"){
+      dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
+      outputplot <- ggplot(data = dftargets)+
+        geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+        geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
+        scale_fill_manual(labels=unique(dftargets$Labels),
+                          values=rep(unique(as.character(dftargets$colour)),1))+
+        
+        scale_color_manual(name="",values = c("Market"=stock_market))+
+        #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
+        #labels=unique(dftargets$Labels)
+        xlab("") +
+        ylab(ylabel)+
+        coord_cartesian(ylim=c(-2,2))+
+        theme_minimal()+
+        theme(panel.grid.major = element_line(color="black", size=1),
+              panel.grid.minor = element_blank(),
+              axis.ticks=element_blank(),
+              panel.border = element_blank(),
+              panel.grid = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_blank(),
+              plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+    } else if (GoodBad =="Green"){
+      dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+      outputplot <- ggplot(data = dftargets)+
+        geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+        geom_line(aes(x=dfwide$Year,y=dfwide[as.character(LinesToPlot[2])],colour =  "Market"), data=dfwide, size = linesize,linetype="solid")+   # Market
+        scale_fill_manual(labels=(unique(dftargets$Labels)),
+                          values=(unique(as.character(dftargets$colour))))+
+        
+        scale_color_manual(name="",values = c("Market"=stock_market))+
+        #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
+        #labels=unique(dftargets$Labels)
+        xlab("") +
+        ylab(ylabel)+
+        coord_cartesian(ylim=c(0,1))+
+        theme_minimal()+
+        theme(panel.grid.major = element_line(color="black", size=1),
+              panel.grid.minor = element_blank(),
+              axis.ticks=element_blank(),
+              panel.border = element_blank(),
+              panel.grid = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_blank(),
+              plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+  }}
   
  
   print(outputplot)
