@@ -276,48 +276,62 @@ for (i in c(1:20,326)){
       #######################
       ### CA TEMPLATE #######
       #######################
-      portfolio_sectorshare("01")
+      
+      #Introduction
+      portfolio_sector_stack(1)
+      
+      portfolio_pie_chart(2, "EQ")
+      portfolio_pie_chart(3, "CB")
 
-      Risk_Distribution("05", "CB")
+      Graph246(4, "CB", "Oil") #Needs to be both
+      Graph246(5, "CB", "Gas") #Needs to be both
       
-      sector_techshare("06","EQ","All")
-      sector_techshare("07","CB","All")
+      exposure_summary(6, "EQ")
+      exposure_summary(7, "CB")
       
-      Carstens_Distribution("08", "EQ")
-      Carstens_Distribution("09", "CB")
+      #Current Exposure
+      portfolio_sector_stack(8)
       
-      Fossil_Distribution("99", "EQ")
-      Fossil_Distribution("99", "CB")
+      sector_techshare(9,"EQ","All")
+      sector_techshare(10,"CB","All")
       
+      Fossil_Distribution(11, "EQ")
+      Fossil_Distribution(12, "CB")
+      
+      Risk_Distribution(13, "CB")
+      
+      #5 Year Trajectory
       if (HasEquity) {
-        Graph246(10, "EQ", "CoalCap")
-        Graph246(11, "EQ", "RenewablesCap")
-        Graph246(12, "EQ", "GasCap")
-        Graph246(13, "EQ", "NuclearCap")
-        Graph246(14, "EQ", "Oil")
-        Graph246(15, "EQ", "Gas")
-        Graph246(16, "EQ", "ICE")
-        Graph246(17, "EQ", "Electric")
+        Graph246(14, "EQ", "CoalCap")
+        Graph246(15, "EQ", "RenewablesCap")
+        Graph246(16, "EQ", "GasCap")
+        Graph246(17, "EQ", "NuclearCap")
+        Graph246(18, "EQ", "Oil")
+        Graph246(19, "EQ", "Gas")
+        Graph246(20, "EQ", "ICE")
+        Graph246(21, "EQ", "Electric")
       }
       
       if (HasDebt) {
-        Graph246(18, "CB", "CoalCap")
-        Graph246(19, "CB", "RenewablesCap")
-        Graph246(20, "CB", "GasCap")
-        Graph246(21, "CB", "NuclearCap")
-        Graph246(22, "CB", "Oil")
-        Graph246(23, "CB", "Gas")
-        Graph246(24, "CB", "ICE")
-        Graph246(25, "CB", "Electric")
-      }
-
-      if (HasEquity) {
-        ranking_chart_alignment(26, "EQ", "All") #Carstens Metric
-      }
-      if (HasDebt) {
-        ranking_chart_alignment(27, "CB", "All") #Carstens Metric
+        Graph246(22, "CB", "CoalCap")
+        Graph246(23, "CB", "RenewablesCap")
+        Graph246(24, "CB", "GasCap")
+        Graph246(25, "CB", "NuclearCap")
+        Graph246(26, "CB", "Oil")
+        Graph246(27, "CB", "Gas")
+        Graph246(28, "CB", "ICE")
+        Graph246(29, "CB", "Electric")
       }
       
+      #Exposure to 2D Scenarios
+      if (HasEquity) {
+        ranking_chart_alignment(30, "EQ", "All") #Carstens Metric
+      }
+      if (HasDebt) {
+        ranking_chart_alignment(31, "CB", "All") #Carstens Metric
+      }
+      
+      #Company Exposure
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
           company_techshare(32, 20, "EQ", "Power")
@@ -334,13 +348,13 @@ for (i in c(1:20,326)){
       }
       if (HasDebt) {
         if (PortSummary$HasPower.CB){
-          company_techshare(32, 20, "CB", "Power")
+          company_techshare(34, 20, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare(33, 20, "CB", "Automotive")
+          company_techshare(35, 20, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare(34, 20, "CB", "Fossil Fuels")
+          company_techshare(36, 20, "CB", "Fossil Fuels")
         }
         # if (PortSummary$HasOilGas.CB) {
           # company_techshare(35, 20, "CB", "Oil")

@@ -317,7 +317,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
   dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
-  dfagg[dfagg$Type == LineHighl,"Metric"] <- "Reference"
+  dfagg[dfagg$Type == LineHighl, "Metric"] <- "Reference"
   dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
   dfagg$Value <- as.numeric(dfagg$Value)
   
@@ -380,7 +380,7 @@ stacked_bar_chart <- function(dat){
 }
           
 # -------- GRAPHS AND CHARTS -----------------                 
-# -------- Seperate Ranking chart ----------- #
+# -------- RANKING CHARTS ----------- #
 
 RankPortfolios <- function( ChartType, Name){
   a<-Name
@@ -630,6 +630,90 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   #return()
 }
 
+# -------- PORTFOLIO SUMMARY -------- #
+portfolio_pie_chart <- function(){}
+
+sector_processing <- function(){
+  
+  ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
+  
+  #Filter to our region, scenario, and year
+  if(nrow(EQCombin) > 0) {
+    EQ <- EQCombin
+    EQ$Type <- "Equity Portfolio"
+    EQ <- unique(subset(EQ, Year == Startyear, 
+                        select = c(ID.COLS)))
+  } else {
+    EQ <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Equity Portfolio")
+    colnames(EQ) <- ID.COLS
+  }
+  if(nrow(CBCombin) > 0) {
+    CB <- CBCombin
+    CB$Type <- "Corporate Bond Portfolio"
+    CB <- unique(subset(CB, Year == Startyear, 
+                        select = c(ID.COLS)))
+  } else {
+    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Corporate Bond Portfolio")
+    colnames(CB) <- ID.COLS
+  }
+  
+  #Aggregate by sector, breaking down by the type (equity vs debt)
+  df <- rbind(CB,EQ)
+  df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
+  df$Sector<-as.factor(df$Sector)
+  levels(df$Sector)[levels(df$Sector)=="Coal"] <- "Fossil Fuels"
+  levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
+  levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
+  dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
+  
+  return(dfagg)
+}                                       
+
+portfolio_sector_stack <- function(plotnumber){
+  
+  dfagg <- sector_processing()
+  sectorpalette <- c(energy,pow,trans)
+  sectororder <-c("Fossil Fuels","Utility Power","Automotive")
+  colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
+  dfagg$Sector<-as.factor(dfagg$Sector)
+  combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
+  dfagg <- merge(dfagg, colourdf, by= "Sector") 
+  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
+  dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
+  dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
+  dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
+  temp<-max(dfagg$CarstenMetric_Port)
+  ylabel = ""
+  
+  a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
+    geom_bar(stat = "identity",width = .6)+
+    theme_minimal()+
+    scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
+    expand_limits(0,0)+
+    ylab(ylabel)+
+    guides(fill=guide_legend(nrow = 1))+
+    theme_barcharts()+
+    theme(legend.position = "bottom",
+          axis.title=element_blank(),
+          axis.line.x = element_line(colour = "black",size=1),
+          axis.line.y = element_blank(),
+          panel.background = element_blank(),
+          legend.text = element_text(face="bold",size=textsize,colour="black"),
+          legend.background = element_rect(fill = "transparent",colour = NA),
+          legend.key.size=unit(0.4,"cm"),
+          legend.title=element_blank(),
+          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
+    )
+  print(a)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
+}
+
+
+exposure_summary <- function(plotnumber,ChartType){
+  
+}
+
 # ------------- DISTRIBUTIONS --------------- #
 
 Carstens_Distribution <- function(plotnumber, ChartType){
@@ -648,8 +732,8 @@ Carstens_Distribution <- function(plotnumber, ChartType){
   df <- unique(subset(BatchTest, Year == Startyear, 
                       select = c(ID.COLS,MetricCol)))
   
-  LineHighl <- c("Market")
-  LineLabels <- c("Market")
+  LineHighl <- c("MetaPortfolio")
+  LineLabels <- c("Average")
   names(LineLabels) <- LineHighl
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
@@ -696,8 +780,8 @@ Risk_Distribution <- function(plotnumber, ChartType){
   names(BarColors) <- c(MetricCol,"Comparison")
   Labels <- c("Elevated Risk", "Substantial Risk", PortName)
   
-  LineHighl <- c("Market")
-  LineLabels <- c("Market")
+  LineHighl <- c("MetaPortfolio")
+  LineLabels <- c("Average")
   names(LineLabels) <- LineHighl
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
@@ -728,8 +812,8 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   df <- spread(df, "Technology", "CarstenMetric_Port", fill = 0) 
   
   
-  LineHighl <- c("Market")
-  LineLabels <- c("Market")
+  LineHighl <- c("MetaPortfolio")
+  LineLabels <- c("Average")
   names(LineLabels) <- LineHighl
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
@@ -902,82 +986,6 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
-}
-
-sector_processing <- function(){
-  
-  ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
-  
-  #Filter to our region, scenario, and year
-  if(nrow(EQCombin) > 0) {
-    EQ <- EQCombin
-    EQ$Type <- "Equity Portfolio"
-    EQ <- unique(subset(EQ, Year == Startyear, 
-                        select = c(ID.COLS)))
-  } else {
-    EQ <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Equity Portfolio")
-    colnames(EQ) <- ID.COLS
-  }
-  if(nrow(CBCombin) > 0) {
-    CB <- CBCombin
-    CB$Type <- "Corporate Bond Portfolio"
-    CB <- unique(subset(CB, Year == Startyear, 
-                        select = c(ID.COLS)))
-  } else {
-    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Corporate Bond Portfolio")
-    colnames(CB) <- ID.COLS
-  }
-  
-  #Aggregate by sector, breaking down by the type (equity vs debt)
-  df <- rbind(CB,EQ)
-  df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
-  df$Sector<-as.factor(df$Sector)
-  levels(df$Sector)[levels(df$Sector)=="Coal"] <- "Fossil Fuels"
-  levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
-  levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
-  dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
-  
-  return(dfagg)
-}                                       
-   
-portfolio_sectorshare <- function(plotnumber){
-  
-  dfagg <- sector_processing()
-  sectorpalette <- c(energy,pow,trans)
-  sectororder <-c("Fossil Fuels","Utility Power","Automotive")
-  colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
-  dfagg$Sector<-as.factor(dfagg$Sector)
-  combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
-  dfagg <- merge(dfagg, colourdf, by= "Sector") 
-  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
-  dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
-  dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
-  dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
-  temp<-max(dfagg$CarstenMetric_Port)
-  ylabel = ""
-
-  a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
-    geom_bar(stat = "identity",width = .6)+
-    theme_minimal()+
-    scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
-    expand_limits(0,0)+
-    ylab(ylabel)+
-    guides(fill=guide_legend(nrow = 1))+
-    theme_barcharts()+
-    theme(legend.position = "bottom",
-        axis.title=element_blank(),
-        axis.line.x = element_line(colour = "black",size=1),
-        axis.line.y = element_blank(),
-        panel.background = element_blank(),
-        legend.text = element_text(face="bold",size=textsize,colour="black"),
-        legend.background = element_rect(fill = "transparent",colour = NA),
-        legend.key.size=unit(0.4,"cm"),
-        legend.title=element_blank(),
-        plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
-  )
-  print(a)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
 
 sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
