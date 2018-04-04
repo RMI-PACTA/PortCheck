@@ -219,26 +219,26 @@ CreateTestList <- function(EQBatchTest, CBBatchTest) {
   
   Equity <- filter(EQBatchTest, Year == 2018)
   Equity <- dcast(Equity, PortName ~ Sector, sum, value.var = "WtProduction")
-  Equity <- mutate(Equity, "TotalWtProduction" = Automotive + Coal + `Oil&Gas` + Power,
-                   "CoalShare" = Coal / TotalWtProduction,
-                   "Oil&GasShare" = `Oil&Gas` / TotalWtProduction,
-                   "PowerShare" = Power / TotalWtProduction)
+  Equity <- mutate(Equity, "HasCoal" = Coal > 0,
+                   "HasOilGas" = `Oil&Gas` > 0,
+                   "HasPower" = Power > 0,
+                   "HasAuto" = Automotive > 0)
   Equity <- merge(Equity,unique(subset(EQBatchTest, select=c(ID.COLS))),by="PortName")
   Equity$HasEquity <- TRUE
   
   Debt <- filter(CBBatchTest, Year == 2018)
   Debt <- dcast(Debt, PortName ~ Sector, sum, value.var = "WtProduction")
-  Debt <- mutate(Debt, "TotalWtProduction" = Automotive + Coal + `Oil&Gas` + Power,
-                 "CoalShare" = Coal / TotalWtProduction,
-                 "Oil&GasShare" = `Oil&Gas` / TotalWtProduction,
-                 "PowerShare" = Power / TotalWtProduction)
+  Debt <- mutate(Debt, "HasCoal" = Coal > 0,
+                 "HasOilGas" = `Oil&Gas` > 0,
+                 "HasPower" = Power > 0,
+                 "HasAuto" = Automotive > 0)
   Debt <- merge(Debt,unique(subset(CBBatchTest, select=c(ID.COLS))),by="PortName")
   Debt$HasDebt <- TRUE
   
   TestList <- merge(Equity,Debt,by=ID.COLS, all=T)
   TestList[is.na(TestList)] <- FALSE
-  colnames(TestList) <- gsub("\\.x",".EQWtProd",colnames(TestList))
-  colnames(TestList) <- gsub("\\.y",".CBWtProd",colnames(TestList))
+  colnames(TestList) <- gsub("\\.x",".EQ",colnames(TestList))
+  colnames(TestList) <- gsub("\\.y",".CB",colnames(TestList))
   
   return(TestList)
 }

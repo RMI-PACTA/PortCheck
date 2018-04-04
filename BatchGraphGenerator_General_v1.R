@@ -222,14 +222,15 @@ for (i in c(1:20,326)){
   PortfolioNameLong <- TestList[i,"PortName"]
   TestType <- TestList[i,"Type"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
-  InvestorName <-  TestList[i,"InvestorName"]
-  PortfolioName <- TestList[i,"PortName"]
-  PortName <- TestList[i,"PortName"]
+  InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
+  PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
+  PortName <- PortfolioNameLong
+  
   ### Subsets results for this portfolio
   EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
@@ -242,9 +243,11 @@ for (i in c(1:20,326)){
     EQCombin$Type <- "Portfolio"
     EQCompProdSnapshot$Type <- "Portfolio"
     CBCombin$Type <- "Portfolio"
-    #CBCompProdSnapshot$Type <- "Portfolio"
+    
+    PortName <- "Meta Portfolio"
   }else if (TestType == "Portfolio") {
     ReportName <- paste0(InvestorNameLong,": ",PortfolioNameLong)
+    PortName <- "Your Portfolio"
   }else {
     return()
   }
@@ -274,9 +277,7 @@ for (i in c(1:20,326)){
       ### CA TEMPLATE #######
       #######################
       portfolio_sectorshare("01")
-      # sector_techshare(2,"Summary","All") #Combined EQ/CB, needs to be updated
-      # Graph246(3, "Summary", c("RenewablesCap","Electric","Hybrid")) #Can't actually plot all three?
-      # Graph246(4, "Summary", "Fossil Fuels") #No fossil fuel combination?
+
       distribution_chart("05", "Risk Exposure", "CB")
       
       sector_techshare("06","EQ","All")
@@ -315,16 +316,32 @@ for (i in c(1:20,326)){
       }
       
       if (HasEquity) {
-        company_techshare(28, 20, "EQ", "Power")
-        company_techshare(29, 20, "EQ", "Automotive")
-        company_techshare(30, 20, "EQ", "Fossil Fuels")
-        # company_techshare(31, 20, "EQ", "Oil")
+        if (PortSummary$HasPower.EQ){
+          company_techshare(32, 20, "EQ", "Power")
+        }
+        if (PortSummary$HasAuto.EQ) {
+          company_techshare(33, 20, "EQ", "Automotive")
+        }
+        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
+          company_techshare(34, 20, "EQ", "Fossil Fuels")
+        }
+        # if (PortSummary$HasOilGas.EQ) {
+        # company_techshare(35, 20, "EQ", "Oil")
+        # }
       }
       if (HasDebt) {
-        company_techshare(32, 20, "CB", "Power")
-        company_techshare(33, 20, "CB", "Automotive")
-        company_techshare(34, 20, "CB", "Fossil Fuels")
-        # company_techshare(35, 20, "CB", "Oil")
+        if (PortSummary$HasPower.CB){
+          company_techshare(32, 20, "CB", "Power")
+        }
+        if (PortSummary$HasAuto.CB) {
+          company_techshare(33, 20, "CB", "Automotive")
+        }
+        if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
+          company_techshare(34, 20, "CB", "Fossil Fuels")
+        }
+        # if (PortSummary$HasOilGas.CB) {
+          # company_techshare(35, 20, "CB", "Oil")
+        # }
       }
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
