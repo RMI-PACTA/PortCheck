@@ -154,12 +154,7 @@ BenchmarkRegionList <- read.csv("BenchRegions.csv")
 IndexUniverses <- read.csv("IndexRegions.csv")
 
 ### Batch related Portfolio & Fund-Data Results
-EquityList <- unique(subset(EQBatchTest, select=c("PortName","InvestorName", "Type")))
-EquityList$HasEquity <- TRUE
-DebtList <- unique(subset(CBBatchTest, select=c("PortName","InvestorName", "Type")))
-DebtList$HasDebt <- TRUE
-TestList <- merge(EquityList,DebtList,by=c("PortName","InvestorName","Type"), all=T)
-TestList[is.na(TestList)] <- FALSE
+TestList <- CreateTestList(EQBatchTest, CBBatchTest)
 print(paste0("Test List: ", nrow(TestList), " rows."))
 
 
@@ -221,6 +216,9 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 for (i in c(1:20,326)){
 
   ### Specify the Names from the Test List
+  
+  PortSummary <- TestList[i,]
+  
   PortfolioNameLong <- TestList[i,"PortName"]
   TestType <- TestList[i,"Type"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
@@ -238,6 +236,7 @@ for (i in c(1:20,326)){
   CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
 
+  
   if(TestType == "MetaPortfolio"){
     ReportName <- InvestorNameLong
     EQCombin$Type <- "Portfolio"
