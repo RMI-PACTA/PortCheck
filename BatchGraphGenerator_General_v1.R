@@ -330,10 +330,10 @@ for (i in c(1:5,326)){
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
-        ranking_chart_alignment(30, "EQ", "All") #Carstens Metric
+        ranking_chart_alignment(30, "EQ") #Carstens Metric
       }
       if (HasDebt) {
-        ranking_chart_alignment(31, "CB", "All") #Carstens Metric
+        ranking_chart_alignment(31, "CB") #Carstens Metric
       }
       
       #Company Exposure
