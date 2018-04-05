@@ -236,7 +236,9 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         axis.line.y = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.position = "none",
+        legend.position = "bottom",
+        legend.text = element_text(color = textcolor, size = textsize),
+        legend.title = element_blank(),
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.title = element_text(hjust = 0.5, color = textcolor)
@@ -245,18 +247,15 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 
 #----------- Distribution Chart ------------- #
 
-distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, MetricCol,
+distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
                                Title, Labels, LineHighl, LineLabels, LineColors, BarColors){
  
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
   dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
-  #dfagg[dfagg$Type == LineHighl, "Metric"] <- "Reference"
-  dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
   dfagg$Value <- as.numeric(dfagg$Value)
   
   dfagg <- dfagg %>%
-    filter(Metric != "Reference") %>%
     group_by(PortName,Type) %>%
     summarise("Value" = 1-sum(Value), "Metric" = "Unexposed") %>%
     ungroup() %>%
@@ -264,37 +263,33 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     select(PortName,Metric,Type,Value) %>%
     rbind(dfagg)
   
+  dfagg <- rename(dfagg, "Name" = PortName)
   order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
-  dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
-  dfagg <- filter(dfagg, Metric != "Unexposed")
-  dfagg$Metric <- factor(dfagg$Metric, levels=c(MetricCol,"Comparison","Reference"))
+  dfagg$Name <- factor(dfagg$Name, levels=unique(order$Name))
+  dfagg <- filter(dfagg, Metric != "Unexposed", Type != "Market")
+  if (PortName != "MetaPort") {
+    dfagg <- filter(dfagg, Type != "MetaPortfolio")
+  }
+  dfagg$Metric <- factor(dfagg$Metric, levels=c(MetricCol))
   
-  x_coord <- length(unique(order$PortName))
+  x_coord <- length(unique(order$Name))
   
-  distribution_plot<- ggplot(filter(dfagg, Metric != "Reference"))+
-    geom_bar(aes(x=PortName, y=Value, fill=Metric),
+  distribution_plot<- ggplot(dfagg)+
+    geom_bar(aes(x=Name, y=Value, fill=Metric),
              stat = "identity", width=1)+
-    scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol,"Comparison"))+
-    # geom_hline(data=filter(dfagg, Metric == "Reference"),
-    #            aes(yintercept=Value),color=LineColors,linetype=2)+
-    # geom_text(data=filter(dfagg, Metric == "Reference"),
-    #           aes(y=Value),x=x_coord,label=LineLabels,
-    #           color="white",vjust=-.2,hjust=1)+
+    geom_segment(data=filter(dfagg, Name == PortName, Metric == MetricCol[2]),
+                 aes(x=Name,xend=Name,y=Value+.2,yend=Value),
+                 size = 2, arrow = arrow(length = unit(.5,"cm")))+
+    scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol))+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
     expand_limits(0,0)+
-    # guides(fill=FALSE)+
     ggtitle(Title)+
-    xlab(paste0("California Insurers"))+
-    ylab(MetricName)+
     coord_cartesian(ylim=c(0,min(1, 1.5*max(dfagg$Value))))+
     theme_distribution()
   
   
-  print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
-         height=4,width=10,plot=distribution_plot,dpi=ppi, bg="transparent")
-
+  return(distribution_plot)
   
 }
 
@@ -951,46 +946,51 @@ exposure_summary <- function(plotnumber,ChartType){
   labels <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
   names(labels) <- technologyorder
   
+  Portfolio$Sector <- recode(Portfolio$Sector, Coal = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels")
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
   plot <- ggplot(Portfolio) +
     geom_bar(aes(x = Technology, y = Exposure, fill = Technology), stat = "identity") +
+    facet_grid(. ~ Sector, scales = "free", space = "free") +
+    geom_hline(yintercept = 0, size = 1, color = textcolor)+
+    scale_y_continuous(labels=percent)+
     scale_fill_manual(values = colours, labels = labels) +
-    theme_barcharts()
+    theme_barcharts() +
+    theme(panel.border = element_rect(color=textcolor,fill=NA,size=1))
   
-  # print(plot)
+  print(plot)
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
          bg="transparent",height=4,width=10,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
 
-Carstens_Distribution <- function(plotnumber, ChartType){
-  Title <- "Exposure of Portfolios to Climate Relevent Sectors"
-  if(ChartType == "CB") {
-    BatchTest <- CBBatchTest
-  } else if (ChartType == "EQ") {
-    BatchTest <- EQBatchTest
-  }
-  ID.COLS = c("PortName","Year","Sector","Technology", "Type")
-  MetricCol <- "CarstenMetric_Port"
-  
-  BarColors <- c("Grey", "Black","White")
-  names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
-  Labels <- c("Exposed", "Your Portfolio")
-  df <- unique(subset(BatchTest, Year == Startyear, 
-                      select = c(ID.COLS,MetricCol)))
-  
-  LineHighl <- c("MetaPortfolio")
-  LineLabels <- c("Average")
-  names(LineLabels) <- LineHighl
-  LineColors <- c("Green")
-  names(LineColors) <- LineLabels
-
-  distribution_chart(plotnumber, "Carsten", ChartType, df, ID.COLS, MetricCol,
-                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
-  
-}
+# Carstens_Distribution <- function(plotnumber, ChartType){
+  # Title <- "Exposure of Portfolios to Climate Relevent Sectors"
+  # if(ChartType == "CB") {
+  #   BatchTest <- CBBatchTest
+  # } else if (ChartType == "EQ") {
+  #   BatchTest <- EQBatchTest
+  # }
+  # ID.COLS = c("PortName","Year","Sector","Technology", "Type")
+  # MetricCol <- "CarstenMetric_Port"
+  # 
+  # BarColors <- c("Grey", "Black","White")
+  # names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
+  # Labels <- c("Exposed", "Your Portfolio")
+  # df <- unique(subset(BatchTest, Year == Startyear, 
+  #                     select = c(ID.COLS,MetricCol)))
+  # 
+  # LineHighl <- c("MetaPortfolio")
+  # LineLabels <- c("Average")
+  # names(LineLabels) <- LineHighl
+  # LineColors <- c("Green")
+  # names(LineColors) <- LineLabels
+  # 
+  # distribution_chart(plotnumber, "Carsten", ChartType, df, ID.COLS, MetricCol,
+  #                    Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  # 
+# }
 
 Risk_Distribution <- function(plotnumber, ChartType){
   Title <- "Risk Exposure of Portfolios"
@@ -1025,9 +1025,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName", "Type")
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   
-  BarColors <- c(HighRisk, MedRisk, "Black")
-  names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Immediate Elevated", "Emerging Elevated", "Your Portfolio")
+  BarColors <- c(HighRisk, MedRisk)
+  names(BarColors) <- c(MetricCol)
+  Labels <- c("Immediate Elevated", "Emerging Elevated")
   
   LineHighl <- c("MetaPortfolio")
   LineLabels <- c("Average")
@@ -1035,8 +1035,13 @@ Risk_Distribution <- function(plotnumber, ChartType){
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
   
-  distribution_chart(plotnumber, "Risk", ChartType, df, ID.COLS, MetricCol,
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  
+  print(plot)
+  
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Risk_Distribution.png', sep=""),
+         height=4,width=10,plot=plot,dpi=ppi, bg="transparent")
   
 }
 
@@ -1054,9 +1059,9 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName","Type","Technology")
   MetricCol <- "CarstenMetric_Port"
   
-  BarColors <- c(energy, "Black")
-  names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Fossil Fuels", "Your Portfolio")
+  BarColors <- c(energy)
+  names(BarColors) <- c(MetricCol)
+  Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
   
   LineHighl <- c("MetaPortfolio")
@@ -1065,8 +1070,14 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   LineColors <- c("Green")
   names(LineColors) <- LineLabels
   
-  distribution_chart(plotnumber, "Fossil", ChartType, df, ID.COLS, MetricCol,
-                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
+                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors) +
+    theme(legend.position = "none")
+  
+  print(plot)
+  
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
+         height=4,width=10,plot=plot,dpi=ppi, bg="transparent")
   
 }
 
