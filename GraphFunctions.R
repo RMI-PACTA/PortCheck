@@ -586,8 +586,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
       # 
       # Company Circles
-      geom_point(data=Exposures,aes(x=comploc,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
-      annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc, y= Exposures$Locations, colour="white",size=rel(3))+ 
+      geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
+      annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
+     
       
       # Distribution Range 
       annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
@@ -640,7 +641,22 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 # -------- PORTFOLIO SUMMARY -------- #
-portfolio_pie_chart <- function(plotnumber,ChartType){
+portfolio_pie_chart <- function(plotnumber,ChartType){                           
+  
+  if (ChartType == "EQ"){
+    pieshare <- EQCombin
+  }else if(ChartType == "CB"){
+    pieshare <- CBCombin
+  }
+  
+  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+    geom_bar(stat = "identity",color=NA, width = 1)
+  
+  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+  
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
+         bg="transparent",height=4,width=4,plot=a,dpi=ppi)
+  print(PieChart)
   
 }
 
@@ -1444,4 +1460,6 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
 
+<<<<<<< HEAD
 }
+                          
