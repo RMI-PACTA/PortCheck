@@ -525,7 +525,7 @@ SetGraphInputs <- function(){
                                           ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
   
-  linesize <<- 1
+  linesize <<- 1.5
   ppi <<- 600
   
 }
