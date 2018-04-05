@@ -407,6 +407,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   Exposures$xlowloc <- Exposures$LowLim
   Exposures$xupploc <- Exposures$UppLim
+  Exposures$xlowloc[Exposures$xlowloc < -1] <- -1
+  Exposures$xupploc[Exposures$xupploc > 1] <- 1
   # PlotData$comploc <- PlotData[,PortName]/100
   # PlotData$comploc[PlotData$comploc < 0] <- 0
   # PlotData$comploc[PlotData$comploc > 2] <- 2
@@ -414,11 +416,12 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market*100
   # PlotData$complabel[PlotData$complabel>200]<-200
   # PlotData$complabel[PlotData$complabel<0]<-0    
+  Exposures$comploc[Exposures$comploc >10000]<-10000
+  Exposures$comploc[Exposures$comploc < -10000]<- -10000
   
   Exposures$complabel <- paste0(round(Exposures$comploc,1),"%")
   Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
-  Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0)        
-  
+  Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0) 
   Exposures$minlabel <- paste0(Exposures$minlabel, " %")
   Exposures$maxlabel <- paste0(Exposures$maxlabel, " %")
   
@@ -445,9 +448,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     scale_y_discrete()+
     
     # error lines
-    geom_segment(data=Exposures,aes(x=xlowloc/100, xend=xupploc/100,y=Locations,yend=Locations), linetype="dashed",colour="black")+
-    geom_point(data=Exposures,aes(x=xlowloc/100,y=Locations), fill="black",colour="black", size=2)+
-    geom_point(data=Exposures,aes(x=xupploc/100,y=Locations),  fill="black",colour="black",size=2)+
+    geom_segment(data=Exposures,aes(x=xlowloc, xend=xupploc,y=Locations,yend=Locations), linetype="dashed",colour="black")+
+    geom_point(data=Exposures,aes(x=xlowloc,y=Locations), fill="black",colour="black", size=2)+
+    geom_point(data=Exposures,aes(x=xupploc,y=Locations),  fill="black",colour="black",size=2)+
     
     # centre alignment line    # xmax
     annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
