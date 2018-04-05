@@ -176,11 +176,11 @@ CAReport <- function(){
 
 theme_barcharts <-function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour="black",size=textsize),
-        axis.text.y=element_text(face="bold",colour="black",size=textsize),
+        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
         axis.title.x=element_blank(),
         axis.title.y=element_blank(),
-        axis.line = element_line(colour = "black",size=1),
+        axis.line = element_line(colour = textcolor,size=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         #panel.background = element_blank(),
@@ -188,11 +188,11 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
         # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
-        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.text = element_text(face="bold",size=textsize,colour=textcolor),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
         #legend.title=element_blank(),
-        legend.title = element_text(colour = "black", size = textsize),
+        legend.title = element_text(colour = textcolor, size = textsize),
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.margin = unit(c(1,1, 0, 0), "lines")
@@ -202,10 +202,10 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
 
 theme_linecharts <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(), 
-        axis.text.x=element_text(face="bold",colour="black",size=textsize),
-        axis.text.y=element_text(face="bold",colour="black",size=textsize),
-        axis.title.x=element_text(face="bold",colour="black",size=textsize),
-        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.title.x=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.title.y=element_text(face="bold",colour=textcolor,size=textsize),
         axis.line = element_line(colour = "black",size=1),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -214,11 +214,11 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
-        legend.text = element_text(face="bold",size=textsize,colour="black"),
+        legend.text = element_text(face="bold",size=textsize,colour=textcolor),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
         #legend.title=element_blank(),
-        legend.title = element_text(colour = "black", size = textsize),
+        legend.title = element_text(colour = textcolor, size = textsize),
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.margin = unit(c(1,1, 0, 0), "lines")
@@ -228,16 +228,18 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
 
 theme_distribution <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour="black",size=textsize),
-        axis.text.y=element_text(face="bold",colour="black",size=textsize),
-        axis.line = element_line(colour = "black",size=1),
+        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.line.x = element_line(colour = textcolor,size=1),
+        axis.line.y = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        legend.title = element_blank(),
-        legend.position = "bottom",
+        legend.position = "none",
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
         plot.background = element_rect(fill = "transparent",colour = NA),
-        plot.title = element_text(hjust = 0.5)
+        plot.title = element_text(hjust = 0.5, color = textcolor)
   )
 }
 

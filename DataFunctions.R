@@ -504,7 +504,7 @@ SetGraphInputs <- function(){
 
   #text size
   textsize <<- 8
-  textcolor<-"#2f4f4f"
+  textcolor <<- "#2f4f4f"
   
   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
   IndexColour <<-  "grey85"
