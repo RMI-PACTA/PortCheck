@@ -244,10 +244,10 @@ for (i in c(1:5,326)){
     EQCompProdSnapshot$Type <- "Portfolio"
     CBCombin$Type <- "Portfolio"
     
-    PortName <- "Meta Portfolio"
+    # PortName <- "Meta Portfolio"
   }else if (TestType == "Portfolio") {
     ReportName <- paste0(InvestorNameLong,": ",PortfolioNameLong)
-    PortName <- "Your Portfolio"
+    # PortName <- "Your Portfolio"
   }else {
     return()
   }
@@ -281,19 +281,19 @@ for (i in c(1:5,326)){
       portfolio_sector_stack("01")
       
       if (HasEquity) {
-      portfolio_pie_chart("02", "EQ")
-      exposure_summary("06", "EQ")  
-      sector_techshare("09","EQ","All")
-      Fossil_Distribution(11, "EQ")
-        }
+        portfolio_pie_chart("02", "EQ")
+        exposure_summary("06", "EQ")  
+        sector_techshare("09","EQ","All")
+        Fossil_Distribution("11", "EQ")
+      }
       
       if (HasDebt) {      
-      portfolio_pie_chart("03", "CB")
-      exposure_summary("07", "CB")  
-      sector_techshare(10,"CB","All")
-      Fossil_Distribution(12, "CB")  
-      Risk_Distribution(13, "CB")
-        }
+        portfolio_pie_chart("03", "CB")
+        exposure_summary("07", "CB")  
+        sector_techshare("10","CB","All")
+        Fossil_Distribution("12", "CB")  
+        Risk_Distribution("13", "CB")
+      }
 
       # I don't think there's space - and the CB/EQ problem reemerges. 
       # Graph246("04", "CB", "Oil") 
