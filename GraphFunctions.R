@@ -1017,8 +1017,8 @@ Carstens_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName","Year","Sector","Technology", "Type")
   MetricCol <- "CarstenMetric_Port"
   
-  BarColors <- c("Grey", "Black")
-  names(BarColors) <- c(MetricCol,"Comparison")
+  BarColors <- c("Grey", "Black","White")
+  names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
   Labels <- c("Exposed", "Your Portfolio")
   df <- unique(subset(BatchTest, Year == Startyear, 
                       select = c(ID.COLS,MetricCol)))
@@ -1068,7 +1068,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   
   BarColors <- c("Orange","Red", "Black", "White")
-  names(BarColors) <- c(MetricCol,"Comparison")
+  names(BarColors) <- c(MetricCol,"Comparison", "Unexposed")
   Labels <- c("Elevated Risk", "Substantial Risk", "Your Portfolio")
   
   LineHighl <- c("MetaPortfolio")
@@ -1094,11 +1094,11 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   Batch <- subset(Batch, Year == Startyear & Sector %in% c("Coal","Oil&Gas"),
                        select=c("PortName","Technology","CarstenMetric_Port","Type"))
   ID.COLS = c("PortName","Type")
-  MetricCol <- c("Coal","Gas","Oil")
+  MetricCol <- c("CarstenMetric_Port")
   
-  BarColors <- c(CoalProdColour, GasProdColour, OilProdColour, "Black", "White")
-  names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Coal", "Gas", "Oil", "Your Portfolio")
+  BarColors <- c("Grey", "Black", "White")
+  names(BarColors) <- c(MetricCol,"Comparison", "Unexposed")
+  Labels <- c("Fossil Fuels", "Your Portfolio")
   df <- unique(subset(Batch, select = c(ID.COLS,"CarstenMetric_Port","Technology")))
   df <- spread(df, "Technology", "CarstenMetric_Port", fill = 0) 
   
