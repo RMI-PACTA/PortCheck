@@ -190,7 +190,7 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 # ---------
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
-template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v1.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
@@ -260,7 +260,7 @@ for (i in c(1:20,326)){
   Languagechoose <-  ParameterFile$Languageselect
   # Languagechoose <- "FR"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
-  RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
+  # RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
   LANGUAGE.PATH <- paste0(PORTFOLIO.PATH,Languagechoose,"/")
   if(!dir.exists(file.path(LANGUAGE.PATH))){dir.create(file.path(LANGUAGE.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
@@ -321,12 +321,12 @@ for (i in c(1:20,326)){
         company_techshare(30, 20, "EQ", "Fossil Fuels")
         # company_techshare(31, 20, "EQ", "Oil")
       }
-      if (HasDebt) {
-        company_techshare(32, 20, "CB", "Power")
-        company_techshare(33, 20, "CB", "Automotive")
-        company_techshare(34, 20, "CB", "Fossil Fuels")
-        # company_techshare(35, 20, "CB", "Oil")
-      }
+      # if (HasDebt) {
+      #   company_techshare(32, 20, "CB", "Power")
+      #   company_techshare(33, 20, "CB", "Automotive")
+      #   company_techshare(34, 20, "CB", "Fossil Fuels")
+      #   # company_techshare(35, 20, "CB", "Oil")
+      # }
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 

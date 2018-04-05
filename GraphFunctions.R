@@ -19,68 +19,70 @@ CAReportData <- function(){
   
   ### Exec Summary Data ###
   ReportInsuranceName <- PortfolioNameLong
-  SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  NoPeers <- nrow(TestList)
+  # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
+  SizeofPortfolio <-10000000
+  
+  NoPeers <- nrow(TestList)-1
   
   
   ### Port Weights ###
-  SectorData$ChartType<- "CB"
-  SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
+  # SectorData$ChartType<- "CB"
+  # SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
   
-  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
-  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
-  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  # FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  # PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  # AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  # 
+  # FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  # PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  # AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
   
-  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
-  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
-  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
+  FFSectorPortEQ <- 4
+  PowerSectorPortEQ <- 4
+  AutoSectorPortEQ <- 4
   
-  # Need to add the averages in
+  FFSectorPortCB <- 4
+  PowerSectorPortCB <- 4
+  AutoSectorPortCB <- 4
   
-  FFSectorPeerEQ <- 1
-  PowerSectorPeerEQ<- 1
-  AutoSectorPeerEQ<- 1
-  FFSectorPeerCB<- 1
-  PowerSectorPeerCB<- 1
-  AutoSectorPeerCB<- 1
   
   ### RANKINGS ###
   
-  EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
-  EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
-  EQPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(EQPortRanks)[2:12])
-  EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
-  colnames(EQReportRanks) <- techlist
-  
-  CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
-  CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
-  CBPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(CBPortRanks)[2:12])
-  CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
-  colnames(CBReportRanks) <- paste0("CB",techlist)
-  
+  # EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
+  # EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
+  # EQPeerRanks$PortName <- "PeerTotal"
+  # techlist <- unlist(colnames(EQPortRanks)[2:12])
+  # EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
+  # colnames(EQReportRanks) <- techlist
+  # 
+  # CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
+  # CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
+  # CBPeerRanks$PortName <- "PeerTotal"
+  # techlist <- unlist(colnames(CBPortRanks)[2:12])
+  # CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
+  # colnames(CBReportRanks) <- paste0("CB",techlist)
+  # 
   
   ### MERGE ALL RESULTS ###
-  # reportdata <- data.frame(
-  #          c("ReportInsuranceName",ReportInsuranceName), 
-  #          c("SizeofPortfolio",SizeofPortfolio),
-  #          c("NoPeers",NoPeers),
-  #          c("FFSectorPortEQ",FFSectorPortEQ),
-  #          c("PowerSectorPortEQ",PowerSectorPortEQ),
-  #          c("AutoSectorPortEQ",AutoSectorPortEQ),
-  #          c("FFSectorPortCB",FFSectorPortCB),
-  #          c("PowerSectorPortCB",PowerSectorPortCB),
-  #          c("AutoSectorPortCB",AutoSectorPortCB)
-  #          )
-  # 
-  # colnames(reportdata) <- as.character(unlist(reportdata[1,]))
-  # reportdata = reportdata[-1, ]
+  reportdata <<- data.frame(
+           c("ReportInsuranceName",ReportInsuranceName),
+           c("SizeofPortfolio",SizeofPortfolio),
+           c("NoPeers",NoPeers),
+           c("FFSectorPortEQ",FFSectorPortEQ),
+           c("PowerSectorPortEQ",PowerSectorPortEQ),
+           c("AutoSectorPortEQ",AutoSectorPortEQ),
+           c("FFSectorPortCB",FFSectorPortCB),
+           c("PowerSectorPortCB",PowerSectorPortCB),
+           c("AutoSectorPortCB",AutoSectorPortCB)
+           )
+
+  colnames(reportdata) <- as.character(unlist(reportdata[1,]))
+  reportdata = reportdata[-1, ]
   # 
   # reportdata <- cbind(reportdata,EQReportRanks)
   # reportdata <- cbind(reportdata,CBReportRanks)
   # 
-  # return(reportdata)
+  return(reportdata)
   
 }
 
@@ -115,14 +117,14 @@ CAReport <- function(){
   
   
   # Ranks
-  techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
-  }
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
-  }
-  
+  # techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
+  # for (j in techranks){
+  #   text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
+  # }
+  # for (j in techranks){
+  #   text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
+  # }
+  # 
   # Exec Summary Values
   execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
   for (j in execsummarylist){
@@ -130,7 +132,7 @@ CAReport <- function(){
   }
   
   # Replace Sector Weight Values
-  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=4),"Sector",rep(c("Port","Peer"),3,each=2),rep(c("EQ","CB"),6)))
+  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
   for (j in 1:nrow(a)){
     text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
   }  
