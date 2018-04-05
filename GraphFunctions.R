@@ -617,8 +617,7 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
   PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
-         bg="transparent",height=4,width=4,plot=a,dpi=ppi)
-  print(PieChart)
+         bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
   
 }
 

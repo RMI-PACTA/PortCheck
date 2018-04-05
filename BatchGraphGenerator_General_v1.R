@@ -280,8 +280,13 @@ for (i in c(1:5,326)){
       #Introduction
       portfolio_sector_stack("01")
       
+      if (HasEquity) {
       portfolio_pie_chart("02", "EQ")
+        }
+      
+      if (HasDebt) {      
       portfolio_pie_chart("03", "CB")
+        }
 
       Graph246("04", "CB", "Oil") #Needs to be both
       Graph246("05", "CB", "Gas") #Needs to be both
