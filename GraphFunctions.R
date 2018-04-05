@@ -174,68 +174,12 @@ CAReport <- function(){
 # --------GENERAL PLOT FUNCTIONS---------
 # ------------ Theme -------------------------#
 
-themecolor <- function() {
-  #tech
-  RenewablesColour <<- "#8cd98c"
-  HydroColour <<- "#6abaff"
-  NuclearColour <<- "#ae89c5"
-  GasCapColour <<- "#a6cad8"
-  CoalCapColour <<- "#1a3577"
-  ElectricColour <<- "#847577"
-  HybridColour <<- "#a6a2a2"
-  ICEColour <<-"#e5e6e4"
-  OilProdColour <<-"#00677f"
-  GasProdColour <<-"#a7c5d1"
-  CoalProdColour <<- "#004335"
-  
-  #sector
-  energy<<-"#0090b2"
-  pow <<- "#2348a1"
-  trans<<- "#cfd2cd"
-  othr<<- "#9793c6"
-  
-  #trajectory
-   area_6 <<- "#e07b73"
-  area_4_6 <<- "#fde291"
-  area_2_4 <<- "#FFFFCC"
-  area_2 <<- "#c3d69b"
-  eq_port <<- "#1056ff"
-  stock_market<<- "black"
-  peer_group <<- "black"
-  
-  #text size
-  textsize <<- 8
-  
-  YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
-  IndexColour <<-  "grey85"
-  Tar2DColourBar <<- "#b3de69"
-  Tar2DColour <<- "#a1c75e"
-  goodexpColour <<- "#1F891F"
-  badexpColour <<- "#ed1c24" #"#fb8072"
-  ReqCapColour <<- "grey55"
-  CurrCapColour <<- "grey75"
-  AxisColour <<- "#17375e" #"#274F80"
-  
-  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power",
-                                          "Automotive","Automotive","Automotive",
-                                          "Fossil Fuels","Fossil Fuels","Fossil Fuels"),
-                               Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap",
-                                              "Electric","Hybrid","ICE","Gas","Oil","Coal"),
-                               Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,
-                                          ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
-  
-  textsize <<- 8
-  linesize <<- 2
-  ppi <<- 600
-  
-}  
-
 theme_barcharts <-function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
         axis.text.x=element_text(face="bold",colour="black",size=textsize),
         axis.text.y=element_text(face="bold",colour="black",size=textsize),
-        axis.title.x=element_text(face="bold",colour="black",size=textsize),
-        axis.title.y=element_text(face="bold",colour="black",size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
         axis.line = element_line(colour = "black",size=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),

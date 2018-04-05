@@ -467,18 +467,36 @@ SectorPrint <- function(SectorToPlot,SectorProd){
 
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
-  #Saturated colours
-  RenewablesColour <<- "#548235"
-  HydroColour <<- "#2e75b6"
-  NuclearColour <<- "#ed7d31"
-  GasCapColour<<-"#afabab"
-  CoalCapColour <<- "#843c0c" 
-  ElectricColour<<- "#a9d18e"
-  HybridColour<<- "#ffd966"
-  ICEColour<<- "#333f50"   #"#ed1c24" #"#f93620"
-  GasProdColour <<- "#a6a6a6"
-  OilProdColour <<- "#3b3838"
-  CoalProdColour <<- "#663300"
+  #tech
+  RenewablesColour <<- "#8cd98c"
+  HydroColour <<- "#6abaff"
+  NuclearColour <<- "#ae89c5"
+  GasCapColour <<- "#a6cad8"
+  CoalCapColour <<- "#1a3577"
+  ElectricColour <<- "#847577"
+  HybridColour <<- "#a6a2a2"
+  ICEColour <<-"#e5e6e4"
+  OilProdColour <<-"#00677f"
+  GasProdColour <<-"#a7c5d1"
+  CoalProdColour <<- "#004335"
+  
+  #sector
+  energy<<-"#0090b2"
+  pow <<- "#2348a1"
+  trans<<- "#cfd2cd"
+  othr<<- "#9793c6"
+  
+  #trajectory
+  area_6 <<- "#e07b73"
+  area_4_6 <<- "#fde291"
+  area_2_4 <<- "#FFFFCC"
+  area_2 <<- "#c3d69b"
+  eq_port <<- "#1056ff"
+  stock_market<<- "black"
+  peer_group <<- "black"
+  
+  #text size
+  textsize <<- 8
   
   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
   IndexColour <<-  "grey85"
@@ -490,19 +508,17 @@ SetGraphInputs <- function(){
   CurrCapColour <<- "grey75"
   AxisColour <<- "#17375e" #"#274F80"
   
-  DarkGreen <<- "#1E7B1E"
-  LightGreen <<- "#C3FDB8"
-  LightRed <<- "#FFFFC2"
-  DarkRed <<- "#C11B17"
-  
-  
-  
-  
-  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power",
+                                          "Automotive","Automotive","Automotive",
+                                          "Fossil Fuels","Fossil Fuels","Fossil Fuels"),
+                               Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap",
+                                              "Electric","Hybrid","ICE","Gas","Oil","Coal"),
+                               Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,
+                                          ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
   textsize <<- 8
+  linesize <<- 2
   ppi <<- 600
-  themecolor()
   
 }
 

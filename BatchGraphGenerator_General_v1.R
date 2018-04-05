@@ -296,50 +296,50 @@ for (i in c(1:5,326)){
       
       #5 Year Trajectory
       if (HasEquity) {
-        Graph246(14, "EQ", "CoalCap")
-        Graph246(15, "EQ", "RenewablesCap")
-        Graph246(16, "EQ", "GasCap")
-        Graph246(17, "EQ", "NuclearCap")
-        Graph246(18, "EQ", "Oil")
-        Graph246(19, "EQ", "Gas")
-        Graph246(20, "EQ", "ICE")
-        Graph246(21, "EQ", "Electric")
+        Graph246("14", "EQ", "CoalCap")
+        Graph246("15", "EQ", "RenewablesCap")
+        Graph246("16", "EQ", "GasCap")
+        Graph246("17", "EQ", "NuclearCap")
+        Graph246("18", "EQ", "Oil")
+        Graph246("19", "EQ", "Gas")
+        Graph246("20", "EQ", "ICE")
+        Graph246("21", "EQ", "Electric")
       }
       
       if (HasDebt) {
-        Graph246(22, "CB", "CoalCap")
-        Graph246(23, "CB", "RenewablesCap")
-        Graph246(24, "CB", "GasCap")
-        Graph246(25, "CB", "NuclearCap")
-        Graph246(26, "CB", "Oil")
-        Graph246(27, "CB", "Gas")
-        Graph246(28, "CB", "ICE")
-        Graph246(29, "CB", "Electric")
+        Graph246("22", "CB", "CoalCap")
+        Graph246("23", "CB", "RenewablesCap")
+        Graph246("24", "CB", "GasCap")
+        Graph246("25", "CB", "NuclearCap")
+        Graph246("26", "CB", "Oil")
+        Graph246("27", "CB", "Gas")
+        Graph246("28", "CB", "ICE")
+        Graph246("29", "CB", "Electric")
       }
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
-        ranking_chart_alignment(30, "EQ") #Carstens Metric
+        ranking_chart_alignment("30", "EQ") #Carstens Metric
       }
       if (HasDebt) {
-        ranking_chart_alignment(31, "CB") #Carstens Metric
+        ranking_chart_alignment("31", "CB") #Carstens Metric
       }
       
       #Company Exposure
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
-          company_techshare(32, 20, "EQ", "Power")
+          company_techshare("32", 20, "EQ", "Power")
         }
         if (PortSummary$HasAuto.EQ) {
-          company_techshare(33, 20, "EQ", "Automotive")
+          company_techshare("33", 20, "EQ", "Automotive")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare(34, 20, "EQ", "Fossil Fuels")
+          company_techshare("34", 20, "EQ", "Fossil Fuels")
         }
         # We need this one too! 
         # Carbon Tracker data. 
         # if (PortSummary$HasOilGas.EQ) {
-        # company_techshare(35, 20, "EQ", "Oil")
+        # company_techshare("35", 20, "EQ", "Oil")
         # }
       }
 
@@ -347,18 +347,18 @@ for (i in c(1:5,326)){
       # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
       if (HasDebt & !HasEquity) {
         if (PortSummary$HasPower.CB){
-          company_techshare(32, 20, "CB", "Power")
+          company_techshare("32", 20, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare(33, 20, "CB", "Automotive")
+          company_techshare("33", 20, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare(34, 20, "CB", "Fossil Fuels")
+          company_techshare("34", 20, "CB", "Fossil Fuels")
         }
         
         # We need this one too! 
         # if (PortSummary$HasOilGas.CB) {
-        #   company_techshare(35, 20, "CB", "Oil")
+        #   company_techshare("35", 20, "CB", "Oil")
         # }
       }
       # Creates the list of figures that were printed. 
@@ -372,7 +372,7 @@ for (i in c(1:5,326)){
      
       # Creates the report for California
       # system.time(
-      CAReport()
+      # CAReport()
       # )
       
       
