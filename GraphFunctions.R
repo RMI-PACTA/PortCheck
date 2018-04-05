@@ -430,13 +430,17 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   Exposures<- Exposures[order(Exposures$Technology),]
   
   
+   
   n1<-n_distinct(Exposures[which(Exposures$Sector=="Automotive"),]$Technology)
   if(n1 >0){a<-c(1:n1)}else{a<-c()}
   n2<-n_distinct(Exposures[which(Exposures$Sector=="FossilFuels"),]$Technology)
-  if((4.5+n2-1) >4.5){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
+  if(n2==0){b<-c()}else if(n2>0){
+    if (((4.5+n2-1) >4.5)){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
+  }
   n3<-n_distinct(Exposures[which(Exposures$Sector=="Power"),]$Technology)
-  if((4.5+n2+0.5) >((4.5+n2+0.5)+n3-1)){d<-c(((4.5+n2+0.5)+n3-1):(4.5+n2+0.5))}else{d<-c((4.5+n2+0.5):((4.5+n2+0.5)+n3-1))}
-  
+  if(n3==0){d<-c()}else if(n3>0){
+    if ((4.5+n2+0.5) >((4.5+n2+0.5)+n3-1)){d<-c(((4.5+n2+0.5)+n3-1):(4.5+n2+0.5))}else{d<-c((4.5+n2+0.5):((4.5+n2+0.5)+n3-1))}
+  }
   locations<-c(a,b,d)
 
  
@@ -548,6 +552,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
     
     leafloc <- c(11,12,2,3)
+    if (any((Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))) & any(Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")))
     
     outputplot<-    outputplot+
       labs(x=NULL,y= NULL)+
@@ -555,16 +560,23 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
       annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
-    
+    else if  (any((Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))) & (any(Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))==FALSE)){
+      outputplot<-    outputplot+
+        labs(x=NULL,y= NULL)+
+        annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
+    }else if  (any((Exposures$Technology %in%  c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))) & (any(Exposures$Technology %in% c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))==FALSE)){
+      outputplot<-    outputplot+
+        labs(x=NULL,y= NULL)+
+        annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
+      }
     #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
     
     graphheight <- 7.2
   
   
- 
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_RankingChart.png',sep=""),
-         bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
-  
+ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_rankingchart.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+
+
   
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
   # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
@@ -572,6 +584,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   print(outputplot)
   #return()
 }
+
 
 ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
