@@ -338,15 +338,11 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     coord_cartesian(ylim=c(0,min(1, 1.5*max(filter(dfagg,Metric!="Unexposed")$Value))))+
     theme_distribution()
   
-<<<<<<< HEAD
-  print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
-         height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
-=======
+  
   # print(distribution_plot)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
          height=4,width=10,plot=distribution_plot,dpi=ppi)
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
+
   
 }
 
@@ -546,11 +542,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     geom_point(data=Exposures,aes(x=xlowloc/100,y=Locations), fill="black",colour="black", size=2)+
     geom_point(data=Exposures,aes(x=xupploc/100,y=Locations),  fill="black",colour="black",size=2)+
     
-<<<<<<< HEAD
-    Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market
-    # PlotData$complabel[PlotData$complabel>200]<-200
-    # PlotData$complabel[PlotData$complabel<0]<-0    
-=======
     # centre alignment line    # xmax
     annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
     annotate(geom="rect",xmin =-1,xmax=0,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour=Tar2DColour)+ # Box around the bars
@@ -568,7 +559,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     # Company Circles
     geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
     annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
     
     # Distribution Range 
     annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
@@ -578,13 +568,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     annotate("text", label = GT["RankTitle"][[1]], x= 1.5,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
     annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.5,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
     
-<<<<<<< HEAD
-    #Exposures$my_ranks[!is.na(Exposures$my_ranks)]<- round(Exposures$Rank[!is.na(Exposures$my_ranks)],0)
-    Exposures <- Exposures %>% rename("my_ranks" = my_ranks.x)
-    Exposures$my_ranks[is.na(Exposures$my_ranks)]<- "-"
-    #Exposures$mx[is.na(Exposures$mx)]<- "-"
-    GraphTitle <- GT["Rank_Title"][[1]]
-=======
     theme(panel.background = element_rect(fill="transparent"),
           panel.grid.major.x = element_blank() ,
           panel.grid.major.y = element_blank(),
@@ -596,7 +579,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
           axis.title.x=element_text(face="bold",colour="black", size=12),
           axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
           plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
     
     leafloc <- c(11,12,2,3)
     
@@ -629,10 +611,6 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
     pieshare <- CBCombin
   }
   
-<<<<<<< HEAD
-  PieChart<- ggplot(pieshare, aes(x="",y=WtProduction, fill=Sector))+
-    geom_bar(stat = "identity",color=NA, width = 1)
-=======
   # Data 
  
   pieshare$Label <- "NeedsALabel"
@@ -657,16 +635,11 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
           legend.background = element_rect(fill = "transparent",colour = NA),
           legend.text = element_text(size=textsize,colour="black"),
           legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   
   PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
          bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
-<<<<<<< HEAD
-  print(PieChart)
-=======
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   
 }
 
@@ -1245,12 +1218,8 @@ Inputs246 <- function(ChartType, TechToPlot){
 
   Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
-<<<<<<< HEAD
-  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","InvestorName.x","Scenario.y"))
-=======
   Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Tot.Build.Out","InvestorName.x","Scenario.y"))
   ### CHECK "Plan.Tot.Build.Out" or "Plan.Cum.Build.Out"
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   Combin <- subset(Combin,Scenario.y %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
@@ -1513,11 +1482,5 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
 
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
 }
                           
