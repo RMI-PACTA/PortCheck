@@ -940,17 +940,12 @@ exposure_summary <- function(plotnumber,ChartType){
   Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"] <- -1*Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"]
   
   technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","Coal","Gas","Oil")
-  colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,
-               HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
-  names(colours) <- technologyorder
-  labels <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
-  names(labels) <- technologyorder
   
   Portfolio$Sector <- recode(Portfolio$Sector, Coal = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels")
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
   plot <- ggplot(Portfolio) +
-    geom_bar(aes(x = Technology, y = Exposure, fill = Technology), stat = "identity") +
+    geom_bar(aes(x = Technology, y = Exposure), fill = YourportColour, stat = "identity") +
     facet_grid(. ~ Sector, scales = "free", space = "free") +
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent)+
