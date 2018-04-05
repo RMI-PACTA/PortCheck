@@ -146,7 +146,8 @@ CAReport <- function(){
   
   # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
-  excessfileendings <- c(".log",".rnw",".tex",".aux")
+  # excessfileendings <- c(".log",".rnw",".tex",".aux")
+  excessfileendings <- c(".rnw",".tex")
   file.remove(paste0(TemplateNameNew,excessfileendings))
   file.remove("FigureList.txt")
   
@@ -334,7 +335,8 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     theme_distribution()
   
   print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
+         height=4,width=10,plot=distribution_plot,dpi=ppi)
   
 }
 
@@ -693,7 +695,7 @@ portfolio_sector_stack <- function(plotnumber){
           plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
     )
   print(a)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=10,plot=a,dpi=ppi)
 }
 
 exposure_summary <- function(plotnumber,ChartType){
@@ -728,7 +730,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   print(plot)
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
-         bg="transparent",height=3.2,width=4.5,dpi=ppi)
+         bg="transparent",height=4,width=10,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
@@ -999,7 +1001,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=3.2,width=9.7,dpi=ppi)
+           bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }

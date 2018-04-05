@@ -213,7 +213,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:20,326)){
+for (i in c(1:5,326)){
 
   ### Specify the Names from the Test List
   
@@ -369,13 +369,11 @@ for (i in c(1:20,326)){
       writeLines(figurelist,"FigureList.txt")
       
       
-      # Prepares the data that goes into the report
-      # CAReportData()
-
-      
+     
       # Creates the report for California
-      # I think it's necessary to seperate from the previous
-      # CAReport()
+      system.time(
+      CAReport()
+      )
       
       
     })}else{
