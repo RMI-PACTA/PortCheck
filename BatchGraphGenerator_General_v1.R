@@ -185,7 +185,7 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 # ---------
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
-template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v1.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
@@ -213,7 +213,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:20,326)){
+for (i in c(1:5,326)){
 
   ### Specify the Names from the Test List
   
@@ -262,7 +262,7 @@ for (i in c(1:20,326)){
   Languagechoose <-  ParameterFile$Languageselect
   # Languagechoose <- "FR"
   GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
-  RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
+  # RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
   
   LANGUAGE.PATH <- paste0(PORTFOLIO.PATH,Languagechoose,"/")
   if(!dir.exists(file.path(LANGUAGE.PATH))){dir.create(file.path(LANGUAGE.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
@@ -278,31 +278,30 @@ for (i in c(1:20,326)){
       #######################
       
       #Introduction
-      portfolio_sector_stack(1)
-      if(HasEquity) {
-        portfolio_pie_chart(2, "EQ")
-      }
-      if(HasDebt) {
-        portfolio_pie_chart(3, "CB")
-      }
-      Graph246(4, "CB", "Oil") #Needs to be both
-      Graph246(5, "CB", "Gas") #Needs to be both
-      if(HasEquity) {
-        exposure_summary(6, "EQ")
-      }
-      if(HasDebt){
-        exposure_summary(7, "CB")
-      }
-      #Current Exposure
-      portfolio_sector_stack(8)
+      portfolio_sector_stack("01")
       
-      sector_techshare(9,"EQ","All")
-      sector_techshare(10,"CB","All")
-      
+      if (HasEquity) {
+      portfolio_pie_chart("02", "EQ")
+      exposure_summary("06", "EQ")  
+      sector_techshare("09","EQ","All")
       Fossil_Distribution(11, "EQ")
-      Fossil_Distribution(12, "CB")
+        }
       
+      if (HasDebt) {      
+      portfolio_pie_chart("03", "CB")
+      exposure_summary("07", "CB")  
+      sector_techshare(10,"CB","All")
+      Fossil_Distribution(12, "CB")  
       Risk_Distribution(13, "CB")
+        }
+
+      # I don't think there's space - and the CB/EQ problem reemerges. 
+      # Graph246("04", "CB", "Oil") 
+      # Graph246("05", "CB", "Gas") 
+      
+      #Current Exposure
+      # portfolio_sector_stack("08") 
+      # We can just use 01 twice
       
       #5 Year Trajectory
       if (HasEquity) {
@@ -329,10 +328,10 @@ for (i in c(1:20,326)){
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
-        ranking_chart_alignment(30, "EQ", "All") #Carstens Metric
+        ranking_chart_alignment(30, "EQ") #Carstens Metric
       }
       if (HasDebt) {
-        ranking_chart_alignment(31, "CB", "All") #Carstens Metric
+        ranking_chart_alignment(31, "CB") #Carstens Metric
       }
       
       #Company Exposure
@@ -346,22 +345,29 @@ for (i in c(1:20,326)){
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
           company_techshare(34, 20, "EQ", "Fossil Fuels")
         }
+        # We need this one too! 
+        # Carbon Tracker data. 
         # if (PortSummary$HasOilGas.EQ) {
         # company_techshare(35, 20, "EQ", "Oil")
         # }
       }
-      if (HasDebt) {
+
+      
+      # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
+      if (HasDebt & !HasEquity) {
         if (PortSummary$HasPower.CB){
-          company_techshare(34, 20, "CB", "Power")
+          company_techshare(32, 20, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare(35, 20, "CB", "Automotive")
+          company_techshare(33, 20, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare(36, 20, "CB", "Fossil Fuels")
+          company_techshare(34, 20, "CB", "Fossil Fuels")
         }
+        
+        # We need this one too! 
         # if (PortSummary$HasOilGas.CB) {
-          # company_techshare(35, 20, "CB", "Oil")
+        #   company_techshare(35, 20, "CB", "Oil")
         # }
       }
       # Creates the list of figures that were printed. 
@@ -372,13 +378,11 @@ for (i in c(1:20,326)){
       writeLines(figurelist,"FigureList.txt")
       
       
-      # Prepares the data that goes into the report
-      # CAReportData()
-
-      
+     
       # Creates the report for California
-      # I think it's necessary to seperate from the previous
-      # CAReport()
+      # system.time(
+      CAReport()
+      # )
       
       
     })}else{

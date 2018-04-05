@@ -18,75 +18,60 @@ CAReportData <- function(){
   # Output is a dataframe with the values for the text
   
   ### Exec Summary Data ###
-  ReportInsuranceName <- PortfolioNameLong
-  SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  NoPeers <- nrow(TestList)
+  InsuranceCompanyName <- PortfolioNameLong
+  # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
+  SizeofPortfolio <-10000000
+  
+  NoPeers <- nrow(TestList)-1
   
   
   ### Port Weights ###
-  SectorData$ChartType<- "CB"
-  SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
+  # SectorData$ChartType<- "CB"
+  # SectorData$ChartType[SectorData$label == "Equity Portfolio"] <- "EQ"
   
-  FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
-  PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
-  AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  # FFSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Equity Portfolio"]
+  # PowerSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Equity Portfolio"]
+  # AutoSectorPortEQ <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Equity Portfolio"]
+  # 
+  # FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
+  # PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
+  # AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
   
-  FFSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Fossil Fuels" & SectorData$label == "Corporate Bond Portfolio"]
-  PowerSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Utility Power" & SectorData$label == "Corporate Bond Portfolio"]
-  AutoSectorPortCB <- SectorData$Portfolio_weight[SectorData$piesector == "Automotive" & SectorData$label == "Corporate Bond Portfolio"]
+  FFSectorPortEQ <- 4
+  PowerSectorPortEQ <- 4
+  AutoSectorPortEQ <- 4
   
-  # Need to add the averages in
-  
-  FFSectorPeerEQ <- 1
-  PowerSectorPeerEQ<- 1
-  AutoSectorPeerEQ<- 1
-  FFSectorPeerCB<- 1
-  PowerSectorPeerCB<- 1
-  AutoSectorPeerCB<- 1
-  
-  ### RANKINGS ###
-  
-  EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
-  EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
-  EQPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(EQPortRanks)[2:12])
-  EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
-  colnames(EQReportRanks) <- techlist
-  
-  CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
-  CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
-  CBPeerRanks$PortName <- "PeerTotal"
-  techlist <- unlist(colnames(CBPortRanks)[2:12])
-  CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
-  colnames(CBReportRanks) <- paste0("CB",techlist)
+  FFSectorPortCB <- 4
+  PowerSectorPortCB <- 4
+  AutoSectorPortCB <- 4
   
   
   ### MERGE ALL RESULTS ###
-  # reportdata <- data.frame(
-  #          c("ReportInsuranceName",ReportInsuranceName), 
-  #          c("SizeofPortfolio",SizeofPortfolio),
-  #          c("NoPeers",NoPeers),
-  #          c("FFSectorPortEQ",FFSectorPortEQ),
-  #          c("PowerSectorPortEQ",PowerSectorPortEQ),
-  #          c("AutoSectorPortEQ",AutoSectorPortEQ),
-  #          c("FFSectorPortCB",FFSectorPortCB),
-  #          c("PowerSectorPortCB",PowerSectorPortCB),
-  #          c("AutoSectorPortCB",AutoSectorPortCB)
-  #          )
-  # 
-  # colnames(reportdata) <- as.character(unlist(reportdata[1,]))
-  # reportdata = reportdata[-1, ]
+  reportdata <<- data.frame(
+           c("InsuranceCompanyName",InsuranceCompanyName),
+           c("SizeofPortfolio",SizeofPortfolio),
+           c("NoPeers",NoPeers),
+           c("FFSectorPortEQ",FFSectorPortEQ),
+           c("PowerSectorPortEQ",PowerSectorPortEQ),
+           c("AutoSectorPortEQ",AutoSectorPortEQ),
+           c("FFSectorPortCB",FFSectorPortCB),
+           c("PowerSectorPortCB",PowerSectorPortCB),
+           c("AutoSectorPortCB",AutoSectorPortCB)
+           )
+
+  colnames(reportdata) <- as.character(unlist(reportdata[1,]))
+  reportdata = reportdata[-1, ]
   # 
   # reportdata <- cbind(reportdata,EQReportRanks)
   # reportdata <- cbind(reportdata,CBReportRanks)
   # 
-  # return(reportdata)
+  return(reportdata)
   
 }
 
 CAReport <- function(){
   
-  CAReportData()
+  reportdata <-CAReportData()
   
   # Copy in the template for the report
   text <- as.data.frame(template,stringsAsFactors = FALSE)  
@@ -113,45 +98,36 @@ CAReport <- function(){
     return(text)
   }
   
-  
-  # Ranks
-  techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
+  # Remove sectors 
+  if (!HasEquity){
+    text <- removetextlines("EQSpecific")
   }
-  for (j in techranks){
-    text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
-  }
-  
-  # Exec Summary Values
-  execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
-  for (j in execsummarylist){
-    text$text <- gsub(j,eval(as.symbol(as.character(j))),text$text)
-  }
+
+  if (!HasDebt){
+    text <- removetextlines("CBSpecific")
+  }  
   
   # Replace Sector Weight Values
-  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=4),"Sector",rep(c("Port","Peer"),3,each=2),rep(c("EQ","CB"),6)))
+  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
   for (j in 1:nrow(a)){
-    text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
+    text$text <- gsub(as.character(a$SectorList[j]),reportdata[as.character(a$SectorList[j])][[1]],text$text)
   }  
   
   # Replace Insurer Name
-  text$text <- gsub("InsurerSampleReport",PortfolioNameLong,text$text)
+  text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
+  text$text <- gsub("SizeofPortfolio",reportdata$SizeofPortfolio,text$text)
+  text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   
   # Figures
-  # Replace CAFigures
-  
-  # Update the template to reflect figure names
-  
-  # FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
-  # colnames(FigNames) <- "Name"
-  # FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
-  # FigNames$Fig <- substring(FigNames$Name,1,2)
-  # FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
-  # 
-  # for (f in 1:nrow(FigNames)){
-  #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
-  # }
+  FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
+  colnames(FigNames) <- "Name"
+  FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
+  FigNames$Fig <- substring(FigNames$Name,1,2)
+  FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
+
+  for (f in 1:nrow(FigNames)){
+    text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
+  }
   
   
   ##### PRINT REPORT ######
@@ -175,7 +151,8 @@ CAReport <- function(){
   
   # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
-  excessfileendings <- c(".log",".rnw",".tex",".aux")
+  # excessfileendings <- c(".log",".rnw",".tex",".aux")
+  excessfileendings <- c(".rnw",".tex")
   file.remove(paste0(TemplateNameNew,excessfileendings))
   file.remove("FigureList.txt")
   
@@ -361,9 +338,15 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     coord_cartesian(ylim=c(0,min(1, 1.5*max(filter(dfagg,Metric!="Unexposed")$Value))))+
     theme_distribution()
   
+<<<<<<< HEAD
   print(distribution_plot)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
          height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
+=======
+  # print(distribution_plot)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
+         height=4,width=10,plot=distribution_plot,dpi=ppi)
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   
 }
 
@@ -387,7 +370,7 @@ stacked_bar_chart <- function(dat){
           
 
 # -------- GRAPHS AND CHARTS -----------------                 
-# -------- RANKING CHARTS ----------- #
+# -------- Seperate Ranking chart -----------
 
 RankPortfolios <- function( ChartType, Name){
   a<-Name
@@ -427,9 +410,11 @@ RankPortfolios <- function( ChartType, Name){
   # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
   
   return(rankingtable)
-}                      
-                           
-ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
+}                           
+
+# ------------- RANKING CHART - ALIGNMENT ----#
+
+ranking_chart_alignment <- function(plotnumber,ChartType){
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
     Ranks<- RankPortfolios("EQ",PortName)
@@ -438,10 +423,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     Exposures <- CBCombin[which(CBCombin$Year==Startyear+5),]
     Ranks<- RankPortfolios("CB",PortName)
     BatchTest<-CBBatchTest[!CBBatchTest$Technology %in% "OilCap",]
-
+    
   }
   
-  Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
 
   
@@ -457,189 +441,184 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   colnames(MinMax)[2] <- "Minimum"
   colnames(MinMax)[3] <- "Maximum"
   
-   
-   Exposures <- merge(Exposures,MinMax,by="Technology")
-   Exposures$Technology<- as.factor(Exposures$Technology)
-   Exposures$Sector<- as.factor(Exposures$Sector)
-   levels(Exposures$Sector)[levels(Exposures$Sector)=="Oil&Gas"] <- "FossilFuels"
-   levels(Exposures$Sector)[levels(Exposures$Sector)=="Coal"] <- "FossilFuels"
-   levels(Exposures$Technology)[levels(Exposures$Technology)=="HydroCap"] <- "Hydro"
-   levels(Exposures$Technology)[levels(Exposures$Technology)=="NuclearCap"] <- "Nuclear"
-   #Exposures$rank <- rank(Exposures$CarstenMetric_Port)
-   # Factorise and Order by Technology  
-   #PlotData <- PlotData[(order(PlotData$order)),]
-   #PlotData$order <- factor(PlotData$order, levels = PlotData$order)
+  Exposures <- merge(Exposures,MinMax,by="Technology")
+  Exposures$Technology<- as.factor(Exposures$Technology)
+  Exposures$Sector<- as.factor(Exposures$Sector)
+  levels(Exposures$Sector)[levels(Exposures$Sector)=="Oil&Gas"] <- "FossilFuels"
+  levels(Exposures$Sector)[levels(Exposures$Sector)=="Coal"] <- "FossilFuels"
+  levels(Exposures$Technology)[levels(Exposures$Technology)=="HydroCap"] <- "Hydro"
+  levels(Exposures$Technology)[levels(Exposures$Technology)=="NuclearCap"] <- "Nuclear"
+  #Exposures$rank <- rank(Exposures$CarstenMetric_Port)
+  # Factorise and Order by Technology  
+  #PlotData <- PlotData[(order(PlotData$order)),]
+  #PlotData$order <- factor(PlotData$order, levels = PlotData$order)
   
-     
-    # ranking
-    # smallest number is number 1
-   
-    # Reduce chart to values to plot 
-   
-   ordrsec<- c("Power","FossilFuels","Automotive")
-   ordrsec<-as.factor(ordrsec)
-   Exposures$Sector<-factor(Exposures$Sector, ordrsec)
-   
-   ordrtech<-c("Electric","Hybrid","ICE","Coal","Gas","Oil","CoalCap","GasCap","Nuclear","Hydro","RenewablesCap")
-   ordrtech<-as.factor(ordrtech)
-   Exposures$Technology<- factor(Exposures$Technology, levels = ordrtech)
-   Exposures<- Exposures[order(Exposures$Technology),]
-
-   n1<-n_distinct(Exposures[which(Exposures$Sector=="Automotive"),]$Technology)
-   if(n1 >0){a<-c(1:n1)}else{a<-c(n1:1)}
-   n2<-n_distinct(Exposures[which(Exposures$Sector=="FossilFuels"),]$Technology)
-   if((4.5+n2-1) >4.5){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
-   n3<-n_distinct(Exposures[which(Exposures$Sector=="Power"),]$Technology)
-   if((4.5+n2+0.5) >((4.5+n2+0.5)+n3-1)){d<-c(((4.5+n2+0.5)+n3-1):(4.5+n2+0.5))}else{d<-c((4.5+n2+0.5):((4.5+n2+0.5)+n3-1))}
   
-   locations<-c(a,b,d)
+  # ranking
+  # smallest number is number 1
+  
+  # Reduce chart to values to plot 
+  
+  ordrsec<- c("Power","FossilFuels","Automotive")
+  ordrsec<-as.factor(ordrsec)
+  Exposures$Sector<-factor(Exposures$Sector, ordrsec)
+  
+  ordrtech<-c("Electric","Hybrid","ICE","Coal","Gas","Oil","CoalCap","GasCap","Nuclear","Hydro","RenewablesCap")
+  ordrtech<-as.factor(ordrtech)
+  Exposures$Technology<- factor(Exposures$Technology, levels = ordrtech)
+  Exposures<- Exposures[order(Exposures$Technology),]
+  
+  
+  n1<-n_distinct(Exposures[which(Exposures$Sector=="Automotive"),]$Technology)
+  if(n1 >0){a<-c(1:n1)}else{a<-c(n1:1)}
+  n2<-n_distinct(Exposures[which(Exposures$Sector=="FossilFuels"),]$Technology)
+  if((4.5+n2-1) >4.5){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
+  n3<-n_distinct(Exposures[which(Exposures$Sector=="Power"),]$Technology)
+  if((4.5+n2+0.5) >((4.5+n2+0.5)+n3-1)){d<-c(((4.5+n2+0.5)+n3-1):(4.5+n2+0.5))}else{d<-c((4.5+n2+0.5):((4.5+n2+0.5)+n3-1))}
+  
+  locations<-c(a,b,d)
 
-   #  if (SectorToPlot != "All"){
-   #     Exposures <- subset(Exposures, Exposures$Sector %in% SectorToPlot)
-   #     if (SectorToPlot == "Power"){
-   #       Exposures <- subset(Exposures, Exposures$Technology %in% c("RenewablesCap", "GasCap", "CoalCap"))
-   #     }
-   #     locations <- c(1:nrow(Exposures))
-   #  }else{
-   #    locations <- c(1:3,4.5:6.5,8:12)
-   #  }
-    # 
-    # Chart variables
-    barwidth <- .03
-    bh <-0.6
-    tbwid <- .25
-    # Label Wrapping Functions  
-    # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
-    # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+ 
+  # Chart variables
+  barwidth <- .03
+  bh <-0.6
+  tbwid <- .25
+  # Label Wrapping Functions  
+  # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
+  # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
+  
+  Exposures$a <- paste0(gsub(" ","",Exposures$Sector),"_Unit")
+  Exposures$b <- paste0("T_",Exposures$Technology)
+  Exposures$b[Exposures$Sector %in% "FossilFuels"] <- paste0("T_",Exposures$Technology[Exposures$Sector %in% "FossilFuels"],"Prod")
+  
+  # Line Labels
+  Exposures$TechTitle <-paste0(t(GT[Exposures$b])," ",t(GT[Exposures$a]))
+  Exposures$TechTitle[Exposures$Sector %in% "Automotive"] <- paste0(t(GT[Exposures$b[Exposures$Sector %in% "Automotive"] ]))
+  
+  Exposures$TechLabel <- Exposures$TechTitle
+  
+  Exposures$Locations <- locations
+  
+  Exposures$LowLim <- rowMins(as.matrix(Exposures[,colnames(Exposures) %in% c("Minimum","LowLim")]))
+  Exposures$UppLim <- rowMaxs(as.matrix(Exposures[,colnames(Exposures) %in% c("Maximum","UppLim")]))
+  
+  Exposures$xlowloc <- Exposures$LowLim
+  Exposures$xupploc <- Exposures$UppLim
+  # PlotData$comploc <- PlotData[,PortName]/100
+  # PlotData$comploc[PlotData$comploc < 0] <- 0
+  # PlotData$comploc[PlotData$comploc > 2] <- 2
+  
+  Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market*100
+  # PlotData$complabel[PlotData$complabel>200]<-200
+  # PlotData$complabel[PlotData$complabel<0]<-0    
+  
+  Exposures$complabel <- paste0(round(Exposures$comploc,1),"%")
+  Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
+  Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0)        
+  
+  Exposures$minlabel <- paste0(Exposures$minlabel, " %")
+  Exposures$maxlabel <- paste0(Exposures$maxlabel, " %")
+  
+  #Exposures$my_ranks[!is.na(Exposures$my_ranks)]<- round(Exposures$Rank[!is.na(Exposures$my_ranks)],0)
+  Exposures$my_ranks[is.na(Exposures$my_ranks)]<- "-"
+  #Exposures$mx[is.na(Exposures$mx)]<- "-"
+  GraphTitle <- GT["Rank_Title"][[1]]
+  
+  repval = 200
+  redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
+  xvals <- rep(seq(-1,1,2/(repval-1)),length(locations))
+  #xvals <- xvals[which(xvals<1)]
+  yvals <- sort(rep(locations,repval))
+  plotdf <- data.frame(x=xvals,y=yvals,w=2.05/repval,h=bh, colbar=rep(redgreen,length(locations)))
+  #plotdf <- plotdf[which(plotdf$x<1),]
+  
+  
+  #xmx<- as.numeric(aggregate(CarstenMetric_Port.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)[2][,1])
+  #xmx should be 
+  outputplot <-    ggplot()+
+    geom_tile(data=plotdf, aes(x=x,y=y),height=plotdf$h,width=plotdf$w,fill=plotdf$colbar) +
     
-    Exposures$a <- paste0(gsub(" ","",Exposures$Sector),"_Unit")
-    Exposures$b <- paste0("T_",Exposures$Technology)
-    Exposures$b[Exposures$Sector %in% "FossilFuels"] <- paste0("T_",Exposures$Technology[Exposures$Sector %in% "FossilFuels"],"Prod")
+    scale_x_continuous()+
+    scale_y_discrete()+
     
-    # Line Labels
-    Exposures$TechTitle <-paste0(t(GT[Exposures$b])," ",t(GT[Exposures$a]))
-    Exposures$TechTitle[Exposures$Sector %in% "Automotive"] <- paste0(t(GT[Exposures$b[Exposures$Sector %in% "Automotive"] ]))
+    # error lines
+    geom_segment(data=Exposures,aes(x=xlowloc/100, xend=xupploc/100,y=Locations,yend=Locations), linetype="dashed",colour="black")+
+    geom_point(data=Exposures,aes(x=xlowloc/100,y=Locations), fill="black",colour="black", size=2)+
+    geom_point(data=Exposures,aes(x=xupploc/100,y=Locations),  fill="black",colour="black",size=2)+
     
-    Exposures$TechLabel <- Exposures$TechTitle
-   
-    Exposures$Locations <- locations
-    
-    Exposures$LowLim <- rowMins(as.matrix(Exposures[,colnames(Exposures) %in% c("Minimum","LowLim")]))
-    Exposures$UppLim <- rowMaxs(as.matrix(Exposures[,colnames(Exposures) %in% c("Maximum","UppLim")]))
-    
-    Exposures$xlowloc <- Exposures$LowLim
-    Exposures$xupploc <- Exposures$UppLim
-    # PlotData$comploc <- PlotData[,PortName]/100
-    # PlotData$comploc[PlotData$comploc < 0] <- 0
-    # PlotData$comploc[PlotData$comploc > 2] <- 2
-    
+<<<<<<< HEAD
     Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market
     # PlotData$complabel[PlotData$complabel>200]<-200
     # PlotData$complabel[PlotData$complabel<0]<-0    
+=======
+    # centre alignment line    # xmax
+    annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
+    annotate(geom="rect",xmin =-1,xmax=0,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour=Tar2DColour)+ # Box around the bars
+    # annotate(geom="rect",xmin = 0,xmax=0.001,ymin = 0.7,ymax=1.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 1.7,ymax=2.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.01,ymin = 2.7,ymax=3.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.019,ymin = 4.2,ymax=4.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.021,ymin = 5.2,ymax=5.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.004,ymin = 6.2,ymax=6.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.007,ymin = 7.7,ymax=8.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+    # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
+
+    # Company Circles
+    geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
+    annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
     
-    Exposures$complabel <-paste0(round(Exposures$comploc,0),"%")
-    Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
-    Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0)        
+    # Distribution Range 
+    annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
+    annotate(geom="text",x= 1.1, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour="black")+     # Maximum
     
-    Exposures$minlabel <- paste0(Exposures$minlabel, " %")
-    Exposures$maxlabel <- paste0(Exposures$maxlabel, " %")
+    # Ranking box and label
+    annotate("text", label = GT["RankTitle"][[1]], x= 1.5,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
+    annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.5,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
     
+<<<<<<< HEAD
     #Exposures$my_ranks[!is.na(Exposures$my_ranks)]<- round(Exposures$Rank[!is.na(Exposures$my_ranks)],0)
     Exposures <- Exposures %>% rename("my_ranks" = my_ranks.x)
     Exposures$my_ranks[is.na(Exposures$my_ranks)]<- "-"
     #Exposures$mx[is.na(Exposures$mx)]<- "-"
     GraphTitle <- GT["Rank_Title"][[1]]
+=======
+    theme(panel.background = element_rect(fill="transparent"),
+          panel.grid.major.x = element_blank() ,
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x=element_text(face="bold",colour="black", size=12),
+          axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
+          plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
     
-    repval = 200
-    redgreen<- colorRampPalette(c("red","white", "darkgreen"))(repval) 
-    xvals <- rep(seq(-1,1,2/(repval-1)),length(locations))
-    #xvals <- xvals[which(xvals<1)]
-    yvals <- sort(rep(locations,repval))
-    plotdf <- data.frame(x=xvals,y=yvals,w=2.05/repval,h=bh, colbar=rep(redgreen,length(locations)))
-    #plotdf <- plotdf[which(plotdf$x<1),]
+    leafloc <- c(11,12,2,3)
     
-    
-    #xmx<- as.numeric(aggregate(CarstenMetric_Port.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)[2][,1])
-    
-    outputplot <-    ggplot()+
-      geom_tile(data=plotdf, aes(x=x,y=y),height=plotdf$h,width=plotdf$w,fill=plotdf$colbar) +
-   
-      scale_x_continuous()+
-      scale_y_discrete()+
-      
-      # error lines
-      geom_segment(data=Exposures,aes(x=xlowloc, xend=xupploc,y=Locations,yend=Locations), linetype="dashed",colour="black")+
-      geom_point(data=Exposures,aes(x=xlowloc,y=Locations), fill="black",colour="black", size=2)+
-      geom_point(data=Exposures,aes(x=xupploc,y=Locations),  fill="black",colour="black",size=2)+
-    
-      # centre alignment line    # xmax
-      annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour=Tar2DColour ,fill = "transparent")+
-      annotate(geom="rect",xmin =-1,xmax=0,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour=Tar2DColour)+ # Box around the bars
-      # annotate(geom="rect",xmin = 0,xmax=0.001,ymin = 0.7,ymax=1.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 1.7,ymax=2.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.01,ymin = 2.7,ymax=3.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.019,ymin = 4.2,ymax=4.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.021,ymin = 5.2,ymax=5.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.004,ymin = 6.2,ymax=6.8,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.007,ymin = 7.7,ymax=8.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-      # 
-      # Company Circles
-      geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
-      annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
-     
-      
-      # Distribution Range 
-      annotate(geom="text",x= -1.1, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour="black")+     # Minimum
-      annotate(geom="text",x= 1.1, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour="black")+     # Maximum
-      
-      # Ranking box and label
-      annotate("text", label = GT["RankTitle"][[1]], x= 1.5,y = max(locations)+ 0.5, size=rel(3),fontface = "bold",colour="black")+ # Rank Heading
-      annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.5,hjust=0.5, y = locations,size=rel(3),fontface = "bold",colour="black")+ # Company Ranking
-      
-      theme(panel.background = element_rect(fill="transparent"),
-            panel.grid.major.x = element_blank() ,
-            panel.grid.major.y = element_blank(),
-            panel.grid.minor.y = element_blank(),
-            panel.grid.minor.x = element_blank(),
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x=element_text(face="bold",colour="black", size=12),
-            axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
-            plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
+    outputplot<-    outputplot+
+      labs(x=NULL,y= NULL)+
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],
+               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), 
+               size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],
+               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), 
+               size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
+      geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
     
-   
-      
-      leafloc <- c(11,12,2,3)
-      
-      outputplot<-    outputplot+
-        labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=-0.2,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
-        annotate(geom="text",x=-0.2,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
-        geom_hline(yintercept = c(3.75,7.25))
     
-      
-      #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
-      
-      graphheight <- 7.2
-   
-     
-
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_RankingChart.png", sep=""),bg="transparent",height=7.2,width=7,plot=outputplot)
     
-   #outputplot <- ggplot_gtable(ggplot_build(outputplot))
-   # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
-   # grid.draw(outputplot)  
   
-    print(outputplot)
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_RankingChart.png', sep=""),bg="transparent",height=7.2,width=7,plot=outputplot)
-    
-    
-  #return()
+
 }
+
+
 
 # -------- PORTFOLIO SUMMARY -------- #
 portfolio_pie_chart <- function(plotnumber,ChartType){                           
@@ -650,16 +629,88 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
     pieshare <- CBCombin
   }
   
+<<<<<<< HEAD
   PieChart<- ggplot(pieshare, aes(x="",y=WtProduction, fill=Sector))+
     geom_bar(stat = "identity",color=NA, width = 1)
+=======
+  # Data 
+ 
+  pieshare$Label <- "NeedsALabel"
+  pieshare$Colour <- RenewablesColour
+  pieshare$perc <- 20
   
-  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+  # PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+    # geom_bar(stat = "identity",color=NA, width = 1)
+  
+  # PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+  
+  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+    geom_bar(stat = "identity",color=NA, width = 0.5)+
+    geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
+    scale_fill_manual(values= pieshare$Colour,labels=paste(pieshare$Label,": ",pieshare$perc,"%",sep=""))+
+    guides(fill = guide_legend(override.aes = list(colour = NULL)))+
+    theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
+          axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA),
+          legend.text = element_text(size=textsize,colour="black"),
+          legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
+  
+  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
          bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
+<<<<<<< HEAD
   print(PieChart)
+=======
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   
 }
+
+
+# ------------- PORT DATA PIE --------------- #
+port_pie <- function(plotnumber, PortData){
+  
+  Port <- PortData
+  
+  Port <- subset(PortData, select = c("Bonds","Equity","Others"))
+  if(nrow(Port)>0){
+    SumPort <- sum(Port[1,1:3],na.rm = TRUE)
+    Port<- melt(Port)
+    Port<- rename(Port,c("variable"="Classification"))
+    Port$perc <- round(Port$value/SumPort,2)*100
+    
+    Palette <- data.frame(Classification = c("Bonds","Equity","Others"),Colour=c("dodgerblue4","dodgerblue1","grey"))
+    Palette$Colour <- as.character(Palette$Colour)
+    Port <- merge(Port,Palette, by="Classification")
+    
+    Port$Label <- lapply(Port$Classification, function(x) GT[paste0(x,"Title")][[1]])
+    
+    
+    PieChart<- ggplot(Port, aes(x="", y=perc, fill=Classification))+
+      geom_bar(stat = "identity",color=NA, width = 0.5)+
+      geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
+      scale_fill_manual(values= Port$Colour,labels=paste(Port$Label,": ",Port$perc,"%",sep=""))+
+      guides(fill = guide_legend(override.aes = list(colour = NULL)))+
+      theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
+            axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+            axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
+            plot.background = element_rect(fill = "transparent",colour = NA),
+            panel.background = element_rect(fill = "transparent",colour = NA),
+            legend.background = element_rect(fill = "transparent",colour = NA),
+            legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
+            legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
+    
+    PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
+    
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",'Portpie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
+  }
+  
+}
+
 
 sector_processing <- function(){
   
@@ -717,7 +768,7 @@ portfolio_sector_stack <- function(plotnumber){
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.05), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
@@ -733,8 +784,8 @@ portfolio_sector_stack <- function(plotnumber){
           legend.title=element_blank(),
           plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
     )
-  print(a)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
+  # print(a)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=10,plot=a,dpi=ppi)
 }
 
 exposure_summary <- function(plotnumber,ChartType){
@@ -767,9 +818,9 @@ exposure_summary <- function(plotnumber,ChartType){
     scale_fill_manual(values = colours, labels = labels) +
     theme_barcharts()
   
-  print(plot)
+  # print(plot)
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
-         bg="transparent",height=3.2,width=4.5,dpi=ppi)
+         bg="transparent",height=4,width=10,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
@@ -878,6 +929,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   
   distribution_chart(plotnumber, "Fossil", ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  
 }
 
 # ------------- TECH SHARE CHARTS ----------- #
@@ -922,12 +974,12 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     market$Sector <- recode(market$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = market$Sector)
   }
   
-  # if (SectorToPlot == "Oil"){
-  #   techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
-  #   CompProdSS <- subset(CompProdSS, Technology == "Oil")
-  #   combin <- subset(combin, Technology == "Oil")
-  #   market <- subset(market, Technology == "Oil")
-  # }
+  if (SectorToPlot == "Oil"){
+    techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
+    CompProdSS <- subset(CompProdSS, Technology == "Oil")
+    combin <- subset(combin, Technology == "Oil")
+    market <- subset(market, Technology == "Oil")
+  }
   
   if (nrow(combin) > 0) {
     CompProdSS <- subset(CompProdSS, Year == (Startyear+5))
@@ -1012,9 +1064,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       names(colors) <- techorder
     }
   
-    # if (SectorToPlot == "Oil"){
-    #   
-    # }
+    if (SectorToPlot == "Oil"){
+      
+    }
   
     PortfolioData <- subset(AllData, Classification == "Portfolio")
     
@@ -1039,8 +1091,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
   
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
+    
     ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=3.2,width=9.7,dpi=ppi)
+           bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
@@ -1111,7 +1164,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       p1 <- template %+% dat +
         ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))
       
-      print(p1)
+      # print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){
         SectorToPlot <- "FossilFuels"
@@ -1192,7 +1245,12 @@ Inputs246 <- function(ChartType, TechToPlot){
 
   Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
+<<<<<<< HEAD
   Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","InvestorName.x","Scenario.y"))
+=======
+  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Tot.Build.Out","InvestorName.x","Scenario.y"))
+  ### CHECK "Plan.Tot.Build.Out" or "Plan.Cum.Build.Out"
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
   Combin <- subset(Combin,Scenario.y %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
@@ -1261,11 +1319,6 @@ Inputs246 <- function(ChartType, TechToPlot){
     MarketBuildOut$Label <- "Debt Market"
 
   }
-
-  ### Global Economy Data
-  ### To include or not to include...
-
-
 
   ### Inputs to the 246 chart.
 
@@ -1346,9 +1399,11 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   # 
 
   # 
-  LineColours <- c(eq_port, stock_market,peer_group,"pink")
+  LineColours <- c(YourportColour, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-
+  
+  linesize=1
+  
   year_lab = Startyear
   LineVector <- setNames(LineColours,LinesToPlot)
 
@@ -1453,11 +1508,16 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   }}
   
  
-  print(outputplot)
+  # print(outputplot)
 
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> f1de3d6afaa0990b4ebc404aef39c3d2d21d1efa
 }
                           
