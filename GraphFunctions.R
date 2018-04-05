@@ -98,6 +98,15 @@ CAReport <- function(){
     return(text)
   }
   
+  # Remove sectors 
+  if (!HasEquity){
+    text <- removetextlines("EQSpecific")
+  }
+
+  if (!HasDebt){
+    text <- removetextlines("CBSpecific")
+  }  
+  
   # Replace Sector Weight Values
   a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
   for (j in 1:nrow(a)){
@@ -110,10 +119,6 @@ CAReport <- function(){
   text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   
   # Figures
-  # Replace CAFigures
-  
-  # Update the template to reflect figure names
-  
   FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
   colnames(FigNames) <- "Name"
   FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
@@ -334,7 +339,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     coord_cartesian(ylim=c(0,min(1, 1.5*max(filter(dfagg,Metric!="Unexposed")$Value))))+
     theme_distribution()
   
-  print(distribution_plot)
+  # print(distribution_plot)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
          height=4,width=10,plot=distribution_plot,dpi=ppi)
   
@@ -549,8 +554,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
     # annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
     # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-    # 
-  # Company Circles
+
+    # Company Circles
     geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
     annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
     
@@ -573,31 +578,29 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
           axis.title.x=element_text(face="bold",colour="black", size=12),
           axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
           plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
-  
-  
     
     leafloc <- c(11,12,2,3)
     
     outputplot<-    outputplot+
       labs(x=NULL,y= NULL)+
-      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
-      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],
+               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), 
+               size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],
+               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), 
+               size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
     
-    #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
     
-    graphheight <- 7.2
-  
-  
- 
-
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_RankingChart.png", sep=""),bg="transparent",height=7.2,width=7,plot=outputplot)
+    
   
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
-  # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
-  # grid.draw(outputplot)  
-  print(outputplot)
-  #return()
+  # outputplot$layout$clip[outputplot$layout$name =#= "panel"] <- "off"
+  # grid.draw(outputplot)
+  # print(outputplot)
+  return()
 }
 
 
@@ -611,15 +614,79 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
     pieshare <- CBCombin
   }
   
-  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
-    geom_bar(stat = "identity",color=NA, width = 1)
+  # Data 
+ 
+  pieshare$Label <- "NeedsALabel"
+  pieshare$Colour <- RenewablesColour
+  pieshare$perc <- 20
   
-  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+  # PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+    # geom_bar(stat = "identity",color=NA, width = 1)
+  
+  # PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
+  
+  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+    geom_bar(stat = "identity",color=NA, width = 0.5)+
+    geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
+    scale_fill_manual(values= pieshare$Colour,labels=paste(pieshare$Label,": ",pieshare$perc,"%",sep=""))+
+    guides(fill = guide_legend(override.aes = list(colour = NULL)))+
+    theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
+          axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA),
+          legend.text = element_text(size=textsize,colour="black"),
+          legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
+  
+  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
          bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
   
 }
+
+
+# ------------- PORT DATA PIE --------------- #
+port_pie <- function(plotnumber, PortData){
+  
+  Port <- PortData
+  
+  Port <- subset(PortData, select = c("Bonds","Equity","Others"))
+  if(nrow(Port)>0){
+    SumPort <- sum(Port[1,1:3],na.rm = TRUE)
+    Port<- melt(Port)
+    Port<- rename(Port,c("variable"="Classification"))
+    Port$perc <- round(Port$value/SumPort,2)*100
+    
+    Palette <- data.frame(Classification = c("Bonds","Equity","Others"),Colour=c("dodgerblue4","dodgerblue1","grey"))
+    Palette$Colour <- as.character(Palette$Colour)
+    Port <- merge(Port,Palette, by="Classification")
+    
+    Port$Label <- lapply(Port$Classification, function(x) GT[paste0(x,"Title")][[1]])
+    
+    
+    PieChart<- ggplot(Port, aes(x="", y=perc, fill=Classification))+
+      geom_bar(stat = "identity",color=NA, width = 0.5)+
+      geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
+      scale_fill_manual(values= Port$Colour,labels=paste(Port$Label,": ",Port$perc,"%",sep=""))+
+      guides(fill = guide_legend(override.aes = list(colour = NULL)))+
+      theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
+            axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+            axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
+            plot.background = element_rect(fill = "transparent",colour = NA),
+            panel.background = element_rect(fill = "transparent",colour = NA),
+            legend.background = element_rect(fill = "transparent",colour = NA),
+            legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
+            legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
+    
+    PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
+    
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",'Portpie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
+  }
+  
+}
+
 
 sector_processing <- function(){
   
@@ -677,7 +744,7 @@ portfolio_sector_stack <- function(plotnumber){
     geom_bar(stat = "identity",width = .6)+
     theme_minimal()+
     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.3), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.05), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
@@ -693,7 +760,7 @@ portfolio_sector_stack <- function(plotnumber){
           legend.title=element_blank(),
           plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
     )
-  print(a)
+  # print(a)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=10,plot=a,dpi=ppi)
 }
 
@@ -727,7 +794,7 @@ exposure_summary <- function(plotnumber,ChartType){
     scale_fill_manual(values = colours, labels = labels) +
     theme_barcharts()
   
-  print(plot)
+  # print(plot)
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
          bg="transparent",height=4,width=10,dpi=ppi)
 }
@@ -838,6 +905,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   
   distribution_chart(plotnumber, "Fossil", ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  
 }
 
 # ------------- TECH SHARE CHARTS ----------- #
@@ -882,12 +950,12 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     market$Sector <- recode(market$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = market$Sector)
   }
   
-  # if (SectorToPlot == "Oil"){
-  #   techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
-  #   CompProdSS <- subset(CompProdSS, Technology == "Oil")
-  #   combin <- subset(combin, Technology == "Oil")
-  #   market <- subset(market, Technology == "Oil")
-  # }
+  if (SectorToPlot == "Oil"){
+    techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
+    CompProdSS <- subset(CompProdSS, Technology == "Oil")
+    combin <- subset(combin, Technology == "Oil")
+    market <- subset(market, Technology == "Oil")
+  }
   
   if (nrow(combin) > 0) {
     CompProdSS <- subset(CompProdSS, Year == (Startyear+5))
@@ -972,9 +1040,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       names(colors) <- techorder
     }
   
-    # if (SectorToPlot == "Oil"){
-    #   
-    # }
+    if (SectorToPlot == "Oil"){
+      
+    }
   
     PortfolioData <- subset(AllData, Classification == "Portfolio")
     
@@ -999,6 +1067,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
   
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
+    
     ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
@@ -1071,7 +1140,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       p1 <- template %+% dat +
         ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))
       
-      print(p1)
+      # print(p1)
       
       if (SectorToPlot == "Fossil Fuels"){
         SectorToPlot <- "FossilFuels"
@@ -1152,7 +1221,8 @@ Inputs246 <- function(ChartType, TechToPlot){
 
   Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
-  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Build.Out","InvestorName.x","Scenario.y"))
+  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Tot.Build.Out","InvestorName.x","Scenario.y"))
+  ### CHECK "Plan.Tot.Build.Out" or "Plan.Cum.Build.Out"
   Combin <- subset(Combin,Scenario.y %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
@@ -1221,11 +1291,6 @@ Inputs246 <- function(ChartType, TechToPlot){
     MarketBuildOut$Label <- "Debt Market"
 
   }
-
-  ### Global Economy Data
-  ### To include or not to include...
-
-
 
   ### Inputs to the 246 chart.
 
@@ -1307,9 +1372,11 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   # 
 
   # 
-  LineColours <- c(eq_port, stock_market,peer_group,"pink")
+  LineColours <- c(YourportColour, stock_market,peer_group,"pink")
   LineColours <- LineColours[1: length(LinesToPlot)]
-
+  
+  linesize=1
+  
   year_lab = Startyear
   LineVector <- setNames(LineColours,LinesToPlot)
 
@@ -1414,7 +1481,7 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   }}
   
  
-  print(outputplot)
+  # print(outputplot)
 
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)

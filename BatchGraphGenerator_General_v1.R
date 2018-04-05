@@ -282,28 +282,26 @@ for (i in c(1:5,326)){
       
       if (HasEquity) {
       portfolio_pie_chart("02", "EQ")
+      exposure_summary("06", "EQ")  
+      sector_techshare("09","EQ","All")
+      Fossil_Distribution(11, "EQ")
         }
       
       if (HasDebt) {      
       portfolio_pie_chart("03", "CB")
+      exposure_summary("07", "CB")  
+      sector_techshare(10,"CB","All")
+      Fossil_Distribution(12, "CB")  
+      Risk_Distribution(13, "CB")
         }
 
-      Graph246("04", "CB", "Oil") #Needs to be both
-      Graph246("05", "CB", "Gas") #Needs to be both
-      
-      exposure_summary("06", "EQ")
-      exposure_summary("07", "CB")
+      # I don't think there's space - and the CB/EQ problem reemerges. 
+      # Graph246("04", "CB", "Oil") 
+      # Graph246("05", "CB", "Gas") 
       
       #Current Exposure
-      portfolio_sector_stack("08")
-      
-      sector_techshare("09","EQ","All")
-      sector_techshare(10,"CB","All")
-      
-      Fossil_Distribution(11, "EQ")
-      Fossil_Distribution(12, "CB")
-      
-      Risk_Distribution(13, "CB")
+      # portfolio_sector_stack("08") 
+      # We can just use 01 twice
       
       #5 Year Trajectory
       if (HasEquity) {
@@ -330,10 +328,10 @@ for (i in c(1:5,326)){
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
-        ranking_chart_alignment(30, "EQ", "All") #Carstens Metric
+        ranking_chart_alignment(30, "EQ") #Carstens Metric
       }
       if (HasDebt) {
-        ranking_chart_alignment(31, "CB", "All") #Carstens Metric
+        ranking_chart_alignment(31, "CB") #Carstens Metric
       }
       
       #Company Exposure
@@ -347,25 +345,31 @@ for (i in c(1:5,326)){
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
           company_techshare(34, 20, "EQ", "Fossil Fuels")
         }
+        # We need this one too! 
+        # Carbon Tracker data. 
         # if (PortSummary$HasOilGas.EQ) {
         # company_techshare(35, 20, "EQ", "Oil")
         # }
       }
-# 
-#       if (HasDebt) {
-#         if (PortSummary$HasPower.CB){
-#           company_techshare(34, 20, "CB", "Power")
-#         }
-#         if (PortSummary$HasAuto.CB) {
-#           company_techshare(35, 20, "CB", "Automotive")
-#         }
-#         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-#           company_techshare(36, 20, "CB", "Fossil Fuels")
-#         }
-#         # if (PortSummary$HasOilGas.CB) {
-#           # company_techshare(35, 20, "CB", "Oil")
-#         # }
-#       }
+
+      
+      # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
+      if (HasDebt & !HasEquity) {
+        if (PortSummary$HasPower.CB){
+          company_techshare(32, 20, "CB", "Power")
+        }
+        if (PortSummary$HasAuto.CB) {
+          company_techshare(33, 20, "CB", "Automotive")
+        }
+        if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
+          company_techshare(34, 20, "CB", "Fossil Fuels")
+        }
+        
+        # We need this one too! 
+        # if (PortSummary$HasOilGas.CB) {
+        #   company_techshare(35, 20, "CB", "Oil")
+        # }
+      }
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
@@ -376,9 +380,9 @@ for (i in c(1:5,326)){
       
      
       # Creates the report for California
-      system.time(
+      # system.time(
       CAReport()
-      )
+      # )
       
       
     })}else{
