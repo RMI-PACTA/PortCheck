@@ -1282,6 +1282,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     Production$Sector<-as.factor(Production$Sector)
     
     Production$Type <- wrap.labels(Production$Type,20)
+    Production$Type <- factor(Production$Type, levels=c("Your Portfolio","MetaPortfolio","Market"))
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
