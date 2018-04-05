@@ -214,6 +214,35 @@ FundPortcheck <- function(PortsToTest,PortfolioList){
   return(testlist)
 }
 
+CreateTestList <- function(EQBatchTest, CBBatchTest) {
+  ID.COLS <- c("PortName","InvestorName","Type")
+  
+  Equity <- filter(EQBatchTest, Year == 2018)
+  Equity <- dcast(Equity, PortName ~ Sector, sum, value.var = "WtProduction")
+  Equity <- mutate(Equity, "HasCoal" = Coal > 0,
+                   "HasOilGas" = `Oil&Gas` > 0,
+                   "HasPower" = Power > 0,
+                   "HasAuto" = Automotive > 0)
+  Equity <- merge(Equity,unique(subset(EQBatchTest, select=c(ID.COLS))),by="PortName")
+  Equity$HasEquity <- TRUE
+  
+  Debt <- filter(CBBatchTest, Year == 2018)
+  Debt <- dcast(Debt, PortName ~ Sector, sum, value.var = "WtProduction")
+  Debt <- mutate(Debt, "HasCoal" = Coal > 0,
+                 "HasOilGas" = `Oil&Gas` > 0,
+                 "HasPower" = Power > 0,
+                 "HasAuto" = Automotive > 0)
+  Debt <- merge(Debt,unique(subset(CBBatchTest, select=c(ID.COLS))),by="PortName")
+  Debt$HasDebt <- TRUE
+  
+  TestList <- merge(Equity,Debt,by=ID.COLS, all=T)
+  TestList[is.na(TestList)] <- FALSE
+  colnames(TestList) <- gsub("\\.x",".EQ",colnames(TestList))
+  colnames(TestList) <- gsub("\\.y",".CB",colnames(TestList))
+  
+  return(TestList)
+}
+
 # ----------- Filter Funds ------------------ #
 filterfunds <- function(nofunds,FundsData){
   FundsDataShort <- unique(subset(FundsData, select=c("PortName","PortAUM")))
