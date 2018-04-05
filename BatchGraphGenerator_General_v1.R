@@ -119,15 +119,6 @@ print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), 
 
 EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
 
-# Remove later
-InvestorName <- gsub(" ","",unique(CBBatchTest$InvestorName))
-EQBatchTest$PortName <- gsub(" ", "", EQBatchTest$PortName, fixed=TRUE)
-# EQBatchTest_PortSnapshots$PortName <- gsub(" ", "", EQBatchTest_PortSnapshots$PortName, fixed=TRUE)
-EQCompProdSnapshots$PortName <- gsub(" ", "", EQCompProdSnapshots$PortName, fixed=TRUE)
-CBBatchTest$PortName <- gsub(" ", "", CBBatchTest$PortName, fixed=TRUE)
-CBBatchTest_PortSnapshots$PortName <- gsub(" ", "", CBBatchTest_PortSnapshots$PortName, fixed=TRUE)
-CBCompProdSnapshots$PortName <- gsub(" ", "", CBCompProdSnapshots$PortName, fixed=TRUE)
-
 # Comparison Flags
 EQBatchTest$Type <- "Portfolio"
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
@@ -219,8 +210,8 @@ for (i in c(1:5,326)){
   
   PortSummary <- TestList[i,]
   
-  PortfolioNameLong <- TestList[i,"PortName"]
   TestType <- TestList[i,"Type"]
+  PortfolioNameLong <- TestList[i,"PortName"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
   PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
