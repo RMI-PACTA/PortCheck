@@ -608,7 +608,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 
 
 
-ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
+ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
   
   if (ChartType == "EQ"){
