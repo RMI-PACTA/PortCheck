@@ -295,27 +295,14 @@ for (i in c(1:5,326)){
       # We can just use 01 twice
       
       #5 Year Trajectory
-      if (HasEquity) {
-        Graph246("14", "EQ", "CoalCap")
-        Graph246("15", "EQ", "RenewablesCap")
-        Graph246("16", "EQ", "GasCap")
-        Graph246("17", "EQ", "NuclearCap")
-        Graph246("18", "EQ", "Oil")
-        Graph246("19", "EQ", "Gas")
-        Graph246("20", "EQ", "ICE")
-        Graph246("21", "EQ", "Electric")
-      }
-      
-      if (HasDebt) {
-        Graph246("22", "CB", "CoalCap")
-        Graph246("23", "CB", "RenewablesCap")
-        Graph246("24", "CB", "GasCap")
-        Graph246("25", "CB", "NuclearCap")
-        Graph246("26", "CB", "Oil")
-        Graph246("27", "CB", "Gas")
-        Graph246("28", "CB", "ICE")
-        Graph246("29", "CB", "Electric")
-      }
+      Graph246("14", "CoalCap")
+      Graph246("15", "RenewablesCap")
+      Graph246("16", "GasCap")
+      Graph246("17", "NuclearCap")
+      Graph246("18", "Oil")
+      Graph246("19", "Gas")
+      Graph246("20", "ICE")
+      Graph246("21", "Electric")
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
