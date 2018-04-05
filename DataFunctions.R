@@ -479,7 +479,7 @@ SetGraphInputs <- function(){
   OilProdColour <<-"#00677f"
   GasProdColour <<-"#a7c5d1"
   CoalProdColour <<- "#004335"
-  
+
   #sector
   energy<<-"#0090b2"
   pow <<- "#2348a1"
@@ -494,7 +494,11 @@ SetGraphInputs <- function(){
   eq_port <<- "#1056ff"
   stock_market<<- "black"
   peer_group <<- "black"
-  
+
+  #moodys
+  HighRisk <<- area_6
+  MedRisk <<- area_4_6
+    
   #text size
   textsize <<- 8
   

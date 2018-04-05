@@ -233,7 +233,6 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         axis.line = element_line(colour = "black",size=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        #panel.background = element_rect(fill = "skyblue",color = NA),
         legend.title = element_blank(),
         legend.position = "bottom",
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
@@ -250,7 +249,7 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
   dfagg <- aggregate(df["Value"],by=df[c("PortName","Metric", "Type")],FUN=sum)
-  dfagg[dfagg$Type == LineHighl, "Metric"] <- "Reference"
+  #dfagg[dfagg$Type == LineHighl, "Metric"] <- "Reference"
   dfagg[dfagg$PortName == PortName,"Metric"] <- "Comparison"
   dfagg$Value <- as.numeric(dfagg$Value)
   
@@ -265,19 +264,20 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
   
   order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
   dfagg$PortName <- factor(dfagg$PortName, levels=unique(order$PortName))
-  dfagg$Metric <- factor(dfagg$Metric, levels=c("Unexposed",MetricCol,"Comparison","Reference"))
+  dfagg <- filter(dfagg, Metric != "Unexposed")
+  dfagg$Metric <- factor(dfagg$Metric, levels=c(MetricCol,"Comparison","Reference"))
   
   x_coord <- length(unique(order$PortName))
   
   distribution_plot<- ggplot(filter(dfagg, Metric != "Reference"))+
     geom_bar(aes(x=PortName, y=Value, fill=Metric),
-             stat = "identity", position = "fill", width=1)+
+             stat = "identity", width=1)+
     scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol,"Comparison"))+
-    geom_hline(data=filter(dfagg, Metric == "Reference"),
-               aes(yintercept=Value),color=LineColors,linetype=2)+
-    geom_text(data=filter(dfagg, Metric == "Reference"),
-              aes(y=Value),x=x_coord,label=LineLabels,
-              color="white",vjust=-.2,hjust=1)+
+    # geom_hline(data=filter(dfagg, Metric == "Reference"),
+    #            aes(yintercept=Value),color=LineColors,linetype=2)+
+    # geom_text(data=filter(dfagg, Metric == "Reference"),
+    #           aes(y=Value),x=x_coord,label=LineLabels,
+    #           color="white",vjust=-.2,hjust=1)+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
     expand_limits(0,0)+
@@ -285,13 +285,13 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     ggtitle(Title)+
     xlab(paste0("California Insurers"))+
     ylab(MetricName)+
-    coord_cartesian(ylim=c(0,min(1, 1.5*max(filter(dfagg,Metric!="Unexposed")$Value))))+
+    coord_cartesian(ylim=c(0,min(1, 1.5*max(dfagg$Value))))+
     theme_distribution()
   
   
-  # print(distribution_plot)
+  print(distribution_plot)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
-         height=4,width=10,plot=distribution_plot,dpi=ppi)
+         height=4,width=10,plot=distribution_plot,dpi=ppi, bg="transparent")
 
   
 }
@@ -528,7 +528,6 @@ ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_rankingchart.png', sep="")
   print(outputplot)
   #return()
 }
-
 
 ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
@@ -993,7 +992,7 @@ Carstens_Distribution <- function(plotnumber, ChartType){
 
 Risk_Distribution <- function(plotnumber, ChartType){
   Title <- "Risk Exposure of Portfolios"
-  MetricCol <- c("Risk2", "Risk1")
+  MetricCol <- c("Risk1", "Risk2")
   if(ChartType == "CB") {
     PortSS <- CBBatchTest_PortSnapshots
   } else if (ChartType == "EQ") {
@@ -1024,9 +1023,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName", "Type")
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   
-  BarColors <- c("Orange","Red", "Black", "White")
-  names(BarColors) <- c(MetricCol,"Comparison", "Unexposed")
-  Labels <- c("Elevated Risk", "Substantial Risk", "Your Portfolio")
+  BarColors <- c(HighRisk, MedRisk, "Black")
+  names(BarColors) <- c(MetricCol,"Comparison")
+  Labels <- c("Immediate Elevated", "Emerging Elevated", "Your Portfolio")
   
   LineHighl <- c("MetaPortfolio")
   LineLabels <- c("Average")
@@ -1050,15 +1049,13 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   #Tag Target portfolio, benchmark
   Batch <- subset(Batch, Year == Startyear & Sector %in% c("Coal","Oil&Gas"),
                        select=c("PortName","Technology","CarstenMetric_Port","Type"))
-  ID.COLS = c("PortName","Type")
-  MetricCol <- c("CarstenMetric_Port")
+  ID.COLS = c("PortName","Type","Technology")
+  MetricCol <- "CarstenMetric_Port"
   
-  BarColors <- c("Grey", "Black", "White")
-  names(BarColors) <- c(MetricCol,"Comparison", "Unexposed")
+  BarColors <- c(energy, "Black")
+  names(BarColors) <- c(MetricCol,"Comparison")
   Labels <- c("Fossil Fuels", "Your Portfolio")
-  df <- unique(subset(Batch, select = c(ID.COLS,"CarstenMetric_Port","Technology")))
-  df <- spread(df, "Technology", "CarstenMetric_Port", fill = 0) 
-  
+  df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
   
   LineHighl <- c("MetaPortfolio")
   LineLabels <- c("Average")
@@ -1129,7 +1126,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Portfolio (Weighted by the AUM)
     Portfoliomix <- subset(combin, select=c("Technology","WtProduction"))
     Portfoliomix$Classification <- "Portfolio"
-    Portfoliomix$Name <- PortfolioNameLong
+    Portfoliomix$Name <- "Your Portfolio"
     Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","WtProduction"))
     Portfoliomix$WtProduction <- Portfoliomix$WtProduction / sum(Portfoliomix$WtProduction) * 100
     colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
@@ -1282,7 +1279,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     Production$Sector<-as.factor(Production$Sector)
     
     Production$Type <- wrap.labels(Production$Type,20)
-    Production$Type <- factor(Production$Type, levels=c("Your Portfolio","MetaPortfolio","Market"))
+    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
