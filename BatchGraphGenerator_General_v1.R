@@ -278,21 +278,21 @@ for (i in c(1:20,326)){
       #######################
       
       #Introduction
-      portfolio_sector_stack(1)
+      portfolio_sector_stack("01")
       
-      portfolio_pie_chart(2, "EQ")
-      portfolio_pie_chart(3, "CB")
+      portfolio_pie_chart("02", "EQ")
+      portfolio_pie_chart("03", "CB")
 
-      Graph246(4, "CB", "Oil") #Needs to be both
-      Graph246(5, "CB", "Gas") #Needs to be both
+      Graph246("04", "CB", "Oil") #Needs to be both
+      Graph246("05", "CB", "Gas") #Needs to be both
       
-      exposure_summary(6, "EQ")
-      exposure_summary(7, "CB")
+      exposure_summary("06", "EQ")
+      exposure_summary("07", "CB")
       
       #Current Exposure
-      portfolio_sector_stack(8)
+      portfolio_sector_stack("08")
       
-      sector_techshare(9,"EQ","All")
+      sector_techshare("09","EQ","All")
       sector_techshare(10,"CB","All")
       
       Fossil_Distribution(11, "EQ")

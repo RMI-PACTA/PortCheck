@@ -18,7 +18,7 @@ CAReportData <- function(){
   # Output is a dataframe with the values for the text
   
   ### Exec Summary Data ###
-  ReportInsuranceName <- PortfolioNameLong
+  InsuranceCompanyName <- PortfolioNameLong
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
   SizeofPortfolio <-10000000
   
@@ -46,26 +46,9 @@ CAReportData <- function(){
   AutoSectorPortCB <- 4
   
   
-  ### RANKINGS ###
-  
-  # EQPortRanks <- EQRanks[EQRanks$PortName == PortName,] 
-  # EQPeerRanks <- data.frame(t(colSums(!is.na(EQRanks))))
-  # EQPeerRanks$PortName <- "PeerTotal"
-  # techlist <- unlist(colnames(EQPortRanks)[2:12])
-  # EQReportRanks <- as.data.frame(lapply(techlist,function(x) paste0(EQPortRanks[[as.character(x)]], " of ", EQPeerRanks[[as.character(x)]])))
-  # colnames(EQReportRanks) <- techlist
-  # 
-  # CBPortRanks <- CBRanks[CBRanks$PortName == PortName,] 
-  # CBPeerRanks <- data.frame(t(colSums(!is.na(CBRanks))))
-  # CBPeerRanks$PortName <- "PeerTotal"
-  # techlist <- unlist(colnames(CBPortRanks)[2:12])
-  # CBReportRanks <- lapply(techlist,function(x) paste0(CBPortRanks[[as.character(x)]], " of ", CBPeerRanks[[as.character(x)]]))
-  # colnames(CBReportRanks) <- paste0("CB",techlist)
-  # 
-  
   ### MERGE ALL RESULTS ###
   reportdata <<- data.frame(
-           c("ReportInsuranceName",ReportInsuranceName),
+           c("InsuranceCompanyName",InsuranceCompanyName),
            c("SizeofPortfolio",SizeofPortfolio),
            c("NoPeers",NoPeers),
            c("FFSectorPortEQ",FFSectorPortEQ),
@@ -88,7 +71,7 @@ CAReportData <- function(){
 
 CAReport <- function(){
   
-  CAReportData()
+  reportdata <-CAReportData()
   
   # Copy in the template for the report
   text <- as.data.frame(template,stringsAsFactors = FALSE)  
@@ -115,45 +98,31 @@ CAReport <- function(){
     return(text)
   }
   
-  
-  # Ranks
-  # techranks <- data.frame( "CoalCap", "NuclearCap", "RenewablesCap", "GasCap", "ICE","Electric", "Oil","Gas")
-  # for (j in techranks){
-  #   text$text <- gsub(as.character(paste0("EQ",techranks[[j]],"Rank")),EQReportRanks[,as.character(techranks[[j]])],text$text)
-  # }
-  # for (j in techranks){
-  #   text$text <- gsub(as.character(paste0("CB",techranks[[j]],"Rank")),CBReportRanks[,as.character(techranks[[j]])],text$text)
-  # }
-  # 
-  # Exec Summary Values
-  execsummarylist <- data.frame("ReportInsuranceName","SizeofPortfolio","NoPeers")
-  for (j in execsummarylist){
-    text$text <- gsub(j,eval(as.symbol(as.character(j))),text$text)
-  }
-  
   # Replace Sector Weight Values
   a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
   for (j in 1:nrow(a)){
-    text$text <- gsub(as.character(a$SectorList[j]),round(eval(as.symbol(as.character(a$SectorList[j])))*100,1),text$text)
+    text$text <- gsub(as.character(a$SectorList[j]),reportdata[as.character(a$SectorList[j])][[1]],text$text)
   }  
   
   # Replace Insurer Name
-  text$text <- gsub("InsurerSampleReport",PortfolioNameLong,text$text)
+  text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
+  text$text <- gsub("SizeofPortfolio",reportdata$SizeofPortfolio,text$text)
+  text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   
   # Figures
   # Replace CAFigures
   
   # Update the template to reflect figure names
   
-  # FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
-  # colnames(FigNames) <- "Name"
-  # FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
-  # FigNames$Fig <- substring(FigNames$Name,1,2)
-  # FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
-  # 
-  # for (f in 1:nrow(FigNames)){
-  #   text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
-  # }
+  FigNames<-as.data.frame(readLines("FigureList.txt",skipNul = TRUE))
+  colnames(FigNames) <- "Name"
+  FigNames$Name <- gsub("\"","",as.character(FigNames$Name))
+  FigNames$Fig <- substring(FigNames$Name,1,2)
+  FigNames$Fig <- paste0("CAFigures/Fig",FigNames$Fig)
+
+  for (f in 1:nrow(FigNames)){
+    text$text <- gsub(FigNames$Fig[f],FigNames$Name[f],text$text,fixed = TRUE)
+  }
   
   
   ##### PRINT REPORT ######
@@ -1451,6 +1420,6 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
 
 
 
-<<<<<<< HEAD
+
 }
                           
