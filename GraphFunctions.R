@@ -342,16 +342,15 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
   
   x_coord <- length(unique(order$PortName))
   
-  distribution_plot<- ggplot(dfagg)+
-    geom_bar(data=subset(dfagg, dfagg$Metric != "Reference"),
-             aes(x=PortName, y=Value, fill=Metric),
+  distribution_plot<- ggplot(filter(dfagg, Metric != "Reference"))+
+    geom_bar(aes(x=PortName, y=Value, fill=Metric),
              stat = "identity", position = "fill", width=1)+
-    scale_fill_manual(values=BarColors,labels=Labels,breaks=c(MetricCol,"Comparison"))+
-    # geom_hline(data=subset(dfagg, dfagg$Metric == "Reference"),
-    #            aes(yintercept=Value),color=LineColors,linetype=2)+
-    # geom_text(data=subset(dfagg, dfagg$Metric == "Reference"),
-    #           aes(y=Value),x=x_coord,label=LineLabels,
-    #           color="white",vjust=-.2,hjust=1)+
+    scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol,"Comparison"))+
+    geom_hline(data=filter(dfagg, Metric == "Reference"),
+               aes(yintercept=Value),color=LineColors,linetype=2)+
+    geom_text(data=filter(dfagg, Metric == "Reference"),
+              aes(y=Value),x=x_coord,label=LineLabels,
+              color="white",vjust=-.2,hjust=1)+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
     expand_limits(0,0)+
@@ -363,7 +362,8 @@ distribution_chart <- function(plotnumber, MetricName, ChartType, df, ID.COLS, M
     theme_distribution()
   
   print(distribution_plot)
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",MetricName,'_Distribution.png', sep=""),
+         height=3.6,width=3.6,plot=distribution_plot,dpi=ppi*2)
   
 }
 
@@ -533,7 +533,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     # PlotData$comploc[PlotData$comploc < 0] <- 0
     # PlotData$comploc[PlotData$comploc > 2] <- 2
     
-    Exposures$comploc<-Exposures$Exp.Carsten.Market
+    Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market
     # PlotData$complabel[PlotData$complabel>200]<-200
     # PlotData$complabel[PlotData$complabel<0]<-0    
     
@@ -545,6 +545,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     Exposures$maxlabel <- paste0(Exposures$maxlabel, " %")
     
     #Exposures$my_ranks[!is.na(Exposures$my_ranks)]<- round(Exposures$Rank[!is.na(Exposures$my_ranks)],0)
+    Exposures <- Exposures %>% rename("my_ranks" = my_ranks.x)
     Exposures$my_ranks[is.na(Exposures$my_ranks)]<- "-"
     #Exposures$mx[is.na(Exposures$mx)]<- "-"
     GraphTitle <- GT["Rank_Title"][[1]]
@@ -649,13 +650,13 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
     pieshare <- CBCombin
   }
   
-  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
+  PieChart<- ggplot(pieshare, aes(x="",y=WtProduction, fill=Sector))+
     geom_bar(stat = "identity",color=NA, width = 1)
   
   PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
-         bg="transparent",height=4,width=4,plot=a,dpi=ppi)
+         bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
   print(PieChart)
   
 }
@@ -785,7 +786,7 @@ Carstens_Distribution <- function(plotnumber, ChartType){
   
   BarColors <- c("Grey", "Black")
   names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Exposed", PortName)
+  Labels <- c("Exposed", "Your Portfolio")
   df <- unique(subset(BatchTest, Year == Startyear, 
                       select = c(ID.COLS,MetricCol)))
   
@@ -833,9 +834,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName", "Type")
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   
-  BarColors <- c("Orange","Red", "Black")
+  BarColors <- c("Orange","Red", "Black", "White")
   names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Elevated Risk", "Substantial Risk", PortName)
+  Labels <- c("Elevated Risk", "Substantial Risk", "Your Portfolio")
   
   LineHighl <- c("MetaPortfolio")
   LineLabels <- c("Average")
@@ -862,9 +863,9 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   ID.COLS = c("PortName","Type")
   MetricCol <- c("Coal","Gas","Oil")
   
-  BarColors <- c(CoalProdColour, GasProdColour, OilProdColour, "Black")
+  BarColors <- c(CoalProdColour, GasProdColour, OilProdColour, "Black", "White")
   names(BarColors) <- c(MetricCol,"Comparison")
-  Labels <- c("Coal", "Gas", "Oil", PortName)
+  Labels <- c("Coal", "Gas", "Oil", "Your Portfolio")
   df <- unique(subset(Batch, select = c(ID.COLS,"CarstenMetric_Port","Technology")))
   df <- spread(df, "Technology", "CarstenMetric_Port", fill = 0) 
   
@@ -1092,7 +1093,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
-    Production$Type <- factor(Production$Type)
+    #Production$Type <- factor(Production$Type)
 
     Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
     colnames(Production) <- c("item", "family", "score", "value")
@@ -1191,7 +1192,7 @@ Inputs246 <- function(ChartType, TechToPlot){
 
   Aldprod$PortName <- gsub(" ", "", Aldprod$PortName, fixed=TRUE)
   Combin<- merge(Combin,Aldprod, by =c("PortName","Technology","Year"))
-  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","Plan.Build.Out","InvestorName.x","Scenario.y"))
+  Combin <- subset(Combin,select=c("PortName","Technology","Year","Sector.x","Plan.Pct.Build.Out","InvestorName.x","Scenario.y"))
   Combin <- subset(Combin,Scenario.y %in% Scenariochoose)
   ### Function to calculate the % Build Out over 5 years
   ### data frame needs Year, Prod and TargetProd and a label for the Chart
@@ -1291,7 +1292,6 @@ Inputs246 <- function(ChartType, TechToPlot){
 
 Graph246 <- function(plotnumber, ChartType, TechToPlot){
    
-
   if (ChartType == "EQ"){
     BatchTest <- EQBatchTest
     Combin <- EQCombin
@@ -1459,7 +1459,5 @@ Graph246 <- function(plotnumber, ChartType, TechToPlot){
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
 
 
-
-<<<<<<< HEAD
 }
                           

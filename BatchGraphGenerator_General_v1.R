@@ -244,10 +244,10 @@ for (i in c(1:20,326)){
     EQCompProdSnapshot$Type <- "Portfolio"
     CBCombin$Type <- "Portfolio"
     
-    PortName <- "Meta Portfolio"
+    # PortName <- "Meta Portfolio"
   }else if (TestType == "Portfolio") {
     ReportName <- paste0(InvestorNameLong,": ",PortfolioNameLong)
-    PortName <- "Your Portfolio"
+    # PortName <- "Your Portfolio"
   }else {
     return()
   }
@@ -279,16 +279,20 @@ for (i in c(1:20,326)){
       
       #Introduction
       portfolio_sector_stack(1)
-      
-      portfolio_pie_chart(2, "EQ")
-      portfolio_pie_chart(3, "CB")
-
+      if(HasEquity) {
+        portfolio_pie_chart(2, "EQ")
+      }
+      if(HasDebt) {
+        portfolio_pie_chart(3, "CB")
+      }
       Graph246(4, "CB", "Oil") #Needs to be both
       Graph246(5, "CB", "Gas") #Needs to be both
-      
-      exposure_summary(6, "EQ")
-      exposure_summary(7, "CB")
-      
+      if(HasEquity) {
+        exposure_summary(6, "EQ")
+      }
+      if(HasDebt){
+        exposure_summary(7, "CB")
+      }
       #Current Exposure
       portfolio_sector_stack(8)
       
