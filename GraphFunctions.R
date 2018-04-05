@@ -233,7 +233,13 @@ themecolor <- function() {
   CurrCapColour <<- "grey75"
   AxisColour <<- "#17375e" #"#274F80"
   
-  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power","Automotive","Automotive","Automotive","Fossil Fuels","Fossil Fuels","Fossil Fuels"),Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap","Electric","Hybrid","ICE","Gas","Oil","Coal"),Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power",
+                                          "Automotive","Automotive","Automotive",
+                                          "Fossil Fuels","Fossil Fuels","Fossil Fuels"),
+                               Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap",
+                                              "Electric","Hybrid","ICE","Gas","Oil","Coal"),
+                               Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,
+                                          ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
   textsize <<- 8
   linesize <<- 2
@@ -379,6 +385,7 @@ stacked_bar_chart <- function(dat){
   return(template)
 }
           
+
 # -------- GRAPHS AND CHARTS -----------------                 
 # -------- RANKING CHARTS ----------- #
 
@@ -392,9 +399,9 @@ RankPortfolios <- function( ChartType, Name){
     PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
     
   }
-
+  
   # Order the table for Green vs Brown Tech
-
+  
   badtech <- c("CoalCap","GasCap","ICE","Oil","Gas","Coal")
   goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
   PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
@@ -404,24 +411,24 @@ RankPortfolios <- function( ChartType, Name){
   #PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
   
   #PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
-  if (PortfolioExposures $Technology %in%  badtech){
-    PortfolioExposures $Exp.Carsten.Market <-PortfolioExposures $Exp.Carsten.Market *-1
+  if (PortfolioExposures$Technology %in%  badtech){
+    PortfolioExposures$Exp.Carsten.Plan.Port.Scen.Market <-PortfolioExposures$Exp.Carsten.Plan.Port.Scen.Market *(-1)
   }
   # ranking
   # smallest number is number 1
   PortfolioExposures<-PortfolioExposures %>%
     group_by(Technology) %>%
-    mutate(my_ranks = order(order(Exp.Carsten.Market,decreasing = TRUE)),
+    mutate(my_ranks = order(order(Exp.Carsten.Plan.Port.Scen.Market,decreasing = TRUE)),
            mx = max(my_ranks))
-  #order(forrank,decreasing=TRUE),
-
+  #order(forrank,decreasing=TRUE)
+  
   # colnames(rankingtable)[1] <- "PortName"
   rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
   # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
   
   return(rankingtable)
-}        
-
+}                      
+                           
 ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
@@ -435,21 +442,21 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
-  Exposures$Exp.Carsten.Market <- Exposures$Exp.Carsten.Scen.Port.Scen.Market/Exposures$CarstenMetric_Port.Market  #will be delete once file is updated
-  BatchTest$Exp.Carsten.Market <- BatchTest$Exp.Carsten.Scen.Port.Scen.Market/BatchTest$CarstenMetric_Port.Market  #will be delete once file is updated
+  Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
+
   
   if (Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
-    Exposures$Exp.Carsten.Market <-Exposures$Exp.Carsten.Market *-1
+    Exposures$Exp.Carsten.Plan.Port.Scen.Market <-Exposures$Exp.Carsten.Plan.Port.Scen.Market  *-1
   }
   if (BatchTest$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
-    BatchTest$Exp.Carsten.Market <-BatchTest$Exp.Carsten.Market *-1
+    BatchTest$Exp.Carsten.Plan.Port.Scen.Market <-BatchTest$Exp.Carsten.Plan.Port.Scen.Market  *-1
   }
-  
-  Mins<- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)  #
-  Maxs <- aggregate(Exp.Carsten.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max) # need define variable
+  Mins<- aggregate(Exp.Carsten.Plan.Port.Scen.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)  #
+  Maxs <- aggregate(Exp.Carsten.Plan.Port.Scen.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max) # need define variable
   MinMax <- merge(Mins,Maxs, by="Technology")
   colnames(MinMax)[2] <- "Minimum"
   colnames(MinMax)[3] <- "Maximum"
+  
    
    Exposures <- merge(Exposures,MinMax,by="Technology")
    Exposures$Technology<- as.factor(Exposures$Technology)
@@ -520,17 +527,17 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     Exposures$LowLim <- rowMins(as.matrix(Exposures[,colnames(Exposures) %in% c("Minimum","LowLim")]))
     Exposures$UppLim <- rowMaxs(as.matrix(Exposures[,colnames(Exposures) %in% c("Maximum","UppLim")]))
     
-    Exposures$xlowloc <- Exposures$LowLim/100
-    Exposures$xupploc <- Exposures$UppLim/100
+    Exposures$xlowloc <- Exposures$LowLim
+    Exposures$xupploc <- Exposures$UppLim
     # PlotData$comploc <- PlotData[,PortName]/100
     # PlotData$comploc[PlotData$comploc < 0] <- 0
     # PlotData$comploc[PlotData$comploc > 2] <- 2
     
-    Exposures$comploc<-Exposures$Exp.Carsten.Market/100
+    Exposures$comploc<-Exposures$Exp.Carsten.Market
     # PlotData$complabel[PlotData$complabel>200]<-200
     # PlotData$complabel[PlotData$complabel<0]<-0    
     
-    Exposures$complabel <-paste0(round(Exposures$comploc,1),"%")
+    Exposures$complabel <-paste0(round(Exposures$comploc,0),"%")
     Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
     Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0)        
     
@@ -626,12 +633,16 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
    # grid.draw(outputplot)  
   
     print(outputplot)
-
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_RankingChart.png', sep=""),bg="transparent",height=7.2,width=7,plot=outputplot)
+    
+    
   #return()
 }
 
 # -------- PORTFOLIO SUMMARY -------- #
-portfolio_pie_chart <- function(){}
+portfolio_pie_chart <- function(plotnumber,ChartType){
+  
+}
 
 sector_processing <- function(){
   
@@ -709,9 +720,39 @@ portfolio_sector_stack <- function(plotnumber){
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=4,width=4,plot=a,dpi=ppi)
 }
 
-
 exposure_summary <- function(plotnumber,ChartType){
+  if(ChartType == "CB") {
+    Portfolio <- CBCombin
+  } else if (ChartType == "EQ") {
+    Portfolio <- EQCombin
+  }
   
+  BrownTech = c("ICE","Coal","Gas","Oil","CoalCap","GasCap", "OilCap")
+  
+  Portfolio <- Portfolio %>%
+    filter(Year == Startyear+5, Technology != "OilCap") %>%
+    select(PortName, Sector, Technology, Exp.Carsten.Plan.Port.Scen.Market) %>%
+    rename("Exposure" = Exp.Carsten.Plan.Port.Scen.Market)
+  
+  Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"] <- -1*Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"]
+  
+  technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","Coal","Gas","Oil")
+  colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,
+               HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
+  names(colours) <- technologyorder
+  labels <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
+  names(labels) <- technologyorder
+  
+  Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
+  
+  plot <- ggplot(Portfolio) +
+    geom_bar(aes(x = Technology, y = Exposure, fill = Technology), stat = "identity") +
+    scale_fill_manual(values = colours, labels = labels) +
+    theme_barcharts()
+  
+  print(plot)
+  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
+         bg="transparent",height=3.2,width=4.5,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
