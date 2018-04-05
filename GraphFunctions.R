@@ -606,8 +606,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 
 }
 
-
-
 ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
   
@@ -847,8 +845,8 @@ ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   return()
 }
 
-
 # -------- PORTFOLIO SUMMARY -------- #
+
 portfolio_pie_chart <- function(plotnumber,ChartType){                           
   
   if (ChartType == "EQ"){
@@ -889,7 +887,6 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
   
 }
 
-
 # ------------- PORT DATA PIE --------------- #
 port_pie <- function(plotnumber, PortData){
   
@@ -929,7 +926,6 @@ port_pie <- function(plotnumber, PortData){
   }
   
 }
-
 
 sector_processing <- function(){
   
