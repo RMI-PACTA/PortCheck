@@ -372,47 +372,6 @@ stacked_bar_chart <- function(dat){
           
 
 # -------- GRAPHS AND CHARTS -----------------                 
-# -------- Seperate Ranking chart -----------
-
-RankPortfolios <- function( ChartType, Name){
-  a<-Name
-  if (ChartType == "EQ"){
-    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear+5),]
-    
-    
-  }else if (ChartType == "CB"){
-    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
-    
-  }
-  
-  # Order the table for Green vs Brown Tech
-  
-  badtech <- c("CoalCap","GasCap","ICE","Oil","Gas","Coal")
-  goodtech <- c("Electric", "Hybrid","RenewablesCap", "HydroCap", "NuclearCap")
-  PortfolioExposures$Technology<- as.factor(PortfolioExposures$Technology)
-  PortfolioExposures<-PortfolioExposures[!PortfolioExposures$Technology %in% "OilCap",]
-  #PortfolioExposures$forrank <- NA
-  #PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$forrank<- PortfolioExposures[PortfolioExposures$Technology %in% goodtech,]$CarstenMetric_Port
-  #PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$forrank<- 1- PortfolioExposures[PortfolioExposures$Technology %in% badtech,]$CarstenMetric_Port
-  
-  #PortfolioExposures$forrank <- as.numeric(PortfolioExposures$forrank)
-  if (PortfolioExposures$Technology %in%  badtech){
-    PortfolioExposures$Exp.Carsten.Plan.Port.Scen.Market <-PortfolioExposures$Exp.Carsten.Plan.Port.Scen.Market *(-1)
-  }
-  # ranking
-  # smallest number is number 1
-  PortfolioExposures<-PortfolioExposures %>%
-    group_by(Technology) %>%
-    mutate(my_ranks = order(order(Exp.Carsten.Plan.Port.Scen.Market,decreasing = TRUE)),
-           mx = max(my_ranks))
-  #order(forrank,decreasing=TRUE)
-  
-  # colnames(rankingtable)[1] <- "PortName"
-  rankingtable <- subset(PortfolioExposures, select = c(PortName ,Technology, my_ranks,mx))
-  # rankportfolio <- rankingtable[rankingtable$PortName == PortName,]
-  
-  return(rankingtable)
-}                           
 
 # ------------- RANKING CHART - ALIGNMENT ----#
 
@@ -561,8 +520,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     # annotate(geom="rect",xmin = 0,xmax=0.002,ymin = 8.7,ymax=9.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
     # annotate(geom="rect",xmin = 0,xmax=0.003,ymin = 9.7,ymax=10.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
     # annotate(geom="rect",xmin = 0,xmax=0.005,ymin = 10.7,ymax=11.3,colour=Tar2DColour ,fill = "transparent")+ #linetype="dashed",
-
-    # Company Circles
+    # 
+  # Company Circles
     geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
     annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
     
@@ -585,29 +544,37 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
           axis.title.x=element_text(face="bold",colour="black", size=12),
           axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
           plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
+  
+  
     
     leafloc <- c(11,12,2,3)
     
     outputplot<-    outputplot+
       labs(x=NULL,y= NULL)+
-      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],
-               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), 
-               size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
-      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],
-               label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), 
-               size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")+  # Technology Label - Black
+      annotate(geom="text",x=-1.4,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
     
+    #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
     
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_RankingChart.png", sep=""),bg="transparent",height=7.2,width=7,plot=outputplot)
-    
+    graphheight <- 7.2
   
-
+  
+ 
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_RankingChart.png',sep=""),
+         bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
+  
+  
+  # outputplot <- ggplot_gtable(ggplot_build(outputplot))
+  # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
+  # grid.draw(outputplot)  
+  print(outputplot)
+  #return()
 }
 
 
-
+                           
 ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
   
