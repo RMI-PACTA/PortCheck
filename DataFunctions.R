@@ -492,11 +492,13 @@ SetGraphInputs <- function(){
   area_2_4 <<- "#FFFFCC"
   area_2 <<- "#c3d69b"
   eq_port <<- "#1056ff"
-  stock_market<<- "black"
-  peer_group <<- "black"
-  
-  #text size
+  #stock_market<<- "black"
+  #peer_group <<- "black"
+  eq_line<- "#AA8CC5"
+  cb_line <- "#C5AA8C"
+  #text
   textsize <<- 8
+  textcolor<-"#2f4f4f"
   
   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
   IndexColour <<-  "grey85"
@@ -516,8 +518,8 @@ SetGraphInputs <- function(){
                                Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,
                                           ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
-  textsize <<- 8
-  linesize <<- 2
+  
+  linesize <<- 1
   ppi <<- 600
   
 }
