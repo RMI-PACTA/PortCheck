@@ -472,7 +472,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   
   n1<-n_distinct(Exposures[which(Exposures$Sector=="Automotive"),]$Technology)
-  if(n1 >0){a<-c(1:n1)}else{a<-c(n1:1)}
+  if(n1 >0){a<-c(1:n1)}else{a<-c()}
   n2<-n_distinct(Exposures[which(Exposures$Sector=="FossilFuels"),]$Technology)
   if((4.5+n2-1) >4.5){b<-c(4.5:(4.5+n2-1))}else{b<-c((4.5+n2-1):4.5)}
   n3<-n_distinct(Exposures[which(Exposures$Sector=="Power"),]$Technology)
