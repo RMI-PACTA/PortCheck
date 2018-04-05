@@ -597,6 +597,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
   # grid.draw(outputplot)  
   print(outputplot)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_RankingChart.png',sep=""),bg="transparent",height=4,width=10,plot=a,dpi=ppi)
+
   #return()
 }
 
