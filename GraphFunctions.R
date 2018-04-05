@@ -331,12 +331,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   Exposures <- merge(Exposures,Ranks, by =c("PortName","Technology"))
 
   
-  if (Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
-    Exposures$Exp.Carsten.Plan.Port.Scen.Market <-Exposures$Exp.Carsten.Plan.Port.Scen.Market  *-1
-  }
-  if (BatchTest$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")){
-    BatchTest$Exp.Carsten.Plan.Port.Scen.Market <-BatchTest$Exp.Carsten.Plan.Port.Scen.Market  *-1
-  }
+  Exposures[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"),]$Exp.Carsten.Plan.Port.Scen.Market <- -1*Exposures[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"),]$Exp.Carsten.Plan.Port.Scen.Market
+  BatchTest[BatchTest$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"),]$Exp.Carsten.Plan.Port.Scen.Market <- -1*BatchTest[BatchTest$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"),]$Exp.Carsten.Plan.Port.Scen.Market
+  
   Mins<- aggregate(Exp.Carsten.Plan.Port.Scen.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], min)  #
   Maxs <- aggregate(Exp.Carsten.Plan.Port.Scen.Market ~ Technology, data = BatchTest[which(BatchTest$Year==Startyear+5),], max) # need define variable
   MinMax <- merge(Mins,Maxs, by="Technology")
