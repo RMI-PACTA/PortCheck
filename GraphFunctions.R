@@ -1321,8 +1321,9 @@ Inputs246 <- function(TechToPlot){
         mutate(Diff=(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod),
                value=Prod- first(Prod))
       
-     
-      if (df$Diff <0){df$Diff<- df$Diff*-1}
+      df <- as.data.frame(df)
+      ifelse(df$Diff < 0,-df$Diff,df$Diff)
+
       df$Plan.Pct.Build.Out<-df$value/df$Diff
       names(df)[names(df)=="Scenario"]<-"Label"
       df$Prod <- df$TargetProd <- NULL
