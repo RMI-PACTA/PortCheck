@@ -1602,7 +1602,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   if (GoodBad == "Brown"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
     outputplot <- ggplot(data = dftargets)+
-      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
       geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+ 
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
@@ -1614,7 +1614,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
       #labels=unique(dftargets$Labels)
       xlab("") +
-      scale_y_continuous(name="",labels = scales::percent)+
+      scale_y_continuous(name="",breaks = seq(-2, 2, 1),labels = scales::percent)+
       coord_cartesian(ylim=c(-2,2))+
       theme_minimal()+
       theme(
@@ -1628,7 +1628,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   } else if (GoodBad =="Green"){
     dftargets$lower <-c(rep(-2.2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
-      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
+      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
       geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+   # Market
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
@@ -1639,7 +1639,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
       #labels=unique(dftargets$Labels)
       xlab("") +
-      scale_y_continuous(name="",labels = scales::percent)+
+      scale_y_continuous(name="",breaks = seq(0, 1, 0.25),labels = scales::percent)+
       coord_cartesian(ylim=c(0,1))+
       theme_minimal()+
       theme(
