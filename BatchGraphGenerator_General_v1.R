@@ -100,17 +100,10 @@ Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv")
 names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
 length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
 
-
-
-
-
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
-
-CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
@@ -118,14 +111,12 @@ print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " r
 
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
+Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 ### Get Equity Batch Results
 EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
-
-# EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-# print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
@@ -137,15 +128,15 @@ EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildO
 EQBatchTest$Type <- "Portfolio"
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
 EQBatchTest$Type[EQBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
+
 CBBatchTest$Type <- "Portfolio"
 CBBatchTest$Type[CBBatchTest$InvestorName != "California Insurers"] <- "Market"
 CBBatchTest$Type[CBBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
-CBBatchTest_PortSnapshots$Type <- "Portfolio"
-CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
-CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
+
 EQCompProdSnapshots$Type <- "Portfolio"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
+
 CBCompProdSnapshots$Type <- "Portfolio"
 CBCompProdSnapshots$Type[CBCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
 CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
