@@ -541,14 +541,14 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     graphheight <- 7.2
   
   
-ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
+    ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
 
 
   
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
   # outputplot$layout$clip[outputplot$layout$name == "panel"] <- "off"
   # grid.draw(outputplot)  
-  print(outputplot)
+  if (PrintPlot) {print(outputplot)}
   #return()
 }
 
@@ -827,7 +827,7 @@ portfolio_pie_chart <- function(plotnumber,ChartType){
           legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
   
   PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
-  
+  if(PrintPort){print(PieChart)}
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
          bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
   
@@ -868,7 +868,7 @@ port_pie <- function(plotnumber, PortData){
             text=element_text(family="Arial"))
     
     PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
-    
+    if(PrintPlot){print(PieChart)}
     ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",'Portpie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
   }
   
@@ -947,7 +947,7 @@ portfolio_sector_stack <- function(plotnumber){
           plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
           text=element_text(family="Arial")
     )
-  # print(a)
+  if(PrintPlot){print(a)}
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=3,width=4,plot=a,dpi=ppi)
 }
 
@@ -1007,7 +1007,7 @@ exposure_summary <- function(plotnumber,ChartType){
           strip.text = element_text(colour=textcolor),
           strip.background = element_blank())
   
-  # print(plot)
+  if(PrintPlot){print(plot)}
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
          bg="transparent",height=4,width=10,dpi=ppi)
 }
@@ -1061,7 +1061,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
   
-  print(plot)
+  if(PrintPlot){print(plot)}
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Risk_Distribution.png', sep=""),
          height=4,width=10,plot=plot,dpi=ppi, bg="transparent")
@@ -1266,7 +1266,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
   
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    
+    if (PrintPlot){print(cmd)}
     ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
@@ -1306,7 +1306,6 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   if(nrow(Production)>0){
     Production[Production$Sector=="Fossil Fuels",]$Technology <- paste0(Production$Technology[Production$Sector %in%"Fossil Fuels"],"Prod")
 
-    ylabel <- GT["StackedBarYLabel_FF"][[1]]
     technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","CoalProd","GasProd","OilProd")
     colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
     names(colours) <- technologyorder
@@ -1319,6 +1318,10 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     
     Production$Type <- wrap.labels(Production$Type,20)
     Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
+    xlabels = c("Your Portfolio", "All Insurers", ifelse(ChartType=="EQ","Listed Market","Bond Universe"))
+    
+    titles = c("Fossil Fuel Production", "Power Capacity", "Vehicle Production")
+    names(titles) <- c("Fossil Fuels", "Power", "Automotive")
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
     chartorder <- as.factor(chartorder)
@@ -1328,8 +1331,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     colnames(Production) <- c("item", "family", "score", "value")
     
     template <- stacked_bar_chart(Production)+
-      ggtitle("Template")+
-      ylab("TechShare")+
+      ylab("Share of Sector Production")+
       scale_fill_manual(labels=labels,values=colours)+
       theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
             legend.position = "bottom",legend.title = element_blank(),
@@ -1339,7 +1341,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
       p1 <- template %+% dat +
-        ggtitle(paste0(unique(as.character(dat$Sector)),"Production"))
+        ggtitle(titles[names(titles) == SectorToPlot]) +
+        scale_x_discrete(labels = xlabels)
       
       # print(p1)
       
@@ -1352,7 +1355,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       dat <- subset(Production,family=="Automotive")
       if (nrow(subset(dat, item=="Portfolio")) > 0) {  
         p1 <- template %+% dat +
-          ggtitle("Automotive Production")
+          ggtitle("Vehicle Production")
       } else {
         dat <- rbind(dat, c("item" = "Portfolio",
                             "family" = "Automotive",
@@ -1368,7 +1371,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       dat <- subset(Production,family=="Fossil Fuels")
       if (nrow(subset(dat, item=="Portfolio")) > 0) {  
         p2 <- template %+% dat +
-          ggtitle("Fossil Fuels Production")
+          ggtitle("Fossil Fuel Production")
         
       } else {
         dat <- rbind(dat, c("item" = "Portfolio",
@@ -1377,7 +1380,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
                             "value" = 0))
         dat$value <- as.numeric(dat$value)
         p2 <- template %+% dat +
-          ggtitle("Fossil Fuels Production") +
+          ggtitle("Fossil Fuel Production") +
           geom_text(data = subset(dat,item=="Portfolio"),
                  aes(item, y = .5, angle = 90, label = "No Fossil Fuel Data Available"))
       }
@@ -1401,7 +1404,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       cmd<-grid.arrange(p2,
                         p3+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),
                         p1+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),nrow=1)
-      
+      if(PrintPlot){print(cmd)}
       ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
     }
@@ -1688,7 +1691,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   
   
   
-  print(outputplot)
+  if(PrintPlot){print(outputplot)}
   
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)

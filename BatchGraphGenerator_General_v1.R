@@ -230,7 +230,6 @@ for (i in c(7:9,326)){
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
   CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-
   
   if(TestType == "MetaPortfolio"){
     ReportName <- InvestorNameLong
@@ -263,6 +262,8 @@ for (i in c(7:9,326)){
   setwd(LANGUAGE.PATH)
   
   ### Loops through graphs and report generation
+  
+  PrintPlot = TRUE
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
