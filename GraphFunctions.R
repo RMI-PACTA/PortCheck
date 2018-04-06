@@ -189,10 +189,10 @@ CAReport <- function(){
 
 theme_barcharts <-function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.text.x=element_text(colour=textcolor,size=textsize),
+        axis.text.y=element_text(colour=textcolor,size=textsize),
         axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
+        axis.title.y=element_text(colour=textcolor,size=textsize),
         axis.line = element_line(colour = textcolor,size=1),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -201,25 +201,26 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
         # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
-        legend.text = element_text(face="bold",size=textsize,colour=textcolor),
+        legend.text = element_text(size=textsize,colour=textcolor),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
         #legend.title=element_blank(),
         legend.title = element_text(colour = textcolor, size = textsize),
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
-        plot.margin = unit(c(1,1, 0, 0), "lines")
+        plot.margin = unit(c(1,1, 0, 0), "lines"),
+        plot.title = element_blank()
         # plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }
 
 theme_linecharts <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(), 
-        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.title.x=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.title.y=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.line = element_line(colour = "black",size=1),
+        axis.text.x=element_text(colour=textcolor,size=textsize),
+        axis.text.y=element_text(colour=textcolor,size=textsize),
+        axis.title.x=element_text(colour=textcolor,size=textsize),
+        axis.title.y=element_text(colour=textcolor,size=textsize),
+        axis.line = element_line(colour = textcolor, size=1),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         #panel.background = element_blank(),
@@ -227,24 +228,25 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
-        legend.text = element_text(face="bold",size=textsize,colour=textcolor),
+        legend.text = element_text(size=textsize,colour=textcolor),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
         #legend.title=element_blank(),
         legend.title = element_text(colour = textcolor, size = textsize),
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
-        plot.margin = unit(c(1,1, 0, 0), "lines")
+        plot.margin = unit(c(1,1, 0, 0), "lines"),
+        plot.title = element_blank()
         #plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }    
 
 theme_distribution <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
-        axis.text.x=element_text(face="bold",colour=textcolor,size=textsize),
-        axis.text.y=element_text(face="bold",colour=textcolor,size=textsize),
+        axis.text.x=element_text(colour=textcolor,size=textsize),
+        axis.text.y=element_text(colour=textcolor,size=textsize),
         axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
+        axis.title.y=element_text(colour=textcolor,size=textsize),
         axis.line.x = element_line(colour = textcolor,size=1),
         axis.line.y = element_line(colour = textcolor,size=1),
         panel.grid.major = element_blank(),
@@ -255,7 +257,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         legend.title = element_blank(),
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
         # plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, color = textcolor)
+        plot.title = element_blank()
   )
 }
 
@@ -297,12 +299,11 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
     # geom_rect(data=filter(dfagg, Name == PortName, Metric == MetricCol[2]),
     #              aes(xmin=Name,xmax=Name,ymin=0,ymax=Value+0.05),
     #              size = .5)+
-    
     scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol))+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
     expand_limits(0,0)+
-    # ggtitle(Title)+
+    ylab(Title)+
     coord_cartesian(ylim=c(0,min(1, 1.1*max(dfagg$Value))))+
     theme_distribution()
   
@@ -952,7 +953,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   BrownTech = c("ICE","Coal","Gas","Oil","CoalCap","GasCap", "OilCap")
   
- technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","Coal","Gas","Oil")
+  technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","Coal","Gas","Oil")
   
   Portfolio <- Portfolio %>%
     filter(Year == Startyear+5, Technology != "OilCap") %>%   #!= "OilCap"
@@ -965,17 +966,24 @@ exposure_summary <- function(plotnumber,ChartType){
   Portfolio$Sector <- recode(Portfolio$Sector, Coal = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels")
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
-  repval = 200
-  redgreen<- colorRampPalette(c(area_6,area_2_4, area_2))(repval) 
+  repval = 201
+  color <- rep(colorRampPalette(c(area_6,area_2_4, area_2))(repval),length(technologyorder))
+  y_coor <- rep(seq(-100,100,1),length(technologyorder))
+  x_coor <- rep(1:length(technologyorder),each=201)
+  redgreen <- as.data.frame(cbind(color,y_coor,x_coor))
+  redgreen$y_coor <- as.numeric(y_coor)
+  redgreen$x_coor <- as.numeric(x_coor)
   
   Portfolio$Technology <- gsub("Cap","",Portfolio$Technology)
   
   plot <- ggplot(Portfolio) +
     geom_bar(aes(x = Technology, y = Exposure), fill = YourportColour, stat = "identity") +
     facet_grid(. ~ Sector, scales = "free", space = "free") +
+    #geom_tile(data=redgreen,aes(x=x_coor,y=y_coor),height=1,width=1,fill=redgreen$color) +
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent,limits=(c(-1,1)))+
     scale_fill_manual(values = colours, labels = labels) +
+    ylab("Exposure of Portfolio to Scenario Targets") +
     theme_barcharts() +
     theme(panel.border = element_rect(color=textcolor,fill=NA,size=1),
           panel.spacing.x = unit(0,"cm"),
@@ -989,35 +997,8 @@ exposure_summary <- function(plotnumber,ChartType){
 
 # ------------- DISTRIBUTIONS --------------- #
 
-# Carstens_Distribution <- function(plotnumber, ChartType){
-  # Title <- "Exposure of Portfolios to Climate Relevent Sectors"
-  # if(ChartType == "CB") {
-  #   BatchTest <- CBBatchTest
-  # } else if (ChartType == "EQ") {
-  #   BatchTest <- EQBatchTest
-  # }
-  # ID.COLS = c("PortName","Year","Sector","Technology", "Type")
-  # MetricCol <- "CarstenMetric_Port"
-  # 
-  # BarColors <- c("Grey", "Black","White")
-  # names(BarColors) <- c(MetricCol,"Comparison","Unexposed")
-  # Labels <- c("Exposed", "Your Portfolio")
-  # df <- unique(subset(BatchTest, Year == Startyear, 
-  #                     select = c(ID.COLS,MetricCol)))
-  # 
-  # LineHighl <- c("MetaPortfolio")
-  # LineLabels <- c("Average")
-  # names(LineLabels) <- LineHighl
-  # LineColors <- c("Green")
-  # names(LineColors) <- LineLabels
-  # 
-  # distribution_chart(plotnumber, "Carsten", ChartType, df, ID.COLS, MetricCol,
-  #                    Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
-  # 
-# }
-
 Risk_Distribution <- function(plotnumber, ChartType){
-  Title <- "Risk Exposure of Portfolios"
+  Title <- "% Risk Exposure of Portfolios"
   MetricCol <- c("Risk1", "Risk2")
   if(ChartType == "CB") {
     PortSS <- CBBatchTest_PortSnapshots
@@ -1071,7 +1052,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
 }
 
 Fossil_Distribution <- function(plotnumber, ChartType){
-  Title <- "Fossil Fuel Breakdown of Portfolios"
+  Title <- "% Fossil Fuel Exposure of Portfolios"
   if (ChartType == "EQ"){
     Batch <- EQBatchTest
   }else if (ChartType == "CB"){
