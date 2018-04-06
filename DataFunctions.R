@@ -503,7 +503,7 @@ SetGraphInputs <- function(){
   MedRisk <<- area_4_6
 
   #text size
-  textsize <<- 8
+  textsize <<- 8.5
   textcolor <<- "#3D3D3C"
   AxisColour <<- "#3D3D3C"
   
@@ -526,7 +526,7 @@ SetGraphInputs <- function(){
                                           ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
   
   
-  linesize <<- 1.5
+  linesize <<- 1
   ppi <<- 600
   
 }
