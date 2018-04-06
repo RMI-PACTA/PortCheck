@@ -1521,7 +1521,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_y_continuous(name="",breaks = seq(0, 1, 0.25),labels = scales::percent)+
       coord_cartesian(ylim=c(0,1))+
       theme_minimal()+
-      theme(
+      theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.ticks=element_blank(),
             panel.border = element_blank(),
@@ -1539,7 +1539,6 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
       theme(legend.position="none",
-           panel.grid.major.y = element_line(color="black",size=0.5),
            text=element_text(family="Arial"))
   
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
@@ -1547,7 +1546,6 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour = "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
       theme(legend.position="none",
-           panel.grid.major.y = element_line(color="black",size=0.5),
            text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
@@ -1556,12 +1554,10 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour =  "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
       theme(legend.position="none",
-           panel.grid.major.y = element_line(color="black",size=0.5),
            text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
     outputplot <- outputplot+
       theme(legend.position="none",
-           panel.grid.major.y = element_line(color="black",size=0.5),
            text=element_text(family="Arial"))
   }
   
