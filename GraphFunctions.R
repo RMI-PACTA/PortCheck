@@ -793,87 +793,6 @@ ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
 
 # -------- PORTFOLIO SUMMARY -------- #
 
-portfolio_pie_chart <- function(plotnumber,ChartType){                           
-  
-  if (ChartType == "EQ"){
-    pieshare <- EQCombin
-  }else if(ChartType == "CB"){
-    pieshare <- CBCombin
-  }
-  
-  # Data 
- 
-  pieshare$Label <- "NeedsALabel"
-  pieshare$Colour <- RenewablesColour
-  pieshare$perc <- 20
-  
-  # PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
-    # geom_bar(stat = "identity",color=NA, width = 1)
-  
-  # PieChart <- PieChart + coord_polar("y", start=0, direction=-1)+ xlab('') +  ylab('')
-  
-  PieChart<- ggplot(pieshare, aes(x="", y=WtProduction, fill=Sector))+
-    geom_bar(stat = "identity",color=NA, width = 0.5)+
-    geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
-    scale_fill_manual(values= pieshare$Colour,labels=paste(pieshare$Label,": ",pieshare$perc,"%",sep=""))+
-    guides(fill = guide_legend(override.aes = list(colour = NULL)))+
-    theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
-          axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-          axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.text = element_text(size=textsize,colour="black"),
-          legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
-  
-  PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
-  if(PrintPort){print(PieChart)}
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_PieChart.png',sep=""),
-         bg="transparent",height=4,width=4,plot=PieChart,dpi=ppi)
-  
-}
-
-# ------------- PORT DATA PIE --------------- #
-port_pie <- function(plotnumber, PortData){
-  
-  Port <- PortData
-  
-  Port <- subset(PortData, select = c("Bonds","Equity","Others"))
-  if(nrow(Port)>0){
-    SumPort <- sum(Port[1,1:3],na.rm = TRUE)
-    Port<- melt(Port)
-    Port<- rename(Port,c("variable"="Classification"))
-    Port$perc <- round(Port$value/SumPort,2)*100
-    
-    Palette <- data.frame(Classification = c("Bonds","Equity","Others"),Colour=c("dodgerblue4","dodgerblue1","grey"))
-    Palette$Colour <- as.character(Palette$Colour)
-    Port <- merge(Port,Palette, by="Classification")
-    
-    Port$Label <- lapply(Port$Classification, function(x) GT[paste0(x,"Title")][[1]])
-    
-    
-    PieChart<- ggplot(Port, aes(x="", y=perc, fill=Classification))+
-      geom_bar(stat = "identity",color=NA, width = 0.5)+
-      geom_bar(stat = "identity",color='white',show.legend = FALSE, lwd = .25,width = 1)+
-      scale_fill_manual(values= Port$Colour,labels=paste(Port$Label,": ",Port$perc,"%",sep=""))+
-      guides(fill = guide_legend(override.aes = list(colour = NULL)))+
-      theme(axis.ticks=element_blank(), axis.text.y=element_blank(),axis.title=element_blank(),
-            axis.text.x=element_blank(),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-            axis.line = element_blank(), plot.margin = unit(c(0,0, 0, 0), "lines"),
-            plot.background = element_rect(fill = "transparent",colour = NA),
-            panel.background = element_rect(fill = "transparent",colour = NA),
-            legend.background = element_rect(fill = "transparent",colour = NA),
-            legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-            legend.key.size=unit(0.4,"cm"),legend.title=element_blank(),
-            text=element_text(family="Arial"))
-    
-    PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
-    if(PrintPlot){print(PieChart)}
-    ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",'Portpie.png',sep=""),bg="transparent",height=2,width=4,plot=PieChart,dpi=ppi)
-  }
-  
-}
-
 sector_processing <- function(){
   
   ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
@@ -1333,16 +1252,14 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     template <- stacked_bar_chart(Production)+
       ylab("Share of Sector Production")+
       scale_fill_manual(labels=labels,values=colours)+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank(),
-            text=element_text(family="Arial"))
+      theme(plot.title = element_text(hjust = 0.5, colour=textcolor,size=textsize),
+            legend.position = "bottom",legend.title = element_blank()) +
+      scale_x_discrete(labels = xlabels)
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
       p1 <- template %+% dat +
-        ggtitle(titles[names(titles) == SectorToPlot]) +
-        scale_x_discrete(labels = xlabels)
+        ggtitle(titles[names(titles) == SectorToPlot])
       
       # print(p1)
       
@@ -1519,7 +1436,6 @@ Inputs246 <- function(TechToPlot){
   
   return(df)
 }
-
 
 Graph246 <- function(plotnumber, TechToPlot){
   
