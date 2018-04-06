@@ -299,9 +299,6 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
     geom_segment(data=filter(dfagg, Name == PortName),
                  aes(x=Name,xend=Name,y=arrow+.05,yend=arrow+.001),
                  size = 1, arrow = arrow(length = unit(.5,"cm")))+
-    # geom_rect(data=filter(dfagg, Name == PortName, Metric == MetricCol[2]),
-    #              aes(xmin=Name,xmax=Name,ymin=0,ymax=Value+0.05),
-    #              size = .5)+
     scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol))+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
@@ -937,8 +934,17 @@ Risk_Distribution <- function(plotnumber, ChartType){
     rename("Risk1" = "1", "Risk2" = "2", "Risk3" = "3", "Risk4" = "4", "Risk5" = "5") %>%
     rename("PortName" = "Portfolio.Name")
   
+  metaport <- RiskData %>%
+    group_by(MoodysRiskLvl) %>%
+    summarise("PortWeight" = sum(Position) / sum(RiskData$Position)) %>%
+    spread("MoodysRiskLvl", "PortWeight", fill = 0) %>%
+    rename("Risk1" = "1", "Risk2" = "2", "Risk3" = "3", "Risk4" = "4", "Risk5" = "5") %>%
+    mutate("PortName" = "MetaPort")
+  
   ID.COLS = c("PortName")
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
+  metaport <- subset(metaport, select = c(ID.COLS,MetricCol))
+  df <- rbind(df,metaport)
   
   BarColors <- c(HighRisk, MedRisk)
   names(BarColors) <- c(MetricCol)
