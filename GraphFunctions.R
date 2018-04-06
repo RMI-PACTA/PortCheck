@@ -883,11 +883,11 @@ sector_processing <- function(){
   }
   if(nrow(CBCombin) > 0) {
     CB <- CBCombin
-    CB$Type <- "Corporate Bond Portfolio"
+    CB$Type <- "Bond Portfolio"
     CB <- unique(subset(CB, Year == Startyear, 
                         select = c(ID.COLS)))
   } else {
-    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Corporate Bond Portfolio")
+    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Bond Portfolio")
     colnames(CB) <- ID.COLS
   }
   
@@ -912,7 +912,7 @@ portfolio_sector_stack <- function(plotnumber){
   dfagg$Sector<-as.factor(dfagg$Sector)
   combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
   dfagg <- merge(dfagg, colourdf, by= "Sector") 
-  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
+  orderofchart <- c("Equity Portfolio","Bond Portfolio")
   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
