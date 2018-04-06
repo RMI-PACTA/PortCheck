@@ -24,6 +24,9 @@ library(knitr)
 library(png)
 library(RColorBrewer)
 library(matrixStats)
+library(extrafont)
+font_import()   #Importing fonts may take a few minutes, depending on the number of fonts and the speed of the system.
+loadfonts(device = "win")
 
 
 #------------

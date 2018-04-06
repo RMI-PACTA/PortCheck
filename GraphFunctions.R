@@ -210,7 +210,8 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.margin = unit(c(1,1, 0, 0), "lines"),
-        plot.title = element_blank()
+        plot.title = element_blank(),
+        text=element_text(family="Arial")
         # plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }
@@ -238,7 +239,8 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.margin = unit(c(1,1, 0, 0), "lines"),
-        plot.title = element_blank()
+        plot.title = element_blank(),
+        text=element_text(family="Arial")
         #plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }    
@@ -259,7 +261,8 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         legend.title = element_blank(),
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
         # plot.background = element_blank(),
-        plot.title = element_blank()
+        plot.title = element_blank(),
+        text=element_text(family="Arial")
   )
 }
 
@@ -510,7 +513,8 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
           axis.ticks = element_blank(),
           axis.title.x=element_text(face="bold",colour="black", size=12),
           axis.title.y=element_text(face="bold",colour="black", size=12, vjust = 1),
-          plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")))
+          plot.margin = (unit(c(0.2, 0.6, 0, 0), "lines")),
+          text=element_text(family="Arial"))
   
   
     labelloc <- -1.5
@@ -519,18 +523,18 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     
     outputplot<-    outputplot+
       labs(x=NULL,y= NULL)+
-      annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour=textcolor)+  # Technology Label - Black
+      annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0,colour=textcolor)+  # Technology Label - Black
       annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
     else if  (any((Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))) & (any(Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))==FALSE)){
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
+        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, colour="black")
     }else if  (any((Exposures$Technology %in%  c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))) & (any(Exposures$Technology %in% c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))==FALSE)){
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
+        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour="black")
       }
     #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
     
@@ -860,7 +864,8 @@ port_pie <- function(plotnumber, PortData){
             panel.background = element_rect(fill = "transparent",colour = NA),
             legend.background = element_rect(fill = "transparent",colour = NA),
             legend.text = element_text(size=textsize,family = "Calibri",colour="black"),
-            legend.key.size=unit(0.4,"cm"),legend.title=element_blank())
+            legend.key.size=unit(0.4,"cm"),legend.title=element_blank(),
+            text=element_text(family="Arial"))
     
     PieChart <- PieChart + coord_polar("y", start=0, direction=-1)#+ xlab('') #+  ylab('')
     
@@ -885,11 +890,11 @@ sector_processing <- function(){
   }
   if(nrow(CBCombin) > 0) {
     CB <- CBCombin
-    CB$Type <- "Corporate Bond Portfolio"
+    CB$Type <- "Bond Portfolio"
     CB <- unique(subset(CB, Year == Startyear, 
                         select = c(ID.COLS)))
   } else {
-    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Corporate Bond Portfolio")
+    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Bond Portfolio")
     colnames(CB) <- ID.COLS
   }
   
@@ -914,7 +919,7 @@ portfolio_sector_stack <- function(plotnumber){
   dfagg$Sector<-as.factor(dfagg$Sector)
   combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
   dfagg <- merge(dfagg, colourdf, by= "Sector") 
-  orderofchart <- c("Equity Portfolio","Corporate Bond Portfolio")
+  orderofchart <- c("Equity Portfolio","Bond Portfolio")
   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
@@ -939,7 +944,8 @@ portfolio_sector_stack <- function(plotnumber){
           legend.background = element_rect(fill = "transparent",colour = NA),
           legend.key.size=unit(0.4,"cm"),
           legend.title=element_blank(),
-          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines")
+          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
+          text=element_text(family="Arial")
     )
   # print(a)
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=3,width=4,plot=a,dpi=ppi)
@@ -1089,7 +1095,8 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors) +
-    theme(legend.position = "none")
+    theme(legend.position = "none",
+         text=element_text(family="Arial"))
   
   print(plot)
   
@@ -1244,7 +1251,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       xlab("Portfolio")+
       coord_flip()+
       theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
+            axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank(),
+            text=element_text(family="Arial"))
     
     CompPlot <- stacked_bar_chart(CompanyData)+
       scale_fill_manual(values=colors,labels = labels, name = "Technology")+
@@ -1252,7 +1260,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank(), plot.title = element_blank())
+            axis.line = element_blank(), plot.title = element_blank(),
+            text=element_text(family="Arial"))
   
     cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
   
@@ -1324,7 +1333,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       scale_fill_manual(labels=labels,values=colours)+
       theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
             legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank())
+            axis.line = element_blank(),
+            text=element_text(family="Arial"))
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
       dat <- subset(Production, Sector == SectorToPlot)
@@ -1607,7 +1617,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_y_continuous(name="",labels = scales::percent)+
       coord_cartesian(ylim=c(-2,2))+
       theme_minimal()+
-      theme(panel.grid.major.y = element_line(color="black",size=0.5),
+      theme(
             panel.grid.minor = element_blank(),
             axis.ticks=element_blank(),
             panel.border = element_blank(),
@@ -1616,7 +1626,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   } else if (GoodBad =="Green"){
-    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    dftargets$lower <-c(rep(-2.2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
@@ -1632,7 +1642,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_y_continuous(name="",labels = scales::percent)+
       coord_cartesian(ylim=c(0,1))+
       theme_minimal()+
-      theme(panel.grid.major.y = element_line(color="black",size=0.5),
+      theme(
             panel.grid.minor = element_blank(),
             axis.ticks=element_blank(),
             panel.border = element_blank(),
@@ -1649,23 +1659,31 @@ Graph246 <- function(plotnumber, TechToPlot){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none")
+      theme(legend.position="none",
+           panel.grid.major.y = element_line(color="black",size=0.5),
+           text=element_text(family="Arial"))
   
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour = "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none")
+      theme(legend.position="none",
+           panel.grid.major.y = element_line(color="black",size=0.5),
+           text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour =  "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none")
+      theme(legend.position="none",
+           panel.grid.major.y = element_line(color="black",size=0.5),
+           text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
     outputplot <- outputplot+
-      theme(legend.position="none")
+      theme(legend.position="none",
+           panel.grid.major.y = element_line(color="black",size=0.5),
+           text=element_text(family="Arial"))
   }
   
   
