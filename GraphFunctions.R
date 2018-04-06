@@ -193,7 +193,8 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
         axis.text.y=element_text(colour=textcolor,size=textsize),
         axis.title.x=element_blank(),
         axis.title.y=element_text(colour=textcolor,size=textsize),
-        axis.line = element_line(colour = textcolor,size=1),
+        axis.line.x = element_line(colour = textcolor,size=1),
+        axis.line.y = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         #panel.background = element_blank(),
@@ -220,7 +221,8 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         axis.text.y=element_text(colour=textcolor,size=textsize),
         axis.title.x=element_text(colour=textcolor,size=textsize),
         axis.title.y=element_text(colour=textcolor,size=textsize),
-        axis.line = element_line(colour = textcolor, size=1),
+        axis.line.x = element_line(colour = textcolor, size=1),
+        axis.line.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         #panel.background = element_blank(),
@@ -960,33 +962,42 @@ exposure_summary <- function(plotnumber,ChartType){
     select(PortName, Sector, Technology, Exp.Carsten.Plan.Port.Scen.Market) %>%
     rename("Exposure" = Exp.Carsten.Plan.Port.Scen.Market)
   
+  Portfolio <- Portfolio %>%
+    group_by(PortName) %>%
+    complete(Technology=technologyorder, fill=list(Exposure = 0))
+  Portfolio[Portfolio$Technology %in% c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap"),"Sector"] <- "Power"
+  Portfolio[Portfolio$Technology %in% c("Coal","Gas","Oil"),"Sector"] <- "Fossil Fuels"
+  Portfolio[Portfolio$Technology %in% c("Electric","Hybrid","ICE"),"Sector"] <- "Automotive"
+  
   Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"] <- -1*Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"]
   
-  
-  Portfolio$Sector <- recode(Portfolio$Sector, Coal = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels")
+  Portfolio$Sector <- factor(Portfolio$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
+  TechLabels <- gsub("Cap","",technologyorder)
+  names(TechLabels) <- technologyorder
   
-  repval = 201
-  color <- rep(colorRampPalette(c(area_6,area_2_4, area_2))(repval),length(technologyorder))
-  y_coor <- rep(seq(-100,100,1),length(technologyorder))
-  x_coor <- rep(1:length(technologyorder),each=201)
-  redgreen <- as.data.frame(cbind(color,y_coor,x_coor))
-  redgreen$y_coor <- as.numeric(y_coor)
-  redgreen$x_coor <- as.numeric(x_coor)
-  
-  Portfolio$Technology <- gsub("Cap","",Portfolio$Technology)
+  # repval = 401
+  # color <- rep(colorRampPalette(c(area_6,area_2_4, area_2))(repval),length(technologyorder))
+  # y_coor <- rep(seq(-2,2,.01),length(technologyorder))
+  # x_coor <- rep(technologyorder, each=repval)
+  # redgreen <- data.frame(color,y_coor,x_coor)
+  # redgreen$y_coor <- as.double(redgreen$y_coor)
+  # redgreen$x_coor <- as.factor(redgreen$x_coor)
+  # redgreen$color <- as.factor(redgreen$color)
+  # rm(color,y_coor,x_coor)
   
   plot <- ggplot(Portfolio) +
-    geom_bar(aes(x = Technology, y = Exposure), fill = YourportColour, stat = "identity") +
-    facet_grid(. ~ Sector, scales = "free", space = "free") +
-    #geom_tile(data=redgreen,aes(x=x_coor,y=y_coor),height=1,width=1,fill=redgreen$color) +
+    # geom_tile(data=redgreen,aes(x = x_coor, y = y_coor, fill = y_coor), alpha = .5)+
+    geom_bar(aes(x = Technology, y = Exposure), fill = YourportColour, stat = "identity")+
+    geom_text(aes(x = Technology, y = Exposure, label = paste0(round(100*Exposure),"%"), vjust = ifelse(Exposure >= 0, -.3, 1)))+
+    facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
-    scale_y_continuous(labels=percent,limits=(c(-1,1)))+
-    scale_fill_manual(values = colours, labels = labels) +
-    ylab("Exposure of Portfolio to Scenario Targets") +
-    theme_barcharts() +
-    theme(panel.border = element_rect(color=textcolor,fill=NA,size=1),
-          panel.spacing.x = unit(0,"cm"),
+    # scale_fill_gradient2(low=area_6,mid=area_2_4,high=area_2,midpoint=0)+
+    scale_y_continuous(labels=percent)+
+    scale_x_discrete(labels=TechLabels)+
+    ylab("Exposure of Portfolio to Scenario Targets")+
+    theme_barcharts()+
+    theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(colour=textcolor),
           strip.background = element_blank())
   
