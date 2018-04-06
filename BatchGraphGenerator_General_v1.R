@@ -46,7 +46,6 @@ if (!exists("TWODII.CONSTS")) {
 ### this defines any project constants and functions
 ### and will also source an override file if it exists
 source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
-print("*** Starting DataImport.R Script")
 print(show.consts())
 
 #------------
@@ -64,7 +63,7 @@ Startyear <- NA
 ComparisonFile <- NA
 ReportTemplate <- NA
 
-ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+ParameterFile <- ReadParameterFile(PORTS.PATH)
 ### fill up those variables
 SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkRegion etc. 
 print("*** STARTING SCRIPT with PARAMETERS:")
@@ -92,6 +91,18 @@ if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showW
 REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
+
+### ###########################################################################
+### GET OVERVIEW RESULTS
+### ###########################################################################
+
+Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv"),stringsAsFactors=FALSE,strip.white = T)
+names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
+length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
+
+
+
+
 
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
