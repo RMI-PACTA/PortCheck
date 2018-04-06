@@ -1605,7 +1605,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   } else if (GoodBad =="Green"){
-    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    dftargets$lower <-c(rep(-2.2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
