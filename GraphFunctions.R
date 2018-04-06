@@ -521,18 +521,18 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     
     outputplot<-    outputplot+
       labs(x=NULL,y= NULL)+
-      annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour=textcolor)+  # Technology Label - Black
+      annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0,colour=textcolor)+  # Technology Label - Black
       annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")+ 
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
     
     else if  (any((Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))) & (any(Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))==FALSE)){
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, fontface = "bold",colour="black")
+        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0, colour="black")
     }else if  (any((Exposures$Technology %in%  c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear"))) & (any(Exposures$Technology %in% c("CoalCap","GasCap","ICE","Oil","Gas","Coal"))==FALSE)){
       outputplot<-    outputplot+
         labs(x=NULL,y= NULL)+
-        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, fontface = "bold",colour="darkgreen")
+        annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","RenewablesCap", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour="black")
       }
     #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
     
