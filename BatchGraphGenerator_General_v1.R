@@ -204,7 +204,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:5,326)){
+for (i in c(7:9,326)){
 
   ### Specify the Names from the Test List
   
@@ -332,7 +332,7 @@ for (i in c(1:5,326)){
 
       
       # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
-      if (HasDebt & !HasEquity) {
+      if (HasDebt ) {
         if (PortSummary$HasPower.CB){
           company_techshare("32", 20, "CB", "Power")
         }
@@ -359,7 +359,7 @@ for (i in c(1:5,326)){
      
       # Creates the report for California
       # system.time(
-      # CAReport()
+      CAReport()
       # )
       
       

@@ -504,7 +504,8 @@ SetGraphInputs <- function(){
 
   #text size
   textsize <<- 8
-  textcolor <<- "#2f4f4f"
+  textcolor <<- "#3D3D3C"
+  AxisColour <<- "#3D3D3C"
   
   YourportColour <<- "#265b9b"   #"#2e4b6e"  #"#17224D"
   IndexColour <<-  "grey85"
@@ -514,7 +515,7 @@ SetGraphInputs <- function(){
   badexpColour <<- "#ed1c24" #"#fb8072"
   ReqCapColour <<- "grey55"
   CurrCapColour <<- "grey75"
-  AxisColour <<- "#17375e" #"#274F80"
+  # AxisColour <<- "#17375e" #"#274F80"
   
   ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power",
                                           "Automotive","Automotive","Automotive",
