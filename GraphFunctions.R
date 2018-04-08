@@ -1322,9 +1322,9 @@ Inputs246 <- function(TechToPlot){
         mutate(Diff=(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod),
                value=Prod- first(Prod))
       
-      df <- as.data.frame(df)
+      df<-as.data.frame(df)
       ifelse(df$Diff < 0,-df$Diff,df$Diff)
-
+      
       df$Plan.Pct.Build.Out<-df$value/df$Diff
       names(df)[names(df)=="Scenario"]<-"Label"
       df$Prod <- df$TargetProd <- NULL
@@ -1353,7 +1353,7 @@ Inputs246 <- function(TechToPlot){
     Production1 <- subset (Production1, select=c("Year","Plan.Pct.Build.Out","Label"))
     Production2 <- subset(Combin2, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
     Production2 <- subset (Production2, select=c("Year","Plan.Pct.Build.Out","Label"))
-  
+    
     Production <- as.data.frame(rbind(Production1,Production2))
   } else if (((nrow(Combin1) ==0) &  (nrow(Combin2) >0))){
     Production <- subset(Combin2, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
@@ -1363,10 +1363,10 @@ Inputs246 <- function(TechToPlot){
   } else if(((nrow(Combin2) ==0) &  (nrow(Combin1) >0))){
     Production <- subset(Combin1, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
     Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out","Label"))
-  
+    
     
   }
-
+  
   
   
   ## Stock Market Build Out
@@ -1377,7 +1377,7 @@ Inputs246 <- function(TechToPlot){
   MarketBuildOut2 <- subset(Aldprod2, InvestorName == "Market"& Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
   MarketBuildOut2 <- subset(MarketBuildOut2,select = c("Year","Plan.Pct.Build.Out"))
   MarketBuildOut2$Label <- "Debt Market"
-
+  
   ### Inputs to the 246 chart.
   
   IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" & Year %in% Startyear:(Startyear+5)  &
@@ -1387,9 +1387,9 @@ Inputs246 <- function(TechToPlot){
   IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
   names(IEATargetsRef)[names(IEATargetsRef)=="AnnualvalIEAtech"] <- "TargetProd"
   IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
-
+  
   IEATargets <- BuildOutCalc(IEATargets,TechToPlot)
-
+  
   IEATargets <- subset(IEATargets, select = c("Label","Year","Plan.Pct.Build.Out"))
   
   
@@ -1399,6 +1399,7 @@ Inputs246 <- function(TechToPlot){
   return(df)
 }
 
+
 Graph246 <- function(plotnumber, TechToPlot){
   
   
@@ -1407,7 +1408,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   LinesToPlot <- c("Equity","Bond","Stock Market","Debt Market")
   # BatchTest2 <- CBBatchTest
   # Combin2 <- CBCombin
-
+  
   
   # Check whether the tech is a green or brown technology
   GoodBad <- GreenBrown(TechToPlot)
@@ -1481,56 +1482,57 @@ Graph246 <- function(plotnumber, TechToPlot){
   #if(('Portfolio' %in% colnames(dfwide)) == TRUE)  {
   
   if (GoodBad == "Brown"){
-    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
+    dftargets$lower <-c(rep(-2.4,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
       geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+ 
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
-    
+      
       scale_fill_manual(labels=unique(dftargets$Labels),
-                        values=rep(unique(as.character(dftargets$colour)),1))+
+                        values=unique(as.character(dftargets$colour)))+
       
       #scale_color_manual(name="",values = c("Portfolio"=eq_port,"Market"=stock_market))+
       #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
       #labels=unique(dftargets$Labels)
-      xlab("") +
-      scale_y_continuous(name="",breaks = seq(-2, 2, 1),labels = scales::percent)+
+      xlab("")+
+      scale_y_continuous(name="",breaks = seq(-2, 2, 1),labels = scales::percent, sec.axis = dup_axis())+
       coord_cartesian(ylim=c(-2,2))+
       theme_minimal()+
+      expand_limits(0,0)+
       theme(
-            panel.grid.minor = element_blank(),
-            axis.ticks=element_blank(),
-            panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   } else if (GoodBad =="Green"){
-    dftargets$lower <-c(rep(-2.2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
       geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+   # Market
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       scale_fill_manual(labels=(unique(dftargets$Labels)),
-                                             values=(unique(as.character(dftargets$colour))))+
+                        values=(unique(as.character(dftargets$colour))))+
       
       #scale_color_manual(name="",values = c("Portfolio"=eq_port,"Market"=stock_market))+
       #scale_y_continuous(minor_breaks = seq(2018 ,2023 , 4), breaks = seq(-2, 2, 1))
       #labels=unique(dftargets$Labels)
       xlab("") +
-      scale_y_continuous(name="",breaks = seq(0, 1, 0.25),labels = scales::percent)+
+      scale_y_continuous(name="",breaks = seq(0, 1, 0.25),labels = scales::percent,sec.axis = dup_axis())+
       coord_cartesian(ylim=c(0,1))+
-      theme_minimal()+
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.ticks=element_blank(),
-            panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.position = "bottom",
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+      theme_bw()+
+      expand_limits(0,0)+
+      theme(
+        panel.grid.minor = element_blank(),
+        axis.ticks.y = element_line(size = 1),
+        panel.border = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   }
   
   
@@ -1540,34 +1542,39 @@ Graph246 <- function(plotnumber, TechToPlot){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
-           text=element_text(family="Arial"))
-  
+      theme(#legend.position="none",
+            panel.grid.major.y = element_blank(),
+            text=element_text(family="Arial"))
+    
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour = "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
-           text=element_text(family="Arial"))
+      theme(#legend.position="none",
+            panel.grid.major.y = element_blank(),
+            text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour =  "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
-           text=element_text(family="Arial"))
+      theme(#legend.position="none",
+            panel.grid.major.y = element_blank(),
+            text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
     outputplot <- outputplot+
-      theme(legend.position="none",
-           text=element_text(family="Arial"))
+      theme(#legend.position="none",
+            panel.grid.major.y = element_blank(),
+            text=element_text(family="Arial"))
   }
   
   
   
-  if(PrintPlot){print(outputplot)}
+  print(outputplot)
   
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
   
-}                       
+}
+          
