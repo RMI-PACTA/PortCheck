@@ -197,8 +197,7 @@ theme_barcharts <-function(base_size = textsize, base_family = "") {
         axis.line.y = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.background = element_blank(),
         # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
@@ -526,11 +525,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   if (PrintPlot) {print(outputplot)}
   #return()
 }
-
-                           
-                           
-                           
-
 
 ranking_chart_alignment_original <- function(plotnumber,ChartType,SectorToPlot){
   
@@ -898,6 +892,30 @@ exposure_summary <- function(plotnumber,ChartType){
   if(PrintPlot){print(plot)}
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
          bg="transparent",height=4,width=10,dpi=ppi)
+}
+
+analysed_summary <- function(plotnumber){
+  if (PortName != "MetaPort") {
+    over <- Ports.Overview %>%
+      filter(Portfolio.Name == PortName)
+  } else {
+    over <- Ports.Overview %>%
+      group_by(Asset.Type, Valid) %>%
+      summarise("ValueUSD" = sum(ValueUSD)) %>%
+      ungroup() %>%
+      mutate("Portfolio.Name" = "MetaPort")
+  }
+  names(over) <- gsub("TwoD\\.","",names(over))
+  over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
+  
+  ## "steelblue" color below should be changed to whatever our Portfolio color is
+  ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
+    geom_bar(position="stack", stat="identity") +
+    scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray","steelblue")) +
+    scale_x_discrete(name="Asset Type") +
+    scale_y_continuous(name="", labels=dollar) +
+    theme_barcharts() + 
+    theme(legend.position = "bottom")
 }
 
 # ------------- DISTRIBUTIONS --------------- #

@@ -276,6 +276,7 @@ for (i in c(7:9,326)){
       
       #Introduction
       portfolio_sector_stack("01")
+      analysed_summary("02") #trish's overview "pie chart"
       
       if (HasEquity) {
         exposure_summary("06", "EQ")  
