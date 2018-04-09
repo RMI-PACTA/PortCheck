@@ -167,7 +167,7 @@ CAReport <- function(){
   write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
   
   # Create the PDF
-  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8', engine_args = "-synctex=1", emulation=TRUE)
+  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
   
   # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
@@ -516,11 +516,12 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   labelloc <- -1.4
   leafloc <- c(11,12,2,3)
   
+  #if (any(Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal",
+  #                                     "Electric", "Hybrid","Renewables", "Hydro", "Nuclear"))) {
     outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0,colour=textcolor)+  # Technology Label - Black
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, colour=textcolor)+ 
-    geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
+    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)+
+      geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))#+   Technology Label - Black
   
 
   #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
