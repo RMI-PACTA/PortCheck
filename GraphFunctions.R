@@ -965,6 +965,7 @@ exposure_summary <- function(plotnumber,ChartType){
   Portfolio$Sector <- recode(Portfolio$Sector, Coal = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels")
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
+  ### This is the correct colour palette, I just didn't work out how to implement this. 
   repval = 200
   redgreen<- colorRampPalette(c(area_6,area_2_4, area_2))(repval) 
   
@@ -1598,6 +1599,9 @@ Graph246 <- function(plotnumber, TechToPlot){
   #if(('Portfolio' %in% colnames(dfwide)) == TRUE)  {
   
   if (GoodBad == "Brown"){
+    
+    xaxismin <- max(-2, min(dftar$value[dftar$Lab %in% c("Equity","Debt Market","Bond","Stock Market")]))
+    
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
@@ -1613,7 +1617,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       #labels=unique(dftargets$Labels)
       xlab("") +
       ylab("")+
-      coord_cartesian(ylim=c(-2,2))+
+      coord_cartesian(ylim=c(xaxismin,2))+
       theme_minimal()+
       theme(panel.grid.major = element_line(color="black",size=0.5),
             panel.grid.minor = element_blank(),
@@ -1623,7 +1627,8 @@ Graph246 <- function(plotnumber, TechToPlot){
             legend.position = "bottom",
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"))
-  } else if (GoodBad =="Green"){
+ 
+     } else if (GoodBad =="Green"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target))+
