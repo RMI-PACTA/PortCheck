@@ -24,6 +24,9 @@ library(knitr)
 library(png)
 library(RColorBrewer)
 library(matrixStats)
+library(extrafont)
+font_import()   #Importing fonts may take a few minutes, depending on the number of fonts and the speed of the system.
+loadfonts(device = "win")
 
 
 #------------
@@ -43,7 +46,6 @@ if (!exists("TWODII.CONSTS")) {
 ### this defines any project constants and functions
 ### and will also source an override file if it exists
 source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
-print("*** Starting DataImport.R Script")
 print(show.consts())
 
 #------------
@@ -61,7 +63,7 @@ Startyear <- NA
 ComparisonFile <- NA
 ReportTemplate <- NA
 
-ParameterFile <- ReadParameterFile(PROC.DATA.PATH)
+ParameterFile <- ReadParameterFile(PORTS.PATH)
 ### fill up those variables
 SetParameters(ParameterFile)              # Sets BatchName, Scenario, BenchmarkRegion etc. 
 print("*** STARTING SCRIPT with PARAMETERS:")
@@ -90,13 +92,18 @@ REPORT.PATH <- paste0(RESULTS.PATH,"05_Reports/",ProjectName,"/",BatchName,"/")
 if(!dir.exists(file.path(REPORT.PATH))){dir.create(file.path(REPORT.PATH), showWarnings = TRUE, recursive = FALSE, mode = "0777")}
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
+### ###########################################################################
+### GET OVERVIEW RESULTS
+### ###########################################################################
+
+Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv"),stringsAsFactors=FALSE,strip.white = T)
+names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
+length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
+
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
-
-CBBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-print(paste0("Debt Portfolio Results: ", nrow(CBBatchTest_PortSnapshots), " rows."))
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
@@ -104,14 +111,12 @@ print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " r
 
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
+Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 ### Get Equity Batch Results
 EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
-
-# EQBatchTest_PortSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Snapshot-",Startyear,".csv"), stringsAsFactors=FALSE,strip.white = T)
-# print(paste0("Equity Portfolio Snapshot: ", nrow(EQBatchTest_PortSnapshots), " rows."))
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
@@ -123,15 +128,15 @@ EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildO
 EQBatchTest$Type <- "Portfolio"
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"
 EQBatchTest$Type[EQBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
+
 CBBatchTest$Type <- "Portfolio"
 CBBatchTest$Type[CBBatchTest$InvestorName != "California Insurers"] <- "Market"
 CBBatchTest$Type[CBBatchTest$PortName == "MetaPort"] <- "MetaPortfolio"
-CBBatchTest_PortSnapshots$Type <- "Portfolio"
-CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$InvestorName != "California Insurers"] <- "Market"
-CBBatchTest_PortSnapshots$Type[CBBatchTest_PortSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
+
 EQCompProdSnapshots$Type <- "Portfolio"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
 EQCompProdSnapshots$Type[EQCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
+
 CBCompProdSnapshots$Type <- "Portfolio"
 CBCompProdSnapshots$Type[CBCompProdSnapshots$InvestorName != "California Insurers"] <- "Market"
 CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
@@ -204,7 +209,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(7:9,326)){
+for (i in c(1:20,326)){
 
   ### Specify the Names from the Test List
   
@@ -227,7 +232,6 @@ for (i in c(7:9,326)){
   EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
   CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
   CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-
   
   if(TestType == "MetaPortfolio"){
     ReportName <- InvestorNameLong
@@ -261,6 +265,8 @@ for (i in c(7:9,326)){
   
   ### Loops through graphs and report generation
   
+  PrintPlot = TRUE
+  
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
       
@@ -270,16 +276,15 @@ for (i in c(7:9,326)){
       
       #Introduction
       portfolio_sector_stack("01")
+      analysed_summary("02") #trish's overview "pie chart"
       
       if (HasEquity) {
-        portfolio_pie_chart("02", "EQ")
         exposure_summary("06", "EQ")  
         sector_techshare("09","EQ","All")
         Fossil_Distribution("11", "EQ")
       }
       
       if (HasDebt) {      
-        portfolio_pie_chart("03", "CB")
         exposure_summary("07", "CB")  
         sector_techshare("10","CB","All")
         Fossil_Distribution("12", "CB")  
