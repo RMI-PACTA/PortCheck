@@ -209,7 +209,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(7:9,326)){
+for (i in c(1:20,326)){
 
   ### Specify the Names from the Test List
   
@@ -364,7 +364,7 @@ for (i in c(7:9,326)){
      
       # Creates the report for California
       # system.time(
-      # CAReport()
+      CAReport()
       # )
       
       

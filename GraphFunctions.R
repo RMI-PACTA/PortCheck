@@ -516,7 +516,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     
   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_rankingchart.png', sep=""),bg="transparent",height=graphheight,width=9.7,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=graphheight,width=9.7,dpi=ppi)
   
 
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
@@ -909,13 +909,16 @@ analysed_summary <- function(plotnumber){
   over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
   
   ## "steelblue" color below should be changed to whatever our Portfolio color is
-  ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
+  plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
     geom_bar(position="stack", stat="identity") +
     scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray","steelblue")) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="", labels=dollar) +
     theme_barcharts() + 
     theme(legend.position = "bottom")
+  
+  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
+         bg="transparent",height=4,width=6,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
@@ -1097,7 +1100,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
                       paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
                       paste0("% ", GT["T_RenewablesCap"][[1]]))
       names(tech_labels) <- techorder
-      tech_labels <- factor(tech_labels, levels=tech_labels)
+      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour)
       names(colors) <- techorder
     }
@@ -1108,7 +1111,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       
       tech_labels <- c(paste0("% ", GT["T_ICE"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_Electric"][[1]]))
       names(tech_labels) <- techorder
-      tech_labels <- factor(tech_labels, levels=tech_labels)
+      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(ICEColour,HybridColour,ElectricColour)
       names(colors) <- techorder
     }
@@ -1117,9 +1120,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       
       AllData$Technology <- factor(AllData$Technology, levels=techorder)
       
-      labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
-      names(labels) <- techorder
-      # labels <- factor(labels, levels=labels)
+      tech_labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
+      names(tech_labels) <- techorder
+      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(CoalProdColour,GasProdColour,OilProdColour)
       names(colors) <- techorder
     }
@@ -1134,21 +1137,16 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
     PortPlot <- stacked_bar_chart(PortfolioData)+
       scale_fill_manual(values=colors)+
-      ggtitle("Templete")+
       xlab("Portfolio")+
       coord_flip()+
-      theme(plot.title = element_text(hjust = 0.5,face="bold",colour="black",size=textsize),
-            axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank(),
-            text=element_text(family="Arial"))
+      theme(axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
     
     CompPlot <- stacked_bar_chart(CompanyData)+
-      scale_fill_manual(values=colors,labels = labels, name = "Technology")+
+      scale_fill_manual(values=colors,labels = tech_labels)+
       xlab("Companies")+
       ylab("TechShare")+
       coord_flip()+
-      theme(legend.position = "bottom",legend.title = element_blank(),
-            axis.line = element_blank(), plot.title = element_blank(),
-            text=element_text(family="Arial"))
+      theme(legend.position = "bottom",legend.title = element_blank())
   
     cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
   
