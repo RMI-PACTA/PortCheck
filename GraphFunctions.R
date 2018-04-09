@@ -832,25 +832,14 @@ portfolio_sector_stack <- function(plotnumber){
   
   a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
-    theme_minimal()+
     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
     scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.05), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
-    theme(legend.position = "bottom",
-          axis.title=element_blank(),
-          axis.line.x = element_line(colour = "black",size=1),
-          axis.line.y = element_blank(),
-          panel.background = element_blank(),
-          legend.text = element_text(face="bold",size=textsize,colour=textcolor),
-          legend.background = element_rect(fill = "transparent",colour = NA),
-          legend.key.size=unit(0.4,"cm"),
-          legend.title=element_blank(),
-          plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-          text=element_text(family="Arial")
-    )
+    theme(legend.position = "bottom", legend.title = element_blank())
+
   if(PrintPlot){print(a)}
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=3,width=4,plot=a,dpi=ppi)
 }
