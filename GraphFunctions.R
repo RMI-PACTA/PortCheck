@@ -418,8 +418,18 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   # wrap.it <- function(x, len){sapply(x, function(y) paste(strwrap(y, len),collapse = "\n"), USE.NAMES = FALSE)}
   # wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
+  # Exposures$a <- paste0(gsub(" ","",Exposures$Sector),"_Unit")
+  # Exposures$b <- Exposures$Technology
+  
   Exposures$a <- paste0(gsub(" ","",Exposures$Sector),"_Unit")
-  Exposures$b <- Exposures$Technology
+  Exposures$b <- paste0("T_",Exposures$Technology)
+  Exposures$b[Exposures$Sector %in% "FossilFuels"] <- paste0("T_",Exposures$Technology[Exposures$Sector %in% "FossilFuels"],"Prod")
+  
+  # Line Labels
+  Exposures$TechTitle <-paste0(t(GT[Exposures$b])," ",t(GT[Exposures$a]))
+  Exposures$TechTitle[Exposures$Sector %in% "Automotive"] <- paste0(t(GT[Exposures$b[Exposures$Sector %in% "Automotive"] ]))
+  
+  Exposures$TechLabel <- Exposures$TechTitle
   
   Exposures$Locations <- locations
   
@@ -503,21 +513,24 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
           text=element_text(family="Arial"))
   
   
-  labelloc <- -1.3
+  labelloc <- -1.4
   leafloc <- c(11,12,2,3)
   
     outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$b[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0,colour=textcolor)+  # Technology Label - Black
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$b[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, colour=textcolor)+ 
+    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal")],12), size=rel(3), hjust=0,colour=textcolor)+  # Technology Label - Black
+    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in% c("Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0, colour=textcolor)+ 
     geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))
   
 
   #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
-  if (all(Exposures$Technology %in%  c("Oil","Gas","Coal")))  
-     {graphheight <-2.3} else if (all(Exposures$Technology %in%  c("Electric", "Hybrid","ICE")))  
-     {graphheight <-2.3} else if (all(Exposures$Technology %in%  c("CoalCap", "GasCap","Renewables","Hydro","Nuclear")))   
-     {graphheight <- 5.7}else {graphheight <- 7.2}
+  if (all(Exposures$Technology %in%  c("Oil","Gas","Coal")))  {
+    graphheight <-2.3
+  } else if (all(Exposures$Technology %in%  c("Electric", "Hybrid","ICE")))  {
+      graphheight <-2.3
+  } else if (all(Exposures$Technology %in%  c("CoalCap", "GasCap","Renewables","Hydro","Nuclear"))) {
+        graphheight <- 5.7
+        }else {graphheight <- 7.2}
     
   
   
