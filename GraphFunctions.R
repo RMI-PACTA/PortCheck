@@ -269,7 +269,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 
 distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
                                Title, Labels, LineHighl, LineLabels, LineColors, BarColors){
- 
+
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
   dfagg <- aggregate(df["Value"],by=df[c(ID.COLS,"Metric")],FUN=sum)
@@ -290,18 +290,11 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
   
   x_coord <- length(unique(order$Name))
   
-  if (PortName %in% dfagg$Name) {
-    arrow <- max(filter(dfagg, Name == PortName)$Value)
-  } else {
-    arrow <- NA
-  } 
+  arrow <- max(filter(dfagg, Name == PortName)$Value)
   
-  distribution_plot<- ggplot(dfagg)+
+  distribution_plot <- ggplot(dfagg)+
     geom_bar(aes(x=Name, y=Value, fill=Metric),
              stat = "identity", width=1)+
-    geom_segment(data=filter(dfagg, Name == PortName),
-                 aes(x=Name,xend=Name,y=arrow+.05,yend=arrow+.001),
-                 size = 1, arrow = arrow(length = unit(.5,"cm")))+
     scale_fill_manual(values=BarColors,labels=Labels, breaks=c(MetricCol))+
     scale_y_continuous(expand=c(0,0), limits = c(0,1.001), labels=percent)+
     scale_x_discrete(labels=NULL)+
@@ -310,7 +303,13 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
     ylab(Title)+
     xlab("All CA Insurer Bond Portfolios")+
     coord_cartesian(ylim=c(0,min(1, 1.1*max(dfagg$Value))))
-
+  
+  if (PortName %in% dfagg$Name) {
+    distribution_plot <- distribution_plot +
+      geom_segment(data=filter(dfagg, Name == PortName),
+                   aes(x=Name,xend=Name,y=arrow+.05,yend=arrow+.001),
+                   size = 1, arrow = arrow(length = unit(.5,"cm")))
+  }
   
   return(distribution_plot)
   
