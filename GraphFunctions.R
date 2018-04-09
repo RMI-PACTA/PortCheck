@@ -927,6 +927,8 @@ analysed_summary <- function(plotnumber){
     theme_barcharts() + 
     theme(legend.position = "bottom")
   
+  if(PrintPlot){print(plot)}
+  
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
          bg="transparent",height=4,width=6,dpi=ppi)
 }
