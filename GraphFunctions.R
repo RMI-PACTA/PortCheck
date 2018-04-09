@@ -290,7 +290,11 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
   
   x_coord <- length(unique(order$Name))
   
-  arrow <- max(filter(dfagg, Name == PortName)$Value)
+  if (PortName %in% dfagg$Name) {
+    arrow <- max(filter(dfagg, Name == PortName)$Value)
+  } else {
+    arrow <- NA
+  } 
   
   distribution_plot<- ggplot(dfagg)+
     geom_bar(aes(x=Name, y=Value, fill=Metric),
