@@ -1041,44 +1041,13 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     combin <- CBCombin
     market <- CBBatchTest[CBBatchTest$Type == "Market",]
   }
-
-  if (SectorToPlot == "Power"){
-    techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
-    CompProdSS <- subset(CompProdSS, Sector == "Power")
-    combin <- subset(combin, Sector == "Power")
-    market <- subset(market, Sector == "Power")
-  }
-  
-  if (SectorToPlot == "Automotive"){
-    techorder <- c("ICE","Hybrid","Electric")
-    CompProdSS <- subset(CompProdSS, Sector == "Automotive")
-    combin <- subset(combin, Sector == "Automotive")
-    market <- subset(combin, Sector == "Automotive")
-  }
-  
-  if (SectorToPlot == "Fossil Fuels") {
-    techorder <- c("Coal", "Gas", "Oil")
-    CompProdSS <- subset(CompProdSS, Sector %in% c("Coal","Oil&Gas"))
-    combin <- subset(combin, Sector %in% c("Coal","Oil&Gas"))
-    market <- subset(market, Sector %in% c("Coal","Oil&Gas"))
-    CompProdSS$Sector <- recode(CompProdSS$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = CompProdSS$Sector)
-    combin$Sector <- recode(combin$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = combin$Sector)
-    market$Sector <- recode(market$Sector, `Coal` = "Fossil Fuels", `Oil&Gas` = "Fossil Fuels", .default = market$Sector)
-  }
-  
-  if (SectorToPlot == "Oil"){
-    techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
-    CompProdSS <- subset(CompProdSS, Technology == "Oil")
-    combin <- subset(combin, Technology == "Oil")
-    market <- subset(market, Technology == "Oil")
-  }
   
   if (nrow(combin) > 0) {
+    
     CompProdSS <- subset(CompProdSS, Year == (Startyear+5))
     combin <- subset(combin, Year == (Startyear+5))
     market <- subset(market, Year == (Startyear+5))
     
-  
     # Portfolio (Weighted by the AUM)
     Portfoliomix <- subset(combin, select=c("Technology","WtProduction"))
     Portfoliomix$Classification <- "Portfolio"
@@ -1109,60 +1078,53 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
     Companies$Classification <- "Companies"
     Companies <- Companies[rev(order(Companies$CompanyLvlProd)),]
-    TopPortCompanies <- unique(Companies$Ticker)[1:companiestoprint]
-    Companies <- subset(Companies, Ticker %in% TopPortCompanies, select = c("Ticker","Classification","Technology","TechShare"))
+    Companies <- subset(Companies, select = c("Ticker","Classification","Technology","TechShare"))
     colnames(Companies) <- c("Name","Classification","Technology","TechShare")
-    Companies[Companies$item == "NA"] <- "NoName"
-    Companies$Name <- factor(Companies$Name, levels=TopPortCompanies)
-    Companies <- Companies[order(Companies$Name),]
+    Companies[Companies$Name == "NA"] <- "No Name"
     AllData <- rbind(Marketmix, Targetmix, Portfoliomix, Companies)
     AllData$Name <- factor(AllData$Name, levels=rev(unique(AllData$Name)))
   
     
     if (SectorToPlot == "Power"){  
+      techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
       
+      AllData <- filter(AllData, !Technology %in% c("Coal", "Gas", "Oil"))
       AllData$Technology <- gsub("Cap","",AllData$Technology)
-      AllData <- subset(AllData, AllData$Technology != "Oil")
-      AllData$Technology <- factor(AllData$Technology, levels=techorder)
       
       tech_labels <- c(paste0("% ", GT["T_CoalCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
                       paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
                       paste0("% ", GT["T_RenewablesCap"][[1]]))
-      names(tech_labels) <- techorder
-      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour)
-      names(colors) <- techorder
     }
     
     if (SectorToPlot == "Automotive"){
-      
-      AllData$Technology <- factor(AllData$Technology, levels=techorder)
-      
+      techorder <- c("ICE","Hybrid","Electric")
       tech_labels <- c(paste0("% ", GT["T_ICE"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_Electric"][[1]]))
-      names(tech_labels) <- techorder
-      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(ICEColour,HybridColour,ElectricColour)
-      names(colors) <- techorder
     }
     
     if (SectorToPlot == "Fossil Fuels") {
-      
-      AllData$Technology <- factor(AllData$Technology, levels=techorder)
-      
+      techorder <- c("Coal", "Gas", "Oil")
       tech_labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
-      names(tech_labels) <- techorder
-      #tech_labels <- factor(tech_labels, levels=tech_labels)
       colors <- c(CoalProdColour,GasProdColour,OilProdColour)
-      names(colors) <- techorder
     }
   
     if (SectorToPlot == "Oil"){
-      
+      #----------------TO DO
     }
+    
+    AllData <- filter(AllData, Technology %in% techorder)
+    AllData$Technology <- factor(AllData$Technology, levels=techorder)
+    
+    
+    names(colors) <- techorder
+    names(tech_labels) <- techorder
   
     PortfolioData <- subset(AllData, Classification == "Portfolio")
     
     CompanyData <- subset(AllData, Classification == "Companies")
+    CompanyData$Name <- factor(CompanyData$Name, levels = rev(unique(Companies$Name)))
+    CompanyData <- filter(CompanyData, Name %in% unique(CompanyData$Name)[1:companiestoprint])
     
     PortPlot <- stacked_bar_chart(PortfolioData)+
       scale_fill_manual(values=colors)+
