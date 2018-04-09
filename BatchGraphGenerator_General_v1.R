@@ -349,6 +349,7 @@ for (i in c(1:20,326)){
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
       # The plotnumber has to match the figure number in the report ie Fig01 etc. Therefore "01" is necessary. 
+      
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
       

@@ -1502,63 +1502,77 @@ Graph246 <- function(plotnumber, TechToPlot){
     xaxismin <- max(-2, min(dftar$value[dftar$Lab %in% c("Equity","Debt Market","Bond","Stock Market")]))
     
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
+    
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
-      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
-      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+ 
+      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), 
+                data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
+      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), 
+                data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+ 
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       
       scale_fill_manual(labels=unique(dftargets$Labels),
                         values=unique(as.character(dftargets$colour)))+
       
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-      scale_y_continuous(name="",breaks = seq(-2, 2, 1),labels = scales::percent, sec.axis = dup_axis())+
+      scale_y_continuous(name="",breaks = seq(-2, 2, 1),expand=c(0,0))+
       coord_cartesian(ylim=c(-2,2))+     # coord_cartesian(ylim=c(xaxismin,2))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.grid = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line = element_line(),
         legend.title = element_blank(),
+        legend.position = "none",
         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
 
   } else if (GoodBad =="Green"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
-      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
-      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+   # Market
+      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), 
+                data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
+      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), 
+                data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+   # Market
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       scale_fill_manual(labels=(unique(dftargets$Labels)),
                         values=(unique(as.character(dftargets$colour))))+
       
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-      scale_y_continuous(name="",breaks = seq(0, 1, 0.25),labels = scales::percent,sec.axis = dup_axis())+
+      scale_y_continuous(name="",breaks = seq(0, 1, 0.25),expand=c(0,0))+
       coord_cartesian(ylim=c(0,1))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.grid = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line = element_line(colour = textcolor),
         legend.title = element_blank(),
+        legend.position = "none",
         plot.margin = unit(c(.5,1,0.5,.5), "cm"))
   }
   
-  
+  print(outputplot)
   
   
   if((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
+      theme(#legend.position="none",
             text=element_text(family="Arial"))
     
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour = "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
+      theme(#legend.position="none",
             text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
     outputplot <- outputplot+ 
@@ -1566,11 +1580,11 @@ Graph246 <- function(plotnumber, TechToPlot){
       
       geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour =  "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
       scale_color_manual(name="",values = c("Equity"=eq_line,"Bond"=cb_line,"Debt Market"=peer_group,"Stock Market"=peer_group))+
-      theme(legend.position="none",
+      theme(#legend.position="none",
             text=element_text(family="Arial"))
   }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
     outputplot <- outputplot+
-      theme(legend.position="none",
+      theme(#legend.position="none",
             text=element_text(family="Arial"))
   }
   
@@ -1579,7 +1593,8 @@ Graph246 <- function(plotnumber, TechToPlot){
   print(outputplot)
   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),
+         height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
   
 }
           
