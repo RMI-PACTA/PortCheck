@@ -1523,7 +1523,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       scale_fill_manual(labels=unique(dftargets$Labels),
                         values=unique(as.character(dftargets$colour)))+
-      scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
+      scale_x_continuous(expand=c(0,0),, limits=c(2018,2023)) +
       scale_y_continuous(name="",breaks = seq(-2, 2, 1))+
       coord_cartesian(ylim=c(-2,2))+
       theme_bw()+
@@ -1532,7 +1532,8 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.border = element_blank(),
             panel.grid = element_blank(),
             legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"),
+            axis.ticks.x = element_blank())
   } else if (GoodBad =="Green"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
@@ -1542,7 +1543,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       scale_fill_manual(labels=(unique(dftargets$Labels)),
                         values=(unique(as.character(dftargets$colour))))+
-      scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
+      scale_x_continuous(expand=c(0,0),, limits=c(2018,2023)) +
       scale_y_continuous(name="",breaks = seq(0, 1, 0.25))+
       coord_cartesian(ylim=c(0,1))+
       theme_bw()+
@@ -1551,7 +1552,8 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.border = element_blank(),
             panel.grid = element_blank(),
             legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"))
+            plot.margin = unit(c(.5,1,0.5,.5), "cm"),
+            axis.ticks.x = element_blank())
   }
   
   
@@ -1589,8 +1591,9 @@ Graph246 <- function(plotnumber, TechToPlot){
   print(outputplot)
   
   
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),	+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
-                    height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)	+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
+                    #height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
 }
           
