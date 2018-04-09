@@ -21,13 +21,14 @@ CAReportData <- function(){
   InsuranceCompanyName <- PortfolioNameLong
   InsuranceCompanyNameWrapped <- wrap.labels(PortfolioNameLong,18)
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  SizeofPortfolio <-10000000
+  # SizeofPortfolio <-Ports.Overview[Port.ValueUSD]
+  SizeofPortfolio <-1000
   
   NoPeers <- nrow(TestList)-1
     
-  if(HasEquity & HasDebt){AssetClass <- "Corporate Debt and Equity"}
-  else if(HasEquity & !HasDebt){AssetClass <- "Equity"}
-  else if(!HasEquity & HasDebt){AssetClass <- "Corporate Debt"}
+  if(HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers and Listed Equity"}
+  else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"}
+  else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers "}
   
   ### Sector Check
   SectorCheck <- TestList[TestList$PortName == PortName,]
@@ -166,7 +167,7 @@ CAReport <- function(){
   write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
   
   # Create the PDF
-  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8')
+  knit2pdf(paste0(LANGUAGE.PATH,TemplateNameNew,".Rnw"),compiler = "xelatex", encoding = 'UTF-8', engine_args = "-synctex=1", emulation=TRUE)
   
   # Delete remaining files and ReportGraphics Folder
   unlink("ReportGraphics",recursive = TRUE)
@@ -259,7 +260,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         legend.text = element_text(color = textcolor, size = textsize),
         legend.title = element_blank(),
         plot.margin = unit(c(0.6,1.0, 2.5, 0), "lines"),
-        # plot.background = element_blank(),
+        plot.background = element_blank(),
         plot.title = element_blank(),
         text=element_text(family="Arial")
   )
@@ -301,8 +302,9 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
     theme_distribution()+
     expand_limits(0,0)+
     ylab(Title)+
-    xlab("All CA Insurer Bond Portfolios")+
-    coord_cartesian(ylim=c(0,min(1, 1.1*max(dfagg$Value))))
+    xlab("All CA Insurer Bond Portfolios")#+
+    # coord_cartesian(ylim=c(0,min(1, 1.1*max(dfagg$Value))))
+  ###### THIS CAUSES AN ERROR! for some reason the coord_cartsian function seems to cause the charts to break in Adobe. 
   
   if (PortName %in% dfagg$Name) {
     distribution_plot <- distribution_plot +
@@ -310,7 +312,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
                    aes(x=Name,xend=Name,y=arrow+.05,yend=arrow+.001),
                    size = 1, arrow = arrow(length = unit(.5,"cm")))
   }
-  
+
   return(distribution_plot)
   
 }
@@ -968,8 +970,8 @@ Risk_Distribution <- function(plotnumber, ChartType){
   
   if(PrintPlot){print(plot)}
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Risk_Distribution.png', sep=""),
-         height=4,width=10,plot=plot,dpi=ppi, bg="transparent")
+  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_Risk_Distribution.png"),
+         height=4,width=9,dpi=ppi, bg="transparent")
   
 }
 
@@ -995,11 +997,13 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors) +
     theme(legend.position = "none")
+
+    
+  # print(plot)
+  # png(filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png')
   
-  print(plot)
-  
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
-         height=4,width=10,plot=plot,dpi=ppi, bg="transparent")
+  ggsave(plot=plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
+         height=4,width=9,dpi=2*ppi, bg="transparent")
   
 }
 
@@ -1495,7 +1499,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   #if(('Portfolio' %in% colnames(dfwide)) == TRUE)  {
   
   if (GoodBad == "Brown"){
-    xaxismin <- max(-2, min(dftar$value[dftar$Lab %in% c("Equity","Debt Market","Bond","Stock Market")]))
+    # xaxismin <- max(-2, min(dftar$value[dftar$Lab %in% c("Equity","Debt Market","Bond","Stock Market")]))
     
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line1)
     outputplot <- ggplot(data = dftargets)+
@@ -1512,7 +1516,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       #labels=unique(dftargets$Labels)
 
       xlab("")+
-      scale_y_continuous(name="",breaks = seq(xaxismin, 2, 1),labels = scales::percent, sec.axis = dup_axis())+
+      scale_y_continuous(name="",breaks = seq(-2, 2, 1),labels = scales::percent, sec.axis = dup_axis())+
       coord_cartesian(ylim=c(-2,2))+
       theme_minimal()+
       expand_limits(0,0)+

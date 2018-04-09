@@ -290,14 +290,6 @@ for (i in c(1:20,326)){
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
       }
-
-      # I don't think there's space - and the CB/EQ problem reemerges. 
-      # Graph246("04", "CB", "Oil") 
-      # Graph246("05", "CB", "Gas") 
-      
-      #Current Exposure
-      # portfolio_sector_stack("08") 
-      # We can just use 01 twice
       
       #5 Year Trajectory
       Graph246("14", "CoalCap")
