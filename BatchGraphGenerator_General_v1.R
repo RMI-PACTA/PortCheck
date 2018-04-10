@@ -209,7 +209,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:20,326)){
+for (i in c(21:24,326)){
 
   ### Specify the Names from the Test List
   
@@ -219,7 +219,8 @@ for (i in c(1:20,326)){
   PortfolioNameLong <- TestList[i,"PortName"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
-  PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
+  PortfolioName <- gsub("[[:punct:]]", "", TestList[i,"PortName"])
+  PortfolioName <- gsub(" ","",PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
   
@@ -265,7 +266,7 @@ for (i in c(1:20,326)){
   
   ### Loops through graphs and report generation
   
-  PrintPlot = TRUE
+  PrintPlot = FALSE
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
