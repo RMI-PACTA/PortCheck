@@ -516,8 +516,8 @@ SetGraphInputs <- function(){
   
   #stock_market<<- "black"
   peer_group <<- "black"
-  eq_line <<- "#AA8CC5"
-  cb_line <<- "#C5AA8C"
+  eq_line <<- "#897D54"
+  cb_line <<- "#59629A"
   
   #moodys
   HighRisk <<- area_6
