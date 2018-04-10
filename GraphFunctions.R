@@ -844,13 +844,13 @@ portfolio_sector_stack <- function(plotnumber){
   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
-  temp<-max(dfagg$CarstenMetric_Port)
+  temp <-sum(dfagg$CarstenMetric_Port)
   ylabel = ""
   
   a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.05), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.01), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
@@ -1146,8 +1146,11 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       theme(legend.position = "bottom",legend.title = element_blank())
 
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    if (PrintPlot){print(PortPlot)}
-    ggsave(PortPlot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
+    if (PrintPlot){
+      dev.off()
+      grid.draw(gt)
+    }
+    ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
