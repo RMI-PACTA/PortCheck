@@ -486,24 +486,28 @@ SetGraphInputs <- function(){
   # trans<<- "#cfd2cd"
   # othr<<- "#9793c6"
 
-  RenewablesColour <<- "#D9DDD4"
-  HydroColour <<- "#C4C3B5"
-  NuclearColour <<- "#B1AC9B"
-  GasCapColour <<- "#9B917C"
-  CoalCapColour <<- "#8B7E66"
+  ## orangey/brown
+  RenewablesColour <<- "#feedde"
+  HydroColour <<- "#fdbe85"
+  NuclearColour <<- "#fd8d3c"
+  GasCapColour <<- "#e6550d"
+  CoalCapColour <<- "#a63603"
   
+  # purpleish
   ElectricColour <<- "#efedf5"
   HybridColour <<- "#bcbddc"
   ICEColour <<-"#756bb1"
 
-  OilProdColour <<- "#BEA07B"
-  GasProdColour <<-"#F5F5F5"
-  CoalProdColour <<- "#8C510A"
+  #goldish
+  GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
+  OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
+  CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
   
   #sector
-  energy<<-"#8C510A"
-  pow <<- "#8B7E66"
-  trans<<- "#8856a7"
+  energy<<-"#8B7E66"
+  pow <<- "#a63603"
+  trans<<- "#756bb1"
+  
   othr<<- "#9793c6"
   
     
@@ -517,7 +521,7 @@ SetGraphInputs <- function(){
   #stock_market<<- "black"
   peer_group <<- "black"
 
-  eq_line <<- "#8C510A" # same as CoalProdColour
+  eq_line <<- "#a63603" # same as CoalCapColor
   cb_line <<- "#756bb1" # same as ICEColour
 # =======
 #   eq_line <<- "#897D54"
