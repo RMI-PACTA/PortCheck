@@ -328,16 +328,16 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
 
 # -------------STACKED BAR CHARTS ---------- #
 
-stacked_bar_chart <- function(dat){
+stacked_bar_chart <- function(dat, colors, legend_labels){
+  # "item", "family", "score", "value"
+  colnames <- colnames(dat)
   
-  colnames(dat) <- c("item", "family", "score", "value")
-  
-  plottheme <- ggplot(data=dat, aes(x=item, y=value,fill=score),show.guide = TRUE)+
+  plottheme <- ggplot(data=dat, aes_string(x=colnames[1], y=colnames[4], fill=colnames[3]),
+                      show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
     geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    theme_minimal()+
+    scale_fill_manual(values=colors,labels = legend_labels, breaks = names(legend_labels))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
-    # expand_limits(0,0)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()
   
@@ -1082,7 +1082,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Portfoliomix$Classification <- "Portfolio"
     Portfoliomix$Name <- "Your Portfolio"
     Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","WtProduction"))
-    Portfoliomix$WtProduction <- Portfoliomix$WtProduction / sum(Portfoliomix$WtProduction) * 100
+    Portfoliomix$WtProduction <- Portfoliomix$WtProduction / sum(Portfoliomix$WtProduction)
     colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
     
     # Add 2D Target (Global Market under 2D Scenario)
@@ -1090,7 +1090,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Targetmix$Classification <- "Portfolio"
     Targetmix$Name<-GT["X2Target"][[1]]
     Targetmix <- subset(Targetmix, select =c("Name","Classification","Technology","Scen.WtProduction"))
-    Targetmix$Scen.WtProduction <- Targetmix$Scen.WtProduction / sum(Targetmix$Scen.WtProduction) * 100
+    Targetmix$Scen.WtProduction <- Targetmix$Scen.WtProduction / sum(Targetmix$Scen.WtProduction)
     colnames(Targetmix) <- c("Name","Classification","Technology","TechShare")
     
     # Add Benchmark / Global Market
@@ -1098,14 +1098,14 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Marketmix$Classification <- "Portfolio"
     Marketmix$Name <- "Market"
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
-    Marketmix$WtProduction <- Marketmix$WtProduction / sum(Marketmix$WtProduction) * 100
+    Marketmix$WtProduction <- Marketmix$WtProduction / sum(Marketmix$WtProduction)
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
 
     PortfolioData <- rbind(Marketmix, Targetmix, Portfoliomix)
 
     # Percentage share of each technology for each company in the portfolio
     Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","CompanyLvlSecProd","PortWeightEQYlvl"))
-    Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
+    Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)
     Companies$Classification <- "Companies"
     Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
     colnames(Companies) <- c("Name","Classification","Technology","TechShare","PortWeight")
@@ -1145,27 +1145,49 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     PortfolioData <- filter(PortfolioData, Technology %in% techorder)
     Companies <- Companies %>% 
       filter(Technology %in% techorder) %>%
-      arrange(-PortWeight) %>%
-      select(-PortWeight)
+      arrange(-PortWeight)
     Companies <- Companies %>%
       filter(Name %in% unique(Companies$Name)[1:min(companiestoprint,length(unique(Companies$Name)))])
-    AllData <- rbind(PortfolioData, Companies)
-    AllData$Name <- factor(AllData$Name, levels=rev(unique(c(PortfolioData$Name,Companies$Name))))
+
+    dummy <- data.frame(c("Name", ""),
+                 c("Classification", NA),
+                 c("Technology", NA),
+                 c("TechShare", 0))
+    colnames(dummy) <- as.character(unlist(dummy[1,]))
+    dummy = dummy[-1, ]
+    dummy$TechShare <- as.numeric(dummy$TechShare)
+
+    AllData <- rbind(PortfolioData,
+                     dummy,
+                     select(Companies,-PortWeight))
+    AllData$Name <- factor(AllData$Name, levels=rev(unique(c(PortfolioData$Name,"",Companies$Name))))
     AllData$Technology <- factor(AllData$Technology, levels=techorder)
     
     names(colors) <- techorder
     names(tech_labels) <- techorder
+
+    scaleFUN <- function(x) sprintf("%.1f", x)
     
-    PortPlot <- stacked_bar_chart(AllData)+
-      scale_fill_manual(values=colors,labels = tech_labels)+
+    PortPlot <- stacked_bar_chart(AllData, colors, tech_labels)+
+      geom_text(aes(x = "", y = 1),
+                label = "% in Portfolio",
+                hjust = -.1, color = textcolor)+
+      geom_text(data=filter(AllData,Classification=="Companies"),
+                aes(x = Name, y = 1),
+                label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
+                hjust = -1, color = textcolor)+
       xlab("Companies")+
       ylab("TechShare")+
       coord_flip()+
-      theme(legend.position = "bottom",legend.title = element_blank())
-
+      theme(legend.position = "bottom",legend.title = element_blank(),
+            plot.margin = unit(c(1, 6, 0, 0), "lines"))
+    
+    gt <- ggplot_gtable(ggplot_build(PortPlot))
+    gt$layout$clip[gt$layout$name == "panel"] <- "off"
+    
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    if (PrintPlot){print(PortPlot)}
-    ggsave(PortPlot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
+    if (PrintPlot){grid.draw(gt)}
+    ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
