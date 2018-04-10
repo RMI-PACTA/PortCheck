@@ -1230,11 +1230,9 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     #Production$Type <- factor(Production$Type)
 
     Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
-    colnames(Production) <- c("item", "family", "score", "value")
-    
-    plottheme<- stacked_bar_chart(Production)+
+
+    plottheme<- stacked_bar_chart(Production, colours, labels)+
       ylab("Share of Sector Production")+
-      scale_fill_manual(labels=labels,values=colours)+
       theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=textsize,margin = unit(c(0,0,1,0),"lines")),
             legend.position = "bottom",
             legend.title = element_blank())+
@@ -1254,53 +1252,53 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
       
     } else if (SectorToPlot == "All"){
-      dat <- subset(Production,family=="Automotive")
-      if (nrow(subset(dat, item=="Portfolio")) > 0) {  
+      dat <- subset(Production,Sector=="Automotive")
+      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
         p1 <- plottheme %+% dat +
           ggtitle("Vehicle Production")
       } else {
-        dat <- rbind(dat, c("item" = "Portfolio",
-                            "family" = "Automotive",
-                            "score" = "ICE",
-                            "value" = 0))
-        dat$value <- as.numeric(dat$value)
+        dat <- rbind(dat, c("Type" = "Portfolio",
+                            "Sector" = "Automotive",
+                            "Technology" = "ICE",
+                            "Value" = 0))
+        dat$Value <- as.numeric(dat$Value)
         p1 <- plottheme %+% dat +
           ggtitle("Automotive Production") +
-          geom_text(data = subset(dat,item=="Portfolio"),
+          geom_text(data = subset(dat,Type=="Portfolio"),
                  aes(item, y = .5, angle = 90, label = "No Automotive Production"))
       }
       
       
-      dat <- subset(Production,family=="Fossil Fuels")
-      if (nrow(subset(dat, item=="Portfolio")) > 0) {  
+      dat <- subset(Production,Sector=="Fossil Fuels")
+      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
         p2 <- plottheme %+% dat +
           ggtitle("Fossil Fuel Production")
         
       } else {
-        dat <- rbind(dat, c("item" = "Portfolio",
-                            "family" = "Fossil Fuels",
-                            "score" = "OilProd",
-                            "value" = 0))
-        dat$value <- as.numeric(dat$value)
+        dat <- rbind(dat, c("Type" = "Portfolio",
+                            "Sector" = "Fossil Fuels",
+                            "Technology" = "OilProd",
+                            "Value" = 0))
+        dat$Value <- as.numeric(dat$Value)
         p2 <- plottheme %+% dat +
           ggtitle("Fossil Fuel Production") +
-          geom_text(data = subset(dat,item=="Portfolio"),
+          geom_text(data = subset(dat,Type=="Portfolio"),
                  aes(item, y = 0.5, angle = 90, label = "No Fossil Fuel Production"))
       }
       
-      dat <- subset(Production,family=="Power")
-      if (nrow(subset(dat, item=="Portfolio")) > 0) {  
+      dat <- subset(Production,Sector=="Power")
+      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
         p3 <- plottheme %+% dat +
           ggtitle("Power Capacity")
       } else {
-        dat <- rbind(dat, c("item" = "Portfolio",
-                            "family" = "Power",
-                            "score" = "CoalCap",
-                            "value" = 0))
-        dat$value <- as.numeric(dat$value)
+        dat <- rbind(dat, c("Type" = "Portfolio",
+                            "Sector" = "Power",
+                            "Technology" = "CoalCap",
+                            "Value" = 0))
+        dat$Value <- as.numeric(dat$Value)
         p3 <- plottheme %+% dat +
           ggtitle("Power Capacity") +
-          geom_text(data = subset(dat,item=="Portfolio"),
+          geom_text(data = subset(dat,Type=="Portfolio"),
                  aes(item, y = .5, angle = 90, label = "No Power Capacity"))
       }
       
