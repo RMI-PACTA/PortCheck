@@ -1524,6 +1524,8 @@ Graph246 <- function(plotnumber, TechToPlot){
   
   if (GoodBad == "Brown"){
     dftargets$lower <-c(rep(-2.4,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    a<-min(dftar$value)
+    if (a< -2){a <- -2}
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
@@ -1533,7 +1535,7 @@ Graph246 <- function(plotnumber, TechToPlot){
                         values=unique(as.character(dftargets$colour)))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
       scale_y_continuous(name="Ratio of Currently Planned Production \nTo Production Levels Specified by 2D Scenario",breaks = seq(-2, 2, 1))+
-      coord_cartesian(ylim=c(-2,2))+
+      coord_cartesian(ylim=c(a,2))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
             panel.grid.minor = element_blank(),
