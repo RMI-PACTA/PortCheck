@@ -497,15 +497,15 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     annotate(geom="rect",xmin =-1,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
     
     # Company Circles
-    geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=8)+
-    annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(2.5))+ 
+    geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
+    annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
     
     # Distribution Range 
     annotate(geom="text",x= -1.03, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour=textcolor)+     # Minimum
     annotate(geom="text",x= 1.03, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour=textcolor)+     # Maximum
     
     # Ranking box and label
-    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor)+ # Rank Heading
+    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor,fontface = "bold")+ # Rank Heading
     annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.3,hjust=0.5, y = locations,size=rel(3),colour=textcolor)+ # Company Ranking
     
     theme(panel.background = element_rect(fill="transparent"),
@@ -529,22 +529,40 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   #                                     "Electric", "Hybrid","Renewables", "Hydro", "Nuclear"))) {
     outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)+
-      geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))#+   Technology Label - Black
-  
+    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)
+      
+  if ((is.null(a)==FALSE) & (is.null(b)==FALSE) & (is.null(d)==FALSE)){     
+    outputplot <- outputplot +
+    geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))#+   Technology Label - Black
+  } else if ((is.null(a)==FALSE) & (is.null(b)==FALSE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = (tail(a,1)+0.75))
+  }else if ((is.null(a)==FALSE) & (is.null(b)==TRUE) & (is.null(d)==FALSE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = (tail(a,1)+1))
+  }else if ((is.null(a)==FALSE) & (is.null(b)==TRUE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot
+  }else if((is.null(a)==TRUE) & (is.null(b)==FALSE) & (is.null(d)==FALSE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = c((d[1]-0.75)))
+  } else if((is.null(a)==TRUE) & (is.null(b)==FALSE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot
+  }  else if((is.null(a)==TRUE) & (is.null(b)==TRUE) & (is.null(d)==FALSE)){
+    outputplot<-outputplot
+  }
 
   #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
-  if (all(Exposures$Technology %in%  c("Oil","Gas","Coal")))  {
-    graphheight <-2.3
-  } else if (all(Exposures$Technology %in%  c("Electric", "Hybrid","ICE")))  {
-      graphheight <-2.3
-  } else if (all(Exposures$Technology %in%  c("CoalCap", "GasCap","Renewables","Hydro","Nuclear"))) {
-        graphheight <- 5.7
-        }else {graphheight <- 7.2}
-    
+  # if (all(Exposures$Technology %in%  c("Oil","Gas","Coal")))  {
+  #   graphheight <-2.3
+  # } else if (all(Exposures$Technology %in%  c("Electric", "Hybrid","ICE")))  {
+  #     graphheight <-2.3
+  # } else if (all(Exposures$Technology %in%  c("CoalCap", "GasCap","Renewables","Hydro","Nuclear"))) {
+  #       graphheight <- 5.7
+  #       }else {graphheight <- 7.2}
+  #   
   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=graphheight,width=9.7,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
   
 
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
