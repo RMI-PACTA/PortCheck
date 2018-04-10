@@ -492,9 +492,9 @@ SetGraphInputs <- function(){
   GasCapColour <<- "#9B917C"
   CoalCapColour <<- "#8B7E66"
   
-  ElectricColour <<- "#e0ecf4"
-  HybridColour <<- "#9ebcda"
-  ICEColour <<-"#8856a7"
+  ElectricColour <<- "#efedf5"
+  HybridColour <<- "#bcbddc"
+  ICEColour <<-"#756bb1"
 
   OilProdColour <<- "#BEA07B"
   GasProdColour <<-"#F5F5F5"
@@ -516,8 +516,8 @@ SetGraphInputs <- function(){
   
   #stock_market<<- "black"
   peer_group <<- "black"
-  eq_line <<- "#AA8CC5"
-  cb_line <<- "#C5AA8C"
+  eq_line <<- "#8C510A"
+  cb_line <<- "#756bb1"
   
   #moodys
   HighRisk <<- area_6
