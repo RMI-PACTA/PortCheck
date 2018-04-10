@@ -1548,8 +1548,8 @@ Graph246 <- function(plotnumber, TechToPlot){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
-      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=3)+   # Market
-      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=5)+   # Market
+      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=2)+   # Market
+      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=2)+   # Market
       scale_color_manual(name="",values = c("Debt Market"=peer_group,"Stock Market"=peer_group))+
       scale_fill_manual(labels=(unique(dftargets$Labels)),
                         values=(unique(as.character(dftargets$colour))))+
