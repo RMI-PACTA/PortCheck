@@ -336,7 +336,7 @@ stacked_bar_chart <- function(dat, colors, legend_labels){
                       show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
     geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    scale_fill_manual(values=colors,labels = legend_labels)+
+    scale_fill_manual(values=colors,labels = legend_labels, breaks = names(legend_labels))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()
