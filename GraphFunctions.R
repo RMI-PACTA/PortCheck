@@ -1086,12 +1086,11 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     PortfolioData <- rbind(Marketmix, Targetmix, Portfoliomix)
 
     # Percentage share of each technology for each company in the portfolio
-    colnames(CompProdSS)[colnames(CompProdSS) %in% c("EQY_FUND_TICKER","COMPANY_CORP_TICKER")] <- "Ticker"
-    Companies <- subset(CompProdSS, select=c("Ticker","Technology","CompanyLvlProd","CompanyLvlSecProd"))
+    Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","CompanyLvlSecProd","PortWeightEQYlvl"))
     Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
     Companies$Classification <- "Companies"
-    Companies <- subset(Companies, select = c("Ticker","Classification","Technology","TechShare","CompanyLvlSecProd"))
-    colnames(Companies) <- c("Name","Classification","Technology","TechShare","SectorProduction")
+    Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
+    colnames(Companies) <- c("Name","Classification","Technology","TechShare","PortWeight")
     Companies[is.na(Companies$Name),"Name"] <- "No Name"
 
     if (SectorToPlot == "Power"){  
@@ -1128,10 +1127,10 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     PortfolioData <- filter(PortfolioData, Technology %in% techorder)
     Companies <- Companies %>% 
       filter(Technology %in% techorder) %>%
-      arrange(-SectorProduction)
+      arrange(-PortWeight) %>%
+      select(-PortWeight)
     Companies <- Companies %>%
-      filter(Name %in% unique(Companies$Name)[1:min(companiestoprint,length(unique(Companies$Name)))]) %>%
-      select(-SectorProduction)
+      filter(Name %in% unique(Companies$Name)[1:min(companiestoprint,length(unique(Companies$Name)))])
     AllData <- rbind(PortfolioData, Companies)
     AllData$Name <- factor(AllData$Name, levels=rev(unique(c(PortfolioData$Name,Companies$Name))))
     AllData$Technology <- factor(AllData$Technology, levels=techorder)
