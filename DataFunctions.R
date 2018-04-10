@@ -516,9 +516,13 @@ SetGraphInputs <- function(){
   
   #stock_market<<- "black"
   peer_group <<- "black"
-  eq_line <<- "#8C510A"
-  cb_line <<- "#756bb1"
-  
+
+  eq_line <<- "#8C510A" # same as CoalProdColour
+  cb_line <<- "#756bb1" # same as ICEColour
+# =======
+#   eq_line <<- "#897D54"
+#   cb_line <<- "#59629A"
+
   #moodys
   HighRisk <<- area_6
   MedRisk <<- area_4_6
