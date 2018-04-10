@@ -948,7 +948,7 @@ analysed_summary <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray","steelblue")) +
+    scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray",YourportColour)) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="", labels=dollar, expand=c(0,0)) +
     theme_barcharts() + 
@@ -1082,25 +1082,26 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
     Marketmix$WtProduction <- Marketmix$WtProduction / sum(Marketmix$WtProduction) * 100
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
-    
+
+    PortfolioData <- rbind(Marketmix, Targetmix, Portfoliomix)
+
     # Percentage share of each technology for each company in the portfolio
     colnames(CompProdSS)[colnames(CompProdSS) %in% c("EQY_FUND_TICKER","COMPANY_CORP_TICKER")] <- "Ticker"
     Companies <- subset(CompProdSS, select=c("Ticker","Technology","CompanyLvlProd","CompanyLvlSecProd"))
     Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)*100
     Companies$Classification <- "Companies"
-    Companies <- Companies[rev(order(Companies$CompanyLvlProd)),]
-    Companies <- subset(Companies, select = c("Ticker","Classification","Technology","TechShare"))
-    colnames(Companies) <- c("Name","Classification","Technology","TechShare")
-    Companies[Companies$Name == "NA"] <- "No Name"
-    AllData <- rbind(Marketmix, Targetmix, Portfoliomix, Companies)
-    AllData$Name <- factor(AllData$Name, levels=rev(unique(AllData$Name)))
-  
-    
+    Companies <- subset(Companies, select = c("Ticker","Classification","Technology","TechShare","CompanyLvlSecProd"))
+    colnames(Companies) <- c("Name","Classification","Technology","TechShare","SectorProduction")
+    Companies[is.na(Companies$Name),"Name"] <- "No Name"
+
     if (SectorToPlot == "Power"){  
       techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
       
-      AllData <- filter(AllData, !Technology %in% c("Coal", "Gas", "Oil"))
-      AllData$Technology <- gsub("Cap","",AllData$Technology)
+      PortfolioData <- filter(PortfolioData, !Technology %in% c("Coal", "Gas", "Oil"))
+      PortfolioData$Technology <- gsub("Cap","",PortfolioData$Technology)
+      
+      Companies <- filter(Companies, !Technology %in% c("Coal", "Gas", "Oil"))
+      Companies$Technology <- gsub("Cap","",Companies$Technology)
       
       tech_labels <- c(paste0("% ", GT["T_CoalCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
                       paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
@@ -1124,37 +1125,30 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       #----------------TO DO
     }
     
-    AllData <- filter(AllData, Technology %in% techorder)
+    PortfolioData <- filter(PortfolioData, Technology %in% techorder)
+    Companies <- Companies %>% 
+      filter(Technology %in% techorder) %>%
+      arrange(-SectorProduction)
+    Companies <- Companies %>%
+      filter(Name %in% unique(Companies$Name)[1:min(companiestoprint,length(unique(Companies$Name)))]) %>%
+      select(-SectorProduction)
+    AllData <- rbind(PortfolioData, Companies)
+    AllData$Name <- factor(AllData$Name, levels=rev(unique(c(PortfolioData$Name,Companies$Name))))
     AllData$Technology <- factor(AllData$Technology, levels=techorder)
-    
     
     names(colors) <- techorder
     names(tech_labels) <- techorder
-  
-    PortfolioData <- subset(AllData, Classification == "Portfolio")
     
-    CompanyData <- subset(AllData, Classification == "Companies")
-    CompanyData$Name <- factor(CompanyData$Name, levels = rev(unique(Companies$Name)))
-    CompanyData <- filter(CompanyData, Name %in% unique(CompanyData$Name)[1:companiestoprint])
-    
-    PortPlot <- stacked_bar_chart(PortfolioData)+
-      scale_fill_manual(values=colors)+
-      xlab("Portfolio")+
-      coord_flip()+
-      theme(axis.line = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
-    
-    CompPlot <- stacked_bar_chart(CompanyData)+
+    PortPlot <- stacked_bar_chart(AllData)+
       scale_fill_manual(values=colors,labels = tech_labels)+
       xlab("Companies")+
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank())
-  
-    cmd<-grid.arrange(PortPlot,CompPlot,ncol=1,nrow=2,heights=c(1/4,3/4))
-  
+
     if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    if (PrintPlot){print(cmd)}
-    ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
+    if (PrintPlot){print(PortPlot)}
+    ggsave(PortPlot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
