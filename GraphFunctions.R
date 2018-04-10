@@ -1283,7 +1283,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
         p1 <- plottheme %+% dat +
           ggtitle("Automotive Production") +
           geom_text(data = subset(dat,Type=="Portfolio"),
-                 aes(item, y = .5, angle = 90, label = "No Automotive Production"))
+                 aes(Type, y = .5, angle = 90, label = "No Automotive Production"))
       }
       
       
@@ -1301,7 +1301,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
         p2 <- plottheme %+% dat +
           ggtitle("Fossil Fuel Production") +
           geom_text(data = subset(dat,Type=="Portfolio"),
-                 aes(item, y = 0.5, angle = 90, label = "No Fossil Fuel Production"))
+                 aes(Type, y = 0.5, angle = 90, label = "No Fossil Fuel Production"))
       }
       
       dat <- subset(Production,Sector=="Power")
@@ -1317,7 +1317,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
         p3 <- plottheme %+% dat +
           ggtitle("Power Capacity") +
           geom_text(data = subset(dat,Type=="Portfolio"),
-                 aes(item, y = .5, angle = 90, label = "No Power Capacity"))
+                 aes(Type, y = .5, angle = 90, label = "No Power Capacity"))
       }
       
       cmd<-grid.arrange(p2,
