@@ -497,15 +497,15 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     annotate(geom="rect",xmin =-1,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
     
     # Company Circles
-    geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=8)+
-    annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(2.5))+ 
+    geom_point(data=Exposures,aes(x=comploc/100,y=Locations),  fill=YourportColour,colour=YourportColour,size=10)+
+    annotate(geom="text",label=Exposures$complabel, x= Exposures$comploc/100, y= Exposures$Locations, colour="white",size=rel(3))+ 
     
     # Distribution Range 
     annotate(geom="text",x= -1.03, hjust=1 , y= locations,label=Exposures$minlabel,size=rel(3),colour=textcolor)+     # Minimum
     annotate(geom="text",x= 1.03, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour=textcolor)+     # Maximum
     
     # Ranking box and label
-    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor)+ # Rank Heading
+    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor,fontface="bold")+ # Rank Heading
     annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.3,hjust=0.5, y = locations,size=rel(3),colour=textcolor)+ # Company Ranking
     
     theme(panel.background = element_rect(fill="transparent"),
@@ -527,24 +527,31 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   #if (any(Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal",
   #                                     "Electric", "Hybrid","Renewables", "Hydro", "Nuclear"))) {
-    outputplot<-    outputplot+
+  outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)+
+  annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)
+  
+  if ((is.null(a)==FALSE) & (is.null(b)==FALSE) & (is.null(d)==FALSE)){     
+    outputplot <- outputplot +
       geom_hline(yintercept = c((tail(a,1)+0.75),(d[1]-0.75)))#+   Technology Label - Black
+  } else if ((is.null(a)==FALSE) & (is.null(b)==FALSE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = (tail(a,1)+0.75))
+  }else if ((is.null(a)==FALSE) & (is.null(b)==TRUE) & (is.null(d)==FALSE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = (tail(a,1)+1))
+  }else if ((is.null(a)==FALSE) & (is.null(b)==TRUE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot
+  }else if((is.null(a)==TRUE) & (is.null(b)==FALSE) & (is.null(d)==FALSE)) {
+    outputplot <- outputplot +
+      geom_hline(yintercept = c((d[1]-0.75)))
+  } else if((is.null(a)==TRUE) & (is.null(b)==FALSE) & (is.null(d)==TRUE)) {
+    outputplot <- outputplot
+  }  else if((is.null(a)==TRUE) & (is.null(b)==TRUE) & (is.null(d)==FALSE)){
+    outputplot<-outputplot
+  }
   
-
-  #write.csv(Exposures,paste0("RankingChartData_",ChartType,"_",PortfolioName,".csv"),row.names = F)
-  if (all(Exposures$Technology %in%  c("Oil","Gas","Coal")))  {
-    graphheight <-2.3
-  } else if (all(Exposures$Technology %in%  c("Electric", "Hybrid","ICE")))  {
-      graphheight <-2.3
-  } else if (all(Exposures$Technology %in%  c("CoalCap", "GasCap","Renewables","Hydro","Nuclear"))) {
-        graphheight <- 5.7
-        }else {graphheight <- 7.2}
-    
-  
-  
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=graphheight,width=9.7,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
   
 
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
@@ -1489,6 +1496,8 @@ Graph246 <- function(plotnumber, TechToPlot){
   
   if (GoodBad == "Brown"){
     dftargets$lower <-c(rep(-2.4,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
+    a<- min(dftar$value)
+    if (a< -2){a<- -2}
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=2)+   # Market
@@ -1497,8 +1506,8 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_fill_manual(labels=unique(dftargets$Labels),
                         values=unique(as.character(dftargets$colour)))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-      scale_y_continuous(name="",breaks = seq(-2, 2, 1))+
-      coord_cartesian(ylim=c(-2,2))+
+      scale_y_continuous(name="Ratio of Currently Planned Production\nTo Production Levels Specified by 2D Scenario",breaks = seq(-2, 2, 1))+
+      coord_cartesian(ylim=c(a,2))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
             panel.grid.minor = element_blank(),
@@ -1506,7 +1515,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.grid = element_blank(),
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
-            axis.ticks.x = element_blank())
+            axis.ticks = element_blank())
   } else if (GoodBad =="Green"){
     dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
     outputplot <- ggplot(data = dftargets)+
@@ -1517,7 +1526,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_fill_manual(labels=(unique(dftargets$Labels)),
                         values=(unique(as.character(dftargets$colour))))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-      scale_y_continuous(name="",breaks = seq(0, 1, 0.25))+
+      scale_y_continuous(name="Ratio of Currently Planned Production\nTo Production Levels Specified by 2D Scenario",breaks = seq(0, 1, 0.25))+
       coord_cartesian(ylim=c(0,1))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
@@ -1526,7 +1535,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.grid = element_blank(),
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
-            axis.ticks.x = element_blank())
+            axis.ticks = element_blank())
   }
   
   
