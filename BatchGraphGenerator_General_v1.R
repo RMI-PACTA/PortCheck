@@ -209,7 +209,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:20,326)){
+for (i in c(21:24,326)){
 
   ### Specify the Names from the Test List
   
@@ -219,7 +219,8 @@ for (i in c(1:20,326)){
   PortfolioNameLong <- TestList[i,"PortName"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
-  PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
+  PortfolioName <- gsub("[[:punct:]]", "", TestList[i,"PortName"])
+  PortfolioName <- gsub(" ","",PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
   
@@ -265,7 +266,7 @@ for (i in c(1:20,326)){
   
   ### Loops through graphs and report generation
   
-  PrintPlot = TRUE
+  PrintPlot = FALSE
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
@@ -312,13 +313,13 @@ for (i in c(1:20,326)){
       #Company Exposure
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
-          company_techshare("32", 10, "EQ", "Power")
+          company_techshare("32", 20, "EQ", "Power")
         }
         if (PortSummary$HasAuto.EQ) {
-          company_techshare("33", 10, "EQ", "Automotive")
+          company_techshare("33", 20, "EQ", "Automotive")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare("34", 10, "EQ", "Fossil Fuels")
+          company_techshare("34", 20, "EQ", "Fossil Fuels")
         }
         # We need this one too! 
         # Carbon Tracker data. 
@@ -331,13 +332,13 @@ for (i in c(1:20,326)){
       # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
-          company_techshare("32", 10, "CB", "Power")
+          company_techshare("32", 20, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare("33", 10, "CB", "Automotive")
+          company_techshare("33", 20, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare("34", 10, "CB", "Fossil Fuels")
+          company_techshare("34", 20, "CB", "Fossil Fuels")
         }
         
         # We need this one too! 
