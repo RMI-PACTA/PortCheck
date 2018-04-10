@@ -468,24 +468,45 @@ SectorPrint <- function(SectorToPlot,SectorProd){
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
   #tech
-  RenewablesColour <<- "#8cd98c"
-  HydroColour <<- "#6abaff"
-  NuclearColour <<- "#ae89c5"
-  GasCapColour <<- "#a6cad8"
-  CoalCapColour <<- "#1a3577"
-  ElectricColour <<- "#847577"
-  HybridColour <<- "#a6a2a2"
-  ICEColour <<-"#e5e6e4"
-  OilProdColour <<-"#00677f"
-  GasProdColour <<-"#a7c5d1"
-  CoalProdColour <<- "#004335"
+  # RenewablesColour <<- "#8cd98c"
+  # HydroColour <<- "#6abaff"
+  # NuclearColour <<- "#ae89c5"
+  # GasCapColour <<- "#a6cad8"
+  # CoalCapColour <<- "#1a3577"
+  # ElectricColour <<- "#847577"
+  # HybridColour <<- "#a6a2a2"
+  # ICEColour <<-"#e5e6e4"
+  # OilProdColour <<-"#00677f"
+  # GasProdColour <<-"#a7c5d1"
+  # CoalProdColour <<- "#004335"
+  # 
+  # #sector
+  # energy<<-"#0090b2"
+  # pow <<- "#2348a1"
+  # trans<<- "#cfd2cd"
+  # othr<<- "#9793c6"
 
+  RenewablesColour <<- "#D9DDD4"
+  HydroColour <<- "#C4C3B5"
+  NuclearColour <<- "#B1AC9B"
+  GasCapColour <<- "#9B917C"
+  CoalCapColour <<- "#8B7E66"
+  
+  ElectricColour <<- "#e0ecf4"
+  HybridColour <<- "#9ebcda"
+  ICEColour <<-"#8856a7"
+
+  OilProdColour <<- "#BEA07B"
+  GasProdColour <<-"#F5F5F5"
+  CoalProdColour <<- "#8C510A"
+  
   #sector
-  energy<<-"#0090b2"
-  pow <<- "#2348a1"
-  trans<<- "#cfd2cd"
+  energy<<-"#8C510A"
+  pow <<- "#8B7E66"
+  trans<<- "#8856a7"
   othr<<- "#9793c6"
   
+    
   #trajectory
   area_6 <<- "#e07b73"
   area_4_6 <<- "#fde291"
