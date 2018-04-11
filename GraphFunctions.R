@@ -906,11 +906,14 @@ exposure_summary <- function(plotnumber,ChartType){
   Portfolio$Sector <- factor(Portfolio$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
+  Portfolio <- arrange(Portfolio, desc(Technology))
+  
   TechLabels <- gsub("Cap","",technologyorder)
   names(TechLabels) <- technologyorder
   
   plot <- ggplot(Portfolio) +
-    geom_bar(aes(x = Technology, y = Exposure), fill = ifelse(Portfolio$Exposure >= 0, area_2, area_6), stat = "identity")+
+    geom_bar(aes(x = Technology, y = Exposure, fill = Exposure >= 0), stat = "identity")+
+    scale_fill_manual(values=c(area_6,area_2))+
     geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
