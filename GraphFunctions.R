@@ -1691,8 +1691,9 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   scaleFUN <- function(x) sprintf("%.1f", x)
   
   
-  colnames<-colnames(OilCompanies)
-  PortPlot <- ggplot(data=OilCompanies, aes(x=Name, y=OilShare,fill=Oil.Type),
+  OilCompanies <-arrange(OilCompanies,-PortWeightEQYlvl)
+  
+  PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,fill=Oil.Type),
                                         show.guide = TRUE)+
                        geom_bar(stat = "identity", position = "fill", width = .6)+
                        geom_hline(yintercept = c(.25,.50,.75), color="white")+
