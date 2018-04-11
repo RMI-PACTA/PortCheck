@@ -1690,14 +1690,14 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) sprintf("%.1f", x)
   
-  
-  OilCompanies <-arrange(OilCompanies,-PortWeightEQYlvl)
-  
-  PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,fill=Oil.Type),
+
+
+
+  PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare),
                                         show.guide = TRUE)+
-                       geom_bar(stat = "identity", position = "fill", width = .6)+
+                       geom_bar(aes(fill=(Oil.Type)),stat = "identity", position = "fill", width = .6)+
                        geom_hline(yintercept = c(.25,.50,.75), color="white")+
-                       scale_fill_manual(values=colors,labels = tech_labels, breaks = names(techorder))+
+                       scale_fill_manual(values=colors,labels = tech_labels, breaks = (techorder))+
                        scale_y_continuous(expand=c(0,0), labels=percent)+
                        guides(fill=guide_legend(nrow = 1))+
                        theme_barcharts()+
@@ -1711,7 +1711,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
                        coord_flip()+
                        theme(legend.position = "bottom",legend.title = element_blank(),
                              plot.margin = unit(c(1, 6, 0, 0), "lines"))
-  
+
     
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
