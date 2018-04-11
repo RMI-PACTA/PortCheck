@@ -1691,21 +1691,27 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   scaleFUN <- function(x) sprintf("%.1f", x)
   
   
+  colnames<-colnames(OilCompanies)
+  PortPlot <- ggplot(data=OilCompanies, aes(x=Name, y=OilShare,fill=Oil.Type),
+                                        show.guide = TRUE)+
+                       geom_bar(stat = "identity", position = "fill", width = .6)+
+                       geom_hline(yintercept = c(.25,.50,.75), color="white")+
+                       scale_fill_manual(values=colors,labels = tech_labels, breaks = names(techorder))+
+                       scale_y_continuous(expand=c(0,0), labels=percent)+
+                       guides(fill=guide_legend(nrow = 1))+
+                       theme_barcharts()+
+                       
+                       geom_text(data=OilCompanies,
+                                 aes(x = Name, y = 1),
+                                 label = paste0(scaleFUN(100*(OilCompanies$PortWeightEQYlvl)),"%"),
+                                  hjust = -1, color = textcolor, size=textsize*(5/14))+
+                       xlab("Companies")+
+                       ylab("TechShare")+
+                       coord_flip()+
+                       theme(legend.position = "bottom",legend.title = element_blank(),
+                             plot.margin = unit(c(1, 6, 0, 0), "lines"))
   
-  PortPlot <- stacked_bar_chart(AllData, colors, tech_labels)+
-    geom_text(aes(x = "", y = 1),
-              label = "% in Portfolio",
-              hjust = -.1, color = textcolor)+
-    geom_text(data=filter(OilCompanies,Classification=="Companies"),
-              aes(x = Name, y = 1),
-              label = paste0(scaleFUN(100*OilCompanies$PortWeightEQYlvl),"%"),
-              hjust = -1, color = textcolor, size=textsize*(5/14))+
-    xlab("Companies")+
-    ylab("TechShare")+
-    coord_flip()+
-    theme(legend.position = "bottom",legend.title = element_blank(),
-          plot.margin = unit(c(1, 6, 0, 0), "lines"))
-  
+    
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
   gt$layout$clip[gt$layout$name == "panel"] <- "off"
