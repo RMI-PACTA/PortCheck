@@ -264,7 +264,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
   theme(axis.ticks=element_blank(),
         axis.text.x=element_text(colour=textcolor,size=textsize),
         axis.text.y=element_text(colour=textcolor,size=textsize),
-        axis.title.x=element_blank(),
+        axis.title.x=element_text(colour=textcolor,size=textsize),
         axis.title.y=element_text(colour=textcolor,size=textsize),
         axis.line.x = element_line(colour = textcolor,size=1),
         axis.line.y = element_line(colour = textcolor,size=1),
