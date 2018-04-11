@@ -909,30 +909,15 @@ exposure_summary <- function(plotnumber,ChartType){
   Portfolio$Sector <- factor(Portfolio$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
   Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
   
-  ### This is the correct colour palette, I just didn't work out how to implement this. 
-  repval = 200
-  redgreen<- colorRampPalette(c(area_6,area_2_4, area_2))(repval) 
-  
   TechLabels <- gsub("Cap","",technologyorder)
   names(TechLabels) <- technologyorder
   
-  # repval = 401
-  # color <- rep(colorRampPalette(c(area_6,area_2_4, area_2))(repval),length(technologyorder))
-  # y_coor <- rep(seq(-2,2,.01),length(technologyorder))
-  # x_coor <- rep(technologyorder, each=repval)
-  # redgreen <- data.frame(color,y_coor,x_coor)
-  # redgreen$y_coor <- as.double(redgreen$y_coor)
-  # redgreen$x_coor <- as.factor(redgreen$x_coor)
-  # redgreen$color <- as.factor(redgreen$color)
-  # rm(color,y_coor,x_coor)
-  
   plot <- ggplot(Portfolio) +
     # geom_tile(data=redgreen,aes(x = x_coor, y = y_coor, fill = y_coor), alpha = .5)+
-    geom_bar(aes(x = Technology, y = Exposure), fill = YourportColour, stat = "identity")+
+    geom_bar(aes(x = Technology, y = Exposure, fill = ifelse(Exposure >= 0, area_2, area_6)), stat = "identity")+
     geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
-    # scale_fill_gradient2(low=area_6,mid=area_2_4,high=area_2,midpoint=0)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
     ylab("Exposure of Portfolio to Scenario Targets")+
@@ -1057,10 +1042,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
 # ------------- TECH SHARE CHARTS ----------- #
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
-  # ChartType = "CB"
-  # # plotnumber = 99
-  # companiestoprint = 20
-  # SectorToPlot = "Power"
+
   if (ChartType == "EQ"){
     CompProdSS <- EQCompProdSnapshot
     combin <- EQCombin
@@ -1176,7 +1158,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       geom_text(data=filter(AllData,Classification=="Companies"),
                 aes(x = Name, y = 1),
                 label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
-                hjust = -1, color = textcolor)+
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
       xlab("Companies")+
       ylab("TechShare")+
       coord_flip()+
@@ -1197,7 +1179,6 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   }
 }
    
-
 sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 
   if (ChartType == "EQ"){
