@@ -21,8 +21,16 @@ CAReportData <- function(){
   InsuranceCompanyName <- PortfolioNameLong
   InsuranceCompanyNameWrapped <- wrap.labels(PortfolioNameLong,18)
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  # SizeofPortfolio <-Ports.Overview[Port.ValueUSD]
-  SizeofPortfolio <-1000
+  if(PortfolioName == "MetaPort"){SizeofPortfolio <-1000}else{
+  SizePortfolio <-  Ports.Overview %>%
+      filter(Portfolio.Name == PortName) %>%
+        distinct(Port.ValueUSD)
+  SizeofPortfolio<- SizePortfolio[[1]]
+  }
+  
+  SizeofPortfolio <- prettyNum(SizeofPortfolio,big.mark = ",")
+  TodaysDate <- format(Sys.Date(),format = "%m.%d.%Y")
+
   
   NoPeers <- nrow(TestList)-1
     
@@ -53,6 +61,7 @@ CAReportData <- function(){
            c("InsuranceCompanyName",InsuranceCompanyName),
            c("InsuranceCompanyNameWrapped",InsuranceCompanyNameWrapped),
            c("SizeofPortfolio",SizeofPortfolio),
+           c("TodaysDate",TodaysDate),
            c("HasPower",HasPower),
            c("HasAuto",HasAuto),
            c("HasOG",HasOG),
@@ -139,6 +148,7 @@ CAReport <- function(){
   # Replace Insurer Name
   text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
   text$text <- gsub("SizeofPortfolio",reportdata$SizeofPortfolio,text$text)
+  text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
   text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   text$text <- gsub("AssetClass",reportdata$AssetClass,text$text)
   
@@ -925,7 +935,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   if(PrintPlot){print(plot)}
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
-         bg="transparent",height=3.5,width=7.5, units="in",dpi=ppi)
+         bg="transparent",height=3,width=7.5, units="in",dpi=ppi)
 }
 
 analysed_summary <- function(plotnumber){
@@ -1501,13 +1511,15 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_fill_manual(labels=unique(dftargets$Labels),
                         values=unique(as.character(dftargets$colour)))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-      scale_y_continuous(name="",breaks = seq(-2, 2, 1))+
+      scale_y_continuous(name="",breaks = seq(-2, 2, 1),expand=c(0,0))+
       coord_cartesian(ylim=c(-2,2))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
             panel.grid.minor = element_blank(),
             panel.border = element_blank(),
             panel.grid = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.line = element_line(),
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
             axis.ticks.x = element_blank())
