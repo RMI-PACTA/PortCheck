@@ -979,7 +979,7 @@ analysed_summary <- function(plotnumber){
 
 Risk_Distribution <- function(plotnumber, ChartType){
   Title <- "Percent of Bond Portfolio Value"
-  MetricCol <- c("Risk1", "Risk2")
+  MetricCol <- c("Risk3", "Risk2", "Risk1")
   
   if(ChartType == "CB") {
     RiskData <- Moodys
@@ -1005,9 +1005,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   metaport <- subset(metaport, select = c(ID.COLS,MetricCol))
   df <- rbind(df,metaport)
   
-  BarColors <- c(HighRisk, MedRisk)
+  BarColors <- c(HighRisk, MedRisk, LowRisk)
   names(BarColors) <- c(MetricCol)
-  Labels <- c("Immediate Elevated", "Emerging Elevated")
+  Labels <- c("Emerging Moderate", "Emerging Elevated","Immediate Elevated")
 
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)

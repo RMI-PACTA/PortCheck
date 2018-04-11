@@ -530,6 +530,7 @@ SetGraphInputs <- function(){
   #moodys
   HighRisk <<- area_6
   MedRisk <<- area_4_6
+  LowRisk <<- area_2_4
 
   #text size
   textsize <<- 8.5
