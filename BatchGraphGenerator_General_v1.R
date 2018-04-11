@@ -209,7 +209,8 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(1:20,326)){
+
+for (i in c(326)){
 
   ### Specify the Names from the Test List
   
@@ -219,6 +220,7 @@ for (i in c(1:20,326)){
   PortfolioNameLong <- TestList[i,"PortName"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
+  PortfolioName <- gsub("[[:punct:]]", "", TestList[i,"PortName"])
   PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
@@ -275,8 +277,8 @@ for (i in c(1:20,326)){
       #######################
       
       #Introduction
-      portfolio_sector_stack("01")
-      analysed_summary("02") #trish's overview "pie chart"
+      analysed_summary("01") #trish's overview "pie chart"
+      portfolio_sector_stack("02")
       
       if (HasEquity) {
         exposure_summary("06", "EQ")  
