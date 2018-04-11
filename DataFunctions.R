@@ -546,13 +546,17 @@ SetGraphInputs <- function(){
   CurrCapColour <<- "grey75"
   # AxisColour <<- "#17375e" #"#274F80"
   
+  technology_order <<- c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap",
+                         "Electric","Hybrid","ICE","Gas","Oil","Coal")
+  
   ColourPalette <<- data.frame(Sector = c("Power","Power","Power","Power","Power",
                                           "Automotive","Automotive","Automotive",
                                           "Fossil Fuels","Fossil Fuels","Fossil Fuels"),
-                               Technology = c("RenewablesCap","HydroCap","NuclearCap","GasCap","CoalCap",
-                                              "Electric","Hybrid","ICE","Gas","Oil","Coal"),
+                               Technology = technology_order,
                                Colours =c(RenewablesColour,HydroColour,NuclearColour,GasCapColour,CoalCapColour,
                                           ElectricColour,HybridColour,ICEColour,GasProdColour,OilProdColour,CoalProdColour))
+  ColourPalette$Technology <- factor(ColourPalette$Technology, levels=technology_order)
+  ColourPalette <- arrange(ColourPalette, Technology)
   
   
   linesize <<- 1

@@ -1106,30 +1106,24 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies[is.na(Companies$Name),"Name"] <- "No Name"
 
     if (SectorToPlot == "Power"){  
-      techorder <- c("Coal","Gas","Nuclear","Hydro","Renewables")
-      
-      PortfolioData <- filter(PortfolioData, !Technology %in% c("Coal", "Gas", "Oil"))
-      PortfolioData$Technology <- gsub("Cap","",PortfolioData$Technology)
-      
-      Companies <- filter(Companies, !Technology %in% c("Coal", "Gas", "Oil"))
-      Companies$Technology <- gsub("Cap","",Companies$Technology)
+      techorder <- technology_order[1:5]
       
       tech_labels <- c(paste0("% ", GT["T_CoalCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
                       paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
                       paste0("% ", GT["T_RenewablesCap"][[1]]))
-      colors <- c(CoalCapColour,GasCapColour,NuclearColour, HydroColour,RenewablesColour)
+      colors <- as.vector(ColourPalette$Colours[1:5])
     }
     
     if (SectorToPlot == "Automotive"){
-      techorder <- c("ICE","Hybrid","Electric")
+      techorder <- technology_order[6:8]
       tech_labels <- c(paste0("% ", GT["T_ICE"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_Electric"][[1]]))
-      colors <- c(ICEColour,HybridColour,ElectricColour)
+      colors <- as.vector(ColourPalette$Colours[6:8])
     }
     
     if (SectorToPlot == "Fossil Fuels") {
-      techorder <- c("Coal", "Gas", "Oil")
+      techorder <- technology_order[9:11]
       tech_labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
-      colors <- c(CoalProdColour,GasProdColour,OilProdColour)
+      colors <- as.vector(ColourPalette$Colours[9:11])
     }
   
     if (SectorToPlot == "Oil"){
@@ -1221,17 +1215,16 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   
   
   if(nrow(Production)>0){
-    Production[Production$Sector=="Fossil Fuels",]$Technology <- paste0(Production$Technology[Production$Sector %in%"Fossil Fuels"],"Prod")
-
-    technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","CoalProd","GasProd","OilProd")
-    colours <- c(CoalCapColour,GasCapColour,NuclearColour,HydroColour,RenewablesColour,ElectricColour,HybridColour,ICEColour,CoalProdColour,GasProdColour,OilProdColour)
+  
+    technologyorder <- technology_order
+    colours <- as.vector(ColourPalette[["Colours"]])
     names(colours) <- technologyorder
-    labels <- c("Coal","Gas","Nuclear","Hydro","Renewables","Electric","Hybrid","ICE","Coal","Gas","Oil")
+    labels <- c("Renewables","Hydro","Nuclear","Gas","Coal","Electric","Hybrid","ICE","Gas","Oil","Coal")
     names(labels) <- technologyorder
     
     
-    Production$Technology<-as.factor(Production$Technology)
-    Production$Sector<-as.factor(Production$Sector)
+    Production$Technology <- factor(Production$Technology, levels = technologyorder)
+    Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     
     Production$Type <- wrap.labels(Production$Type,20)
     Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
