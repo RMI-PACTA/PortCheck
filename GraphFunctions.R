@@ -283,7 +283,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 
 #----------- Distribution Chart ------------- #
 
-distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
+distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                                Title, Labels, LineHighl, LineLabels, LineColors, BarColors){
 
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
@@ -308,7 +308,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
   
   arrow <- max(filter(dfagg, Name == PortName)$Value)
   
-  ylimval <- 1
+  ylimval <- ylim
   
   distribution_plot <- ggplot(dfagg)+
     geom_bar(aes(x=Name, y=Value, fill=Metric),
@@ -1008,8 +1008,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   BarColors <- c(LowRisk, MedRisk, HighRisk)
   names(BarColors) <- c(MetricCol)
   Labels <- c("Emerging Moderate", "Emerging Elevated","Immediate Elevated")
-
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
+  ylim = .5
+  
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
   
   if(PrintPlot){print(plot)}
@@ -1037,7 +1038,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
 
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol,
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, 1,
                      Title, Labels, LineHighl, LineLabels, LineColors, BarColors) +
     theme(legend.position = "none")
 
