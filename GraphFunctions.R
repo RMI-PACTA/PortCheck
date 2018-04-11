@@ -319,9 +319,9 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol,
     theme_distribution()+
     expand_limits(0,0)+
     ylab(Title)+
-    xlab("All CA Insurer Bond Portfolios")#+
-    # coord_cartesian(ylim=c(0,min(1, 1.1*max(dfagg$Value))))
-  ###### THIS CAUSES AN ERROR! for some reason the coord_cartsian function seems to cause the charts to break in Adobe. 
+    xlab(paste0("All CA Insurer ",
+                ifelse(ChartType == "EQ", "Equity", "Bond"),
+                " Portfolios"))
   
   arrowlength <- ylimval/5
   
