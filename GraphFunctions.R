@@ -505,7 +505,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     annotate(geom="text",x= 1.03, hjust=0 , y= locations,label=Exposures$maxlabel,size=rel(3),colour=textcolor)+     # Maximum
     
     # Ranking box and label
+
     annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor,fontface = "bold")+ # Rank Heading
+
     annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.3,hjust=0.5, y = locations,size=rel(3),colour=textcolor)+ # Company Ranking
     
     theme(panel.background = element_rect(fill="transparent"),
@@ -527,7 +529,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   #if (any(Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal",
   #                                     "Electric", "Hybrid","Renewables", "Hydro", "Nuclear"))) {
-    outputplot<-    outputplot+
+  outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
     annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)
       
@@ -560,8 +562,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   #       graphheight <- 5.7
   #       }else {graphheight <- 7.2}
   #   
-  
-  
+
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
   
 
@@ -862,13 +863,13 @@ portfolio_sector_stack <- function(plotnumber){
   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
-  temp<-max(dfagg$CarstenMetric_Port)
+  temp <-sum(dfagg$CarstenMetric_Port)
   ylabel = ""
   
   a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
     geom_bar(stat = "identity",width = .6)+
     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.05), labels=percent)+
+    scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.01), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
     guides(fill=guide_legend(nrow = 1))+
@@ -1185,14 +1186,17 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     gt <- ggplot_gtable(ggplot_build(PortPlot))
     gt$layout$clip[gt$layout$name == "panel"] <- "off"
     
-    if (SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
-    if (PrintPlot){grid.draw(gt)}
+    if (PrintPlot){
+      dev.off()
+      grid.draw(gt)
+    }
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=4,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
 }
+   
 
 sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 
@@ -1524,8 +1528,10 @@ Graph246 <- function(plotnumber, TechToPlot){
   
   if (GoodBad == "Brown"){
     dftargets$lower <-c(rep(-2.4,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
-    a<-min(dftar$value)
-    if (a< -2){a <- -2}
+
+    a<- min(dftar$value)
+    if (a< -2){a<- -2}
+
     outputplot <- ggplot(data = dftargets)+
       geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
       geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=2)+   # Market
@@ -1534,7 +1540,9 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_fill_manual(labels=unique(dftargets$Labels),
                         values=unique(as.character(dftargets$colour)))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
+
       scale_y_continuous(name="Ratio of Currently Planned Production \nTo Production Levels Specified by 2D Scenario",breaks = seq(-2, 2, 1))+
+
       coord_cartesian(ylim=c(a,2))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
@@ -1554,7 +1562,9 @@ Graph246 <- function(plotnumber, TechToPlot){
       scale_fill_manual(labels=(unique(dftargets$Labels)),
                         values=(unique(as.character(dftargets$colour))))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
+
       scale_y_continuous(name="Ratio of Currently Planned Production \nTo Production Levels Specified by 2D Scenario",breaks = seq(0, 1, 0.25))+
+
       coord_cartesian(ylim=c(0,1))+
       theme_bw()+
       theme(panel.grid.major.y = element_blank(),
