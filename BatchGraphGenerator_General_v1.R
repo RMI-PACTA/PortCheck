@@ -209,7 +209,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-for (i in c(21:24,326)){
+for (i in c(26:36,326)){
 
   ### Specify the Names from the Test List
   
@@ -276,8 +276,8 @@ for (i in c(21:24,326)){
       #######################
       
       #Introduction
-      portfolio_sector_stack("01")
-      analysed_summary("02") #trish's overview "pie chart"
+      analysed_summary("01") #trish's overview "pie chart"
+      portfolio_sector_stack("02")
       
       if (HasEquity) {
         exposure_summary("06", "EQ")  
