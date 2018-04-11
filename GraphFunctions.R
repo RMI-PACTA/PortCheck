@@ -945,14 +945,15 @@ analysed_summary <- function(plotnumber){
   names(over) <- gsub("TwoD\\.","",names(over))
   over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
   
-  over$Asset.Type <- plyr::revalue(over$Asset.Type, c("Bonds"="Bond Holdings", "Equity" = "Equity Holdings","Other"="Other Holdings"),warn_missing = F)
+  over$Asset.Type <- plyr::revalue(over$Asset.Type, 
+                                   c("Bonds"="Bond Portfolio", "Equity" = "Equity Portfolio", "Other"="Other Holdings"),warn_missing = F)
   
   ## "steelblue" color below should be changed to whatever our Portfolio color is
-  plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
+  plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD/1000000, fill=factor(Valid))) +
     geom_bar(position="stack", stat="identity") +
     scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray",YourportColour)) +
     scale_x_discrete(name="Asset Type") +
-    scale_y_continuous(name="", labels=dollar, expand=c(0,0)) +
+    scale_y_continuous(name="", labels=dollar_format(suffix = " Million"), expand=c(0,0)) +
     theme_barcharts() + 
     theme(legend.position = "bottom")
   
