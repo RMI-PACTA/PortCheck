@@ -1005,7 +1005,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
   metaport <- subset(metaport, select = c(ID.COLS,MetricCol))
   df <- rbind(df,metaport)
   
-  BarColors <- c(HighRisk, MedRisk, LowRisk)
+  BarColors <- c(LowRisk, MedRisk, HighRisk)
   names(BarColors) <- c(MetricCol)
   Labels <- c("Emerging Moderate", "Emerging Elevated","Immediate Elevated")
 
