@@ -468,24 +468,49 @@ SectorPrint <- function(SectorToPlot,SectorProd){
 #-------- Graph Inputs ---------- #
 SetGraphInputs <- function(){
   #tech
-  RenewablesColour <<- "#8cd98c"
-  HydroColour <<- "#6abaff"
-  NuclearColour <<- "#ae89c5"
-  GasCapColour <<- "#a6cad8"
-  CoalCapColour <<- "#1a3577"
-  ElectricColour <<- "#847577"
-  HybridColour <<- "#a6a2a2"
-  ICEColour <<-"#e5e6e4"
-  OilProdColour <<-"#00677f"
-  GasProdColour <<-"#a7c5d1"
-  CoalProdColour <<- "#004335"
+  # RenewablesColour <<- "#8cd98c"
+  # HydroColour <<- "#6abaff"
+  # NuclearColour <<- "#ae89c5"
+  # GasCapColour <<- "#a6cad8"
+  # CoalCapColour <<- "#1a3577"
+  # ElectricColour <<- "#847577"
+  # HybridColour <<- "#a6a2a2"
+  # ICEColour <<-"#e5e6e4"
+  # OilProdColour <<-"#00677f"
+  # GasProdColour <<-"#a7c5d1"
+  # CoalProdColour <<- "#004335"
+  # 
+  # #sector
+  # energy<<-"#0090b2"
+  # pow <<- "#2348a1"
+  # trans<<- "#cfd2cd"
+  # othr<<- "#9793c6"
 
+  ## orangey/brown
+  RenewablesColour <<- "#feedde"
+  HydroColour <<- "#fdbe85"
+  NuclearColour <<- "#fd8d3c"
+  GasCapColour <<- "#e6550d"
+  CoalCapColour <<- "#a63603"
+  
+  # purpleish
+  ElectricColour <<- "#efedf5"
+  HybridColour <<- "#bcbddc"
+  ICEColour <<-"#756bb1"
+
+  #goldish
+  GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
+  OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
+  CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
+  
   #sector
-  energy<<-"#0090b2"
-  pow <<- "#2348a1"
-  trans<<- "#cfd2cd"
+  energy<<-"#8B7E66"
+  pow <<- "#a63603"
+  trans<<- "#756bb1"
+  
   othr<<- "#9793c6"
   
+    
   #trajectory
   area_6 <<- "#e07b73"
   area_4_6 <<- "#fde291"
@@ -495,9 +520,13 @@ SetGraphInputs <- function(){
   
   #stock_market<<- "black"
   peer_group <<- "black"
-  eq_line <<- "#AA8CC5"
-  cb_line <<- "#C5AA8C"
-  
+
+  eq_line <<- "#a63603" # same as CoalCapColor
+  cb_line <<- "#756bb1" # same as ICEColour
+# =======
+#   eq_line <<- "#897D54"
+#   cb_line <<- "#59629A"
+
   #moodys
   HighRisk <<- area_6
   MedRisk <<- area_4_6
