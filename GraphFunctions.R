@@ -963,7 +963,7 @@ analysed_summary <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD/1000000, fill=factor(Valid))) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("gray",YourportColour)) +
+    scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("#d9d9d9",YourportColour)) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="", labels=dollar_format(suffix = " Million"), expand=c(0,0)) +
     theme_barcharts() + 
