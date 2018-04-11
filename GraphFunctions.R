@@ -818,24 +818,17 @@ sector_processing <- function(){
   
   ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
   
-  #Filter to our region, scenario, and year
-  if(nrow(EQCombin) > 0) {
-    EQ <- EQCombin
+  EQ <- EQCombin
+  if(HasEquity) {
     EQ$Type <- "Equity Portfolio"
-    EQ <- unique(subset(EQ, Year == Startyear, 
+    EQ <- unique(subset(EQ, Year == Startyear,
                         select = c(ID.COLS)))
-  } else {
-    EQ <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Equity Portfolio")
-    colnames(EQ) <- ID.COLS
   }
-  if(nrow(CBCombin) > 0) {
-    CB <- CBCombin
+  CB <- CBCombin
+  if(HasDebt) {
     CB$Type <- "Bond Portfolio"
     CB <- unique(subset(CB, Year == Startyear, 
                         select = c(ID.COLS)))
-  } else {
-    CB <- data.frame("NoResults",2018,"Power","RenewablesCap",0,"Bond Portfolio")
-    colnames(CB) <- ID.COLS
   }
   
   #Aggregate by sector, breaking down by the type (equity vs debt)
@@ -846,6 +839,10 @@ sector_processing <- function(){
   levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
   levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
   dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
+  
+  dfagg <- dfagg %>%
+    group_by(Sector) %>%
+    complete(Type=c("Bond Portfolio","Equity Portfolio"), fill=list(CarstenMetric_Port = 0, PortName = PortName))
   
   return(dfagg)
 }                                       
@@ -914,7 +911,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   plot <- ggplot(Portfolio) +
     # geom_tile(data=redgreen,aes(x = x_coor, y = y_coor, fill = y_coor), alpha = .5)+
-    geom_bar(aes(x = Technology, y = Exposure, fill = ifelse(Exposure >= 0, area_2, area_6)), stat = "identity")+
+    geom_bar(aes(x = Technology, y = Exposure, fill = ifelse(Exposure >= 0, area_6, area_2)), stat = "identity")+
     geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
@@ -944,6 +941,7 @@ analysed_summary <- function(plotnumber){
       ungroup() %>%
       mutate("Portfolio.Name" = "MetaPort")
   }
+  
   names(over) <- gsub("TwoD\\.","",names(over))
   over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
   
