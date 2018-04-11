@@ -265,7 +265,7 @@ for (i in c(1:20,326)){
   
   ### Loops through graphs and report generation
   
-  PrintPlot = TRUE
+  PrintPlot = FALSE
   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
@@ -345,6 +345,8 @@ for (i in c(1:20,326)){
         #   company_techshare("35", 20, "CB", "Oil")
         # }
       }
+      
+      dev.off()
       # Creates the list of figures that were printed. 
       # A better solution is possible, but this works. 
       # This list gets deleted after the report is printed. 
@@ -361,7 +363,7 @@ for (i in c(1:20,326)){
       # )
       
       
-    })}else{
+    },error=function(e){cat("ERROR :",conditionMessage(e), "\n")}) }else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
   # 
