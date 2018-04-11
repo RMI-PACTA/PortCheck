@@ -306,7 +306,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   
   x_coord <- length(unique(order$Name))
   
-  arrow <- max(filter(dfagg, Name == PortName)$Value)
+  arrow <- sum(filter(dfagg, Name == PortName)$Value)
   
   ylimval <- ylim
   
