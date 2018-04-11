@@ -897,7 +897,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   BrownTech = c("ICE","Coal","Gas","Oil","CoalCap","GasCap", "OilCap")
   
-  technologyorder <- c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap","Electric","Hybrid","ICE","Coal","Gas","Oil")
+  technologyorder <- technology_order
   
   Portfolio <- Portfolio %>%
     filter(Year == Startyear+5, Technology != "OilCap") %>%   #!= "OilCap"
@@ -929,7 +929,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Exposure of Portfolio to 2° Scenario Benchmark")+
+    ylab("Exposure of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
