@@ -70,7 +70,7 @@ print("*** STARTING SCRIPT with PARAMETERS:")
 print(ParameterFile)
 
 SamplePortfolio <- FALSE
-InvestorName <- "California Insurers"
+InvestorName <- "UNPRI"
 
 #-------------
 # Set Input / OUtput Locations Based on parameter File Input
@@ -98,28 +98,28 @@ BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTe
 
 Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
-length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
+length(unique(Ports.Overview$Portfolio.Name)) ## Number of Portfolios
 
 ### Get Debt Batch Results
-CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
-print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
+CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results.csv"),stringsAsFactors=FALSE,strip.white = T)
+# CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
+# print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
-print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
+# CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
+# print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
 
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 ### Get Equity Batch Results
-EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
-EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
+EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
+# EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
-EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
+# EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
 
 EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
@@ -179,16 +179,16 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 # ------
 # Translation and Report Inputs
 # ---------
-template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
+# template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
-template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/","GeneralTemplateInput_v2.tex"),encoding="UTF-8"))
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
-ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
+# ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
 if (length(grep("Swiss",ReportTemplate))==1){ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/SwissReportTranslation_V12.csv"), stringsAsFactors = FALSE)}
 
 GT <- preptranslations("Graph",GraphTranslation, Languagechoose,Startyear)
-RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
+# RT <- preptranslations("Report",ReportTranslation, Languagechoose, Startyear)
 
 #--------
 # Meta Analysis Charts
@@ -210,7 +210,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(326)){
+# for (i in 1){
 
   ### Specify the Names from the Test List
   
