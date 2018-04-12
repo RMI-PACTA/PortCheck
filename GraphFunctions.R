@@ -353,7 +353,6 @@ stacked_bar_chart <- function(dat, colors, legend_labels){
   
   return(plottheme)
 }
-          
 
 # -------- GRAPHS AND CHARTS -----------------                 
 
@@ -1114,6 +1113,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","CompanyLvlSecProd","PortWeightEQYlvl"))
     Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)
     Companies$Classification <- "Companies"
+    Companies$Name <- paste0(substr(Companies$Name, 1, 12),"...")
     Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
     colnames(Companies) <- c("Name","Classification","Technology","TechShare","PortWeight")
     Companies[is.na(Companies$Name),"Name"] <- "No Name"
@@ -1121,15 +1121,15 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     if (SectorToPlot == "Power"){  
       techorder <- technology_order[1:5]
       
-      tech_labels <- c(paste0("% ", GT["T_CoalCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
-                      paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
-                      paste0("% ", GT["T_RenewablesCap"][[1]]))
+      tech_labels <- c(paste0("% ", GT["T_RenewablesCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
+                      paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
+                      paste0("% ", GT["T_CoalCap"][[1]]))
       colors <- as.vector(ColourPalette$Colours[1:5])
     }
     
     if (SectorToPlot == "Automotive"){
       techorder <- technology_order[6:8]
-      tech_labels <- c(paste0("% ", GT["T_ICE"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_Electric"][[1]]))
+      tech_labels <- c(paste0("% ", GT["T_Electric"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_ICE"][[1]]))
       colors <- as.vector(ColourPalette$Colours[6:8])
     }
     
@@ -1162,17 +1162,21 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
                      dummy,
                      select(Companies,-PortWeight))
     AllData$Name <- factor(AllData$Name, levels=rev(unique(c(PortfolioData$Name,"",Companies$Name))))
-    AllData$Technology <- factor(AllData$Technology, levels=techorder)
+    AllData$Technology <- factor(AllData$Technology, levels=rev(techorder))
     
     names(colors) <- techorder
     names(tech_labels) <- techorder
 
-    scaleFUN <- function(x) sprintf("%.1f", x)
+    scaleFUN <- function(x) {
+      x <- sprintf("%.1f", x)
+      x[x<10] <- paste0("  ",x[x<10])
+      return(x)
+    }
     
     PortPlot <- stacked_bar_chart(AllData, colors, tech_labels)+
       geom_text(aes(x = "", y = 1),
-                label = "% in Portfolio",
-                hjust = -.1, color = textcolor)+
+                label = "Weight",#paste0("% of ", ifelse(ChartType=="CB", "Bond", "Equity")," Portfolio"),
+                hjust=-0.9,color = textcolor, size=textsize*(5/14))+
       geom_text(data=filter(AllData,Classification=="Companies"),
                 aes(x = Name, y = 1),
                 label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
@@ -1192,7 +1196,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=3,width=linewidth_in,dpi=ppi)
+           bg="transparent",height=3,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }

@@ -311,40 +311,38 @@ for (i in c(326)){
         ranking_chart_alignment("31", "CB") #Carstens Metric
       }
       
-      #Company Exposure
-      if (HasEquity) {
-        if (PortSummary$HasPower.EQ){
-          company_techshare("32", 5, "EQ", "Power")
-        }
-        if (PortSummary$HasAuto.EQ) {
-          company_techshare("33", 5, "EQ", "Automotive")
-        }
-        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare("34", 5, "EQ", "Fossil Fuels")
-        }
-        # We need this one too! 
-        # Carbon Tracker data. 
-        # if (PortSummary$HasOilGas.EQ) {
-        # company_techshare("35", 20, "EQ", "Oil")
-        # }
-      }
-
-      
-      # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
+      # As mentioned - these are not EQ and CB - these must be combined somehow. 
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
           company_techshare("32", 5, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare("33", 5, "CB", "Automotive")
+          company_techshare("34", 5, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare("34", 5, "CB", "Fossil Fuels")
+          company_techshare("36", 5, "CB", "Fossil Fuels")
         }
         
         # We need this one too! 
         # if (PortSummary$HasOilGas.CB) {
         #   company_techshare("35", 20, "CB", "Oil")
+        # }
+      }
+      
+      if (HasEquity) {
+        if (PortSummary$HasPower.EQ){
+          company_techshare("33", 5, "EQ", "Power")
+        }
+        if (PortSummary$HasAuto.EQ) {
+          company_techshare("35", 5, "EQ", "Automotive")
+        }
+        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
+          company_techshare("37", 5, "EQ", "Fossil Fuels")
+        }
+        # We need this one too! 
+        # Carbon Tracker data. 
+        # if (PortSummary$HasOilGas.EQ) {
+        # company_techshare("35", 20, "EQ", "Oil")
         # }
       }
       
