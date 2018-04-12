@@ -864,7 +864,7 @@ portfolio_sector_stack <- function(plotnumber){
   
   dfagg <- sector_processing()
   sectorpalette <- c(energy,pow,trans)
-  sectororder <-c("Fossil Fuels","Utility Power","Automotive")
+  sectororder <-c("Fossil Fuels","Power","Automotive")
   colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
   dfagg$Sector<-as.factor(dfagg$Sector)
   combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
