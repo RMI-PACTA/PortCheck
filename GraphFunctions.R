@@ -1554,7 +1554,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.border = element_blank(),
             panel.grid = element_blank(),
             axis.ticks.y = element_blank(),
-            axis.line = element_line(),
+            #axis.line.x  = element_line(),
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
             axis.ticks = element_blank())
@@ -1577,9 +1577,14 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.grid.minor = element_blank(),
             panel.border = element_blank(),
             panel.grid = element_blank(),
+            axis.ticks.y = element_blank(),
+            #axis.line.x = element_line(colour = textcolor,size=1),
+            #axis.line.y = element_blank(),
+            
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
             axis.ticks = element_blank())
+
   }
   
   
