@@ -1372,7 +1372,7 @@ Inputs246 <- function(TechToPlot){
       Year <- rep(2018:2023,3)
       Plan.Pct.Build.Out <- c(0,-0.2,-0.4,-0.6,-0.8,-1,
                               0,0,0,0,0,0,
-                              0,-0.1,-.2,-.3,-.4,-.5)
+                              0,-0.12,-0.24,-0.36,-0.48,-0.6)
       Label <- c(rep(c("450S"),6),rep(c("CPS"),6),rep(c("NPS"),6))
       df <- data.frame(Year, Plan.Pct.Build.Out, Label)
     }
@@ -1596,18 +1596,17 @@ Graph246 <- function(plotnumber, TechToPlot){
             text=element_text(family="Arial"))
   }
   
-  print(outputplot)
-  # 
-  # if(PrintPlot){print(outputplot)}
-  # 
-  # 
-  # 
-  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
-  # 
-  # 
-  # 
-  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)	+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
-                    #height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
+
+  if(PrintPlot){print(outputplot)}
+
+
+
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
+
+
+
+  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)	+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
+  # height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
 }
           
 
