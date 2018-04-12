@@ -380,7 +380,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   Test <- BatchTest %>%
     group_by(Technology) %>%
-    do(data.frame(t(quantile(.$Exp.Carsten.Plan.Port.Scen.Market, probs = c(0.25, 0.75)))))
+    do(data.frame(t(quantile(.$Exp.Carsten.Plan.Port.Scen.Market, probs = c(0.25, 0.5,0.75)))))
   
   Test<- as.data.frame(Test) 
   Test$Technology <- as.factor(Test$Technology)
@@ -460,8 +460,10 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   # Exposures[which(Exposures$X75. <  -1),]$X75. <-1
   Exposures$X25.<-ifelse(Exposures$X25. >1,1,Exposures$X25.)
   Exposures$X75.<-ifelse(Exposures$X75. >1,1,Exposures$X75.)
+  Exposures$X50.<-ifelse(Exposures$X50. >1,1,Exposures$X50.)
   Exposures$X25.<-ifelse(Exposures$X25. < -1,-1,Exposures$X25.)
   Exposures$X75.<-ifelse(Exposures$X75. < -1,-1,Exposures$X75.)
+  Exposures$X50.<-ifelse(Exposures$X50. < -1,-1,Exposures$X50.)
   
   
   Exposures$comploc<-Exposures$Exp.Carsten.Plan.Port.Scen.Market*100
@@ -503,6 +505,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     geom_point(data=Exposures,aes(x=X75.,y=Locations),  fill="black",colour="black",size=2)+
     
     # centre alignment line    # xmax
+    annotate(geom="rect",xmin = 0,xmax=Exposures$X50.,ymin = locations-bh/2,ymax=locations+bh/2,colour="green",fill = "transparent")+
     annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour="black",fill = "transparent")+
     annotate(geom="rect",xmin =-1,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
     
@@ -1663,7 +1666,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     techorder <- c("Convetional Oil","Heavy Oil","Oil Sands","Unconventional Oil","Other & Unknown")
     tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
                      paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
-    colors <- c("#45B5C3","#1392C5","#1B62AE", "#262B8E","#071C54")
+    colors <- c("#999c84","#a5a792","#b0b3a0", "#bcbeae","#c8c9bc")
     
   
   
