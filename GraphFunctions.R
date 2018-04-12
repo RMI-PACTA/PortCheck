@@ -1622,6 +1622,7 @@ Graph246 <- function(plotnumber, TechToPlot){
 }
           
 
+
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
   # # plotnumber = 99
@@ -1631,8 +1632,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     CompProdSS <- EQCompProdSnapshot
     OilCompProdSS<- subset(CompProdSS,(Technology %in% "Oil")&Year == (Startyear+5),select=c("Name","Year","PortWeightEQYlvl", "Technology","EQY_FUND_TICKER")) 
     colnames(OilCompProdSS)[which(names(OilCompProdSS) == "EQY_FUND_TICKER")] <- "Ticker"
-    
-    combin <- EQCombin
     OilOG<- subset(OGData,Year ==(Startyear+5)& (Technology %in% "Oil") &(RollUpType %in% "Equity"))
     
     
@@ -1641,17 +1640,16 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     OilCompProdSS<- subset(CompProdSS,(Technology %in% "Oil")&Year == (Startyear+5),select=c("Name","Year","PortWeightEQYlvl", "Technology","COMPANY_CORP_TICKER")) 
     colnames(OilCompProdSS)[which(names(OilCompProdSS) == "COMPANY_CORP_TICKER")] <- "Ticker"
     
-    combin <- CBCombin
     OilOG<- subset(OGData,Year ==(Startyear+5)& (Technology %in% "Oil") &(RollUpType %in% "Debt"))
     
   }
   
   
   
-
+  
   ####Oil
   #OilCompProdSS$EQY_FUND_TICKER <- gsub(" US","",as.character(OilCompProdSS$EQY_FUND_TICKER))
-
+  
   OilCompanies <- right_join(OilOG,OilCompProdSS, by=c("Technology","Ticker"))
   OilCompanies <- subset(OilCompanies, select=c("Production","PortWeightEQYlvl","Resource.Type","Name"))
   OilCompanies1 <- OilCompanies %>%
@@ -1665,18 +1663,18 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   OilCompanies <- left_join(OilCompanies1,OilCompanies2,by=c("Name"))
   OilCompanies$OilShare <- (OilCompanies$Oilsum/OilCompanies$Oiltotal) 
   OilCompanies$Classification <- "Companies"
-
+  
   OilCompanies$Resource.Type <- as.factor(OilCompanies$Resource.Type)
   levels(OilCompanies$Resource.Type)[levels(OilCompanies$Resource.Type)=="Conventional Gas"] <- "Other & Unknown"
   levels(OilCompanies$Resource.Type)[levels(OilCompanies$Resource.Type)=="Unconventional Gas"] <- "Other & Unknown"
   levels(OilCompanies$Resource.Type)[levels(OilCompanies$Resource.Type)=="-"] <- "Other & Unknown"
   
   
-    techorder <- c("Convetional Oil","Heavy Oil","Oil Sands","Unconventional Oil","Other & Unknown")
-    tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
-                     paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
-    colors <- c("#999c84","#a5a792","#b0b3a0", "#bcbeae","#c8c9bc")
-    
+  techorder <- c("Conventional Oil","Heavy Oil","Oil Sands","Unconventional Oil","Other & Unknown")
+  tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
+                   paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
+  colors <- c("#999c84","#a5a792","#b0b3a0", "#bcbeae","#c8c9bc")
+  
   
   
   #AllData <- filter(AllData, Technology %in% techorder)
@@ -1689,11 +1687,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   OilCompanies <- OilCompanies %>%
     filter(Name %in% unique(OilCompanies$Name)[1:min(companiestoprint,length(unique(OilCompanies$Name)))])
   
-
+  
   
   colnames(OilCompanies)[which(names(OilCompanies) == "Resource.Type")] <- "Oil.Type"
   OilCompanies <- subset(OilCompanies,select = c("Oil.Type","Name","OilShare","Classification","PortWeightEQYlvl"))
-
+  
   OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
   
   names(colors) <- techorder
@@ -1701,29 +1699,32 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) sprintf("%.1f", x)
   
-
-
-
+  
+  
+  
   PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare),
-                                        show.guide = TRUE)+
-                       geom_bar(aes(fill=(Oil.Type)),stat = "identity", position = "fill", width = .6)+
-                       geom_hline(yintercept = c(.25,.50,.75), color="white")+
-                       scale_fill_manual(values=colors,labels = tech_labels, breaks = (techorder))+
-                       scale_y_continuous(expand=c(0,0), labels=percent)+
-                       guides(fill=guide_legend(nrow = 1))+
-                       theme_barcharts()+
-                       
-                       geom_text(data=OilCompanies,
-                                 aes(x = Name, y = 1),
-                                 label = paste0(scaleFUN(100*(OilCompanies$PortWeightEQYlvl)),"%"),
-                                  hjust = -1, color = textcolor, size=textsize*(5/14))+
-                       xlab("Companies")+
-                       ylab("TechShare")+
-                       coord_flip()+
-                       theme(legend.position = "bottom",legend.title = element_blank(),
-                             plot.margin = unit(c(1, 6, 0, 0), "lines"))
-
+                     show.guide = TRUE)+
+    geom_bar(aes(fill=(Oil.Type)),stat = "identity", position = position_stack(), width = 0.4)+
+    geom_hline(yintercept = c(.25,.50,.75), color="white")+
+    scale_fill_manual(values=colors,labels = tech_labels, breaks = (techorder))+
+    scale_y_continuous(expand=c(0,0), labels=percent)+
+    guides(fill=guide_legend(nrow = 1))+
+    theme_barcharts()+
     
+    geom_text(data=OilCompanies,
+              aes(x = Name, y = 1),
+              label = paste0(scaleFUN(100*(OilCompanies$PortWeightEQYlvl)),"%"),
+              hjust = -1, color = textcolor, size=textsize*(5/14))+
+    xlab("Companies")+
+    ylab("TechShare")+
+    coord_flip()+
+    theme(legend.position = "bottom",legend.title = element_blank(),
+          plot.margin = unit(c(1, 6, 0, 0), "lines"))+
+    annotation_custom(
+      grob = textGrob(label = "% in Portfolio", hjust = 0),
+      xmin = 5.5, xmax = 6, ymin = 0.9, ymax = 1)
+  
+  
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
   gt$layout$clip[gt$layout$name == "panel"] <- "off"
@@ -1734,3 +1735,97 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   #ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
   #       bg="transparent",height=4,width=10,dpi=ppi)
 }
+
+
+
+carboninout <- function(plotnumber, companiestoprint, ChartType){
+  # ChartType = "CB"
+  # # plotnumber = 99
+  # companiestoprint = 20
+  # SectorToPlot = "Power"
+  if (ChartType == "EQ"){
+    CompProdSS <- EQCompProdSnapshot %>%
+      filter(Year == Startyear +5) %>%
+      select(Name,PortWeightEQYlvl, EQY_FUND_TICKER) %>%
+      unique()
+    ccap<- CarbonCap
+    
+    
+  } else if(ChartType == "CB"){
+    CompProdSS <- CBCompProdSnapshot %>%
+      filter(Year == Startyear +5) %>%
+      select(Name,PortWeightEQYlvl, COMPANY_CORP_TICKER) %>%
+      rename(EQY_FUND_TICKER = COMPANY_CORP_TICKER) %>%
+      unique()
+    
+    ccap<- CarbonCap
+    ccap$EQY_FUND_TICKER <-gsub(' [A-z ]*', '' , as.character(ccap$EQY_FUND_TICKER))
+    
+  }
+  
+  
+  ccap$InsideCarbonBudget <- ccap$TotalCarbonBudget - ccap$OutsideCarbonBudget
+  ccap <- subset(ccap,select= c("EQY_FUND_TICKER","TotalCarbonBudget","OutsideCarbonBudget","InsideCarbonBudget" ))
+  
+  colnames(ccap) <- c("EQY_FUND_TICKER","TotalCarbonBudget","Outside.Carbon.Budget","Inside.Carbon.Budget")
+  ccap$Inside.Carbon.Budget <- ccap$Inside.Carbon.Budget/ccap$TotalCarbonBudget
+  ccap$Outside.Carbon.Budget <- ccap$Outside.Carbon.Budget/ccap$TotalCarbonBudget
+  
+  portfolio <- left_join(CompProdSS,ccap, by="EQY_FUND_TICKER") %>%
+    select(Name,PortWeightEQYlvl,Inside.Carbon.Budget,Outside.Carbon.Budget)
+  portfolio1 <- melt(portfolio, id.vars = c( "Name","PortWeightEQYlvl"), variable.name = "CarbonBudget")
+  portfolio1 <- subset(portfolio1, !is.na(value))
+  carbonorder <- c("Outside.Carbon.Budget","Inside.Carbon.Budget")
+  
+  colors <- c(area_6,area_2)
+  
+  
+  #AllData <- filter(AllData, Technology %in% techorder)
+  portfolio1$CarbonBudget  <- factor(portfolio1$CarbonBudget, levels=carbonorder)
+  
+  portfolio1 <- portfolio1 %>% 
+    arrange(-PortWeightEQYlvl) 
+  
+  portfolio1 <- portfolio1 %>%
+    filter(Name %in% unique(portfolio1$Name)[1:min(companiestoprint,length(unique(portfolio1$Name)))])
+  
+  
+  names(colors) <- carbonorder
+  
+  scaleFUN <- function(x) sprintf("%.1f", x)
+  
+  PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value),
+                     show.guide = TRUE)+
+    geom_bar(aes(fill=(CarbonBudget)),stat = "identity", position = position_stack(), width = 0.4)+
+    geom_hline(yintercept = c(.25,.50,.75), color="white")+
+    scale_fill_manual(values=colors,labels = (carbonorder), breaks = (carbonorder))+
+    scale_y_continuous(expand=c(0,0),labels=percent)+
+    guides(fill=guide_legend(nrow = 1))+
+    theme_barcharts()+
+    
+    geom_text(data=portfolio1,
+              aes(x = Name, y = 1),
+              label = paste0(scaleFUN(100*(portfolio1$PortWeightEQYlvl)),"%"),
+              hjust = -1, color = textcolor, size=textsize*(5/14))+
+    xlab("Companies")+
+    ylab("TechShare")+
+    coord_flip()+
+    theme(legend.position = "bottom",legend.title = element_blank(),
+          plot.margin = unit(c(1, 6, 0, 0), "lines"))+
+    annotation_custom(
+      grob = textGrob(label = "% in Portfolio", hjust = 0),
+      xmin = 5.5, xmax = 6, ymin = 0.9, ymax = 1)
+  
+  
+  gt <- ggplot_gtable(ggplot_build(PortPlot))
+  gt$layout$clip[gt$layout$name == "panel"] <- "off"
+  
+  dev.off()
+  grid.draw(gt)
+  
+  
+}
+
+
+
+
