@@ -1731,9 +1731,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   dev.off()
   grid.draw(gt)
-  
-  #ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-  #       bg="transparent",height=4,width=10,dpi=ppi)
+  ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
+         bg="transparent",height=3,width=linewidth_in,dpi=ppi)
 }
 
 
@@ -1823,6 +1822,8 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   dev.off()
   grid.draw(gt)
   
+  ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
+         bg="transparent",height=3,width=linewidth_in,dpi=ppi)
   
 }
 
