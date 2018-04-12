@@ -314,13 +314,13 @@ for (i in c(326)){
       #Company Exposure
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
-          company_techshare("32", 10, "EQ", "Power")
+          company_techshare("32", 5, "EQ", "Power")
         }
         if (PortSummary$HasAuto.EQ) {
-          company_techshare("33", 10, "EQ", "Automotive")
+          company_techshare("33", 5, "EQ", "Automotive")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare("34", 10, "EQ", "Fossil Fuels")
+          company_techshare("34", 5, "EQ", "Fossil Fuels")
         }
         # We need this one too! 
         # Carbon Tracker data. 
@@ -333,13 +333,13 @@ for (i in c(326)){
       # As mentioned - these are not EQ and CB - these must be combined somehow. The Debt ticker is not enough information to distinguish companies. 
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
-          company_techshare("32", 10, "CB", "Power")
+          company_techshare("32", 5, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare("33", 10, "CB", "Automotive")
+          company_techshare("33", 5, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare("34", 10, "CB", "Fossil Fuels")
+          company_techshare("34", 5, "CB", "Fossil Fuels")
         }
         
         # We need this one too! 

@@ -850,7 +850,7 @@ sector_processing <- function(){
   df$Sector<-as.factor(df$Sector)
   levels(df$Sector)[levels(df$Sector)=="Coal"] <- "Fossil Fuels"
   levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
-  levels(df$Sector)[levels(df$Sector)=="Power"] <- "Utility Power"
+  levels(df$Sector)[levels(df$Sector)=="Power"] <- "Power"
   dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
   
   dfagg <- dfagg %>%
@@ -873,7 +873,8 @@ portfolio_sector_stack <- function(plotnumber){
   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
-  temp <-sum(dfagg$CarstenMetric_Port)
+  temp <-max(sum(filter(dfagg,Type=="Bond Portfolio")$CarstenMetric_Port),
+             sum(filter(dfagg,Type=="Equity Portfolio")$CarstenMetric_Port))
   ylabel = ""
   
   a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
@@ -882,12 +883,12 @@ portfolio_sector_stack <- function(plotnumber){
     scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.01), labels=percent)+
     expand_limits(0,0)+
     ylab(ylabel)+
-    guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
-    theme(legend.position = "bottom", legend.title = element_blank())
+    theme(legend.position = "bottom")
 
   if(PrintPlot){print(a)}
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),bg="transparent",height=3,width=4,plot=a,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
+         bg="transparent",height=3.5,width=linewidth_in*.9,plot=a,dpi=ppi)
 }
 
 exposure_summary <- function(plotnumber,ChartType){
@@ -963,19 +964,27 @@ analysed_summary <- function(plotnumber){
   over$Asset.Type <- plyr::revalue(over$Asset.Type, 
                                    c("Bonds"="Bond Portfolio", "Equity" = "Equity Portfolio", "Other"="Other Holdings"),warn_missing = F)
   
+  comprss <- function(tx) { 
+    tx[is.na(tx)] <- 0
+    div <- findInterval(tx, 
+                        c(1, 1e3, 1e6, 1e9, 1e12) )
+    paste("$",round( tx/10^(3*(div-1)), 2), 
+          c("","Thousand","Million","Billion","Trillion")[div] )
+    }
+  
   ## "steelblue" color below should be changed to whatever our Portfolio color is
-  plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD/1000000, fill=factor(Valid))) +
+  plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=factor(Valid))) +
     geom_bar(position="stack", stat="identity") +
     scale_fill_manual(name="", labels=c("Excluded", "In Analysis"), values=c("#d9d9d9",YourportColour)) +
     scale_x_discrete(name="Asset Type") +
-    scale_y_continuous(name="", labels=dollar_format(suffix = " Million"), expand=c(0,0)) +
+    scale_y_continuous(name="", labels=comprss, expand=c(0,0)) +
     theme_barcharts() + 
     theme(legend.position = "bottom")
   
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3,width=4,dpi=ppi)
+         bg="transparent",height=3.5,width=linewidth_in*.9,dpi=ppi)
 }
 
 # ------------- DISTRIBUTIONS --------------- #
@@ -1094,7 +1103,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Add Benchmark / Global Market
     Marketmix <- subset(market, select=c("Technology","WtProduction"))
     Marketmix$Classification <- "Portfolio"
-    Marketmix$Name <- "Market"
+    Marketmix$Name <- ifelse(ChartType=="CB","Bond Universe","Listed Equity Market")
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
     Marketmix$WtProduction <- Marketmix$WtProduction / sum(Marketmix$WtProduction)
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
@@ -1183,7 +1192,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=4,width=10,dpi=ppi)
+           bg="transparent",height=3,width=linewidth_in,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }

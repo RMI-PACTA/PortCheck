@@ -523,7 +523,7 @@ SetGraphInputs <- function(){
 
   eq_line <<- "#a63603" # same as CoalCapColor
   cb_line <<- "#756bb1" # same as ICEColour
-# =======
+
 #   eq_line <<- "#897D54"
 #   cb_line <<- "#59629A"
 
@@ -559,7 +559,7 @@ SetGraphInputs <- function(){
   ColourPalette$Technology <- factor(ColourPalette$Technology, levels=technology_order)
   ColourPalette <- arrange(ColourPalette, Technology)
   
-  
+  linewidth_in <<- 390 / 72.27
   linesize <<- 1
   ppi <<- 600
   
