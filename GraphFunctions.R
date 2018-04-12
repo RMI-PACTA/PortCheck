@@ -1126,7 +1126,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
     if (SectorToPlot == "Fossil Fuels") {
       techorder <- technology_order[9:11]
-      tech_labels <- c(paste0("% ", GT["T_CoalProd"][[1]]),paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
+      tech_labels <- c(paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_OilProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
       colors <- as.vector(ColourPalette$Colours[9:11])
     }
   
