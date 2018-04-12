@@ -148,6 +148,8 @@ AllIEATargets <- read.csv("IEATargets2016_AllRegions.csv", stringsAsFactors=FALS
 OGData <- read.csv(paste0("01_SectorMasters/",ParameterFile$GDYearMonth,"/OGMaster_",ParameterFile$GDYearMonth,".csv"),stringsAsFactors = FALSE)
 BenchmarkRegionList <- read.csv("BenchRegions.csv")
 IndexUniverses <- read.csv("IndexRegions.csv")
+CarbonCap <- read.csv(paste0(DATA.PATH,"04_Other/","CarbonCapexUpstream.csv"),stringsAsFactors=FALSE,strip.white = T)
+
 
 ### Batch related Portfolio & Fund-Data Results
 TestList <- CreateTestList(EQBatchTest, CBBatchTest)
