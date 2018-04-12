@@ -1626,7 +1626,6 @@ Graph246 <- function(plotnumber, TechToPlot){
 }
           
 
-
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
   # # plotnumber = 99
@@ -1738,7 +1737,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
          bg="transparent",height=3,width=linewidth_in,dpi=ppi)
 }
-
 
 
 carboninout <- function(plotnumber, companiestoprint, ChartType){
