@@ -459,7 +459,7 @@ for (i in 1:nrow(TestList)){
       
       # fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
       
-      
+      Graph246(99, "RenewablesCap")
       #######################
       ### CA TEMPLATE #######
       #######################
