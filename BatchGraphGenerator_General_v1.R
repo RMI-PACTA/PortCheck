@@ -316,34 +316,34 @@ for (i in c(326)){
       # As mentioned - these are not EQ and CB - these must be combined somehow. 
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
-          company_techshare("32", 5, "CB", "Power")
+          company_techshare("32", 10, "CB", "Power")
         }
         if (PortSummary$HasAuto.CB) {
-          company_techshare("34", 5, "CB", "Automotive")
+          company_techshare("34", 10, "CB", "Automotive")
         }
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare("36", 5, "CB", "Fossil Fuels")
+          company_techshare("36", 10, "CB", "Fossil Fuels")
         }
         if (PortSummary$HasOilGas.CB) {
-          Oilshare("38", 5, "CB")
+          Oilshare("38", 10, "CB")
         }
       }
       
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
-          company_techshare("33", 5, "EQ", "Power")
+          company_techshare("33", 10, "EQ", "Power")
         }
         if (PortSummary$HasAuto.EQ) {
-          company_techshare("35", 5, "EQ", "Automotive")
+          company_techshare("35", 10, "EQ", "Automotive")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare("37", 5, "EQ", "Fossil Fuels")
+          company_techshare("37", 10, "EQ", "Fossil Fuels")
         }
         if (PortSummary$HasOilGas.EQ) {
-          Oilshare("39", 5, "EQ")
+          Oilshare("39", 10, "EQ")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          carboninout("40", 5, "EQ")
+          carboninout("40", 10, "EQ")
         }
       }
       
