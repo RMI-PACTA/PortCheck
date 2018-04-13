@@ -1772,7 +1772,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
           plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
     guides(fill = guide_legend(ncol = 5,keywidth=1))+
     annotation_custom(
-      grob = textGrob(label = "Weight", hjust = 0),
+      grob = textGrob(label = "Weight", hjust = 0,gp=gpar(fontsize=8.5)),
       xmin = 10.5, xmax = 11, ymin = 1, ymax = 1.1)
   
   
@@ -1866,7 +1866,9 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     theme(legend.position = "bottom",legend.title = element_blank(),
           plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
     annotation_custom(
-      grob = textGrob(label = "Weight", hjust = 0),
+      grob = textGrob(label = "Weight", 
+                      gp=gpar(fontsize=8.5),
+                      hjust = 0),
       xmin = 10.5, xmax = 11, ymin = 1, ymax = 1.1)
   
   
