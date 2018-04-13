@@ -502,9 +502,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     geom_segment(data=Exposures,aes(x=X25., xend=X75.,y=Locations,yend=Locations), linetype="dashed",colour="black")+
     geom_point(data=Exposures,aes(x=X25.,y=Locations), fill="black",colour="black", size=2)+
     geom_point(data=Exposures,aes(x=X75.,y=Locations),  fill="black",colour="black",size=2)+
-    
+    geom_point(data=Exposures,aes(x=X50.,y=Locations), fill="black",colour="black", size=2)+
     # centre alignment line    # xmax
-    annotate(geom="rect",xmin = 0,xmax=Exposures$X50.,ymin = locations-bh/2,ymax=locations+bh/2,colour="green",fill = "transparent")+
+    #annotate(geom="rect",xmin = 0,xmax=Exposures$X50.,ymin = locations-bh/2,ymax=locations+bh/2,colour="green",fill = "transparent")+
     annotate(geom="rect",xmin = 0,xmax=1,ymin = locations-bh/2,ymax=locations+bh/2,colour="black",fill = "transparent")+
     annotate(geom="rect",xmin =-1,xmax=1,ymin=(locations-bh/2),ymax=(locations+bh/2), fill="transparent",colour="black")+ # Box around the bars
     
