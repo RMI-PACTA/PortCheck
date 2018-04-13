@@ -138,6 +138,13 @@ CAReport <- function(){
     return(text)
   }
   
+  if (!HasEquity){
+    text <- removetextlines("EQSpecific")
+  }
+  
+  if (!HasDebt){
+    text <- removetextlines("CBSpecific")
+  }
   
   if(!HasAuto){
     text <- removetextlines("AutoSector")
@@ -169,11 +176,6 @@ CAReport <- function(){
       text <- removetextlines("FossilFuelSector_EQ")
     }
   }
-  
-  
-  # if(paste0(HasAuto,HasPower) == "FALSEFALSE"){
-  #   text <- removetextlines("PowerAutomotiveSector")
-  # }
   
   # Replace Sector Weight Values
   a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
