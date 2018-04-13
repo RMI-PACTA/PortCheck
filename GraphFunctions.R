@@ -1702,6 +1702,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     summarise("Oiltotal" =sum(Oilsum))
   
   OilCompanies <- left_join(OilCompanies1,OilCompanies2,by=c("Name"))
+  if (nrow(OilCompanies) > 0) {
   OilCompanies$OilShare <- (OilCompanies$Oilsum/OilCompanies$Oiltotal) 
   OilCompanies$Classification <- "Companies"
   
@@ -1778,7 +1779,10 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   dev.off()
   grid.draw(gt)
   ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
-         bg="transparent",height=3,width=10,dpi=ppi)
+         bg="transparent",height=3,width=10,dpi=ppi)}
+  else {
+    print("No oil data to plot.")
+  }
 }
 
 
@@ -1819,6 +1823,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     select(Name,PortWeightEQYlvl,Inside.Carbon.Budget,Outside.Carbon.Budget)
   portfolio1 <- melt(portfolio, id.vars = c( "Name","PortWeightEQYlvl"), variable.name = "CarbonBudget")
   portfolio1 <- subset(portfolio1, !is.na(value))
+  if (nrow(portfolio1)>1) {
   carbonorder <- c("Inside.Carbon.Budget","Outside.Carbon.Budget")
   
   colors <- c(OilProdColour,area_6)
@@ -1874,7 +1879,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   grid.draw(gt)
   
   ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-         bg="transparent",height=3,width=11,dpi=ppi)
+         bg="transparent",height=3,width=11,dpi=ppi)}
+  else {
+    print("No Carbon Budget data to plot.")
+  }
   
 }
 
