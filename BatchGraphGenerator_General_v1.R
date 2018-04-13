@@ -324,11 +324,9 @@ for (i in c(326)){
         if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
           company_techshare("36", 5, "CB", "Fossil Fuels")
         }
-        
-        # We need this one too! 
-        # if (PortSummary$HasOilGas.CB) {
-        #   company_techshare("35", 20, "CB", "Oil")
-        # }
+        if (PortSummary$HasOilGas.CB) {
+          Oilshare("38", 5, "CB")
+        }
       }
       
       if (HasEquity) {
@@ -341,11 +339,12 @@ for (i in c(326)){
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
           company_techshare("37", 5, "EQ", "Fossil Fuels")
         }
-        # We need this one too! 
-        # Carbon Tracker data. 
-        # if (PortSummary$HasOilGas.EQ) {
-        # company_techshare("35", 20, "EQ", "Oil")
-        # }
+        if (PortSummary$HasOilGas.EQ) {
+          Oilshare("39", 5, "EQ")
+        }
+        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
+          carboninout("40", 5, "EQ")
+        }
       }
       
       dev.off()

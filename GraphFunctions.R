@@ -932,7 +932,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Exposure of Portfolio to 2� Market Benchmark")+
+    ylab("Exposure of Portfolio to 2째 Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1486,7 +1486,7 @@ Graph246 <- function(plotnumber, TechToPlot){
     # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
     lineorder<- c("Line1","Line2","Line3","Line4")
     Palette <- c(area_6,area_4_6,area_2_4,area_2)
-    AreaNames <-  c( "> 6캜","4-6캜","2-4캜","< 2캜")
+    AreaNames <-  c( "> 6째C","4-6째C","2-4째C","< 2째C")
   }else if (GoodBad == "Brown"){
     dfwide$Line1 <- dfwide$`450S`
     dfwide$Line2 <- dfwide$NPS #- dfwide$`450S`
@@ -1494,7 +1494,7 @@ Graph246 <- function(plotnumber, TechToPlot){
     dfwide$Line4 <- dfwide$MaxValue #- dfwide$`450S`
     
     Palette <- c(area_2,area_2_4,area_4_6,area_6)
-    AreaNames <-  c( "< 2캜","2-4캜","4-6캜","> 6캜")
+    AreaNames <-  c( "< 2째C","2-4째C","4-6째C","> 6째C")
     lineorder <-c("Line4","Line3","Line2","Line1")
   } 
   
@@ -1503,7 +1503,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   dftar <- melt(dfwide, id.vars =  "Year", variable.name = "Lab")
   # # dftargets <- rev(dftargets)
   # 
-  # # AreaNames <-  c( "< 2캜","2-4캜","4-6캜","> 6캜")
+  # # AreaNames <-  c( "< 2째C","2-4째C","4-6째C","> 6째C")
   # # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
   #brown lineorder <-c("Line4","Line3","Line2","Line1")
   #lineorder <-c("Line1","Line2","Line3","Line4")
@@ -1554,7 +1554,7 @@ Graph246 <- function(plotnumber, TechToPlot){
             panel.border = element_blank(),
             panel.grid = element_blank(),
             axis.ticks.y = element_blank(),
-            axis.line = element_line(),
+            #axis.line = element_line(),
             legend.title = element_blank(),
             plot.margin = unit(c(.5,1,0.5,.5), "cm"),
             axis.ticks = element_blank())
@@ -1625,7 +1625,6 @@ Graph246 <- function(plotnumber, TechToPlot){
   # height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
 }
           
-
 
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
@@ -1738,7 +1737,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
          bg="transparent",height=3,width=linewidth_in,dpi=ppi)
 }
-
 
 
 carboninout <- function(plotnumber, companiestoprint, ChartType){
