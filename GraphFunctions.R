@@ -42,9 +42,17 @@ CAReportData <- function(){
   SectorCheck <- TestList[TestList$PortName == PortName,]
 
   HasPower <- SectorCheck$HasPower.CB| SectorCheck$HasPower.EQ
-  HasAuto <- SectorCheck$HasAuto.CB| SectorCheck$HasAuto.EQ
-  HasOG <- SectorCheck$HasOilGas.CB| SectorCheck$HasOilGas.EQ
-  HasCoal <- SectorCheck$HasCoal.CB| SectorCheck$HasCoal.EQ
+  HasAuto <- SectorCheck$HasAuto.CB | SectorCheck$HasAuto.EQ
+  HasOG <- SectorCheck$HasOilGas.CB | SectorCheck$HasOilGas.EQ
+  HasCoal <- SectorCheck$HasCoal.CB | SectorCheck$HasCoal.EQ
+  HasPowerCB <- SectorCheck$HasPower.CB
+  HasAutoCB <- SectorCheck$HasAuto.CB
+  HasOGCB <- SectorCheck$HasOilGas.CB
+  HasCoalCB <- SectorCheck$HasCoal.CB
+  HasPowerEQ <- SectorCheck$HasPower.EQ
+  HasAutoEQ <- SectorCheck$HasAuto.EQ
+  HasOGEQ <- SectorCheck$HasOilGas.EQ
+  HasCoalEQ <- SectorCheck$HasCoal.EQ
   
   ### Sector Weights ###
   FFSectorPortEQ <- 4
@@ -66,6 +74,14 @@ CAReportData <- function(){
            c("HasAuto",HasAuto),
            c("HasOG",HasOG),
            c("HasCoal",HasCoal),
+           c("HasPowerCB",HasPowerCB),
+           c("HasAutoCB",HasAutoCB),
+           c("HasOGCB",HasOGCB),
+           c("HasCoalCB",HasCoalCB),
+           c("HasPowerEQ",HasPowerEQ),
+           c("HasAutoEQ",HasAutoEQ),
+           c("HasOGEQ",HasOGEQ),
+           c("HasCoalEQ",HasCoalEQ),
            c("NoPeers",NoPeers),
            c("AssetClass", AssetClass),
            c("FFSectorPortEQ",FFSectorPortEQ),
@@ -90,6 +106,12 @@ CAReport <- function(){
   HasAuto <- reportdata$HasAuto[[1]]
   HasPower <- reportdata$HasPower[[1]]
   HasOG <- reportdata$HasOG[[1]]
+  HasAutoCB <- reportdata$HasAutoCB[[1]]
+  HasPowerCB <- reportdata$HasPowerCB[[1]]
+  HasOGCB <- reportdata$HasOGCB[[1]]
+  HasAutoEQ <- reportdata$HasAutoEQ[[1]]
+  HasPowerEQ <- reportdata$HasPowerEQ[[1]]
+  HasOGEQ <- reportdata$HasOGEQ[[1]]
   
   # Copy in the template for the report
   text <- as.data.frame(template,stringsAsFactors = FALSE)  
@@ -135,9 +157,30 @@ CAReport <- function(){
     text <- removetextlines("FossilFuelSector")
   }
   
-  if(paste0(HasAuto,HasPower) == "FALSEFALSE"){
-    text <- removetextlines("PowerAutomotiveSector")
+  if(HasAutoCB == "FALSE"){
+    text <- removetextlines("AutoSectorCB")
   }
+  if(HasPowerCB == "FALSE"){
+    text <- removetextlines("PowerSectorCB")
+  }
+  if(HasOGCB == "FALSE"){
+    text <- removetextlines("FossilFuelSectorCB")
+  }
+
+  if(HasAutoEQ == "FALSE"){
+    text <- removetextlines("AutoSectorEQ")
+  }
+  if(HasPowerEQ == "FALSE"){
+    text <- removetextlines("PowerSectorEQ")
+  }
+  if(HasOGEQ == "FALSE"){
+    text <- removetextlines("FossilFuelSectorEQ")
+  }
+  
+  
+  # if(paste0(HasAuto,HasPower) == "FALSEFALSE"){
+  #   text <- removetextlines("PowerAutomotiveSector")
+  # }
   
   # Replace Sector Weight Values
   a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
