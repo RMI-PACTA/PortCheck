@@ -59,6 +59,10 @@ sector_techshare <- function(plotnumber,ChartInputs){
            PortName == PortfolioName,
            InvestorName == InvestorName) 
   
+  ### Temp Fix ###
+  Combin$Type <- "Portfolio"
+  
+  
   #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch)
   
@@ -185,4 +189,55 @@ sector_techshare <- function(plotnumber,ChartInputs){
       
     }
   }
+}
+
+
+
+#### Base and functions
+
+stacked_bar_chart <- function(dat, colors, legend_labels){
+  # "item", "family", "score", "value"
+  colnames <- colnames(dat)
+  
+  plottheme <- ggplot(data=dat, aes_string(x=colnames[1], y=colnames[4], fill=colnames[3]),
+                      show.guide = TRUE)+
+    geom_bar(stat = "identity", position = "fill", width = .6)+
+    geom_hline(yintercept = c(.25,.50,.75), color="white")+
+    scale_fill_manual(values=colors,labels = legend_labels, breaks = names(legend_labels))+
+    scale_y_continuous(expand=c(0,0), labels=percent)+
+    guides(fill=guide_legend(nrow = 1))+
+    theme_barcharts()
+  
+  return(plottheme)
+}
+
+
+#### Base themes
+
+theme_barcharts <-function(base_size = textsize, base_family = "") {
+  theme(axis.ticks=element_blank(),
+        axis.text.x=element_text(colour=textcolor,size=textsize),
+        axis.text.y=element_text(colour=textcolor,size=textsize),
+        axis.title.x=element_blank(),
+        axis.title.y=element_text(colour=textcolor,size=textsize),
+        axis.line.x = element_line(colour = textcolor,size=1),
+        axis.line.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        # legend.position=c(0.5,0),#legend.position = "none",
+        legend.position = "none",
+        legend.direction="horizontal",
+        legend.text = element_text(size=textsize,colour=textcolor),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key.size=unit(0.4,"cm"),
+        #legend.title=element_blank(),
+        legend.title = element_text(colour = textcolor, size = textsize),
+        legend.key = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        plot.margin = unit(c(1,1, 0, 0), "lines"),
+        plot.title = element_blank(),
+        text=element_text(family="Arial",size = textsize)
+        # plot.margin = unit(c(1,1, 5, 2), "lines")
+  )
 }
