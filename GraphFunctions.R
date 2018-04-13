@@ -103,15 +103,15 @@ CAReportData <- function(){
 CAReport <- function(){
   
   reportdata <-CAReportData()
-  HasAuto <- reportdata$HasAuto[[1]]
-  HasPower <- reportdata$HasPower[[1]]
-  HasOG <- reportdata$HasOG[[1]]
-  HasAutoCB <- reportdata$HasAutoCB[[1]]
-  HasPowerCB <- reportdata$HasPowerCB[[1]]
-  HasOGCB <- reportdata$HasOGCB[[1]]
-  HasAutoEQ <- reportdata$HasAutoEQ[[1]]
-  HasPowerEQ <- reportdata$HasPowerEQ[[1]]
-  HasOGEQ <- reportdata$HasOGEQ[[1]]
+  HasAuto <- as.logical(reportdata$HasAuto[[1]])
+  HasPower <- as.logical(reportdata$HasPower[[1]])
+  HasOG <- as.logical(reportdata$HasOG[[1]])
+  HasAutoCB <- as.logical(reportdata$HasAutoCB[[1]])
+  HasPowerCB <- as.logical(reportdata$HasPowerCB[[1]])
+  HasOGCB <- as.logical(reportdata$HasOGCB[[1]])
+  HasAutoEQ <- as.logical(reportdata$HasAutoEQ[[1]])
+  HasPowerEQ <- as.logical(reportdata$HasPowerEQ[[1]])
+  HasOGEQ <- as.logical(reportdata$HasOGEQ[[1]])
   
   # Copy in the template for the report
   text <- as.data.frame(template,stringsAsFactors = FALSE)  
@@ -138,43 +138,36 @@ CAReport <- function(){
     return(text)
   }
   
-  # Remove EQ/CB sectors 
-  if (!HasEquity){
-    text <- removetextlines("EQSpecific")
-  }
-
-  if (!HasDebt){
-    text <- removetextlines("CBSpecific")
-  }  
   
-  if(HasAuto == "FALSE"){
+  if(!HasAuto){
     text <- removetextlines("AutoSector")
+  } else {
+    if(!HasAutoCB){
+      text <- removetextlines("AutoSector_CB")
+    }
+    if(!HasAutoEQ){
+      text <- removetextlines("AutoSector_EQ")
+    }
   }
-  if(HasPower == "FALSE"){
+  if(!HasPower){
     text <- removetextlines("PowerSector")
+  } else {
+    if(!HasPowerCB){
+      text <- removetextlines("PowerSector_CB")
+    }
+    if(!HasPowerEQ){
+      text <- removetextlines("PowerSector_EQ")
+    }
   }
-  if(HasOG == "FALSE"){
+  if(!HasOG){
     text <- removetextlines("FossilFuelSector")
-  }
-  
-  if(HasAutoCB == "FALSE"){
-    text <- removetextlines("AutoSectorCB")
-  }
-  if(HasPowerCB == "FALSE"){
-    text <- removetextlines("PowerSectorCB")
-  }
-  if(HasOGCB == "FALSE"){
-    text <- removetextlines("FossilFuelSectorCB")
-  }
-
-  if(HasAutoEQ == "FALSE"){
-    text <- removetextlines("AutoSectorEQ")
-  }
-  if(HasPowerEQ == "FALSE"){
-    text <- removetextlines("PowerSectorEQ")
-  }
-  if(HasOGEQ == "FALSE"){
-    text <- removetextlines("FossilFuelSectorEQ")
+  } else {
+    if(!HasOGCB){
+      text <- removetextlines("FossilFuelSector_CB")
+    }
+    if(!HasOGEQ){
+      text <- removetextlines("FossilFuelSector_EQ")
+    }
   }
   
   
