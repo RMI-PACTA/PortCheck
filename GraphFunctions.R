@@ -1718,14 +1718,14 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
               aes(x = Name, y = 1),
               label = paste0(scaleFUN(100*(OilCompanies$PortWeightEQYlvl)),"%"),
               hjust = -1, color = textcolor, size=textsize*(5/14))+
-    xlab("Companies")+
+    xlab("")+
     ylab("TechShare")+
     coord_flip()+
     theme(legend.position = "bottom",legend.title = element_blank(),
           plot.margin = unit(c(1, 6, 0, 0), "lines"))+
     annotation_custom(
       grob = textGrob(label = "% in Portfolio", hjust = 0),
-      xmin = 5.5, xmax = 6, ymin = 0.9, ymax = 1)
+      xmin = 10.5, xmax = 11, ymin = 0.9, ymax = 1)
   
   
   
@@ -1808,14 +1808,14 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
               aes(x = Name, y = 1),
               label = paste0(scaleFUN(100*(portfolio1$PortWeightEQYlvl)),"%"),
               hjust = -1, color = textcolor, size=textsize*(5/14))+
-    xlab("Companies")+
+    xlab("")+
     ylab("TechShare")+
     coord_flip()+
     theme(legend.position = "bottom",legend.title = element_blank(),
           plot.margin = unit(c(1, 6, 0, 0), "lines"))+
     annotation_custom(
       grob = textGrob(label = "% in Portfolio", hjust = 0),
-      xmin = 5.5, xmax = 6, ymin = 0.9, ymax = 1)
+      xmin = 10.5, xmax = 11, ymin = 0.9, ymax = 1)
   
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
