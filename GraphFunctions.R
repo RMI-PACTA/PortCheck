@@ -970,7 +970,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Exposure of Portfolio to 2° Market Benchmark")+
+    ylab("Alignment of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1151,7 +1151,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","CompanyLvlSecProd","PortWeightEQYlvl"))
     Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)
     Companies$Classification <- "Companies"
-    Companies$Name <- paste0(substr(Companies$Name, 1, 12),"...")
+    Companies$Name <- paste0(substr(Companies$Name, 1, 15),"...")
     Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
     colnames(Companies) <- c("Name","Classification","Technology","TechShare","PortWeight")
     Companies[is.na(Companies$Name),"Name"] <- "No Name"
@@ -1213,14 +1213,13 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
     PortPlot <- stacked_bar_chart(AllData, colors, tech_labels)+
       geom_text(aes(x = "", y = 1),
-                label = "Weight",#paste0("% of ", ifelse(ChartType=="CB", "Bond", "Equity")," Portfolio"),
+                label = "Weight",
                 hjust=-0.9,color = textcolor, size=textsize*(5/14))+
       geom_text(data=filter(AllData,Classification=="Companies"),
                 aes(x = Name, y = 1),
                 label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
                 hjust = -1, color = textcolor, size=textsize*(5/14))+
-      xlab("Companies")+
-      ylab("TechShare")+
+      xlab("")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"))
@@ -1486,7 +1485,6 @@ Inputs246 <- function(TechToPlot){
   return(df)
 }
 
-
 Graph246 <- function(plotnumber, TechToPlot){
   
   
@@ -1663,7 +1661,6 @@ Graph246 <- function(plotnumber, TechToPlot){
   # height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
 }
           
-
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
   # # plotnumber = 99
@@ -1741,6 +1738,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) {
     x <- sprintf("%.1f", x)
+    x<-as.numeric(x)
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }
@@ -1784,7 +1782,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     print("No oil data to plot.")
   }
 }
-
 
 carboninout <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
@@ -1843,6 +1840,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) {
     x <- sprintf("%.1f", x)
+    x<-as.numeric(x)
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }  
@@ -1885,7 +1883,3 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   }
   
 }
-
-
-
-
