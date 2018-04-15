@@ -1738,6 +1738,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) {
     x <- sprintf("%.1f", x)
+    x<-as.numeric(x)
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }
@@ -1839,6 +1840,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   
   scaleFUN <- function(x) {
     x <- sprintf("%.1f", x)
+    x<-as.numeric(x)
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }  
