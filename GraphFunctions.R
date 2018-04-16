@@ -1768,7 +1768,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # }
   perc <- function(x, digits = 1, format = "f", ...) {
     x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-    x[x<10] <- paste0("  ",x[x<10])
+    
     return(x)
   }
   
@@ -1798,7 +1798,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     guides(fill = guide_legend(ncol = 5,keywidth=1))+
     annotation_custom(
       grob = textGrob(label = "Weight", hjust =0,gp=gpar(fontsize=8.5)),
-      xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.1)
+      xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
   
   
   
@@ -1871,7 +1871,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   
   perc <- function(x, digits = 1, format = "f", ...) {
     x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-    x[x<10] <- paste0("  ",x[x<10])
+    
     return(x)
   }
   portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
@@ -1899,7 +1899,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grob = textGrob(label = "Weight", 
                       gp=gpar(fontsize=8.5),
                       hjust = 0),
-      xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.1)
+      xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.05)
   
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
