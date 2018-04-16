@@ -1004,8 +1004,7 @@ analysed_summary <- function(plotnumber){
   over$Asset.Type <- plyr::revalue(over$Asset.Type, 
                                    c("Bonds"="Bond Portfolio", "Equity" = "Equity Portfolio", "Other"="Other Holdings"), warn_missing = F)
   
-  portfolio_label = paste0("Percent Analyzed: ", 
-                           round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
+  portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
   comprss <- function(tx) { 
     tx[is.na(tx)] <- 0
@@ -1025,9 +1024,9 @@ analysed_summary <- function(plotnumber){
     theme(legend.position = "bottom")
   
   plot <- plot+
-    annotate("label", x = "Other Holdings", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
-             label = portfolio_label,
-             hjust = .5, vjust = 1, size = textsize*(5/14))
+    annotate("text", x = "Other Holdings", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label, color = YourportColour,
+             hjust = .5, vjust = 1, size = textsize)
   
   if(PrintPlot){print(plot)}
   
@@ -1067,6 +1066,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
   df <- unique(subset(df, select = c(ID.COLS,MetricCol)))
   metaport <- subset(metaport, select = c(ID.COLS,MetricCol))
   df <- rbind(df,metaport)
+  name = PortName
   
   BarColors <- c(HighRisk, MedRisk, LowRisk)
   names(BarColors) <- c(MetricCol)
@@ -1074,9 +1074,9 @@ Risk_Distribution <- function(plotnumber, ChartType){
   ylim = .5
   
   portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Bond","Equity")," Portfolio\n",
-                           "Immediate Elevated: ", round(sum(filter(df, PortName == PortName)$Risk1),1), "%\n",
-                           "Emerging Elevated: ", round(sum(filter(df, PortName == PortName)$Risk2),1), "%\n",
-                           "Emerging Moderate: ", round(sum(filter(df, PortName == PortName)$Risk3),1), "%")
+                           "Immediate Elevated: ", round(100*sum(filter(df, PortName == name)$Risk1),1), "%\n",
+                           "Emerging Elevated: ", round(100*sum(filter(df, PortName == name)$Risk2),1), "%\n",
+                           "Emerging Moderate: ", round(100*sum(filter(df, PortName == name)$Risk3),1), "%")
   
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim, 
                              portfolio_label, Title, Labels, BarColors)
@@ -1102,13 +1102,14 @@ Fossil_Distribution <- function(plotnumber, ChartType){
                        select=c("PortName","Technology","CarstenMetric_Port"))
   ID.COLS = c("PortName")
   MetricCol <- "CarstenMetric_Port"
+  name = PortName
   
   BarColors <- c(energy)
   names(BarColors) <- c(MetricCol)
   Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
   portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Bond","Equity")," Portfolio\n",
-                           "Fossil Fuel Share: ", round(sum(filter(df,PortName==PortName)$CarstenMetric_Port),1), "%")
+                           "Fossil Fuel Share: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
   
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                      portfolio_label, Title, Labels, BarColors) +

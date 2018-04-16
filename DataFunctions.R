@@ -560,7 +560,7 @@ SetGraphInputs <- function(){
   ColourPalette <- arrange(ColourPalette, Technology)
   
   linewidth_in <<- 390 / 72.27
-  linesize <<- 1
+  linesize <<- 0.8
   ppi <<- 600
   
 }
