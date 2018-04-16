@@ -1852,67 +1852,70 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     select(Name,PortWeightEQYlvl,Inside.Carbon.Budget,Outside.Carbon.Budget)
   portfolio1 <- melt(portfolio, id.vars = c( "Name","PortWeightEQYlvl"), variable.name = "CarbonBudget")
   portfolio1 <- subset(portfolio1, !is.na(value))
+  
   if (nrow(portfolio1)>1) {
-  carbonorder <- c("Inside.Carbon.Budget","Outside.Carbon.Budget")
-  
-  colors <- c(OilProdColour,area_6)
-  
-  
-  #AllData <- filter(AllData, Technology %in% techorder)
-  portfolio1$CarbonBudget  <- factor(portfolio1$CarbonBudget, levels=carbonorder)
-  
-  portfolio1 <- portfolio1 %>% 
-    arrange(-PortWeightEQYlvl) 
-  
-  portfolio1 <- portfolio1 %>%
-    filter(Name %in% unique(portfolio1$Name)[1:min(companiestoprint,length(unique(portfolio1$Name)))])
-  
-  
-  names(colors) <- carbonorder
-  
-  perc <- function(x, digits = 1, format = "f", ...) {
-    x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+    carbonorder <- c("Inside.Carbon.Budget","Outside.Carbon.Budget")
     
-    return(x)
-  }
-  portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
-  
-  PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
-                                          fill=factor(CarbonBudget,levels=c("Outside.Carbon.Budget","Inside.Carbon.Budget" ))),
-                     show.guide = TRUE)+
-    geom_bar(stat = "identity", position = "fill", width = .6)+
-    geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    scale_fill_manual(values=colors,labels = paste(carbonorder," "), breaks = (carbonorder))+
-    scale_y_continuous(expand=c(0,0),labels=percent)+
-    guides(fill=guide_legend(nrow = 1))+
-    theme_barcharts()+
+    colors <- c(OilProdColour,area_6)
     
-    geom_text(data=portfolio1,
-              aes(x = Name, y = 1),
-              label = perc(portfolio1$PortWeightEQYlvl),
-              hjust = -1, color = textcolor, size=textsize*(5/14))+
-    xlab("")+
-    ylab("TechShare")+
-    coord_flip()+
-    theme(legend.position = "bottom",legend.title = element_blank(),
-          plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-    annotation_custom(
-      grob = textGrob(label = "Weight", 
-                      gp=gpar(fontsize=8.5),
-                      hjust = 0),
-      xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.05)
-  
-  
-  gt <- ggplot_gtable(ggplot_build(PortPlot))
-  gt$layout$clip[gt$layout$name == "panel"] <- "off"
-  
-  dev.off()
-  grid.draw(gt)
-  
-  ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-         bg="transparent",height=3,width=11,dpi=ppi)}
-  else {
+    
+    #AllData <- filter(AllData, Technology %in% techorder)
+    portfolio1$CarbonBudget  <- factor(portfolio1$CarbonBudget, levels=carbonorder)
+    
+    portfolio1 <- portfolio1 %>% 
+      arrange(-PortWeightEQYlvl) 
+    
+    portfolio1 <- portfolio1 %>%
+      filter(Name %in% unique(portfolio1$Name)[1:min(companiestoprint,length(unique(portfolio1$Name)))])
+    
+    
+    names(colors) <- carbonorder
+    
+    perc <- function(x, digits = 1, format = "f", ...) {
+      x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+      
+      return(x)
+    }
+    portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
+    
+    PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
+                                            fill=factor(CarbonBudget,levels=c("Outside.Carbon.Budget","Inside.Carbon.Budget" ))),
+                       show.guide = TRUE)+
+      geom_bar(stat = "identity", position = "fill", width = .6)+
+      geom_hline(yintercept = c(.25,.50,.75), color="white")+
+      scale_fill_manual(values=colors,labels = paste(carbonorder," "), breaks = (carbonorder))+
+      scale_y_continuous(expand=c(0,0),labels=percent)+
+      guides(fill=guide_legend(nrow = 1))+
+      theme_barcharts()+
+      
+      geom_text(data=portfolio1,
+                aes(x = Name, y = 1),
+                label = perc(portfolio1$PortWeightEQYlvl),
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
+      xlab("")+
+      ylab("TechShare")+
+      coord_flip()+
+      theme(legend.position = "bottom",legend.title = element_blank(),
+            plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
+      annotation_custom(
+        grob = textGrob(label = "Weight", 
+                        gp=gpar(fontsize=8.5),
+                        hjust = 0),
+        xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.05)
+    
+    
+    gt <- ggplot_gtable(ggplot_build(PortPlot))
+    gt$layout$clip[gt$layout$name == "panel"] <- "off"
+    
+    dev.off()
+    grid.draw(gt)
+    
+    ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
+           bg="transparent",height=6,width=11,dpi=ppi)
+  return(TRUE)
+  } else {
     print("No Carbon Budget data to plot.")
+    return(FALSE)
   }
   
 }
