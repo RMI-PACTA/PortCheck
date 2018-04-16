@@ -212,7 +212,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(1:10,326)){
+for (i in c(1:20,326)){
 
   ### Specify the Names from the Test List
   
@@ -343,7 +343,7 @@ for (i in c(1:10,326)){
           Oilshare("39", 10, "EQ")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          carboninout("40", 10, "EQ")
+          flag <- carboninout("40", 20, "EQ")
         }
       }
       

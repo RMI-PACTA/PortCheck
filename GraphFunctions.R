@@ -185,7 +185,7 @@ CAReport <- function(){
   
   # Replace Insurer Name
   text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
-  text$text <- gsub("SizeofPortfolio",reportdata$SizeofPortfolio,text$text)
+  text$text <- gsub("SizeofPortfolio",paste0("$",reportdata$SizeofPortfolio),text$text)
   text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
   text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   text$text <- gsub("AssetClass",reportdata$AssetClass,text$text)
@@ -967,7 +967,7 @@ exposure_summary <- function(plotnumber,ChartType){
   
   plot <- ggplot(Portfolio) +
     geom_bar(aes(x = Technology, y = Exposure, fill = Exposure >= 0), stat = "identity")+
-    scale_fill_manual(values=c(area_6,area_2))+
+    scale_fill_manual(values=c("FALSE" = area_6, "TRUE" = area_2))+
     geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
