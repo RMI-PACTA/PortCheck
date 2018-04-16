@@ -1849,11 +1849,11 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   ccap <- subset(ccap,select= c("EQY_FUND_TICKER","TotalCarbonBudget","OutsideCarbonBudget","InsideCarbonBudget" ))
   
   colnames(ccap) <- c("EQY_FUND_TICKER","TotalCarbonBudget","Outside Carbon Budget","Inside Carbon Budget")
-  ccap$Inside.Carbon.Budget <- ccap$Inside.Carbon.Budget/ccap$TotalCarbonBudget
-  ccap$Outside.Carbon.Budget <- ccap$Outside.Carbon.Budget/ccap$TotalCarbonBudget
+  ccap$Inside.Carbon.Budget <- ccap$`Inside Carbon Budget`/ccap$TotalCarbonBudget
+  ccap$Outside.Carbon.Budget <- ccap$`Outside Carbon Budget`/ccap$TotalCarbonBudget
   
   portfolio <- left_join(CompProdSS,ccap, by="EQY_FUND_TICKER") %>%
-    select(Name,PortWeightEQYlvl,Inside.Carbon.Budget,Outside.Carbon.Budget)
+    select(Name,PortWeightEQYlvl,`Inside Carbon Budget`,`Outside Carbon Budget`)
   portfolio1 <- melt(portfolio, id.vars = c( "Name","PortWeightEQYlvl"), variable.name = "CarbonBudget")
   portfolio1 <- subset(portfolio1, !is.na(value))
   
