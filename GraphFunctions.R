@@ -1767,7 +1767,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # }
   perc <- function(x, digits = 1, format = "f", ...) {
     x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-    x[x<10] <- paste0("  ",x[x<10])
+    
     return(x)
   }
   
@@ -1870,7 +1870,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   
   perc <- function(x, digits = 1, format = "f", ...) {
     x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-    x[x<10] <- paste0("  ",x[x<10])
+    
     return(x)
   }
   portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
