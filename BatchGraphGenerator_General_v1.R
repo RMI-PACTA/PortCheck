@@ -226,6 +226,7 @@ for (i in c(1:20,326)){
   PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
+  HasCarbonBudget <- FALSE #Set later
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -343,7 +344,7 @@ for (i in c(1:20,326)){
           Oilshare("39", 10, "EQ")
         }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          flag <- carboninout("40", 20, "EQ")
+          HasCarbonBudget <- carboninout("40", 20, "EQ")
         }
       }
       
