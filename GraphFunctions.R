@@ -322,7 +322,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 #----------- Distribution Chart ------------- #
 
 distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
-                               Title, Labels, LineHighl, LineLabels, LineColors, BarColors){
+                               portfolio_label, Title, Labels, BarColors){
 
   df <- df %>% gather(key=Metric, value=Value, -c(ID.COLS))
   
@@ -359,7 +359,10 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     ylab(Title)+
     xlab(paste0("All CA Insurer ",
                 ifelse(ChartType == "EQ", "Equity", "Bond"),
-                " Portfolios"))
+                " Portfolios"))+
+    annotate("label", x = x_coord, y = ylim,
+             label = portfolio_label,
+             hjust = 1.05, vjust = 1.05, size = textsize*(5/14))
   
   arrowlength <- ylimval/5
   
@@ -970,7 +973,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio to 2Â° Market Benchmark")+
+    ylab("Alignment of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -999,7 +1002,10 @@ analysed_summary <- function(plotnumber){
   over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
   
   over$Asset.Type <- plyr::revalue(over$Asset.Type, 
-                                   c("Bonds"="Bond Portfolio", "Equity" = "Equity Portfolio", "Other"="Other Holdings"),warn_missing = F)
+                                   c("Bonds"="Bond Portfolio", "Equity" = "Equity Portfolio", "Other"="Other Holdings"), warn_missing = F)
+  
+  portfolio_label = paste0("Percent Analyzed: ", 
+                           round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
   comprss <- function(tx) { 
     tx[is.na(tx)] <- 0
@@ -1018,6 +1024,11 @@ analysed_summary <- function(plotnumber){
     theme_barcharts() + 
     theme(legend.position = "bottom")
   
+  plot <- plot+
+    annotate("label", x = "Other Holdings", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label,
+             hjust = .5, vjust = 1, size = textsize*(5/14))
+  
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
@@ -1028,10 +1039,13 @@ analysed_summary <- function(plotnumber){
 
 Risk_Distribution <- function(plotnumber, ChartType){
   Title <- "Percent of Bond Portfolio Value"
-  MetricCol <- c("Risk3", "Risk2", "Risk1")
+  MetricCol <- c("Risk1", "Risk2", "Risk3")
   
   if(ChartType == "CB") {
     RiskData <- Moodys
+  } else {
+    print("No Data.")
+    return()
   }
   
   RiskData$MoodysRiskLvl[is.na(RiskData$MoodysRiskLvl)] <- "5"
@@ -1054,13 +1068,18 @@ Risk_Distribution <- function(plotnumber, ChartType){
   metaport <- subset(metaport, select = c(ID.COLS,MetricCol))
   df <- rbind(df,metaport)
   
-  BarColors <- c(LowRisk, MedRisk, HighRisk)
+  BarColors <- c(HighRisk, MedRisk, LowRisk)
   names(BarColors) <- c(MetricCol)
-  Labels <- c("Emerging Moderate", "Emerging Elevated","Immediate Elevated")
+  Labels <- c("Immediate Elevated", "Emerging Elevated", "Emerging Moderate")
   ylim = .5
   
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
-                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors)
+  portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Bond","Equity")," Portfolio\n",
+                           "Immediate Elevated: ", round(sum(filter(df, PortName == PortName)$Risk1),1), "%\n",
+                           "Emerging Elevated: ", round(sum(filter(df, PortName == PortName)$Risk2),1), "%\n",
+                           "Emerging Moderate: ", round(sum(filter(df, PortName == PortName)$Risk3),1), "%")
+  
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim, 
+                             portfolio_label, Title, Labels, BarColors)
   
   if(PrintPlot){print(plot)}
   
@@ -1069,11 +1088,13 @@ Risk_Distribution <- function(plotnumber, ChartType){
 }
 
 Fossil_Distribution <- function(plotnumber, ChartType){
-  Title <- "Percent of Portfolio Exposed to Fossil Fuels"
+  Title <- paste0("Percent of ", ifelse(ChartType=="CB","Bond","Equity")," Portfolio Value")
   if (ChartType == "EQ"){
     Batch <- EQBatchTest
+    ylim = 1
   }else if (ChartType == "CB"){
     Batch <- CBBatchTest
+    ylim = .25
   }
   
   #Tag Target portfolio, benchmark
@@ -1086,15 +1107,15 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   names(BarColors) <- c(MetricCol)
   Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
-
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, 1,
-                     Title, Labels, LineHighl, LineLabels, LineColors, BarColors) +
+  portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Bond","Equity")," Portfolio\n",
+                           "Fossil Fuel Share: ", round(sum(filter(df,PortName==PortName)$CarstenMetric_Port),1), "%")
+  
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
+                     portfolio_label, Title, Labels, BarColors) +
     theme(legend.position = "none")
 
-    
-  # print(plot)
-  # png(filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png')
-  
+
+  if(PrintPlot){print(plot)}
   ggsave(plot=plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
          height=3,width=7,dpi=ppi, bg="transparent")
   
@@ -1126,7 +1147,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Portfoliomix$Classification <- "Portfolio"
     Portfoliomix$Name <- "Your Portfolio"
     Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","WtProduction"))
-    Portfoliomix$WtProduction <- Portfoliomix$WtProduction / sum(Portfoliomix$WtProduction)
+    Portfoliomix$WtProduction <- Portfoliomix$WtProduction
     colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
     
     # Add 2D Target (Global Market under 2D Scenario)
@@ -1134,7 +1155,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Targetmix$Classification <- "Portfolio"
     Targetmix$Name<-GT["X2Target"][[1]]
     Targetmix <- subset(Targetmix, select =c("Name","Classification","Technology","Scen.WtProduction"))
-    Targetmix$Scen.WtProduction <- Targetmix$Scen.WtProduction / sum(Targetmix$Scen.WtProduction)
+    Targetmix$Scen.WtProduction <- Targetmix$Scen.WtProduction
     colnames(Targetmix) <- c("Name","Classification","Technology","TechShare")
     
     # Add Benchmark / Global Market
@@ -1142,14 +1163,14 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Marketmix$Classification <- "Portfolio"
     Marketmix$Name <- ifelse(ChartType=="CB","Bond Universe","Listed Equity Market")
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
-    Marketmix$WtProduction <- Marketmix$WtProduction / sum(Marketmix$WtProduction)
+    Marketmix$WtProduction <- Marketmix$WtProduction
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
 
     PortfolioData <- rbind(Marketmix, Targetmix, Portfoliomix)
 
     # Percentage share of each technology for each company in the portfolio
-    Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","CompanyLvlSecProd","PortWeightEQYlvl"))
-    Companies$TechShare <- (Companies$CompanyLvlProd/Companies$CompanyLvlSecProd)
+    Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","PortWeightEQYlvl"))
+    Companies$TechShare <- Companies$CompanyLvlProd
     Companies$Classification <- "Companies"
     Companies$Name <- paste0(substr(Companies$Name, 1, 15),"...")
     Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
@@ -1159,21 +1180,21 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     if (SectorToPlot == "Power"){  
       techorder <- technology_order[1:5]
       
-      tech_labels <- c(paste0("% ", GT["T_RenewablesCap"][[1]]),paste0("% ", GT["T_HydroCap"][[1]]),
-                      paste0("% ", GT["T_NuclearCap"][[1]]),paste0("% ", GT["T_GasCap"][[1]]),
-                      paste0("% ", GT["T_CoalCap"][[1]]))
+      tech_labels <- c(GT["T_RenewablesCap"][[1]],GT["T_HydroCap"][[1]],
+                      GT["T_NuclearCap"][[1]],GT["T_GasCap"][[1]],
+                      GT["T_CoalCap"][[1]])
       colors <- as.vector(ColourPalette$Colours[1:5])
     }
     
     if (SectorToPlot == "Automotive"){
       techorder <- technology_order[6:8]
-      tech_labels <- c(paste0("% ", GT["T_Electric"][[1]]),paste0("% ", GT["T_Hybrid"][[1]]),paste0("% ", GT["T_ICE"][[1]]))
+      tech_labels <- c(GT["T_Electric"][[1]],GT["T_Hybrid"][[1]],GT["T_ICE"][[1]])
       colors <- as.vector(ColourPalette$Colours[6:8])
     }
     
     if (SectorToPlot == "Fossil Fuels") {
       techorder <- technology_order[9:11]
-      tech_labels <- c(paste0("% ", GT["T_GasProd"][[1]]),paste0("% ", GT["T_OilProd"][[1]]),paste0("% ", GT["T_CoalProd"][[1]]))
+      tech_labels <- c(GT["T_GasProd"][[1]],GT["T_OilProd"][[1]],GT["T_CoalProd"][[1]])
       colors <- as.vector(ColourPalette$Colours[9:11])
     }
   
