@@ -1581,7 +1581,7 @@ Graph246 <- function(plotnumber, TechToPlot){
                         values=unique(as.character(dftargets$colour)))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
 
-      scale_y_continuous(name="Ratio of Currently Planned Production \nTo Production Levels Specified by 2D Scenario",breaks = seq(-2, 2, 1))+
+      scale_y_continuous(name="Ratio of Planned Production to 2D Production",breaks = seq(-2, 2, 1))+
 
       coord_cartesian(ylim=c(a,2))+
       theme_bw()+
@@ -1605,7 +1605,7 @@ Graph246 <- function(plotnumber, TechToPlot){
                         values=(unique(as.character(dftargets$colour))))+
       scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
 
-      scale_y_continuous(name="Ratio of Currently Planned Production \nTo Production Levels Specified by 2D Scenario",breaks = seq(0, 1, 0.25))+
+      scale_y_continuous(name="Ratio of Planned Production to 2D Production",breaks = seq(0, 1, 0.25))+
 
       coord_cartesian(ylim=c(0,1))+
       theme_bw()+
@@ -1709,9 +1709,9 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   levels(OilCompanies$Resource.Type)[levels(OilCompanies$Resource.Type)=="-"] <- "Other & Unknown"
   
   
-  techorder <- c("Conventional Oil","Heavy Oil","Oil Sands","Unconventional Oil","Other & Unknown")
-  tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
-                   paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
+  techorder <- c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown")
+  #tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
+  #                 paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
   colors <- c("#72755e","#8d9176","#a5a792", "#bcbeae","#d3d5ca")
   
   
@@ -1737,20 +1737,22 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   names(tech_labels) <- techorder
   
   scaleFUN <- function(x) {
-    x <- sprintf("%.1f", x)
-    x<-as.numeric(x)
-    x[x<10] <- paste0("  ",x[x<10])
+    x <- round(x, digits = 1)
+    #x<-as.numeric(x)
+    #x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }
+  
+  OilCompanies$Name <- paste0(substr(OilCompanies$Name, 1, 15),"...")
   
   
   
   PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
-                                            fill=factor(Oil.Type,levels=c("Other & Unknown","Unconventional Oil","Oil Sands","Heavy Oil","Conventional Oil"))),
+                                            fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
                      show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
     geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    scale_fill_manual(values=colors,labels = paste(tech_labels, " "), breaks = (techorder))+
+    scale_fill_manual(values=colors,labels = rev(paste(techorder, " ")), breaks = rev(techorder))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
@@ -1766,8 +1768,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
           plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
     guides(fill = guide_legend(ncol = 5,keywidth=1))+
     annotation_custom(
-      grob = textGrob(label = "Weight", hjust = 0,gp=gpar(fontsize=8.5)),
-      xmin = 10.5, xmax = 11, ymin = 1, ymax = 1.1)
+      grob = textGrob(label = "Weight", hjust =0,gp=gpar(fontsize=8.5)),
+      xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.1)
   
   
   
@@ -1844,6 +1846,8 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }  
+  portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
+  
   PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
                                           fill=factor(CarbonBudget,levels=c("Outside.Carbon.Budget","Inside.Carbon.Budget" ))),
                      show.guide = TRUE)+
@@ -1867,7 +1871,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grob = textGrob(label = "Weight", 
                       gp=gpar(fontsize=8.5),
                       hjust = 0),
-      xmin = 10.5, xmax = 11, ymin = 1, ymax = 1.1)
+      xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.1)
   
   
   gt <- ggplot_gtable(ggplot_build(PortPlot))
