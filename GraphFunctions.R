@@ -1736,10 +1736,15 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   names(colors) <- techorder
   names(tech_labels) <- techorder
   
-  scaleFUN <- function(x) {
-    x <- round(x, digits = 1)
-    #x<-as.numeric(x)
-    #x[x<10] <- paste0("  ",x[x<10])
+  # scaleFUN <- function(x) {
+  #   x <- round(x, digits = 1)
+  #   x<-as.numeric(x)
+  #   x[x<10] <- paste0("  ",x[x<10])
+  #   return(x)
+  # }
+  perc <- function(x, digits = 1, format = "f", ...) {
+    x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
+    x[x<10] <- paste0("  ",x[x<10])
     return(x)
   }
   
@@ -1759,7 +1764,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
     geom_text(data=OilCompanies,
               aes(x = Name, y = 1),
-              label = paste0(scaleFUN(100*(OilCompanies$PortWeightEQYlvl)),"%"),
+              label = perc(OilCompanies$PortWeightEQYlvl),
               hjust = -1, color = textcolor, size=textsize*(5/14))+
     xlab("")+
     ylab("TechShare")+
@@ -1840,12 +1845,11 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   
   names(colors) <- carbonorder
   
-  scaleFUN <- function(x) {
-    x <- sprintf("%.1f", x)
-    x<-as.numeric(x)
+  perc <- function(x, digits = 1, format = "f", ...) {
+    x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
     x[x<10] <- paste0("  ",x[x<10])
     return(x)
-  }  
+  }
   portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
   
   PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
@@ -1860,7 +1864,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     
     geom_text(data=portfolio1,
               aes(x = Name, y = 1),
-              label = paste0(scaleFUN(100*(portfolio1$PortWeightEQYlvl)),"%"),
+              label = perc(portfolio1$PortWeightEQYlvl),
               hjust = -1, color = textcolor, size=textsize*(5/14))+
     xlab("")+
     ylab("TechShare")+
