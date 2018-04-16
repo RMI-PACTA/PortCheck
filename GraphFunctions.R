@@ -74,6 +74,7 @@ CAReportData <- function(){
            c("HasAuto",HasAuto),
            c("HasOG",HasOG),
            c("HasCoal",HasCoal),
+           c("HasCarbonBudget",HasCarbonBudget),
            c("HasPowerCB",HasPowerCB),
            c("HasAutoCB",HasAutoCB),
            c("HasOGCB",HasOGCB),
@@ -174,6 +175,9 @@ CAReport <- function(){
     }
     if(!HasOGEQ){
       text <- removetextlines("FossilFuelSector_EQ")
+    }
+    if(!HasCarbonBudget){
+      text <- removetextlines("CarbonBudget")
     }
   }
   
