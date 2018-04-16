@@ -1710,8 +1710,10 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   
   
   techorder <- c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown")
-  #tech_labels <- c(paste0("% ", GT["Conv_Oil"][[1]]),paste0("% ", GT["Heavy_Oil"][[1]]),paste0("% ", GT["Oil_Sands"][[1]]),
-  #                 paste0("% ", GT["Unconv_Oil"][[1]]), paste0("% ", GT["Other_Oil"][[1]]))
+  tech_labels <- c(paste0(" ", GT["Oil_Sands"][[1]]),paste0(" ",GT["Heavy_Oil"][[1]]), paste0(" ", GT["Conv_Oil"][[1]]),
+                   paste0(" ", GT["Unconv_Oil"][[1]]),paste0(" ", GT["Other_Oil"][[1]]))
+    
+
   colors <- c("#72755e","#8d9176","#a5a792", "#bcbeae","#d3d5ca")
   
   
@@ -1734,7 +1736,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
   
   names(colors) <- techorder
-  #names(tech_labels) <- techorder
+  names(tech_labels) <- techorder
   
   # scaleFUN <- function(x) {
   #   x <- round(x, digits = 1)
@@ -1757,7 +1759,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
                      show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
     geom_hline(yintercept = c(.25,.50,.75), color="white")+
-    scale_fill_manual(values=colors,labels = rev(paste(techorder, " ")), breaks = rev(techorder))+
+    scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()+
