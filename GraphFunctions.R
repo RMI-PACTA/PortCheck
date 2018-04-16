@@ -189,7 +189,7 @@ CAReport <- function(){
   
   # Replace Insurer Name
   text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
-  text$text <- gsub("SizeofPortfolio",paste0("$",reportdata$SizeofPortfolio),text$text)
+  text$text <- gsub("SizeofPortfolio",paste0("\\\\$",reportdata$SizeofPortfolio),text$text)
   text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
   text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
   text$text <- gsub("AssetClass",reportdata$AssetClass,text$text)
@@ -1848,7 +1848,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   ccap$InsideCarbonBudget <- ccap$TotalCarbonBudget - ccap$OutsideCarbonBudget
   ccap <- subset(ccap,select= c("EQY_FUND_TICKER","TotalCarbonBudget","OutsideCarbonBudget","InsideCarbonBudget" ))
   
-  colnames(ccap) <- c("EQY_FUND_TICKER","TotalCarbonBudget","Outside.Carbon.Budget","Inside.Carbon.Budget")
+  colnames(ccap) <- c("EQY_FUND_TICKER","TotalCarbonBudget","Outside Carbon Budget","Inside Carbon Budget")
   ccap$Inside.Carbon.Budget <- ccap$Inside.Carbon.Budget/ccap$TotalCarbonBudget
   ccap$Outside.Carbon.Budget <- ccap$Outside.Carbon.Budget/ccap$TotalCarbonBudget
   
@@ -1858,7 +1858,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   portfolio1 <- subset(portfolio1, !is.na(value))
   
   if (nrow(portfolio1)>1) {
-    carbonorder <- c("Inside.Carbon.Budget","Outside.Carbon.Budget")
+    carbonorder <- c("Inside Carbon Budget","Outside Carbon Budget")
     
     colors <- c(OilProdColour,area_6)
     
@@ -1883,7 +1883,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
     
     PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
-                                            fill=factor(CarbonBudget,levels=c("Outside.Carbon.Budget","Inside.Carbon.Budget" ))),
+                                            fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
       geom_bar(stat = "identity", position = "fill", width = .6)+
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
@@ -1915,7 +1915,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     grid.draw(gt)
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-           bg="transparent",height=6,width=11,dpi=ppi)
+           bg="transparent",height=6.5,width=11,dpi=ppi)
   return(TRUE)
   } else {
     print("No Carbon Budget data to plot.")
