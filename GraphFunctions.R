@@ -1734,7 +1734,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
   
   names(colors) <- techorder
-  names(tech_labels) <- techorder
+  #names(tech_labels) <- techorder
   
   # scaleFUN <- function(x) {
   #   x <- round(x, digits = 1)
