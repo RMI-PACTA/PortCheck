@@ -322,6 +322,26 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
         text=element_text(family="Arial")
   )
 }
+                           
+theme_246 <- function() {
+  theme_minimal(base_size=11, base_family="Calibri") + 
+    theme(
+      panel.background  = element_rect(fill="white", color="white"),
+      panel.border = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      plot.background = element_blank(),
+      plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+      axis.line.x = element_blank(),
+      axis.line.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      axis.text = element_text(size=11.5, color="#3D3D3C"),
+      axis.title = element_text(size=11, color="#3D3D3C"),
+      plot.title = element_text(size = 12, 
+                                hjust = 0))
+}                             
+                           
+                           
 
 #----------- Distribution Chart ------------- #
 
@@ -978,7 +998,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio to 2� Market Benchmark")+
+    ylab("Alignment of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1403,290 +1423,154 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 # ------------ 246 Chart -------------------- #
-Inputs246 <- function(TechToPlot){
-  #EQ
-  Combin1 <- EQCombin
-  if (nrow(Combin1)>0){Combin1$Label <- "Equity"}
+Graph246 <- function(TechToPlot){
+### EQUITY PRODUCTION
   Aldprod1 <- EQALDAggProd
-  Combin1<- merge(Combin1,Aldprod1, by =c("PortName","Technology","Year"))
-  Combin1<- Combin1 %>%
-    filter(Scenario.y %in% Scenariochoose)
+  Aldprod1$Asset.Type <- "Equity"
+  EQCombin <- EQCombin
   
-  
-  #CB
-  Combin2 <- CBCombin
-  if (nrow(Combin2)>0){Combin2$Label <- "Bond"}
+  #eq.meta <- port.eq %>% filter(PortName=="MetaPort")
+  #eq.market <- port.eq %>% filter(PortName=="Listed Market")
+
+### BOND PRODUCTION
   Aldprod2 <- CBALDAggProd
-  Combin2<- merge(Combin2,Aldprod2, by =c("PortName","Technology","Year"))
-  Combin2<- Combin2 %>%
-    filter(Scenario.y %in% Scenariochoose)
-  ### Function to calculate the % Build Out over 5 years
-  ### data frame needs Year, Prod and TargetProd and a label for the Chart
-  BuildOutCalc <- function(df, TechToPlot){
-    Tech <- c("RenewablesCap","HydroCap","NuclearCap",
-              "Coal","CoalCap","Gas","GasCap","Oil","OilCap")
-    
-    if (TechToPlot %in% Tech){
-      names(df)[names(df)== "AnnualvalIEAtech"]<-"Prod"
-      df$Scenario <- as.factor(df$Scenario)
-      df<- df %>%
-        group_by(Scenario) %>%
-        arrange(Year) %>%
-        mutate(Diff=(df[which(df$Year == (Startyear+5)&df$Scenario=="450S"),]$Prod-df[which(df$Year == Startyear&df$Scenario=="450S"),]$Prod),
-               value=Prod- first(Prod))
-      
-      df<-as.data.frame(df)
-      df$Diff<-ifelse(df$Diff < 0,-df$Diff,df$Diff)
-      
-      df$Plan.Pct.Build.Out<-df$value/df$Diff
-      names(df)[names(df)=="Scenario"]<-"Label"
-      df$Prod <- df$TargetProd <- NULL
-      
-    } else if (TechToPlot =="Electric"){
-      Year <- rep(2018:2023,3)
-      Plan.Pct.Build.Out <- c(0,0.2,0.4,0.6,0.8,1,0,0.1,0.2,0.3,0.4,0.5,0,0.15,0.3,0.45,0.6,0.75)
-      Label <- c(rep(c("450S"),6),rep(c("CPS"),6),rep(c("NPS"),6))
-      df <- data.frame(Year, Plan.Pct.Build.Out, Label)
-      
-    }else if (TechToPlot =="ICE"){
-      Year <- rep(2018:2023,3)
-      Plan.Pct.Build.Out <- c(0,-0.2,-0.4,-0.6,-0.8,-1,
-                              0,0,0,0,0,0,
-                              0,-0.12,-0.24,-0.36,-0.48,-0.6)
-      Label <- c(rep(c("450S"),6),rep(c("CPS"),6),rep(c("NPS"),6))
-      df <- data.frame(Year, Plan.Pct.Build.Out, Label)
-    }
-    return(df)
-  }
-  #
-  ### Production Inputs - normalised to the start year
-  
-  if ((nrow(Combin1) >0) &  (nrow(Combin2) >0)){
-    Production1 <- subset(Combin1, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
-    Production1 <- subset (Production1, select=c("Year","Plan.Pct.Build.Out","Label"))
-    Production2 <- subset(Combin2, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
-    Production2 <- subset (Production2, select=c("Year","Plan.Pct.Build.Out","Label"))
-    
-    Production <- as.data.frame(rbind(Production1,Production2))
-  } else if (((nrow(Combin1) ==0) &  (nrow(Combin2) >0))){
-    Production <- subset(Combin2, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
-    Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out","Label"))
-    
-    
-  } else if(((nrow(Combin2) ==0) &  (nrow(Combin1) >0))){
-    Production <- subset(Combin1, Technology %in% TechToPlot & Year %in% Startyear:(Startyear+5))
-    Production <- subset (Production, select=c("Year","Plan.Pct.Build.Out","Label"))
-    
-    
-  }
-  
-  
-  
-  ## Stock Market Build Out
-  
-  MarketBuildOut1 <- subset(Aldprod1, InvestorName == "Market"& Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
-  MarketBuildOut1 <- subset(MarketBuildOut1,select = c("Year","Plan.Pct.Build.Out"))
-  MarketBuildOut1$Label <- "Stock Market"
-  MarketBuildOut2 <- subset(Aldprod2, InvestorName == "Market"& Technology %in% TechToPlot  & Scenario %in% Scenariochoose & Year %in% Startyear:(Startyear+5))
-  MarketBuildOut2 <- subset(MarketBuildOut2,select = c("Year","Plan.Pct.Build.Out"))
-  MarketBuildOut2$Label <- "Debt Market"
-  
-  ### Inputs to the 246 chart.
-  
-  IEATargets246 <- subset(AllIEATargets, BenchmarkRegion == "Global" & Year %in% Startyear:(Startyear+5)  &
-                            Scenario %in% c("450S","NPS","CPS"), select = c("Sector","Technology","Scenario","Year","AnnualvalIEAtech"))
-  
-  IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)
-  IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
-  names(IEATargetsRef)[names(IEATargetsRef)=="AnnualvalIEAtech"] <- "TargetProd"
-  IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
-  
-  IEATargets <- BuildOutCalc(IEATargets,TechToPlot)
-  
-  IEATargets <- subset(IEATargets, select = c("Label","Year","Plan.Pct.Build.Out"))
-  
-  
-  df <- rbind(Production,MarketBuildOut1,MarketBuildOut2,IEATargets)
-  
-  
-  return(df)
-}
+  Aldprod2$Asset.Type <- "Bonds"
+  CBCombin <- CBCombin
+  #bd.meta <- port.bd %>% filter(PortName=="MetaPort")
+  #bd.market <- port.bd %>% filter(PortName=="Bond Universe")
 
-Graph246 <- function(plotnumber, TechToPlot){
-  
-  
-  # BatchTest1 <- EQBatchTest
-  # Combin1 <- EQCombin
-  LinesToPlot <- c("Equity","Bond","Stock Market","Debt Market")
-  # BatchTest2 <- CBBatchTest
-  # Combin2 <- CBCombin
-  
-  
-  # Check whether the tech is a green or brown technology
+### PORT PRODUCTION
+  ALD <- bind_rows(Aldprod1, Aldprod2)
+  table(ALD$Asset.Type, useNA="always")
+  ALD <- subset(ALD, Aggregation=="GlobalAggregate" & BenchmarkRegion=="GlobalAggregate" & Scenario %in% c("450S","NPS","CPS"))
+  ALD$Technology <- factor(ALD$Technology, levels=tech.order, ordered=TRUE)
+  ALD$Tech.Type <- ifelse(ALD$Technology %in% c("Hybrid","Electric","NuclearCap", "RenewablesCap","HydroCap"), 
+                         "Low Carbon", "High Carbon")
+  ALD$Scenario <- factor(ALD$Scenario, levels=c("450S","NPS","CPS"), ordered=TRUE)
+
+### Separate into CurrentPlans and Scenario, get into same column headers
+
+  ALD.cp <- ALD %>% select(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Year, Technology, Tech.Type, WtProduction) %>% distinct() %>%
+  rename(Production=WtProduction) %>% mutate(Line.Type="CurrentPlan")
+
+  ALD.sc <- ALD %>% select(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Year, Technology, Tech.Type, Scen.WtProduction) %>% 
+  rename(Production=Scen.WtProduction) %>% mutate(Line.Type="Scenario")
+
+### Calculate GROWTH
+
+  ALD2 <- bind_rows(ALD.cp, ALD.sc)
+  ALD2 <- ALD2 %>% ungroup() %>% 
+    arrange(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Line.Type, Tech.Type, Year) %>%
+    group_by(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Line.Type, Tech.Type) %>%
+    mutate(Growth=Production/first(Production))
+
+
+### IDENTIFY LIMITS of the Y axis
+
+  MIN.Y <- -2
+  MAX.Y <- 2.5
+
+  ylims <- ALD2 %>% filter(PortName=="MetaPort" | PortName=="Listed Market" | PortName=="Bond Universe") %>% 
+    group_by(Technology, Tech.Type, Scenario) %>%
+    summarise(min=min(Growth), max=max(Growth))
+
+### SEPARATE AGAIN
+
+  ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
+  ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
+
+### GET SCENARIOS INTO RIBBON FORMAT
+
+  ALD.sc.wide <- ALD.sc %>% ungroup() %>% select(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year, Growth) %>%
+    spread(key=Scenario, value=Growth)
+
+  ALD.sc.wide <- ALD.sc.wide %>% 
+    arrange(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year) %>%
+    group_by(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type) %>%
+    mutate(Green=ifelse(last(`450S`) > last(CPS), 1, 0))
+
+  ALD.sc.wide <- ALD.sc.wide %>% mutate(Line1=ifelse(Green == 1, CPS, `450S`),
+                                          Line2=NPS,
+                                          Line3=ifelse(Green == 1 , `450S`, CPS),
+                                          Line4=MAX.Y)
+
+  ALD.sc.tall <- ALD.sc.wide %>% select(-`450S`, -NPS, -CPS) %>% gather(key="Target", value="Value", 
+                                                                        -Asset.Type,-InvestorName, -PortName, -Type,-Aggregation,-Sector,-BenchmarkRegion,-Technology,-Tech.Type, -Green, -Line.Type,-Year)
+
+
+
+  ALD.sc.tall <- ALD.sc.tall %>% group_by(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Green, Year) %>%
+    mutate(lower=lag(Value),
+           lower=ifelse(is.na(lower), MIN.Y, lower))
+
   GoodBad <- GreenBrown(TechToPlot)
-  
-  df <- Inputs246(TechToPlot)
-  
-  IEATargetMax <- data.frame(Year = Startyear:(Startyear+5))
-  IEATargetMax$Plan.Pct.Build.Out <- 4
-  IEATargetMax$Label<- "MaxValue"
-  
-  
-  df <- rbind(df,IEATargetMax)
-  
-  dfwide <- dcast(df,Year~Label, value.var="Plan.Pct.Build.Out")
-  
-  
-  if (GoodBad == "Green"){
-    dfwide$Line1 <- dfwide$CPS
-    dfwide$Line2 <- dfwide$NPS#-dfwide$CPS
-    dfwide$Line3 <- dfwide$`450S`#-dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue#-dfwide$`450S`#(dfwide$`450S`+dfwide$NPS+dfwide$CPS)
-    
-    # dfwide$Line1 <- dfwide$`450S`
-    # dfwide$Line2 <- dfwide$NPS - dfwide$`450S`
-    # dfwide$Line3 <- dfwide$CPS - dfwide$NPS
-    # dfwide$Line4 <- dfwide$MaxValue - dfwide$CPS
-    lineorder<- c("Line1","Line2","Line3","Line4")
-    Palette <- c(area_6,area_4_6,area_2_4,area_2)
-    AreaNames <-  c( "> 6°C","4-6°C","2-4°C","< 2°C")
-  }else if (GoodBad == "Brown"){
-    dfwide$Line1 <- dfwide$`450S`
-    dfwide$Line2 <- dfwide$NPS #- dfwide$`450S`
-    dfwide$Line3 <- dfwide$CPS #- dfwide$NPS
-    dfwide$Line4 <- dfwide$MaxValue #- dfwide$`450S`
-    
-    Palette <- c(area_2,area_2_4,area_4_6,area_6)
-    AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
-    lineorder <-c("Line4","Line3","Line2","Line1")
-  } 
-  
-  dftargets <- subset(dfwide, select = c("Year","Line1","Line2","Line3","Line4"))
-  dftargets <- melt(dftargets, id.vars =  "Year", variable.name = "Target")
-  dftar <- melt(dfwide, id.vars =  "Year", variable.name = "Lab")
-  # # dftargets <- rev(dftargets)
-  # 
-  # # AreaNames <-  c( "< 2°C","2-4°C","4-6°C","> 6°C")
-  # # Palette <- c(DarkGreen,LightGreen,LightRed,DarkRed)
-  #brown lineorder <-c("Line4","Line3","Line2","Line1")
-  #lineorder <-c("Line1","Line2","Line3","Line4")
-  colourdf <- data.frame(colour=Palette, Target =lineorder, Labels = AreaNames)
-  # 
-  # #dftargets$Target<-as.factor(dftargets$Target, lestr
-  combined <- sort(union(levels(dftargets$Target), levels(colourdf$Target)))
-  dftargets <- merge(dftargets, colourdf, by= "Target")
-  dftargets$Target<- factor(dftargets$Target,levels = lineorder, ordered=TRUE)
-  # 
-  # 
-  # maxval <- max(dftargets$value) +0.1
-  # minval <- min(dftargets$value) -0.1
-  # 
-  LineColours <- c(eq_line, cb_line,peer_group,peer_group)
-  
-  
-  year_lab = Startyear
-  LineVector <- setNames(LineColours,LinesToPlot)
-  
-  
-  
-  #ylabel <- "Normalized Built Out"
-  
-  #if(('Portfolio' %in% colnames(dfwide)) == TRUE)  {
-  
+  PORTFOLIO <- c("MetaPort")
+  ALD.sc.tall<- as.data.frame(ALD.sc.tall)
+  ALD.cp <- as.data.frame(ALD.cp)
   if (GoodBad == "Brown"){
-    dftargets$lower <-c(rep(-2.4,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
-
-    a<- min(dftar$value)
-    if (a< -2){a<- -2}
-
-    outputplot <- ggplot(data = dftargets)+
-      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
-      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=2)+   # Market
-      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=2)+ 
-      scale_color_manual(name="",values = c("Debt Market"=cb_line,"Stock Market"=eq_line))+
-      scale_fill_manual(labels=unique(dftargets$Labels),
-                        values=unique(as.character(dftargets$colour)))+
-      scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-
-      scale_y_continuous(name="Ratio of Planned Production to 2D Production",breaks = seq(-2, 2, 1))+
-
-      coord_cartesian(ylim=c(a,2))+
-      theme_bw()+
-      theme(panel.grid.major.y = element_blank(),
-            panel.grid.minor = element_blank(),
-            #panel.border = element_blank(),
-            panel.grid = element_blank(),
-            axis.ticks.y = element_blank(),
-            #axis.line = element_line(),
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"),
-            axis.ticks = element_blank())
-  } else if (GoodBad =="Green"){
-    dftargets$lower <-c(rep(-2,6),dfwide$Line1,dfwide$Line2,dfwide$Line3)
-    outputplot <- ggplot(data = dftargets)+
-      geom_ribbon(aes(ymin=lower, ymax=value, x=Year,fill=Target),alpha=0.6)+
-      geom_line(aes(x=dftar[which(dftar$Lab=="Debt Market"),]$Year,y=dftar[which(dftar$Lab=="Debt Market"),]$value,colour =  "Debt Market"), data=subset(dftar,Lab=="Debt Market"), size = linesize,linetype=2)+   # Market
-      geom_line(aes(x=dftar[which(dftar$Lab=="Stock Market"),]$Year,y=dftar[which(dftar$Lab=="Stock Market"),]$value,colour =  "Stock Market"), data=subset(dftar,Lab=="Stock Market"), size = linesize,linetype=2)+   # Market
-      scale_color_manual(name="",values = c("Debt Market"=cb_line,"Stock Market"=eq_line))+
-      scale_fill_manual(labels=(unique(dftargets$Labels)),
-                        values=(unique(as.character(dftargets$colour))))+
-      scale_x_continuous(expand=c(0,0), limits=c(2018,2023)) +
-
-      scale_y_continuous(name="Ratio of Planned Production to 2D Production",breaks = seq(0, 1, 0.25))+
-
-      coord_cartesian(ylim=c(0,1))+
-      theme_bw()+
-      theme(panel.grid.major.y = element_blank(),
-            panel.grid.minor = element_blank(),
-            #panel.border = element_blank(),
-            panel.grid = element_blank(),
-            legend.title = element_blank(),
-            plot.margin = unit(c(.5,1,0.5,.5), "cm"),
-            axis.ticks = element_blank())
-  }
-  
-  
-  
-  
-  if((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
-    outputplot <- outputplot+ 
-      geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
-      scale_color_manual(name="",values = c("Bond"=cb_line,"Debt Market"=cb_line,"Stock Market"=eq_line))+
-      theme(legend.position="none",
-            text=element_text(family="Arial"))
     
-  }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
-    outputplot <- outputplot+ 
-      geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour = "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
-      scale_color_manual(name="",values = c("Equity"=eq_line,"Debt Market"=cb_line,"Stock Market"=eq_line))+
-      theme(legend.position="none",
-            text=element_text(family="Arial"))
-  }else if ((('Bond' %in% colnames(dfwide)) == TRUE)& (('Equity' %in% colnames(dfwide)) == TRUE) ){
-    outputplot <- outputplot+ 
-      geom_line(aes(x=dftar[which(dftar$Lab=="Bond"),]$Year,y=dftar[which(dftar$Lab=="Bond"),]$value,colour =  "Bond"), data=subset(dftar,Lab=="Bond"), size = linesize,linetype=1)+   # Market
-      
-      geom_line(aes(x=dftar[which(dftar$Lab=="Equity"),]$Year,y=dftar[which(dftar$Lab=="Equity"),]$value,colour =  "Equity"), data=subset(dftar,Lab=="Equity"), size = linesize,linetype=1)+   # Market
-      scale_color_manual(name="",values = c("Equity"=eq_line,"Bond"=cb_line,"Debt Market"=cb_line,"Stock Market"=eq_line))+
-      theme(legend.position="none",
-            text=element_text(family="Arial"))
-  }else if ((('Bond' %in% colnames(dfwide)) == FALSE)& (('Equity' %in% colnames(dfwide)) == FALSE) ){
-    outputplot <- outputplot+
-      theme(legend.position="none",
-            text=element_text(family="Arial"))
-  }
-  
+    names <- c("Oil"="Oil Production", "Gas"="Gas Production", "CoalCap"="Coal Capacity")
 
+### GRAPHS -- BROWN TECH  
+
+    outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO  &
+                                   Asset.Type == "Bonds")) + 
+      geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
+      scale_fill_manual(labels=brown.labels, values=brown.fill) +
+      scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
+      scale_y_continuous(name="Normalized Growth (2018=1)", 
+                         expand=c(0,0), 
+                         breaks=seq(-.8, 2.5, by=.05)) +
+      theme_246() + theme(legend.position = "none") +
+      #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"), 
+      #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
+      coord_cartesian(ylim=c(min(subset(ylims, Technology==TechToPlot, select="min"))-.01, max(subset(ylims, Technology==TechToPlot, select="max")) + .02))
+  
+    outputplot <- outputplot + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(CBCombin$PortName) & Asset.Type == "Bonds"),
+                aes(x=Year, y=Growth), color=cb_line, size=.75) + 
+        geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(EQCombin$PortName) & Asset.Type == "Equity"),
+                aes(x=Year, y=Growth), color=eq_line, size=.75) +
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Bond Universe"),
+                aes(x=Year, y=Growth), color=cb_line, size=.75, linetype="dashed") + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
+                aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed")
+  }else if (GoodBad =="Green"){
+    outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO &
+                                   Asset.Type == "Bonds")) + 
+      geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
+      scale_fill_manual(labels=green.labels, values=green.fill) +
+      scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.9)) +
+      scale_y_continuous(name="Normalized Growth Rate (2018=1)", 
+                         expand=c(0,0)) +
+      theme_246() + theme(legend.position = "none") +
+      #labs(title=paste0("Growth of ", TechToPlot, " Allocated to Portfolio 2018-2023"), 
+      #     subtitle = "Trajectory of Portfolio's Current Plans Compared to IEA 2, 4, and 6 Degree Scenarios") +
+      coord_cartesian(ylim=c(min(subset(ylims, Technology==TechToPlot, select="min"))-.01, max(subset(ylims, Technology==TechToPlot, select="max")) + .02))
+    outputplot <- outputplot + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(CBCombin$PortName) & Asset.Type == "Bonds"),
+                aes(x=Year, y=Growth), color=cb_line, size=.75) + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(EQCombin$PortName) & Asset.Type == "Equity"),
+                aes(x=Year, y=Growth), color=eq_line, size=.75) +
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Bond Universe"),
+                aes(x=Year, y=Growth), color=cb_line, size=.75, linetype="dashed") + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
+                aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed") 
+    
+    
+  }
   if(PrintPlot){print(outputplot)}
 
 
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
 
-
-
-  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)	+  #ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,'_246.png', sep=""),bg="transparent",height=3.6,width=4.6,plot=outputplot,dpi=ppi*2)
-  # height=3.6,width=4.6,plot=outputplot,dpi=ppi*2) #bg="transparent",
+  #return(outputplot)
 }
+
+
+
+
           
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
@@ -1710,7 +1594,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
   }
   
   
-  
+  # ------------ Oil Chart -------------------- #
+
   
   ####Oil
   #OilCompProdSS$EQY_FUND_TICKER <- gsub(" US","",as.character(OilCompProdSS$EQY_FUND_TICKER))
