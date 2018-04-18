@@ -1508,6 +1508,26 @@ Graph246 <- function(TechToPlot){
   PORTFOLIO <- c("MetaPort")
   ALD.sc.tall<- as.data.frame(ALD.sc.tall)
   ALD.cp <- as.data.frame(ALD.cp)
+  
+  green.fill <- c("Line4"=area_2, 
+                  "Line3"=area_2_4,
+                  "Line2"=area_4_6,
+                  "Line1"=area_6)
+  
+  brown.fill <- c("Line4"=area_6, 
+                   "Line3"=area_4_6,
+                   "Line2"=area_2_4,
+                   "Line1"=area_2)
+  
+  green.labels <- c("Line4"="2D", 
+                     "Line3"="2D-4D",
+                     "Line2"="4D-6D",
+                     "Line1"="6D")
+  
+  brown.labels <- c("Line4"="6D", 
+                     "Line3"="4D-6D",
+                     "Line2"="2D-4D",
+                     "Line1"="2D")
   if (GoodBad == "Brown"){
     
     names <- c("Oil"="Oil Production", "Gas"="Gas Production", "CoalCap"="Coal Capacity")
