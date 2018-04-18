@@ -1443,6 +1443,7 @@ Graph246 <- function(TechToPlot){
   ALD <- bind_rows(Aldprod1, Aldprod2)
   table(ALD$Asset.Type, useNA="always")
   ALD <- subset(ALD, Aggregation=="GlobalAggregate" & BenchmarkRegion=="GlobalAggregate" & Scenario %in% c("450S","NPS","CPS"))
+  tech.order <- c("Coal","Oil","Gas", "CoalCap", "OilCap","GasCap","NuclearCap", "HydroCap","RenewablesCap","ICE","Hybrid","Electric")
   ALD$Technology <- factor(ALD$Technology, levels=tech.order, ordered=TRUE)
   ALD$Tech.Type <- ifelse(ALD$Technology %in% c("Hybrid","Electric","NuclearCap", "RenewablesCap","HydroCap"), 
                          "Low Carbon", "High Carbon")
