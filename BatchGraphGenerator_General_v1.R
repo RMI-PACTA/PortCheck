@@ -278,7 +278,7 @@ for (i in c(326,441,442)){
       #######################
       ### CA TEMPLATE #######
       #######################
-      
+     
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
       portfolio_sector_stack("02")
@@ -347,12 +347,8 @@ for (i in c(326,441,442)){
           HasCarbonBudget <- carboninout("40", 20, "EQ")
         }
       }
-      
+    
       dev.off()
-      # Creates the list of figures that were printed. 
-      # A better solution is possible, but this works. 
-      # This list gets deleted after the report is printed. 
-      # The plotnumber has to match the figure number in the report ie Fig01 etc. Therefore "01" is necessary. 
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
@@ -360,14 +356,15 @@ for (i in c(326,441,442)){
       
      
       # Creates the report for California
-      # system.time(
+      system.time(
       CAReport()
-      # )
+      )
       
       
     },error=function(e){cat("ERROR :",conditionMessage(e), "\n")}) }else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))
     }
+  
   # 
   # write.csv(EQCompProdSnapshot, paste0("EQCompProdSnapshot_",PortfolioNameLong,".csv"),row.names = FALSE, na="")
   # write.csv(EQPortSnapshot,paste0("EQPortSnapshot_",PortfolioNameLong,".csv"), row.names = FALSE, na = "")
