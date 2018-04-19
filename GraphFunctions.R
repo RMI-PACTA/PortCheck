@@ -34,9 +34,9 @@ CAReportData <- function(){
   
   NoPeers <- nrow(TestList)-1
   
-  if(HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers and Listed Equity"}
-  else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"}
-  else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers "}
+  if(HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers and Listed Equity"
+  }else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"
+  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers "}
   
   ### Sector Check
   SectorCheck <- TestList[TestList$PortName == PortName,]
@@ -1565,13 +1565,13 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
                 aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed")
    
-  # if(PrintPlot){print(outputplot)}
-  # 
-  # 
-  # 
-  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
-  # 
-  return(outputplot)
+  if(PrintPlot){print(outputplot)}
+
+
+
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
+
+  #return(outputplot)
 }
 
 
