@@ -1466,15 +1466,14 @@ Graph246 <- function(plotnumber, TechToPlot){
     mutate(Growth=Production/first(Production))
   
   
-  ### IDENTIFY LIMITS of the Y axis
-  
-  MIN.Y <- -2
-  MAX.Y <- 2.5
+
   
   ylims <- ALD2 %>% filter(PortName=="MetaPort" | PortName=="Listed Market" | PortName=="Bond Universe") %>% 
     group_by(Technology, Tech.Type, Scenario) %>%
     summarise(min=min(Growth), max=max(Growth))
-  
+  a<-data.frame(Technology=c("Electric", "Electric","ICE","ICE"), Tech.Type=c("Low Carbon", "Low Carbon","High Carbon","High Carbon"),
+             Scenario=c("CPS","NPS","CPS","NPS"),min=c(1,1,1,0.929878),max=c(1,9.7801,1,1))
+  ylims<-as.data.frame(rbind(as.data.frame(ylims),a))
   ### SEPARATE AGAIN
   
   ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
@@ -1484,12 +1483,22 @@ Graph246 <- function(plotnumber, TechToPlot){
   
   ALD.sc.wide <- ALD.sc %>% ungroup() %>% select(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year, Growth) %>%
     spread(key=Scenario, value=Growth)
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<-ifelse(ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`==1,1,ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`+0.016)
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<-ifelse(ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`==1,1,ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`*0.5)
+  
   
   ALD.sc.wide <- ALD.sc.wide %>% 
     arrange(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year) %>%
     group_by(Asset.Type, InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type) %>%
     mutate(Green=ifelse(last(`450S`) > last(CPS), 1, 0))
   
+  ### IDENTIFY LIMITS of the Y axis
+  
+  MIN.Y <- -2
+  if (TechToPlot =="Electric"){MAX.Y=20}else{MAX.Y=2.5}
+
   ALD.sc.wide <- ALD.sc.wide %>% mutate(Line1=ifelse(Green == 1, CPS, `450S`),
                                         Line2=NPS,
                                         Line3=ifelse(Green == 1 , `450S`, CPS),
@@ -1529,8 +1538,8 @@ Graph246 <- function(plotnumber, TechToPlot){
                     "Line2"="2D-4D",
                     "Line1"="2D")
     
-    names <- c("Oil"="Oil Production", "Gas"="Gas Production", "CoalCap"="Coal Capacity")
-    
+  a<- ifelse(TechToPlot=="Electric",-0.1,min(subset(ylims, Technology==TechToPlot, select="min"))-.01)
+  b<-max(subset(ylims, Technology==TechToPlot, select="max")) + .02
     ### GRAPHS -- BROWN TECH  
     
     outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO  &
@@ -1544,7 +1553,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       theme_246() + theme(legend.position = "none") +
       #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"), 
       #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
-      coord_cartesian(ylim=c(min(subset(ylims, Technology==TechToPlot, select="min"))-.01, max(subset(ylims, Technology==TechToPlot, select="max")) + .02))
+      coord_cartesian(ylim=c(a, b))
     
     outputplot <- outputplot + 
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(CBCombin$PortName) & Asset.Type == "Bonds"),
@@ -1556,13 +1565,13 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
                 aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed")
    
-  if(PrintPlot){print(outputplot)}
-  
-  
-  
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
-  
-  #return(outputplot)
+  # if(PrintPlot){print(outputplot)}
+  # 
+  # 
+  # 
+  # ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
+  # 
+  return(outputplot)
 }
 
 
