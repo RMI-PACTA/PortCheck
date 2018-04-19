@@ -1484,7 +1484,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   ALD.sc.wide <- ALD.sc %>% ungroup() %>% select(Asset.Type, InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year, Growth) %>%
     spread(key=Scenario, value=Growth)
   ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
-  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<-ifelse(ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`==1,1,ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`+0.016)
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<- rep(c(1, 0.989,0.9672516,0.96,0.953,0.91387802),2)
   ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
   ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<-ifelse(ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`==1,1,ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`*0.5)
   
