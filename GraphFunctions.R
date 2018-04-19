@@ -998,7 +998,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-1,1),expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio to 2� Market Benchmark")+
+    ylab("Alignment of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1528,7 +1528,6 @@ Graph246 <- function(plotnumber, TechToPlot){
                     "Line3"="4D-6D",
                     "Line2"="2D-4D",
                     "Line1"="2D")
-  if (GoodBad == "Brown"){
     
     names <- c("Oil"="Oil Production", "Gas"="Gas Production", "CoalCap"="Coal Capacity")
     
@@ -1537,14 +1536,14 @@ Graph246 <- function(plotnumber, TechToPlot){
     outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO  &
                                          Asset.Type == "Bonds")) + 
       geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
-      scale_fill_manual(labels=brown.labels, values=brown.fill) +
+      scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
       scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
       scale_y_continuous(name="Normalized Growth (2018=1)", 
-                         expand=c(0,0), 
-                         breaks=seq(-.8, 2.5, by=.05)) +
+                         expand=c(0,0))+ 
+                         #breaks=seq(-.8, 2.5, by=.05)) +
       theme_246() + theme(legend.position = "none") +
       #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"), 
-      #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
+      #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
       coord_cartesian(ylim=c(min(subset(ylims, Technology==TechToPlot, select="min"))-.01, max(subset(ylims, Technology==TechToPlot, select="max")) + .02))
     
     outputplot <- outputplot + 
@@ -1556,30 +1555,7 @@ Graph246 <- function(plotnumber, TechToPlot){
                 aes(x=Year, y=Growth), color=cb_line, size=.75, linetype="dashed") + 
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
                 aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed")
-  }else if (GoodBad =="Green"){
-    outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO &
-                                         Asset.Type == "Bonds")) + 
-      geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
-      scale_fill_manual(labels=green.labels, values=green.fill) +
-      scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.9)) +
-      scale_y_continuous(name="Normalized Growth Rate (2018=1)", 
-                         expand=c(0,0)) +
-      theme_246() + theme(legend.position = "none") +
-      #labs(title=paste0("Growth of ", TechToPlot, " Allocated to Portfolio 2018-2023"), 
-      #     subtitle = "Trajectory of Portfolio's Current Plans Compared to IEA 2, 4, and 6 Degree Scenarios") +
-      coord_cartesian(ylim=c(min(subset(ylims, Technology==TechToPlot, select="min"))-.01, max(subset(ylims, Technology==TechToPlot, select="max")) + .02))
-    outputplot <- outputplot + 
-      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(CBCombin$PortName) & Asset.Type == "Bonds"),
-                aes(x=Year, y=Growth), color=cb_line, size=.75) + 
-      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(EQCombin$PortName) & Asset.Type == "Equity"),
-                aes(x=Year, y=Growth), color=eq_line, size=.75) +
-      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Bond Universe"),
-                aes(x=Year, y=Growth), color=cb_line, size=.75, linetype="dashed") + 
-      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
-                aes(x=Year, y=Growth), color=eq_line, size=.75, linetype="dashed") 
-    
-    
-  }
+   
   if(PrintPlot){print(outputplot)}
   
   
