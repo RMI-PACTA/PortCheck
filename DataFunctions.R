@@ -571,8 +571,8 @@ GreenBrown <- function(Tech){
   GreenTechs <- c("Electric","Hybrid","RenewablesCap","HydroCap","NuclearCap")
   
   if(Tech %in% GreenTechs){
-    TechIs <- "Green"}else{
-      TechIs <- "Brown"  }
+    TechIs <- "green"}else{
+      TechIs <- "brown"  }
   
   return(TechIs)
 }
