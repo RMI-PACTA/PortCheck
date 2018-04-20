@@ -22,7 +22,7 @@ CAReportData <- function(){
   if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIAN INSURERS"}
   
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  if(PortfolioName == "MetaPort"){SizeofPortfolio <-1000}else{
+  if(PortfolioName == "MetaPort"){SizeofPortfolio <-4020919115682}else{
     SizePortfolio <-  Ports.Overview %>%
       filter(Portfolio.Name == PortName) %>%
       distinct(Port.ValueUSD)
@@ -188,7 +188,7 @@ CAReport <- function(){
   }  
   
   # Replace Insurer Name
-  text$text <- gsub("InsuranceCompanyName",PortfolioNameLong,text$text)
+  text$text <- gsub("InsuranceCompanyName",reportdata$InsuranceCompanyName,text$text)
   text$text <- gsub("SizeofPortfolio",paste0("\\\\$",reportdata$SizeofPortfolio),text$text)
   text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
   text$text <- gsub("NoPeers",reportdata$NoPeers,text$text)
