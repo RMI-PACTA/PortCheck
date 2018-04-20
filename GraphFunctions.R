@@ -21,6 +21,9 @@ CAReportData <- function(){
   InsuranceCompanyName <- PortfolioNameLong
   if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIAN INSURERS"}
   
+  InsuranceCompanyName <- gsub("&","\\\\\\\\&",InsuranceCompanyName)
+  
+  
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
   if(PortfolioName == "MetaPort"){SizeofPortfolio <-4020919115682}else{
     SizePortfolio <-  Ports.Overview %>%
@@ -188,6 +191,7 @@ CAReport <- function(){
   }  
   
   # Replace Insurer Name
+  # reportdata$InsuranceCompanyName <- gsub("&","\\\\&",reportdata$InsuranceCompanyName)
   text$text <- gsub("InsuranceCompanyName",reportdata$InsuranceCompanyName,text$text)
   text$text <- gsub("SizeofPortfolio",paste0("\\\\$",reportdata$SizeofPortfolio),text$text)
   text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
@@ -1574,10 +1578,7 @@ Graph246 <- function(plotnumber, TechToPlot){
   #return(outputplot)
 }
 
-
-
-
-
+# ------------ Oil and Gas Charts ----------- #
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
   # # plotnumber = 99

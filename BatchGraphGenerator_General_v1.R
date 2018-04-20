@@ -28,7 +28,6 @@ library(extrafont)
 font_import()   #Importing fonts may take a few minutes, depending on the number of fonts and the speed of the system.
 loadfonts(device = "win")
 
-
 #------------
 # Set up 2DII Dev Environment Folders and Locations
 #------------
@@ -212,7 +211,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(326,441,442)){
+for (i in c(442)){
 
   ### Specify the Names from the Test List
   
