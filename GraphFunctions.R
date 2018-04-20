@@ -19,7 +19,8 @@ CAReportData <- function(){
   
   ### Exec Summary Data ###
   InsuranceCompanyName <- PortfolioNameLong
-  InsuranceCompanyNameWrapped <- wrap.labels(PortfolioNameLong,18)
+  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIAN INSURERS"}
+  
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
   if(PortfolioName == "MetaPort"){SizeofPortfolio <-1000}else{
     SizePortfolio <-  Ports.Overview %>%
@@ -67,7 +68,6 @@ CAReportData <- function(){
   ### MERGE ALL RESULTS ###
   reportdata <<- data.frame(
     c("InsuranceCompanyName",InsuranceCompanyName),
-    c("InsuranceCompanyNameWrapped",InsuranceCompanyNameWrapped),
     c("SizeofPortfolio",SizeofPortfolio),
     c("TodaysDate",TodaysDate),
     c("HasPower",HasPower),

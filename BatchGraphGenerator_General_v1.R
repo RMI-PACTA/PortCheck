@@ -223,11 +223,11 @@ for (i in c(326,441,442)){
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
   PortfolioName <- gsub("[[:punct:]]", "", TestList[i,"PortName"])
-  PortfolioName <- gsub(" ", "", TestList[i,"PortName"])
+  PortfolioName <- gsub(" ", "", PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
   HasCarbonBudget <- FALSE #Set later
-  
+
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
   PortName <- PortfolioNameLong
