@@ -1324,7 +1324,7 @@ Graph246 <- function(plotnumber, TechToPlot){
       geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
       scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
       scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
-      scale_y_continuous(name="Normalized Growth (2018=1)", 
+      scale_y_continuous(name="Index Production", 
                          expand=c(0,0))+ 
                          #breaks=seq(-.8, 2.5, by=.05)) +
       theme_246() + theme(legend.position = "none") +
