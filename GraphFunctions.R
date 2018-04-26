@@ -1190,7 +1190,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 # ------------ 246 Chart -------------------- #
-Graph246 <- function(plotnumber, TechToPlot){
+#Graph246 <- function(plotnumber, TechToPlot){
   
   ### EQUITY PRODUCTION
   Aldprod1 <- EQALDAggProd
@@ -1347,7 +1347,181 @@ Graph246 <- function(plotnumber, TechToPlot){
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
 
 }
-
+Graph246 <- function(plotnumber,ChartType,TechToPlot){
+  
+  ### EQUITY PRODUCTION
+  if (ChartType =="EQ") {
+    ALD <- EQALDAggProd
+    ALD$Asset.Type <- "Equity"
+    Combin <- EQCombin
+  } else{
+    #eq.meta <- port.eq %>% filter(PortName=="MetaPort")
+    #eq.market <- port.eq %>% filter(PortName=="Listed Market")
+    
+    ### BOND PRODUCTION
+    ALD <- CBALDAggProd
+    ALD$Asset.Type <- "Bonds"
+    Combin <- CBCombin}
+  #bd.meta <- port.bd %>% filter(PortName=="MetaPort")
+  #bd.market <- port.bd %>% filter(PortName=="Bond Universe")
+  
+  ### PORT PRODUCTION
+  #ALD <- bind_rows(Aldprod1, Aldprod2)
+  table(ALD$Asset.Type, useNA="always")
+  ALD <- subset(ALD, Aggregation=="GlobalAggregate" & BenchmarkRegion=="GlobalAggregate" & Scenario %in% c("450S","NPS","CPS"))
+  tech.order <- c("Coal","Oil","Gas", "CoalCap", "OilCap","GasCap","NuclearCap", "HydroCap","RenewablesCap","ICE","Hybrid","Electric")
+  ALD$Technology <- factor(ALD$Technology, levels=tech.order, ordered=TRUE)
+  ALD$Tech.Type <- ifelse(ALD$Technology %in% c("Hybrid","Electric","NuclearCap", "RenewablesCap","HydroCap"), 
+                          "Low Carbon", "High Carbon")
+  ALD$Scenario <- factor(ALD$Scenario, levels=c("450S","NPS","CPS"), ordered=TRUE)
+  
+  ### Separate into CurrentPlans and Scenario, get into same column headers
+  
+  ALD.cp <- ALD %>% 
+    select(InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Year, Technology, Tech.Type, WtProduction) %>% 
+    distinct() %>%
+    rename(Production=WtProduction) %>% mutate(Line.Type="CurrentPlan")
+  
+  ALD.sc <- ALD %>% 
+    select(InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Year, Technology, Tech.Type, Scen.WtProduction) %>% 
+    rename(Production=Scen.WtProduction) %>% 
+    mutate(Line.Type="Scenario")
+  
+  ### Calculate GROWTH
+  
+  ALD2 <- bind_rows(ALD.cp, ALD.sc)
+  ALD2 <- ALD2 %>% ungroup() %>% 
+    arrange(InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Line.Type, Tech.Type, Year) %>%
+    group_by(InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Line.Type, Tech.Type) %>%
+    mutate(Growth=Production/first(Production))
+  
+  
+  
+  
+  ylims <- ALD2 %>% 
+    filter(PortName=="MetaPort" | PortName=="Listed Market" | PortName=="Bond Universe") %>% 
+    group_by(Technology, Tech.Type, Scenario) %>%
+    summarise(min=min(Growth), max=max(Growth))
+  a<-data.frame(Technology=c("Electric", "Electric","ICE","ICE"), Tech.Type=c("Low Carbon", "Low Carbon","High Carbon","High Carbon"),
+                Scenario=c("CPS","NPS","CPS","NPS"),min=c(1,1,1,0.929878),max=c(1,9.7801,1,1))
+  ylims<-as.data.frame(rbind(as.data.frame(ylims),a))
+  ### SEPARATE AGAIN
+  
+  ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
+  ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
+  
+  ### GET SCENARIOS INTO RIBBON FORMAT
+  
+  ALD.sc.wide <- ALD.sc %>% 
+    ungroup() %>% 
+    select(InvestorName, PortName, Type, Aggregation, Scenario, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year, Growth) %>%
+    spread(key=Scenario, value=Growth)
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="ICE" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<- c(1, 0.989,0.973,0.96,0.953,0.946)
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$CPS<-1
+  ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$NPS<-ifelse(ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`==1,1,ALD.sc.wide[which(ALD.sc.wide$Technology=="Electric" & ALD.sc.wide$PortName=="MetaPort"),]$`450S`*0.5)
+  
+  
+  ALD.sc.wide <- ALD.sc.wide %>% 
+    arrange(InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Year) %>%
+    group_by( InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type) %>%
+    mutate(Green=ifelse(last(`450S`) > last(CPS), 1, 0))
+  
+  ### IDENTIFY LIMITS of the Y axis
+  
+  MIN.Y <- -2
+  if (TechToPlot =="Electric"){MAX.Y=20}else{MAX.Y=2.5}
+  
+  ALD.sc.wide <- ALD.sc.wide %>% mutate(Line1=ifelse(Green == 1, CPS, `450S`),
+                                        Line2=NPS,
+                                        Line3=ifelse(Green == 1 , `450S`, CPS),
+                                        Line4=MAX.Y)
+  
+  ALD.sc.tall <- ALD.sc.wide %>% 
+    select(-`450S`, -NPS, -CPS) %>% 
+    gather(key="Target", value="Value",-InvestorName, -PortName, -Type,-Aggregation,-Sector,-BenchmarkRegion,-Technology,-Tech.Type, -Green, -Line.Type,-Year)
+  
+  
+  
+  ALD.sc.tall <- ALD.sc.tall %>% 
+    group_by(InvestorName, PortName, Type, Aggregation, Sector, BenchmarkRegion, Technology, Tech.Type, Line.Type, Green, Year) %>%
+    mutate(lower=lag(Value),
+           lower=ifelse(is.na(lower), MIN.Y, lower))
+  
+  GoodBad <- GreenBrown(TechToPlot)
+  PORTFOLIO <- c("MetaPort")
+  ALD.sc.tall<- as.data.frame(ALD.sc.tall)
+  ALD.cp <- as.data.frame(ALD.cp)
+  
+  green.fill <- c("Line4"=area_2, 
+                  "Line3"=area_2_4,
+                  "Line2"=area_4_6,
+                  "Line1"=area_6)
+  
+  brown.fill <- c("Line4"=area_6, 
+                  "Line3"=area_4_6,
+                  "Line2"=area_2_4,
+                  "Line1"=area_2)
+  
+  green.labels <- c("Line4"="2D", 
+                    "Line3"="2D-4D",
+                    "Line2"="4D-6D",
+                    "Line1"="6D")
+  
+  brown.labels <- c("Line4"="6D", 
+                    "Line3"="4D-6D",
+                    "Line2"="2D-4D",
+                    "Line1"="2D")
+  
+  a<- ifelse(TechToPlot=="Electric",-0.1,min(subset(ylims, Technology==TechToPlot, select="min")))
+  
+  b<-max(subset(ylims, Technology==TechToPlot, select="max")) 
+  calbreak <- function(ymin, ymax)
+  {
+    if ((ymax-ymin)<1)
+    {unit <- 0.05}
+    else if ((ymax-ymin)>1 && (ymax-ymin)<2)
+    {unit <- 0.5}
+    else
+    {unit <-5}
+    roundmax <- (as.integer(ymax/unit)+1)*unit
+    roundmin <- (as.integer(ymin/unit))*unit
+    breaks <- sort(unique(c(seq(roundmin, roundmax , unit),1)))
+    return(breaks)
+  }
+  
+  
+  unit <- 100  
+  outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & PortName %in% PORTFOLIO)) + 
+    geom_ribbon(aes(ymin=lower*unit, ymax=Value*unit, x=Year,fill=Target),alpha=0.75) +
+    scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
+    scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
+    scale_y_continuous(name="Index of Production (2018=100)", 
+                       expand=c(0,0),
+                       breaks=calbreak(a,b)*unit) +
+    theme_246() + theme(legend.position = "none") +
+    #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"), 
+    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
+    coord_cartesian(ylim=c(calbreak(a,b)[1]*unit, calbreak(a,b)[length(calbreak(a,b))]*unit))
+  
+  if (ChartType =="CB"){ 
+    outputplot <- outputplot + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(Combin$PortName)),
+                aes(x=Year, y=Growth*unit), color=cb_line, size=.75) + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Bond Universe"),
+                aes(x=Year, y=Growth*unit), color=cb_line, size=.75, linetype="dashed") 
+  }else{
+    outputplot <- outputplot + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(Combin$PortName)),
+                aes(x=Year, y=Growth*unit), color=eq_line, size=.75) + 
+      geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
+                aes(x=Year, y=Growth*unit), color=eq_line, size=.75, linetype="dashed")}
+  #print(outputplot)
+  if(PrintPlot){print(outputplot)}
+  
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,"_246.png",sep=""),height=4.6,width=5.6,dpi=ppi*2)
+  
+}
 # ------------ Oil and Gas Charts ----------- #
 Oilshare <- function(plotnumber, companiestoprint, ChartType){
   # ChartType = "CB"
