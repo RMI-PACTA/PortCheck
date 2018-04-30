@@ -193,6 +193,9 @@ if (!is.null(nrow(FundsInPort))){
   FundCoveragePortfolioLevel$Coverage <- FundCoveragePortfolioLevel$USDcovered / FundCoveragePortfolioLevel$USDinFunds
 }
 
+
+
+
 ### Identify holdings with missing BBG info
 PortfolioData_wo_BBG <- subset(PortfolioData_wo_BBG, !ISIN %in% Portfolio_LookThrough$FundISIN)
 PortfolioData_wo_BBG2 <- subset(PortfolioData_wo_BBG2, !ISIN %in% Portfolio_LookThrough$FundISIN)
@@ -216,7 +219,7 @@ if(nrow(MissingISINsLookThrough) > 0){
 MissingISINs$QTY <- 1
 MissingISINs$Date <- "31-12-2016"
 
-
+### Identify Funds with missing BBG Data
 PortfolioData_Funds <- subset(PortfolioData_w_BBG, ISIN %in% Portfolio_LookThrough$FundISIN)
 FundsBBG <- subset(PortfolioData_w_BBG, Security.Type %in% c("ETF", "Closed End Fund", "Mutual Fund") | Sector == "Funds", select = c("ISIN", "SharePrice","PortfolioName", "InvestorName", "NumberofShares", "ValueUSD", "Security.Type", "ICB.Subsector.Name", "Group"))  
 
@@ -240,6 +243,11 @@ if (!is.null(nrow(FundsInPort))){
 }else{
   PortfolioMetaAnalysis<- PortfolioSizes
 }
+
+### Identify Funds with Missing Holding Data
+AllFunds <- unique(subset(PortfolioData_w_BBG, Sector == "Funds", select= c("ISIN")))
+MissingFunds <- AllFunds[!AllFunds$ISIN %in% unique(Fund_Data$FundISIN),]
+write.csv(MissingFunds,paste0(BatchName,"_MissingFunds.csv"), row.names = F)
 
 
 
