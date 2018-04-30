@@ -1520,7 +1520,7 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
   #print(outputplot)
   if(PrintPlot){print(outputplot)}
 
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,"_246.png",sep=""),height=4.6,width=5.6,dpi=ppi*2)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
 
 }
 # # ------------ Oil and Gas Charts ----------- #
