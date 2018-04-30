@@ -34,7 +34,7 @@ report_data <- function(ChartType){
   
   if (nrow(combin)>0){
     
-    PortSnapshot <- rename(PortSnapshot, c("IssLvlPortWeight"="PortWeight"),warn_missing = FALSE)
+    PortSnapshot <- plyr::rename(PortSnapshot, c("IssLvlPortWeight"="PortWeight"),warn_missing = FALSE)
     # Pie Share Data
     PortSnapshotSub <- subset(PortSnapshot, CNTRY_OF_DOMICILE %in% IndexUniverses[,names(IndexUniverses) == eval(paste0(CompanyDomicileRegionchoose,"_ISO"))])
     piesub_tech <- unique(subset(PortSnapshotSub,select=c("ISIN","piesector","PortWeight")))
@@ -88,7 +88,7 @@ report_data <- function(ChartType){
     
     df <- Exposures
     df <- merge(df,AUMData, by= "PortName")
-    df <- rename(x = df, c("PortAUM"="AUM"),warn_missing = FALSE)
+    df <- plyr::rename(x = df, c("PortAUM"="AUM"),warn_missing = FALSE)
     
     WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
     WM$PortName <- "WeightedMean"
@@ -507,7 +507,7 @@ shipping_chart <- function(plotnumber, SectorToPlot="Shipping"){
     ShipsListedMarket <- melt(ShipsListedMarket, id.var=c("Year"))
     ShipsListedMarket$variable <- strtrim(ShipsListedMarket$variable,5)
     ShipsListedMarket$Type <- GT["ShipsTypeStockMarket"][[1]]
-    ShipsListedMarket <- rename(ShipsListedMarket, c("value" = "TechShare"))
+    ShipsListedMarket <- plyr::rename(ShipsListedMarket, c("value" = "TechShare"))
     
     ShipsSummary <- ShipsListedMarket
     
@@ -592,7 +592,7 @@ port_pie <- function(plotnumber, PortData){
   if(nrow(Port)>0){
     SumPort <- sum(Port[1,1:3],na.rm = TRUE)
     Port<- melt(Port)
-    Port<- rename(Port,c("variable"="Classification"))
+    Port<- plyr::rename(Port,c("variable"="Classification"))
     Port$perc <- round(Port$value/SumPort,2)*100
     
     Palette <- data.frame(Classification = c("Bonds","Equity","Others"),Colour=c("dodgerblue4","dodgerblue1","grey"))
@@ -921,14 +921,14 @@ stacked_bar_chart_data <- function(ChartType){
       FFWeightedResults$CoverageWeight <- FFWeightedResults$CoverageWeight/sumWR
       
       FFMix_5yrs <- merge(FFMix_5yrs,FFWeightedResults, by="Technology")
-      FFMix_5yrs <- rename(FFMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],
+      FFMix_5yrs <- plyr::rename(FFMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],
                                          "TechShare"=PortName,
                                          "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
       
       
       FFMix_5yrs <- melt(FFMix_5yrs, id.vars = c("Technology"))
       FFMix_5yrs$Sector <- "Fossil Fuels"
-      FFMix_5yrs <- rename(FFMix_5yrs, c("value"="TechShare"))
+      FFMix_5yrs <- plyr::rename(FFMix_5yrs, c("value"="TechShare"))
       
       FFMix_5yrs$TechShare[is.nan(FFMix_5yrs$TechShare)] <- 0
       FFMix_5yrs <- subset(FFMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
@@ -937,7 +937,7 @@ stacked_bar_chart_data <- function(ChartType){
       ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% c("Automotive","Power"))
       ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
       ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by=c("Technology"))
-      ProductionMix_5yrs <- rename(ProductionMix_5yrs, 
+      ProductionMix_5yrs <- plyr::rename(ProductionMix_5yrs, 
                                    c("WtTechShareTechShare"=PortName,
                                      "Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],
                                      "CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
@@ -1244,12 +1244,12 @@ stacked_bar_chart_horizontal <- function(plotnumber,ChartType,SectorToPlot,inc_a
         WeightedResults$CoverageWeight <- WeightedResults$CoverageWeight/sumWR
         
         ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],"TechShare"=PortfolioNameLong,"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+        ProductionMix_5yrs <- plyr::rename(ProductionMix_5yrs, c("TechShareMarket"=GT["X2Target"][[1]],"TechShare"=PortfolioNameLong,"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
         # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
         
         ProductionMix_5yrs <- melt(ProductionMix_5yrs, id.vars = c("Technology"))
         ProductionMix_5yrs$Sector <- "Fossil Fuels"
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("value"="TechShare"))
+        ProductionMix_5yrs <- plyr::rename(ProductionMix_5yrs, c("value"="TechShare"))
         
         ProductionMix_5yrs$TechShare[is.nan(ProductionMix_5yrs$TechShare)] <- 0
         ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c("Sector","Technology","variable","TechShare"))
@@ -1258,7 +1258,7 @@ stacked_bar_chart_horizontal <- function(plotnumber,ChartType,SectorToPlot,inc_a
         ProductionMix_5yrs <- subset(combin, Year==Startyear+5 & BenchmarkRegion==BenchmarkRegionchoose &  Scenario == Scenariochoose & Sector %in% SectorToPlot)
         ProductionMix_5yrs <- subset(ProductionMix_5yrs, select=c("Sector","Technology","WtTechShareTechShare","Benchmark_WtTechShareTechShare"))
         ProductionMix_5yrs <- merge(ProductionMix_5yrs,WeightedResults, by="Technology")
-        ProductionMix_5yrs <- rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
+        ProductionMix_5yrs <- plyr::rename(ProductionMix_5yrs, c("WtTechShareTechShare"=PortfolioNameLong,"Benchmark_WtTechShareTechShare"=GT["X2Target"][[1]],"CoverageWeight"=GT["AveragePort"][[1]]),warn_missing = FALSE)
         # ProductionMix_5yrs <- subset(ProductionMix_5yrs, select = c( "Year","Technology","Scenario","Sector","PortProduction","RefProduction","CoverageWeight"))
         
         
@@ -1428,7 +1428,7 @@ mini_line_chart <- function(plotnumber,ChartType,TechToPlot, SectorToPlot){
   
   production <- subset(combin, Technology %in% TechToPlot)
   
-  production <- rename(production, c("WtProduction"="Production"),warn_missing = FALSE)
+  production <- plyr::rename(production, c("WtProduction"="Production"),warn_missing = FALSE)
   
   # if ((sum(production$Production, na.rm = TRUE)>0 | SectorToPlot == "Fossil Fuels") & nrow(combin)>0){
   
@@ -1650,7 +1650,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
     
     if (PortfolioNameLong %in% c("PK","V")){
       df <- merge(df,AUMData, by= "PortName")
-      df <- rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
+      df <- plyr::rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
       
       WM<- as.data.frame(lapply(df[colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
       WM$PortName <- PortfolioNameLong
@@ -1665,7 +1665,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType,SectorToPlot){
       AUMData <- AUMData[,colnames(AUMData) %in% c("PortName","PortAUM") ]
       
       df <- merge(df,AUMData, by= "PortName")
-      df <- rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
+      df <- plyr::rename(df, c("PortAUM"="AUM"),warn_missing = FALSE)
       
       WM<- as.data.frame(lapply(df[ colnames(df) %in% TechList], weighted.mean, na.rm=TRUE,  w = df$AUM))
       WM$PortName <- "WeightedMean" 
@@ -1962,7 +1962,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     if (!is.null(columnNames)) {
       namesColumn <- names(columnNames)
       names(namesColumn) <- columnNames
-      df <- rename(df, namesColumn)
+      df <- plyr::rename(df, namesColumn)
     }
     
     applyLookup <- function(groups, keys, unassigned = "unassigned") {
@@ -2166,7 +2166,7 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     if (SectorToPlot == "Fossil Fuels"){
       techorder <- c("Conventional Oil","Heavy Oil","Oil Sands", "Unconventional Oil","Other")
       AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "Technology"]
-      AlloftheCompanies <- rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
+      AlloftheCompanies <- plyr::rename(AlloftheCompanies, c("Resource.Type" = "Technology"),warn_missing = FALSE)
       
       if (ChartType == "EQ"){AlloftheCompanies <- AlloftheCompanies[!colnames(AlloftheCompanies) %in% "DebtTicker"]
       }else{
@@ -2205,12 +2205,12 @@ flat_wheel_chart <- function(plotnumber,companiestoprint,ChartType, SectorToPlot
     Targetmix <- subset(combin, Sector == SectorToPlot & Scenario == Scenariochoose  & Year == Startyear+5)
     if (ChartType == "EQ"){ Targetmix <- subset(Targetmix,  CompanyDomicileRegion == CompanyDomicileRegionchoose & BenchmarkRegion == BenchmarkRegionchoose, select = c("Technology", "TargetProductionAlignment"))}else{
       Targetmix <- subset(Targetmix, select = c("Technology","Benchmark_WtTechShare"))
-      Targetmix <- rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
+      Targetmix <- plyr::rename(Targetmix, c("Benchmark_WtTechShare" = "TargetProductionAlignment"))
     }
     
     Targetmix$Classification<-"Portfolio"
     Targetmix$Name<-GT["X2Target"][[1]]
-    Targetmix<-rename(Targetmix, c("TargetProductionAlignment"="Capacity"))
+    Targetmix<-plyr::rename(Targetmix, c("TargetProductionAlignment"="Capacity"))
     Targetmix <- subset(Targetmix, select =c("Name","Classification","Technology","Capacity"))
     colnames(Targetmix) <- c("item", "family", "score", "value")
     Targetmix$value <- as.numeric(as.character(Targetmix$value))
@@ -2878,7 +2878,7 @@ renewablesadditions_chart <- function(plotnumber,ChartType){
         Countries<- data.frame(BenchmarkRegion="Global",Country=RegionCountries$Global)
       }
   }else{
-    PortSnapshot <- rename(PortSnapshot, c("COMPANY_CORP_TICKER"="EQY_FUND_TICKER"),warn_missing = FALSE)
+    PortSnapshot <- plyr::rename(PortSnapshot, c("COMPANY_CORP_TICKER"="EQY_FUND_TICKER"),warn_missing = FALSE)
   }
   # Companies in Port
   PortCompanies <- unique(subset(PortSnapshot, select = c("EQY_FUND_TICKER","Name","piesector"), PortSnapshot$AUM >0))
@@ -3036,7 +3036,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   BuildOutCalc <- function(df, Label){
     GoodBad <- GreenBrown(TechToPlot)
     
-    df <- rename(df, c("Production"="Prod","TargetProductionAlignment"="TargetProd",
+    df <- plyr::rename(df, c("Production"="Prod","TargetProductionAlignment"="TargetProd",
                        "WtTechShareTechShare"="Prod","Benchmark_WtTechShareTechShare"="TargetProd",
                        "AnnualvalIEAtech"="Prod"),warn_missing = F)
     
@@ -3085,7 +3085,7 @@ Inputs246 <- function(ChartType, TechToPlot){
   ### Inputs to the 246 chart. 
   IEATargets <- subset(IEATargets246, Technology %in% TechToPlot)  
   IEATargetsRef <- subset(IEATargets, Scenario == "450S", select=c("Year","AnnualvalIEAtech"))
-  IEATargetsRef <- rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
+  IEATargetsRef <- plyr::rename(IEATargetsRef, c("AnnualvalIEAtech"="TargetProd"))
   IEATargets <- merge(IEATargets,IEATargetsRef, by="Year")
   
   

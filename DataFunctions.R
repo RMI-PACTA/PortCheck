@@ -212,7 +212,7 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
       df <- subset(dfall, Sector %in% c("Automotive","Power"))
       df <- subset(df, select=c("PortName","Sector","Technology","WtTechShareTechShare"))
       df <- melt(df, id.vars = c("PortName","Sector","Technology"))
-      df <- rename(df, c("value"="TechShare"))
+      df <- plyr::rename(df, c("value"="TechShare"))
       df$variable <- NULL
       
       df$TechShare[is.nan(df$TechShare)] <- 0
@@ -250,11 +250,11 @@ CoverageWeight_data <- function(ChartType,PortfolioType,BatchTest_PortSnapshots,
       
       dfallsectors$TechShare <- dfallsectors$TechShare*dfallsectors$SectorWtTotal
       dfallsectors$SectorWtTotal <- NULL  
-      dfallsectors <- rename(dfallsectors, c("TechShare"="CoverageWeight"))
+      dfallsectors <- plyr::rename(dfallsectors, c("TechShare"="CoverageWeight"))
       
       
       Results <- subset(dfallsectors, select = c("PortName","Technology","CoverageWeight","SectorWeight", "PortfolioAUMAnalyzed"))
-      Results <- rename(Results, c("PortfolioAUMAnalyzed"="PortAUM"))
+      Results <- plyr::rename(Results, c("PortfolioAUMAnalyzed"="PortAUM"))
     }else{
       Results <- "NoResults"
     }
@@ -413,7 +413,7 @@ company_comparison <- function(ChartType,BatchTestComparison, Startyear, Scenari
   }else{
     
     AUMs <- unique(subset(Results, select = c("PortName","PortfolioAUMAnalyzed")))
-    AUMs <- rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
+    AUMs <- plyr::rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
     
     Heatmap <- subset(Results, Results$Year == Startyear+5 & Results$Scenario == Scenariochoose  ,select = c("PortName","Technology","BenchmarkRegion","Exposure_WtTechShareTechShare", "Exposure_OGCMetrik"))
     
@@ -491,7 +491,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Star
   # ChartType <- "CB"
   # BatchTest <- CBBatchTest
   # BatchTest <- EQBatchTest
-  # BatchTest_PortSnapshots <- EQBatchTest_PortSnapshots
+  # BatchTest_PortSnapshots <- CBBatchTest_PortSnapshots
   
   ### AUMs
   Results <- BatchTest
@@ -504,7 +504,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Star
   }else{
     
     AUMs <- unique(subset(Results, select = c("PortName","ComparisonType","PortfolioAUMAnalyzed")))
-    AUMs <- rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
+    AUMs <- plyr::rename(AUMs, c("PortfolioAUMAnalyzed" = "PortAUM"))
   }   
   
   
@@ -599,7 +599,7 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Star
       df <- subset(dfall, Sector %in% c("Automotive","Power"))
       df <- subset(df, select=c("PortName","Sector","Technology","WtTechShareTechShare"))
       df <- melt(df, id.vars = c("PortName","Sector","Technology"))
-      df <- rename(df, c("value"="TechShare"))
+      df <- plyr::rename(df, c("value"="TechShare"))
       df$variable <- NULL
       
       df$TechShare[is.nan(df$TechShare)] <- 0
@@ -636,11 +636,11 @@ company.comparison <- function(ChartType,BatchTest, BatchTest_PortSnapshots,Star
       
       dfallsectors$TechShare <- dfallsectors$TechShare*dfallsectors$SectorWtTotal
       dfallsectors$SectorWtTotal <- NULL  
-      dfallsectors <- rename(dfallsectors, c("TechShare"="CoverageWeight"))
+      dfallsectors <- plyr::rename(dfallsectors, c("TechShare"="CoverageWeight"))
       
       
       CoverageWeight <- unique(subset(dfallsectors, select = c("PortName","Technology","CoverageWeight","SectorWeight", "PortfolioAUMAnalyzed","ComparisonType","Type")))
-      CoverageWeight <- rename(CoverageWeight, c("PortfolioAUMAnalyzed"="PortAUM"))
+      CoverageWeight <- plyr::rename(CoverageWeight, c("PortfolioAUMAnalyzed"="PortAUM"))
     }else{
       CoverageWeight <- "NoCoverageWeight"
     }
@@ -746,7 +746,7 @@ cleanOGData <- function(OGData,AllCompanyData,Startyear){
   OilData <- subset(OGData, OGData$Technology %in% "Oil" & OGData$Year %in% (Startyear+5))  
   OilData$Resource.Type[!OilData$Resource.Type %in% techlist] <- "Other & Unknown"
   OilData$Resource.Type[OilData$Resource.Type %in% "Other"] <- "Other & Unknown"
-  OilData <- rename(OilData, c("Ticker" = "EQY_FUND_TICKER"))
+  OilData <- plyr::rename(OilData, c("Ticker" = "EQY_FUND_TICKER"))
   OilCompanyData <- unique(subset(AllCompanyData, AllCompanyData$Sector %in% "Fossil Fuels" & AllCompanyData$Year %in% (Startyear+5), select = c("EQY_FUND_TICKER","Name")))
   Data <- merge(OilData,OilCompanyData, by = "EQY_FUND_TICKER", all.x=TRUE, all.y=FALSE)
   return(Data)
@@ -819,7 +819,7 @@ SectorProduction <- function(combin,ChartType){
   
   
   if (ChartType == "CB"){
-    combin <- rename(combin, c("WtProduction"="Production"),warn_missing = F)
+    combin <- plyr::rename(combin, c("WtProduction"="Production"),warn_missing = F)
     combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose, select = c("Sector","Technology","Production")) 
   }else{
     combinsector <- subset(combin,combin$Year == Startyear & combin$BenchmarkRegion == BenchmarkRegionchoose & combin$CompanyDomicileRegion == CompanyDomicileRegionchoose, select = c("Sector","Technology","Production")) 
