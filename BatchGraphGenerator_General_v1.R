@@ -183,6 +183,8 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
 template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/","GeneralTemplateInput_v3.tex"),encoding="UTF-8"))
+
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
 ReportTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GeneralReportTranslation_V1.csv"), stringsAsFactors = FALSE)
@@ -211,7 +213,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(442)){
+for (i in c(326)){
 
   ### Specify the Names from the Test List
   
@@ -286,6 +288,18 @@ for (i in c(442)){
         exposure_summary("06", "EQ")  
         sector_techshare("09","EQ","All")
         Fossil_Distribution("11", "EQ")
+        
+        
+        #5 Year Trajectory
+        Graph246("22", "EQ","CoalCap")
+        Graph246("23", "EQ" ,"RenewablesCap")
+        Graph246("24", "EQ" ,"GasCap")
+        Graph246("25", "EQ", "NuclearCap")
+        Graph246("26","EQ", "Oil")
+        Graph246("27","EQ", "Gas")
+        Graph246("28","EQ", "ICE")
+        Graph246("29","EQ", "Electric")
+        
       }
       
       if (HasDebt) {      
@@ -293,17 +307,24 @@ for (i in c(442)){
         sector_techshare("10","CB","All")
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
+        
+        #5 Year Trajectory
+        Graph246("14", "CB","CoalCap")
+        Graph246("15", "CB" ,"RenewablesCap")
+        Graph246("16", "CB" ,"GasCap")
+        Graph246("17", "CB", "NuclearCap")
+        Graph246("18","CB", "Oil")
+        Graph246("19","CB", "Gas")
+        Graph246("20","CB", "ICE")
+        Graph246("21","CB", "Electric")
+        
       }
       
-      #5 Year Trajectory
-      Graph246("14", "CoalCap")
-      Graph246("15", "RenewablesCap")
-      Graph246("16", "GasCap")
-      Graph246("17", "NuclearCap")
-      Graph246("18", "Oil")
-      Graph246("19", "Gas")
-      Graph246("20", "ICE")
-      Graph246("21", "Electric")
+
+      
+      
+      
+      
       
       #Exposure to 2D Scenarios
       if (HasEquity) {
