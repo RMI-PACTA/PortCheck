@@ -459,7 +459,7 @@ for (i in 1:nrow(TestList)){
       
       # fundmap_chart("99",PortHeatMapData, Startyear, Scenariochoose, PortfolioName)
       
-      Graph246(99, "RenewablesCap")
+      # Graph246(99, "RenewablesCap")
       #######################
       ### CA TEMPLATE #######
       #######################
@@ -470,7 +470,7 @@ for (i in 1:nrow(TestList)){
       # EQStackedBarProdData <-stacked_bar_chart_data ("EQ")
       # stacked_bar_chart_vertical(99,"EQ","All",EQStackedBarProdData)
       # 
-      CBStackedBarProdData <-stacked_bar_chart_data ("CB")
+      # CBStackedBarProdData <-stacked_bar_chart_data ("CB")
       # stacked_bar_chart_vertical(99,"CB","All",CBStackedBarProdData)
       
       
