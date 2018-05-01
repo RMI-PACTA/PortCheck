@@ -773,7 +773,7 @@ portfolio_sector_stack <- function(plotnumber){
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
   ## "steelblue" color below should be changed to whatever our Portfolio color is
-  plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector),show.guide = TRUE) +
+  plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
     geom_bar(position="stack", stat="identity") +
     scale_fill_manual(name="", labels=c("No 2D Scenario","Climate Relevant w/o 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow)) +
     scale_x_discrete(name="Asset Type") +
