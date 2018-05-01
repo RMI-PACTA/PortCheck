@@ -99,6 +99,11 @@ Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv")
 names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
 length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
 
+
+Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Subgroup.csv"),stringsAsFactors=FALSE,strip.white = T)
+names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
+length(unique(Subgroup.Overview$Portfolio.Name)) ## Number of Insurers   672
+
 ### Get Debt Batch Results
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
