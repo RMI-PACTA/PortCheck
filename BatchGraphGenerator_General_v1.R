@@ -188,7 +188,7 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
 template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
-template <- (readLines(paste0(GIT.PATH,"Templates/","GeneralTemplateInput_v3.tex"),encoding="UTF-8"))
+#template <- (readLines(paste0(GIT.PATH,"Templates/","GeneralTemplateInput_v3.tex"),encoding="UTF-8"))
 
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
@@ -287,7 +287,9 @@ for (i in c(326)){
      
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
-      portfolio_sector_stack("02")
+      Overview_portfolio_sector_stack("02")
+      portfolio_sector_stack("03")     #newly added graphs
+      
       
       if (HasEquity) {
         exposure_summary("06", "EQ")  
