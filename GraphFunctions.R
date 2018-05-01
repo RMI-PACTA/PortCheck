@@ -768,7 +768,7 @@ portfolio_sector_stack <- function(plotnumber){
   
   over <- over %>%
         group_by(Sector) %>%
-        complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, PortName = PortName))
+        complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, PortName = PortName,Valid=1))
   over<- as.data.frame(over)
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
@@ -779,8 +779,8 @@ portfolio_sector_stack <- function(plotnumber){
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
     theme(legend.position = "bottom")+
-    geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
-    geom_bar(data=subset(over, Valid==0 & Asset.Type=="Equity"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
+    #geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
+    #geom_bar(data=subset(over, Valid==0 & Asset.Type=="Equity"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
     theme_barcharts() +
     theme(legend.position = "bottom") 
   
@@ -907,7 +907,7 @@ analysed_summary <- function(plotnumber){
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=Sector.All)) +
     geom_bar(position="stack", stat="identity") +
     scale_fill_manual(name="", labels=c("Excluded", "Other Sector","Climate Relevant No 2D Scenario","Climate Relevant w/ 2D Scenario"), values=c("grey80", "#deebf7","#90b6e4","#265b9b")) +
-    scale_x_discrete(name="Asset Type") +
+    scale_x_discrete(name="Asset Type",labels = c("Debt" = "Debt","Equity" = "Equity","Other"="Other")) +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
     theme_barcharts() + 
     theme(legend.position = "bottom")
@@ -1495,7 +1495,10 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
     group_by(InvestorName, PortName, Scenario, Sector, Technology, Line.Type) %>%  #Tech.Type,
     mutate(Growth=Production/first(Production))
 
-
+  # b<-a %>%
+  #    arrange(Scenario,Sector,Technology,Year) %>%
+  #    group_by(InvestorName,Scenario,Sector,Technology)%>%
+  #    mutate(ha =Scen.WtProduction/first(Scen.WtProduction))
 
 
   ylims <- ALD2 %>%
@@ -1598,6 +1601,7 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
     scale_y_continuous(name="Index of Production (2018=100)",
                        expand=c(0,0),
                        breaks=calbreak(a,b)*unit) +
+    geom_hline(yintercept =219.6 )+
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
     #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
@@ -1609,6 +1613,7 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
                 aes(x=Year, y=Growth*unit), color=cb_line, size=.75) +
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Bond Universe"),
                 aes(x=Year, y=Growth*unit), color=cb_line, size=.75, linetype="dashed")
+      
   }else{
     outputplot <- outputplot +
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == unique(Combin$PortName)),
