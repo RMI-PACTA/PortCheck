@@ -744,17 +744,17 @@ portfolio_sector_stack <- function(plotnumber){
             "Auto-Cars/Light Trucks", "Automobiles.Manufacturing")
   
   
-  over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","No 2D Scenario")
+  over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","Other Sector")
   over$Sector <-ifelse (over$Subgroup %in% OilGasCoal,"Fossil Fuels",over$Sector)
   over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
-  over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant w/o 2D Scenario",over$Sector)
+  over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2D Scenario",over$Sector)
   
   over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Climate Relevant w/ 2D Scenario")
-  over$Sector.All <- ifelse(over$Sector== "Climate Relevant w/o 2D Scenario" & over$Valid==1 , "Climate Relevant w/o 2D Scenario",over$Sector.All)
-  over$Sector.All <- ifelse(over$Sector =="No 2D Scenario" & over$Valid==1, "No 2D Scenario",over$Sector.All)
+  over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2D Scenario" & over$Valid==1 , "Climate Relevant No 2D Scenario",over$Sector.All)
+  over$Sector.All <- ifelse(over$Sector =="Other Sector" & over$Valid==1, "Other Sector",over$Sector.All)
   
-  over$Sector <- factor(over$Sector, levels=c("No 2D Scenario","Climate Relevant w/o 2D Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
-  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","No 2D Scenario","Climate Relevant w/ 2D Scenario","Climate Relevant w/o 2D Scenario"), ordered=TRUE)
+  over$Sector <- factor(over$Sector, levels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+    over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sector","Climate Relevant No 2D Scenario","Climate Relevant w/ 2D Scenario"), ordered=TRUE)
   
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
@@ -775,13 +775,14 @@ portfolio_sector_stack <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("No 2D Scenario","Climate Relevant w/o 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow)) +
+    scale_fill_manual(name="", labels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow)) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
     theme(legend.position = "bottom")+
     geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
-    theme(legend.position = "bottom") + 
-    theme_barcharts() 
+    geom_bar(data=subset(over, Valid==0 & Asset.Type=="Equity"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
+    theme_barcharts() +
+    theme(legend.position = "bottom") 
   
   # 
   if(PrintPlot){print(plot)}
@@ -873,17 +874,17 @@ analysed_summary <- function(plotnumber){
                "Auto-Cars/Light Trucks", "Automobiles.Manufacturing")
 
   
-  over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","No 2D Scenario")
+  over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","Other Sector")
   over$Sector <-ifelse (over$Subgroup %in% OilGasCoal,"Fossil Fuels",over$Sector)
   over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
-  over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant w/o 2D Scenario",over$Sector)
+  over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2D Scenario",over$Sector)
 
   over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Climate Relevant w/ 2D Scenario")
-  over$Sector.All <- ifelse(over$Sector== "Climate Relevant w/o 2D Scenario" & over$Valid==1 , "Climate Relevant w/o 2D Scenario",over$Sector.All)
-  over$Sector.All <- ifelse(over$Sector =="No 2D Scenario" & over$Valid==1, "No 2D Scenario",over$Sector.All)
+  over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2D Scenario" & over$Valid==1 , "Climate Relevant No 2D Scenario",over$Sector.All)
+  over$Sector.All <- ifelse(over$Sector =="Other Sector" & over$Valid==1, "Other Sector",over$Sector.All)
  
-  over$Sector <- factor(over$Sector, levels=c("No 2D Scenario","Climate Relevant w/o 2D Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
-  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","No 2D Scenario","Climate Relevant w/ 2D Scenario","Climate Relevant w/o 2D Scenario"), ordered=TRUE)
+  over$Sector <- factor(over$Sector, levels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sector","Climate Relevant No 2D Scenario","Climate Relevant w 2D Scenario"), ordered=TRUE)
   
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
@@ -905,17 +906,17 @@ analysed_summary <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=Sector.All)) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "No 2D Scenario","Climate Relevant w/o 2D Scenario","Climate Relevant w/ 2D Scenario"), values=c("grey80",  "#deebf7","#90b6e4","#265b9b")) +
+    scale_fill_manual(name="", labels=c("Excluded", "Other Sector","Climate Relevant No 2D Scenario","Climate Relevant w/ 2D Scenario"), values=c("grey80", "#deebf7","#90b6e4","#265b9b")) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
     theme_barcharts() + 
     theme(legend.position = "bottom")
   
-  # plot <- plot+
-  #   annotate("text", x = "Other Holdings", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
-  #            label = portfolio_label, color = YourportColour,
-  #            hjust = .5, vjust = 1, size = textsize)
-  # 
+  plot <- plot+
+    annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label, color = YourportColour,
+             hjust = .5, vjust = 1, size = textsize)
+
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
