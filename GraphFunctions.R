@@ -1601,7 +1601,6 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
     scale_y_continuous(name="Index of Production (2018=100)",
                        expand=c(0,0),
                        breaks=calbreak(a,b)*unit) +
-    geom_hline(yintercept =219.6 )+
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
     #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +

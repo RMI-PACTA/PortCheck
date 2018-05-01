@@ -95,9 +95,9 @@ BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTe
 ### GET OVERVIEW RESULTS
 ### ###########################################################################
 
-Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv"),stringsAsFactors=FALSE,strip.white = T)
-names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
-length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
+# Ports.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview.csv"),stringsAsFactors=FALSE,strip.white = T)
+# names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
+# length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
 
 
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Subgroup.csv"),stringsAsFactors=FALSE,strip.white = T)
