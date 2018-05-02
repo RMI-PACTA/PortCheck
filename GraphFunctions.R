@@ -26,7 +26,7 @@ CAReportData <- function(){
   
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
   if(PortfolioName == "MetaPort"){SizeofPortfolio <-4020919115682}else{
-    SizePortfolio <-  Ports.Overview %>%
+    SizePortfolio <-  Subgroup.Overview %>%
       filter(Portfolio.Name == PortName) %>%
       distinct(Port.ValueUSD)
     SizeofPortfolio<- SizePortfolio[[1]]
