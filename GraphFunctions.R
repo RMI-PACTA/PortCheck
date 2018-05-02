@@ -803,14 +803,14 @@ Overview_portfolio_sector_stack <- function(plotnumber){
 }
 
 portfolio_sector_stack <- function(plotnumber){
-  
-  if (PortName != "MetaPort") {
-    over <- Subgroup.Overview %>%
-      filter(Portfolio.Name == PortName)
-  } else {
-    over <- Subgroup.Overview 
-  }
-  
+  # 
+  # if (PortName != "MetaPort") {
+  #   over <- Subgroup.Overview %>%
+  #     filter(Portfolio.Name == PortName)
+  # } else {
+  #   over <- Subgroup.Overview 
+  # }
+  over <- Subgroup.Overview
   over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
   
   
@@ -840,26 +840,26 @@ portfolio_sector_stack <- function(plotnumber){
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
 
   
-  over<- as.data.frame(over)
-  orderofchart <- c("Debt","Equity","Other")
-  over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
   over<-over%>%
-    group_by(Sector,Asset.Type,Valid) %>%
+    select(Sector,Asset.Type,Valid,ValueUSD,Portfolio.Name)%>%
+    group_by(Sector,Asset.Type,Valid,Portfolio.Name) %>%
     summarise(ValueUSD=sum(ValueUSD))%>%
     ungroup() %>%
     group_by(Valid) %>%
     mutate(per=ValueUSD/sum(ValueUSD))
-  over<-as.data.frame(over)
   over<- over %>%
-    group_by(Sector) %>%
-    complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sector"))
+    group_by(Sector,Portfolio.Name) %>%
+    complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sector",Portfolio.Name=PortName))
+  over<-as.data.frame(over)
+  orderofchart <- c("Debt","Equity","Other")
+  over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   if (PortName!="MetaPort"){
-    plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
+    plot <- ggplot(data=subset(over, Portfolio.Name==PortName&Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
-      scale_y_continuous(name="", labels = scales::percent, expand=c(0,0),limits=c(0,1)) +
+      scale_y_continuous(name="", labels = scales::percent, expand=c(0,0)) +
       theme(legend.position = "bottom")+
       theme_barcharts() +
       theme(legend.position = "bottom",
@@ -869,7 +869,7 @@ portfolio_sector_stack <- function(plotnumber){
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
-      scale_y_continuous(name="", labels=scales::percent, expand=c(0,0)) +
+      scale_y_continuous(name="", labels=scales::percent, expand=c(0,0),limits = c(0,1)) +
       theme(legend.position = "bottom")+
       geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=per), fill="white", stat="identity") +
       theme_barcharts() +
