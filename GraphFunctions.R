@@ -655,81 +655,18 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   #return()
 }
 
-# -------- PORTFOLIO SUMMARY -------- #
-
-# sector_processing <- function(){
-# 
-#   ID.COLS = c("PortName","Year","Sector","Technology","CarstenMetric_Port","Type")
-# 
-#   EQ <- EQCombin
-#   if(HasEquity) {
-#     EQ$Type <- "Equity Portfolio"
-#     EQ <- unique(subset(EQ, Year == Startyear,
-#                         select = c(ID.COLS)))
-#   }
-#   CB <- CBCombin
 #   if(HasDebt) {
-#     CB$Type <- "Bond Portfolio"
 #     CB <- unique(subset(CB, Year == Startyear,
-#                         select = c(ID.COLS)))
-#   }
 # 
-#   #Aggregate by sector, breaking down by the type (equity vs debt)
-#   df <- rbind(CB,EQ)
-#   df <- df %>% gather(key=Type, value=Value, -c(ID.COLS))
-#   df$Sector<-as.factor(df$Sector)
-#   levels(df$Sector)[levels(df$Sector)=="Coal"] <- "Fossil Fuels"
-#   levels(df$Sector)[levels(df$Sector)=="Oil&Gas"] <- "Fossil Fuels"
-#   levels(df$Sector)[levels(df$Sector)=="Power"] <- "Power"
-#   dfagg <- aggregate(df["CarstenMetric_Port"],by=df[c("Sector","Type","PortName")],FUN=sum)
-# 
-#   dfagg <- dfagg %>%
-#     group_by(Sector) %>%
-#     complete(Type=c("Bond Portfolio","Equity Portfolio"), fill=list(CarstenMetric_Port = 0, PortName = PortName))
-# 
-#   return(dfagg)
-# }
-
-# portfolio_sector_stack <- function(plotnumber){
-# 
-#   dfagg <- sector_processing()
-#   sectorpalette <- c(energy,pow,trans)
-#   sectororder <-c("Fossil Fuels","Power","Automotive")
-#   colourdf <- data.frame(colour=sectorpalette, Sector =sectororder)
-#   dfagg$Sector<-as.factor(dfagg$Sector)
-#   combined <- sort(union(levels(dfagg$Sector), levels(colourdf$sectororder)))
-#   dfagg <- merge(dfagg, colourdf, by= "Sector")
-#   orderofchart <- c("Bond Portfolio","Equity Portfolio")
-#   dfagg$Type <- factor(dfagg$Type,levels=orderofchart)
-#   dfagg$Sector<- factor(dfagg$Sector,levels = sectororder)
-#   dfagg <- dfagg[order(dfagg$Sector,dfagg$Type),]
-#   temp <-max(sum(filter(dfagg,Type=="Bond Portfolio")$CarstenMetric_Port),
-#              sum(filter(dfagg,Type=="Equity Portfolio")$CarstenMetric_Port))
-#   ylabel = ""
-# 
-#   a<-ggplot(dfagg, aes(x=Type, y=CarstenMetric_Port,fill=Sector),show.guide = TRUE)+
-#     geom_bar(stat = "identity",width = .6)+
-#     scale_fill_manual(labels=unique(as.character(dfagg$Sector)),values=unique(as.character(dfagg$colour)))+
-#     scale_y_continuous(expand=c(0,0), limits = c(0,temp+0.01), labels=percent)+
-#     expand_limits(0,0)+
-#     ylab(ylabel)+
-#     theme_barcharts()+
-#     theme(legend.position = "bottom")
-# 
-#   if(PrintPlot){print(a)}
-#   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
-#          bg="transparent",height=3,width=3.5,plot=a,dpi=ppi) #linewidth_in*.9
-# }
-
-
 Overview_portfolio_sector_stack <- function(plotnumber){
   
   if (PortName != "MetaPort") {
     over <- Subgroup.Overview %>%
       filter(Portfolio.Name == PortName)
   } else {
-    over <- Subgroup.Overview }
-  
+    over <- Subgroup.Overview
+  }
+
   over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
   
   
@@ -760,10 +697,11 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   
   comprss <- function(tx) { 
     tx[is.na(tx)] <- 0
-    div <- findInterval(tx, 
-                        c(1, 1e3, 1e6, 1e9, 1e12) )
-    paste("$",round( tx/10^(3*(div-1)), 2), 
-          c("","Thousand","Million","Billion","Trillion")[div] )
+    div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
+    div[div==0] <- 1
+    labels <- paste("$",round(tx/10^(3*(div-1)), 2),
+                    c("","K","Mn","Bn","Tn")[div])
+    return(labels)
   }
   
   over<- over %>%
@@ -983,10 +921,11 @@ analysed_summary <- function(plotnumber){
   
   comprss <- function(tx) { 
     tx[is.na(tx)] <- 0
-    div <- findInterval(tx, 
-                        c(1, 1e3, 1e6, 1e9, 1e12) )
-    paste("$",round( tx/10^(3*(div-1)), 2), 
-          c("","Thousand","Million","Billion","Trillion")[div] )
+    div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
+    div[div==0] <- 1
+    labels <- paste("$",round(tx/10^(3*(div-1)), 2),
+                    c("","K","Mn","Bn","Tn")[div])
+    return(labels)
   }
   
   over <- over %>%
