@@ -853,13 +853,14 @@ portfolio_sector_stack <- function(plotnumber){
   over<-as.data.frame(over)
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
-  ## "steelblue" color below should be changed to whatever our Portfolio color is
+  temp <-max(sum(filter(over,Portfolio.Name==PortName&Valid==1)$per))
+
   if (PortName!="MetaPort"){
     plot <- ggplot(data=subset(over, Portfolio.Name==PortName&Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sector","Climate Relevant No 2D Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
-      scale_y_continuous(name="", labels = scales::percent, expand=c(0,0)) +
+      scale_y_continuous(name="", labels = scales::percent, expand=c(0,0),limits = c(0,temp+0.005)) +
       theme(legend.position = "bottom")+
       theme_barcharts() +
       theme(legend.position = "bottom",
