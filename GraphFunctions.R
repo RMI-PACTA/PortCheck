@@ -19,20 +19,30 @@ CAReportData <- function(){
   
   ### Exec Summary Data ###
   InsuranceCompanyName <- PortfolioNameLong
-  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIAN INSURERS"}
+  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIA INSURERS"}
   
   InsuranceCompanyName <- gsub("&","\\\\\\\\&",InsuranceCompanyName)
   
   
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  if(PortfolioName == "MetaPort"){SizeofPortfolio <-4020919115682}else{
+  if(PortfolioName == "MetaPort"){SizeofPortfolio <- 4020919115682}
+  else{
     SizePortfolio <-  Subgroup.Overview %>%
       filter(Portfolio.Name == PortName) %>%
       distinct(Port.ValueUSD)
     SizeofPortfolio<- SizePortfolio[[1]]
   }
   
-  SizeofPortfolio <- prettyNum(SizeofPortfolio,big.mark = ",")
+  comprss_long <- function(tx) { 
+    tx[is.na(tx)] <- 0
+    div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
+    div[div==0] <- 1
+    labels <- paste(round(tx/10^(3*(div-1)), 3),
+                    c("","Thousand","Million","Billion","Trillion")[div])
+    return(labels)
+  }
+  
+  SizeofPortfolio <- comprss_long(SizeofPortfolio)
   TodaysDate <- format(Sys.Date(),format = "%m.%d.%Y")
   
   
@@ -345,7 +355,14 @@ theme_246 <- function() {
                                 hjust = 0))
 }                             
 
-
+comprss <- function(tx) { 
+  tx[is.na(tx)] <- 0
+  div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
+  div[div==0] <- 1
+  labels <- paste("$",round(tx/10^(3*(div-1)), 2),
+                  c("","K","Mn","Bn","Tn")[div])
+  return(labels)
+}
 
 #----------- Distribution Chart ------------- #
 
@@ -424,6 +441,7 @@ stacked_bar_chart <- function(dat, colors, legend_labels){
 }
 
 # ------------- RANKING CHART - ALIGNMENT ----#
+
 ranking_chart_alignment <- function(plotnumber,ChartType){
   
   if (ChartType == "EQ"){
@@ -690,15 +708,6 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
-  comprss <- function(tx) { 
-    tx[is.na(tx)] <- 0
-    div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
-    div[div==0] <- 1
-    labels <- paste("$",round(tx/10^(3*(div-1)), 2),
-                    c("","K","Mn","Bn","Tn")[div])
-    return(labels)
-  }
-  
   over<- over %>%
         group_by(Sector) %>%
         complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sector"))
@@ -859,7 +868,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-1,1),expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio to 2Â° Market Benchmark")+
+    ylab("Alignment of Portfolio to 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -913,16 +922,7 @@ analysed_summary <- function(plotnumber){
   over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sector","Climate Relevant No 2D Scenario","Climate Relevant w/ 2D Scenario"), ordered=TRUE)
   
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
-  
-  comprss <- function(tx) { 
-    tx[is.na(tx)] <- 0
-    div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
-    div[div==0] <- 1
-    labels <- paste("$",round(tx/10^(3*(div-1)), 2),
-                    c("","K","Mn","Bn","Tn")[div])
-    return(labels)
-  }
-  
+
   over <- over %>%
     group_by(Sector) %>%
     complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Sector.All ="Excluded"))
@@ -1224,7 +1224,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     
     Production$Type <- wrap.labels(Production$Type,20)
     Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
-    xlabels = c("Your Portfolio", "All Insurers", "Market Benchmark")
+    xlabels = c("Your Portfolio", "All Insurers", "Market\nBenchmark")
     
     titles = c("Fossil Fuel Production", "Power Capacity", "Vehicle Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
