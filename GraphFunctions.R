@@ -708,7 +708,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over$Sector <- factor(over$Sector, levels=c("Other Sector","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
     over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sector","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
-  portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
+  portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sector", "Excluded"))$ValueUSD)/sum(filter(over,Valid==1)$ValueUSD)*100,1),"%")
   
   over<- over %>%
         group_by(Sector) %>%
@@ -739,7 +739,12 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize)) 
   }
-  # 
+  
+  plot <- plot+
+    annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label, color = YourportColour,
+             hjust = .5, vjust = 1, size = textsize*(5/14))
+  
   if(PrintPlot){print(plot)}
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
@@ -923,7 +928,7 @@ analysed_summary <- function(plotnumber){
   over$Sector <- factor(over$Sector, levels=c("Other Sector","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
   over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sector","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
-  portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
+  portfolio_label = paste0("Analysed: ", round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
 
   over <- over %>%
     group_by(Sector) %>%
@@ -946,7 +951,7 @@ analysed_summary <- function(plotnumber){
   plot <- plot+
     annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour,
-             hjust = .5, vjust = 1, size = textsize)
+             hjust = .5, vjust = 1, size = textsize*(5/14))
 
   if(PrintPlot){print(plot)}
   
