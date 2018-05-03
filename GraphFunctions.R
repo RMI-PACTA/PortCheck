@@ -427,16 +427,17 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
 
 # -------------STACKED BAR CHARTS ---------- #
 
-stacked_bar_chart <- function(dat, colors, legend_labels){
+stacked_bar_chart <- function(dat, colors, bar_labels, legend_labels){
   # "item", "family", "score", "value"
   colnames <- colnames(dat)
   
-  plottheme <- ggplot(data=dat, aes_string(x=colnames[1], y=colnames[4], fill=colnames[3]),
-                      show.guide = TRUE)+
-    geom_bar(stat = "identity", position = "fill", width = .6)+
+  plottheme <- ggplot(data=dat, show.guide = TRUE)+
+    geom_bar(aes_string(x=colnames[1], y=colnames[4], fill=colnames[3]),
+             stat = "identity", position = "fill", width = .6)+
     #geom_hline(yintercept = c(.25,.50,.75), color="white")+
     scale_fill_manual(values=colors,labels = legend_labels, breaks = names(legend_labels))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
+    scale_x_discrete(labels=bar_labels)+
     guides(fill=guide_legend(nrow = 1))+
     theme_barcharts()
   
@@ -1055,7 +1056,6 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     CompProdSS <- EQCompProdSnapshot
     combin <- EQCombin
     market <- EQBatchTest[EQBatchTest$Type == "Market",]
-    
   } else if(ChartType == "CB"){
     CompProdSS <- CBCompProdSnapshot
     combin <- CBCombin
@@ -1098,7 +1098,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies <- subset(CompProdSS, select=c("Name","Technology","CompanyLvlProd","PortWeightEQYlvl"))
     Companies$TechShare <- Companies$CompanyLvlProd
     Companies$Classification <- "Companies"
-    Companies$Name <- paste0(substr(Companies$Name, 1, 15),"...")
+    #Companies$Name <- paste0(substr(Companies$Name, 1, 15),"...")
     Companies <- subset(Companies, select = c("Name","Classification","Technology","TechShare","PortWeightEQYlvl"))
     colnames(Companies) <- c("Name","Classification","Technology","TechShare","PortWeight")
     Companies[is.na(Companies$Name),"Name"] <- "No Name"
@@ -1151,6 +1151,10 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
     names(colors) <- techorder
     names(tech_labels) <- techorder
+    Companies <- unique(select(Companies, Name, PortWeight))
+    PortfolioData <- unique(select(PortfolioData, Name))
+    
+    bar_labels = c(PortfolioData$Name,"",paste0(substr(Companies$Name, 1, 15),"..."))
     
     scaleFUN <- function(x) {
       x <- sprintf("%.1f", x)
@@ -1158,14 +1162,15 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       return(x)
     }
     
-    PortPlot <- stacked_bar_chart(AllData, colors, tech_labels)+
-      geom_text(aes(x = "", y = 1),
+    PortPlot <- stacked_bar_chart(AllData, colors, rev(bar_labels), tech_labels)+
+      geom_text(data = Companies,
+                aes(x = Name, y = 1,
+                label = paste0(scaleFUN(100*PortWeight),"%")),
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
+      geom_text(data = Companies,
+                aes(x = "", y = 1),
                 label = "Weight",
                 hjust=-0.9,color = textcolor, size=textsize*(5/14))+
-      geom_text(data=filter(AllData,Classification=="Companies"),
-                aes(x = Name, y = 1),
-                label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
-                hjust = -1, color = textcolor, size=textsize*(5/14))+
       xlab("")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
@@ -1594,9 +1599,10 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    OilCompanies$Name <- paste0(substr(OilCompanies$Name, 1, 15),"...")
+    company_labels = unique(filter(OilCompanies, Classification == "Companies")$Name)
+    #portfolio_labels =  unique(filter(OilCompanies, Classification == "Portfolio")$Name)
     
-    
+    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
@@ -1605,6 +1611,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
+      scale_x_discrete(labels = rev(bar_labels))+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
@@ -1702,7 +1709,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       
       return(x)
     }
-    portfolio1$Name <- paste0(substr(portfolio1$Name, 1, 15),"...")
+    
+    company_labels = unique(portfolio1$Name)
+    
+    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
     
     PortPlot <- ggplot(data=portfolio1, aes(x=reorder(Name,PortWeightEQYlvl), y=value,
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
@@ -1711,6 +1721,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = paste(carbonorder," "), breaks = (carbonorder))+
       scale_y_continuous(expand=c(0,0),labels=percent)+
+      scale_x_discrete(labels = rev(bar_labels))+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
