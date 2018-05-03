@@ -717,8 +717,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
   ## "steelblue" color below should be changed to whatever our Portfolio color is
+  over1<- subset(over, Valid==1)
   if (PortName!="MetaPort"){
-    plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
@@ -728,7 +729,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize)) 
   }else {
-    plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
