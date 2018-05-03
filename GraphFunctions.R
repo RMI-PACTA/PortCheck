@@ -1628,6 +1628,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
     dev.off()
     grid.draw(gt)
+    
+    if(length(unique(portfolio1$Name))<=2){
+      h=length(unique(portfolio1$Name))
+    }else{h=3}
+    
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
            bg="transparent",height=3,width=10,dpi=ppi)}
   else {
@@ -1730,8 +1735,12 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     dev.off()
     grid.draw(gt)
     
+    if(length(unique(portfolio1$Name))<=6){
+      h=length(unique(portfolio1$Name))
+    }else{h=6.5}
+    
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-           bg="transparent",height=6.5,width=11,dpi=ppi)
+           bg="transparent",height=h,width=11,dpi=ppi)
     return(TRUE)
   } else {
     print("No Carbon Budget data to plot.")
