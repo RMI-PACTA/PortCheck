@@ -389,7 +389,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   
   x_coord <- length(unique(order$Name))
   
-  arrow <- sum(filter(dfagg, Name == PortName)$Value)
+  #arrow <- sum(filter(dfagg, Name == PortName)$Value)
   
   ylimval <- ylim
   
@@ -405,17 +405,15 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     xlab(paste0("All CA Insurer ",
                 ifelse(ChartType == "EQ", "Equity", "Debt"),
                 " Portfolios"))+
-    annotate("label", x = x_coord, y = ylim,
+    annotate("text", x = PortName, y = ylim/2,
              label = portfolio_label,
              hjust = 1.05, vjust = 1.05, size = textsize*(5/14))
   
-  arrowlength <- ylimval/5
+  #arrowlength <- ylimval/5
   
   if (PortName %in% dfagg$Name) {
     distribution_plot <- distribution_plot +
-      geom_segment(data=filter(dfagg, Name == PortName),
-                   aes(x=Name,xend=Name,y=arrow+arrowlength,yend=arrow+.001),
-                   size = 1, arrow = arrow(length = unit(.4,"cm")))
+      geom_vline(xintercept = which(grepl(PortName, unique(order$Name))), linetype = 2)
   }
   
   return(distribution_plot)
@@ -431,7 +429,7 @@ stacked_bar_chart <- function(dat, colors, legend_labels){
   plottheme <- ggplot(data=dat, aes_string(x=colnames[1], y=colnames[4], fill=colnames[3]),
                       show.guide = TRUE)+
     geom_bar(stat = "identity", position = "fill", width = .6)+
-    geom_hline(yintercept = c(.25,.50,.75), color="white")+
+    #geom_hline(yintercept = c(.25,.50,.75), color="white")+
     scale_fill_manual(values=colors,labels = legend_labels, breaks = names(legend_labels))+
     scale_y_continuous(expand=c(0,0), labels=percent)+
     guides(fill=guide_legend(nrow = 1))+
@@ -991,8 +989,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
   Labels <- c("Immediate Elevated", "Emerging Elevated", "Emerging Moderate")
   ylim = .5
   
-  portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Debt","Equity")," Portfolio\n",
-                           "Immediate Elevated: ", round(100*sum(filter(df, PortName == name)$Risk1),1), "%\n",
+  portfolio_label = paste0("Immediate Elevated: ", round(100*sum(filter(df, PortName == name)$Risk1),1), "%\n",
                            "Emerging Elevated: ", round(100*sum(filter(df, PortName == name)$Risk2),1), "%\n",
                            "Emerging Moderate: ", round(100*sum(filter(df, PortName == name)$Risk3),1), "%")
   
@@ -1026,8 +1023,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   names(BarColors) <- c(MetricCol)
   Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
-  portfolio_label = paste0("Your ", ifelse(ChartType == "CB","Debt","Equity")," Portfolio\n",
-                           "Fossil Fuel Share: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
+  portfolio_label = paste0("Fossil Fuel Share: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
   
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                              portfolio_label, Title, Labels, BarColors) +
