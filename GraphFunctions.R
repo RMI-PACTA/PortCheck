@@ -413,10 +413,11 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     
     distribution_plot <- distribution_plot +
       geom_vline(xintercept = x_coord, linetype = 2)+
-      annotate("text", x = PortName, y = ylim/2,
+      annotate("text", x = PortName, y = ylim,
                label = portfolio_label,
                hjust = ifelse(is_left, -.05, 1.05),
-               size = textsize*(10/14))
+               vjust = 1,
+               size = textsize*(7/14))
     
   }
   
@@ -708,8 +709,6 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
     over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
-  portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sector", "Excluded"))$ValueUSD)/sum(filter(over,Valid==1)$ValueUSD)*100,1),"%")
-  
   over<- over %>%
         group_by(Sector) %>%
         complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sectors"))
@@ -741,10 +740,12 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             legend.text=element_text(size=textsize)) 
   }
   
+  portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
+  
   plot <- plot+
-    annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+    annotate("text", x = "Other", y = max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour,
-             hjust = 1.05, vjust = 1, size = textsize*(7/14))
+             hjust = 1.05, vjust = 1, size = textsize*(10/14))
   
   if(PrintPlot){print(plot)}
 
@@ -952,7 +953,7 @@ analysed_summary <- function(plotnumber){
   plot <- plot+
     annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour,
-             hjust = 1.05, vjust = 1, size = textsize*(7/14))
+             hjust = 1.05, vjust = 1, size = textsize*(10/14))
 
   if(PrintPlot){print(plot)}
   
