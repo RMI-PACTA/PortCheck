@@ -789,7 +789,7 @@ portfolio_sector_stack <- function(plotnumber){
     group_by(Sector,Asset.Type,Valid,Portfolio.Name) %>%
     summarise(ValueUSD=sum(ValueUSD))%>%
     ungroup() %>%
-    group_by(Valid) %>%
+    group_by(Valid,Asset.Type) %>%
     mutate(per=ValueUSD/sum(ValueUSD))
   over<- over %>%
     group_by(Sector,Portfolio.Name) %>%
