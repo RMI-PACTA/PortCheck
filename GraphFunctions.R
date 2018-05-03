@@ -799,8 +799,10 @@ portfolio_sector_stack <- function(plotnumber){
     group_by(Valid,Asset.Type) %>%
     mutate(per=ValueUSD/sum(ValueUSD))
   over<- over %>%
-    group_by(Sector,Portfolio.Name) %>%
-    complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sectors",Portfolio.Name=PortName))
+    complete(Asset.Type=c("Debt","Equity"),
+             Sector = c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), 
+             fill=list(ValueUSD = 0, Valid=1,Portfolio.Name=PortName)) %>%
+    unique()
   over<-as.data.frame(over)
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
@@ -853,8 +855,8 @@ exposure_summary <- function(plotnumber,ChartType){
     rename("Exposure" = Exp.Carsten.Plan.Port.Scen.Market)
   
   Portfolio <- Portfolio %>%
-    group_by(PortName) %>%
-    complete(Technology=technologyorder, fill=list(Exposure = 0))
+    #group_by(PortName) %>%
+    complete(Technology=technologyorder, fill=list(Exposure = 0,PortName = PortName))
   Portfolio[Portfolio$Technology %in% c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap"),"Sector"] <- "Power"
   Portfolio[Portfolio$Technology %in% c("Coal","Gas","Oil"),"Sector"] <- "Fossil Fuels"
   Portfolio[Portfolio$Technology %in% c("Electric","Hybrid","ICE"),"Sector"] <- "Automotive"
