@@ -387,7 +387,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   dfagg <- filter(dfagg, Metric != "Unexposed")
   dfagg$Metric <- factor(dfagg$Metric, levels=c(MetricCol))
   
-  x_coord <- length(unique(order$Name))
+  x_length <- length(unique(order$Name))
   
   #arrow <- sum(filter(dfagg, Name == PortName)$Value)
   
@@ -404,16 +404,20 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     ylab(Title)+
     xlab(paste0("All CA Insurer ",
                 ifelse(ChartType == "EQ", "Equity", "Debt"),
-                " Portfolios"))+
-    annotate("text", x = PortName, y = ylim/2,
-             label = portfolio_label,
-             hjust = 1.05, vjust = 1.05, size = textsize*(5/14))
-  
+                " Portfolios"))
   #arrowlength <- ylimval/5
   
   if (PortName %in% dfagg$Name) {
+    x_coord = which(grepl(PortName, unique(order$Name)))
+    is_left = x_coord/x_length < .50
+    
     distribution_plot <- distribution_plot +
-      geom_vline(xintercept = which(grepl(PortName, unique(order$Name))), linetype = 2)
+      geom_vline(xintercept = x_coord, linetype = 2)+
+      annotate("text", x = PortName, y = ylim/2,
+               label = portfolio_label,
+               hjust = ifelse(is_left, -.05, 1.05),
+               size = textsize*(10/14))
+    
   }
   
   return(distribution_plot)
