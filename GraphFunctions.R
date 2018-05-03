@@ -743,7 +743,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   plot <- plot+
     annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour,
-             hjust = .5, vjust = 1, size = textsize*(5/14))
+             hjust = 1.05, vjust = 1, size = textsize*(7/14))
   
   if(PrintPlot){print(plot)}
 
@@ -875,7 +875,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-1,1),expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio to 2° Market Benchmark")+
+    ylab("Alignment of Portfolio with 2° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -951,7 +951,7 @@ analysed_summary <- function(plotnumber){
   plot <- plot+
     annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour,
-             hjust = .5, vjust = 1, size = textsize*(5/14))
+             hjust = 1.05, vjust = 1, size = textsize*(7/14))
 
   if(PrintPlot){print(plot)}
   
@@ -1312,8 +1312,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
       }
       
       cmd<-grid.arrange(p2,
-                        p3+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),
-                        p1+theme(axis.text.y = element_blank(), axis.title.y = element_blank()),nrow=1)
+                        p3+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")),
+                        p1+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")), nrow=1)
       dev.off()
       if(PrintPlot){print(cmd)}
       ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
