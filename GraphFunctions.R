@@ -1630,8 +1630,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     dev.off()
     grid.draw(gt)
     
-    if(length(unique(portfolio1$Name))<=2){
-      h=length(unique(portfolio1$Name))
+    if(length(unique(OilCompanies$Name))<=2){
+      h=length(unique(OilCompanies$Name))
     }else{h=3}
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
