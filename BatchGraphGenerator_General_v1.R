@@ -326,13 +326,7 @@ for (i in c(326)){
         Graph246("21","CB", "Electric")
         
       }
-      
-
-      
-      
-      
-      
-      
+  
       #Exposure to 2D Scenarios
       if (HasEquity) {
         ranking_chart_alignment("30", "EQ") #Carstens Metric
@@ -384,7 +378,7 @@ for (i in c(326)){
      
       # Creates the report for California
       system.time(
-      CAReport()
+        CAReport()
       )
       
       

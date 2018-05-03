@@ -744,9 +744,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
   
   plot <- plot+
-    annotate("text", x = "Other", y = max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD),
-             label = portfolio_label, color = YourportColour,
-             hjust = 1.05, vjust = 1, size = textsize*(10/14))
+    annotate("text", x = "Equity", y = max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
   
   if(PrintPlot){print(plot)}
 
@@ -952,9 +951,8 @@ analysed_summary <- function(plotnumber){
           legend.text=element_text(size=textsize))
   
   plot <- plot+
-    annotate("text", x = "Other", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
-             label = portfolio_label, color = YourportColour,
-             hjust = 1.05, vjust = 1, size = textsize*(10/14))
+    annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+             label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
 
   if(PrintPlot){print(plot)}
   
@@ -1164,8 +1162,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
     PortPlot <- stacked_bar_chart(AllData, colors, rev(bar_labels), tech_labels)+
       geom_text(data = Companies,
-                aes(x = Name, y = 1,
-                label = paste0(scaleFUN(100*PortWeight),"%")),
+                aes(x = Name, y = 1),
+                label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
                 hjust = -1, color = textcolor, size=textsize*(5/14))+
       geom_text(data = Companies,
                 aes(x = "", y = 1),
@@ -1247,12 +1245,11 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     
     Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
     
-    plottheme<- stacked_bar_chart(Production, colours, labels)+
+    plottheme<- stacked_bar_chart(Production, colours, xlabels, labels)+
       ylab("Share of Sector Production")+
       theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=textsize,margin = unit(c(0,0,1,0),"lines")),
             legend.position = "bottom",
-            legend.title = element_blank())+
-      scale_x_discrete(labels = xlabels)
+            legend.title = element_blank())
     
     
     if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
@@ -1501,8 +1498,8 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
                 aes(x=Year, y=Growth*unit), color=eq_line, size=.75) +
       geom_line(data=subset(ALD.cp, Technology == TechToPlot & PortName == "Listed Market"),
                 aes(x=Year, y=Growth*unit), color=eq_line, size=.75, linetype="dashed")}
-  print(outputplot)
-  #if(PrintPlot){print(outputplot)}
+
+  if(PrintPlot){print(outputplot)}
 
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",TechToPlot,"_246.png",sep=""),height=3.6,width=4.6,dpi=ppi*2)
  
@@ -1634,9 +1631,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     gt <- ggplot_gtable(ggplot_build(PortPlot))
     gt$layout$clip[gt$layout$name == "panel"] <- "off"
     
-    dev.off()
-    grid.draw(gt)
-    
+    if(PrintPlot){
+      dev.off()
+      grid.draw(gt)
+    }
+      
     if(length(unique(OilCompanies$Name))<=2){
       h=length(unique(OilCompanies$Name))
     }else{h=3}
@@ -1744,8 +1743,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     gt <- ggplot_gtable(ggplot_build(PortPlot))
     gt$layout$clip[gt$layout$name == "panel"] <- "off"
     
-    dev.off()
-    grid.draw(gt)
+    if(PrintPlot){
+      dev.off()
+      grid.draw(gt)
+    }
     
     if(length(unique(portfolio1$Name))<=6){
       h=length(unique(portfolio1$Name))
