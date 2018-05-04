@@ -806,6 +806,8 @@ portfolio_sector_stack <- function(plotnumber){
   over<-as.data.frame(over)
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
+  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  
   temp <-max(sum(filter(over,Portfolio.Name==PortName&Valid==1)$per))
 
   if (PortName!="MetaPort"){
