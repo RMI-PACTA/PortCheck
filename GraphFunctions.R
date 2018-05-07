@@ -677,13 +677,13 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 
 Overview_portfolio_sector_stack <- function(plotnumber){
   
-  if (PortName != "MetaPort") {
-    over <- Subgroup.Overview %>%
-      filter(Portfolio.Name == PortName)
-  } else {
-    over <- Subgroup.Overview
-  }
-
+  # if (PortName != "MetaPort") {
+  #   over <- Subgroup.Overview %>%
+  #     filter(Portfolio.Name == PortName)
+  # } else {
+  #   over <- Subgroup.Overview
+  # }
+  over <- Subgroup.Overview
   over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
   
   
@@ -707,22 +707,25 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2° Scenario" & over$Valid==1 , "Climate Relevant No 2° Scenario",over$Sector.All)
   over$Sector.All <- ifelse(over$Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
   
-  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
-    over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
-  over<- over %>%
-        group_by(Sector) %>%
-        complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Valid=1,Sector ="Other Sectors"))
+  # over<- over %>%
+  #       #group_by(Sector) %>%
+  #       complete(Asset.Type=c("Debt","Equity","Other"),
+  #                Sector=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"),
+  #                fill=list(ValueUSD = 0, Valid=1))
   over<- as.data.frame(over)
-  orderofchart <- c("Debt","Equity","Other")
-  over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
+ 
   ## "steelblue" color below should be changed to whatever our Portfolio color is
-  over1<- subset(over, Valid==1)
+  over1<- subset(over, Valid==1 & Portfolio.Name ==PortName)
+  over1$Asset.Type <- factor(over1$Asset.Type,levels=c("Debt","Equity","Other"))
+  over1$Sector <- factor(over1$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  over1$Sector.All <- factor(over1$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
+  
   if (PortName!="MetaPort"){
     plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
-      scale_x_discrete(name="Asset Type") +
+      scale_x_discrete(name="Asset Type",drop=F) +
       scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
@@ -836,7 +839,7 @@ portfolio_sector_stack <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
-         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3,width=3,dpi=ppi)   #linewidth_in*.9
 }
 
 exposure_summary <- function(plotnumber,ChartType){
@@ -873,10 +876,13 @@ exposure_summary <- function(plotnumber,ChartType){
   TechLabels <- gsub("Cap","",technologyorder)
   names(TechLabels) <- technologyorder
   
+  Portfolio$Show<- ifelse(Portfolio$Exposure>1,1,Portfolio$Exposure)
+  Portfolio$Show<- ifelse(Portfolio$Exposure< -1,-1,Portfolio$Exposure)
+  
   plot <- ggplot(Portfolio) +
-    geom_bar(aes(x = Technology, y = Exposure, fill = Exposure >= 0), stat = "identity")+
+    geom_bar(aes(x = Technology, y = Show, fill = Show >= 0), stat = "identity")+
     scale_fill_manual(values=c("FALSE" = area_6, "TRUE" = area_2))+
-    geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
+    geom_text(size=textsize*(5/14),aes(x = Technology, y = Show,label = paste0(round(100*Exposure),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-1,1),expand = c(0.08,0.08))+
@@ -1709,9 +1715,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     
     names(colors) <- carbonorder
     
-    perc <- function(x, digits = 1, format = "f", ...) {
-      x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-      
+    perc <- function(x, format = "f", ...) {
+      x<-ifelse(x*100 >=10,
+             paste0(formatC(100 * x, format = format, digits = 0, ...), "%"),
+             paste0(formatC(100 * x, format = format, digits = 1, ...), "%"))
       return(x)
     }
     
@@ -1729,14 +1736,14 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       scale_x_discrete(labels = rev(bar_labels))+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
-      
+      coord_flip()+
       geom_text(data=portfolio1,
                 aes(x = Name, y = 1),
                 label = perc(portfolio1$PortWeightEQYlvl),
                 hjust = -1, color = textcolor, size=textsize*(5/14))+
       xlab("")+
       ylab("TechShare")+
-      coord_flip()+
+      
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
       annotation_custom(
