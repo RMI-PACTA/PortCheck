@@ -1187,11 +1187,9 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    if(length(unique(OilCompanies$Name))<3){
-      h=length(unique(OilCompanies$Name))
-    }else{h=3}
+
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=h,width=10,dpi=ppi)
+           bg="transparent",height=3,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
