@@ -750,7 +750,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             legend.text=element_text(size=textsize)) 
    
      portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
-     ymax<- max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD)
+     ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
   }
   
 
