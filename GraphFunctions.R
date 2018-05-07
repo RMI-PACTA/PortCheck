@@ -756,7 +756,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
 
   plot <- plot+
     annotate("text", x = "Equity", y = ymax,
-             label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
+             label = portfolio_label, color = YourportColour, vjust = 1, hjust = .25, size = textsize*(7/14))
   
   if(PrintPlot){print(plot)}
 
@@ -971,7 +971,7 @@ analysed_summary <- function(plotnumber){
   
   plot <- plot+
     annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
-             label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
+             label = portfolio_label, color = YourportColour, vjust = 1, hjust = .25, size = textsize*(7/14))
 
   if(PrintPlot){print(plot)}
   
