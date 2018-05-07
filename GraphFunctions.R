@@ -738,7 +738,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
     
   }else {
-    plot <- ggplot(data=over, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=subset(over,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
@@ -749,7 +749,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize)) 
    
-     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
+     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
      ymax<- max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD)
   }
   
