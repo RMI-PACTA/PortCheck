@@ -706,6 +706,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Climate Relevant w/ 2° Scenario")
   over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2° Scenario" & over$Valid==1 , "Climate Relevant No 2° Scenario",over$Sector.All)
   over$Sector.All <- ifelse(over$Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
+  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
   
   # over<- over %>%
@@ -731,8 +733,11 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize)) 
+    
+    portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
+    
   }else {
-    plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=over, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
@@ -742,12 +747,14 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize)) 
+   
+     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
+    
   }
   
-  portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
-  
+
   plot <- plot+
-    annotate("text", x = "Equity", y = max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD),
+    annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
              label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
   
   if(PrintPlot){print(plot)}
