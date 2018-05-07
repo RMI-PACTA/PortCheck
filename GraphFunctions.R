@@ -408,7 +408,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   #arrowlength <- ylimval/5
   
   if (PortName %in% dfagg$Name) {
-    x_coord = which(grepl(PortName, unique(order$Name)))
+    x_coord = which(order$Name == PortName)
     is_left = x_coord/x_length < .50
     
     distribution_plot <- distribution_plot +
