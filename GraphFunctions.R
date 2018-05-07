@@ -1204,7 +1204,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     
 
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=3,width=14,dpi=ppi)
+           bg="transparent",height=3*(1.4),width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
