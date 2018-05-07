@@ -735,6 +735,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             legend.text=element_text(size=textsize)) 
     
     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
+    ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
     
   }else {
     plot <- ggplot(data=over, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
@@ -749,12 +750,12 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             legend.text=element_text(size=textsize)) 
    
      portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
-    
+     ymax<- max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD)
   }
   
 
   plot <- plot+
-    annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
+    annotate("text", x = "Equity", y = ymax,
              label = portfolio_label, color = YourportColour, vjust = 1, size = textsize*(10/14))
   
   if(PrintPlot){print(plot)}
