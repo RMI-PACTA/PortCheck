@@ -1757,7 +1757,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
       annotation_custom(
         grob = textGrob(label = "Weight",
-                        gp=gpar(fontsize=8.5,col="black"),
+                        gp=gpar(fontsize=8.5,col=textcolor),
                         hjust = 0),
         xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.05)
     
