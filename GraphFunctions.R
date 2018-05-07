@@ -823,7 +823,7 @@ portfolio_sector_stack <- function(plotnumber){
 
   if (PortName!="MetaPort"){
     plot <- ggplot(data=subset(over, Portfolio.Name==PortName&Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
-      geom_bar(position="stack", stat="identity") +
+      geom_bar(position="stack", stat="identity",width =0.6) +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="", labels = scales::percent, expand=c(0,0),limits = c(0,temp+0.005)) +
@@ -833,7 +833,7 @@ portfolio_sector_stack <- function(plotnumber){
             legend.text=element_text(size=textsize)) 
   }else {
     plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
-      geom_bar(position="stack", stat="identity") +
+      geom_bar(position="stack", stat="identity",width =0.6) +
       scale_fill_manual(name="", labels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), values=c("#deebf7","#90b6e4",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="", labels=scales::percent, expand=c(0,0),limits = c(0,1)) +
@@ -847,7 +847,7 @@ portfolio_sector_stack <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
-         bg="transparent",height=3,width=3,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
 }
 
 exposure_summary <- function(plotnumber,ChartType){
