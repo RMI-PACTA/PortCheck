@@ -876,8 +876,9 @@ exposure_summary <- function(plotnumber,ChartType){
   TechLabels <- gsub("Cap","",technologyorder)
   names(TechLabels) <- technologyorder
   
-  Portfolio$Show<- ifelse(Portfolio$Exposure>1,1,Portfolio$Exposure)
-  Portfolio$Show<- ifelse(Portfolio$Exposure< -1,-1,Portfolio$Exposure)
+
+  Portfolio$Show<-ifelse(Portfolio$Exposure>1,1,Portfolio$Exposure)
+  Portfolio$Show<- ifelse(Portfolio$Show< -1,-1,Portfolio$Show)
   
   plot <- ggplot(Portfolio) +
     geom_bar(aes(x = Technology, y = Show, fill = Show >= 0), stat = "identity")+
