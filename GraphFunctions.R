@@ -1186,8 +1186,12 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       grid.draw(gt)
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
+    
+    if(length(unique(OilCompanies$Name))<3){
+      h=length(unique(OilCompanies$Name))
+    }else{h=3}
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=3,width=10,dpi=ppi)
+           bg="transparent",height=h,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
@@ -1640,12 +1644,12 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
       
-    if(length(unique(OilCompanies$Name))<=2){
+    if(length(unique(OilCompanies$Name))<3){
       h=length(unique(OilCompanies$Name))
     }else{h=3}
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
-           bg="transparent",height=3,width=10,dpi=ppi)}
+           bg="transparent",height=h,width=10,dpi=ppi)}
   else {
     print("No oil data to plot.")
   }
