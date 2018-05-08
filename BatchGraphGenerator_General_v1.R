@@ -292,7 +292,8 @@ for (i in c(326)){
       
       
       if (HasEquity) {
-        exposure_summary("06", "EQ")  
+        exposure_summary("06", "EQ")
+        exposure_summary_carstens("101", "EQ")
         sector_techshare("09","EQ","All")
         Fossil_Distribution("11", "EQ")
         
@@ -310,7 +311,8 @@ for (i in c(326)){
       }
       
       if (HasDebt) {      
-        exposure_summary("07", "CB")  
+        exposure_summary("07", "CB")
+        exposure_summary_carstens("102", "CB")
         sector_techshare("10","CB","All")
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
@@ -334,7 +336,7 @@ for (i in c(326)){
       }
       if (HasDebt) {
         ranking_chart_alignment("31", "CB") #Carstens Metric
-        ranking_chart_alignment_Carstenmetric("99", "CB")
+        ranking_chart_alignment_Carstenmetric("100", "CB")
       }
       
       # As mentioned - these are not EQ and CB - these must be combined somehow. 

@@ -1142,6 +1142,64 @@ exposure_summary <- function(plotnumber,ChartType){
          bg="transparent",height=3,width=7.5, units="in",dpi=ppi)
 }
 
+exposure_summary_carstens <- function(plotnumber,ChartType){
+  
+  if(ChartType == "CB") {
+    Portfolio <- CBCombin
+  } else if (ChartType == "EQ") {
+    Portfolio <- EQCombin
+  }
+  
+  BrownTech = c("ICE","Coal","Gas","Oil","CoalCap","GasCap", "OilCap")
+  
+  technologyorder <- technology_order
+  
+  Portfolio <- Portfolio %>%
+    filter(Year == Startyear+5, Technology != "OilCap") %>%   #!= "OilCap"
+    select(PortName, Sector, Technology, CarstenMetric_Port, Scen.CarstenMetric_Port.Market) %>%
+    mutate("Exposure" = CarstenMetric_Port - Scen.CarstenMetric_Port.Market)
+  
+  Portfolio <- Portfolio %>%
+    #group_by(PortName) %>%
+    complete(Technology=technologyorder, fill=list(Exposure = 0,PortName = PortName))
+  Portfolio[Portfolio$Technology %in% c("CoalCap","GasCap","NuclearCap","HydroCap","RenewablesCap"),"Sector"] <- "Power"
+  Portfolio[Portfolio$Technology %in% c("Coal","Gas","Oil"),"Sector"] <- "Fossil Fuels"
+  Portfolio[Portfolio$Technology %in% c("Electric","Hybrid","ICE"),"Sector"] <- "Automotive"
+  
+  Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"] <- -1*Portfolio[Portfolio$Technology %in% BrownTech, "Exposure"]
+  
+  Portfolio$Sector <- factor(Portfolio$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
+  Portfolio$Technology <- factor(Portfolio$Technology, levels = technologyorder)
+  
+  Portfolio <- arrange(Portfolio, desc(Technology))
+  
+  TechLabels <- gsub("Cap","",technologyorder)
+  names(TechLabels) <- technologyorder
+  
+  # 
+  # Portfolio$Show<-ifelse(Portfolio$Exposure>1,1,Portfolio$Exposure)
+  # Portfolio$Show<- ifelse(Portfolio$Show< -1,-1,Portfolio$Show)
+  # 
+  plot <- ggplot(Portfolio) +
+    geom_bar(aes(x = Technology, y = Exposure, fill = Exposure >= 0), stat = "identity")+
+    scale_fill_manual(values=c("FALSE" = area_6, "TRUE" = area_2))+
+    geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure,2),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
+    facet_grid(. ~ Sector, scales = "free", space = "free")+
+    geom_hline(yintercept = 0, size = 1, color = textcolor)+
+    scale_y_continuous(labels=percent, limits = c(-.05,.05),expand = c(0,0))+
+    scale_x_discrete(labels=TechLabels,expand=c(0,0))+
+    ylab("Alignment of Portfolio with 2° Market Benchmark")+
+    theme_barcharts()+
+    theme(panel.spacing.x = unit(.5,"cm"),
+          strip.text = element_text(size=textsize,colour=textcolor),
+          strip.background = element_blank(),
+          plot.margin = (unit(c(0, 0, 0.1, 0), "lines")))
+  
+  if(PrintPlot){print(plot)}
+  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
+         bg="transparent",height=3,width=7.5, units="in",dpi=ppi)
+}
+
 analysed_summary <- function(plotnumber){
   
   if (PortName != "MetaPort") {
