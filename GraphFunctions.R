@@ -897,7 +897,7 @@ ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
   #       }else {graphheight <- 7.2}
   #   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_rankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
+  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_carstenrankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
   
   
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
@@ -1196,7 +1196,7 @@ exposure_summary_carstens <- function(plotnumber,ChartType){
           plot.margin = (unit(c(0, 0, 0.1, 0), "lines")))
   
   if(PrintPlot){print(plot)}
-  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_ExposureSummary.png', sep=""),
+  ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarstenExposureSummary.png', sep=""),
          bg="transparent",height=3,width=7.5, units="in",dpi=ppi)
 }
 
