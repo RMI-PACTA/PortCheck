@@ -218,7 +218,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(441,326)){
+for (i in c(326)){
 
   ### Specify the Names from the Test List
   
@@ -330,9 +330,11 @@ for (i in c(441,326)){
       #Exposure to 2D Scenarios
       if (HasEquity) {
         ranking_chart_alignment("30", "EQ") #Carstens Metric
+        ranking_chart_alignment_Carstenmetric("99", "EQ")
       }
       if (HasDebt) {
         ranking_chart_alignment("31", "CB") #Carstens Metric
+        ranking_chart_alignment_Carstenmetric("100", "CB")
       }
       
       # As mentioned - these are not EQ and CB - these must be combined somehow. 

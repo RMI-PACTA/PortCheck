@@ -677,7 +677,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 
 # ------------- RANKING CHART - ALIGNMENT USING CarstenMetric_Port ----#
 
-ranking_chart_alignment <- function(plotnumber,ChartType){
+ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
   
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
