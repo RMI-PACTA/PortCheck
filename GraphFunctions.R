@@ -897,7 +897,9 @@ ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
   #       }else {graphheight <- 7.2}
   #   
   
-  ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_carstenrankingchart.png', sep=""),bg="transparent",height=7.2,width=9.7,dpi=ppi)
+  ggsave(outputplot,
+         filename=paste0(plotnumber,"_",PortfolioName,'_',ChartType,'_carstenrankingchart.png', sep=""),
+         bg="transparent",height=7.2,width=9.7,dpi=ppi)
   
   
   # outputplot <- ggplot_gtable(ggplot_build(outputplot))
@@ -1186,7 +1188,7 @@ exposure_summary_carstens <- function(plotnumber,ChartType){
     geom_text(size=textsize*(5/14),aes(x = Technology, y = Exposure,label = paste0(round(100*Exposure,2),"%"),vjust = ifelse(Exposure >= 0, -.3, 1)))+
     facet_grid(. ~ Sector, scales = "free", space = "free")+
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
-    scale_y_continuous(labels=percent, limits = c(-.05,.05),expand = c(0,0))+
+    scale_y_continuous(labels=percent, limits = c(-.02,.02),expand = c(0,0))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
     ylab("Alignment of Portfolio with 2° Market Benchmark")+
     theme_barcharts()+
