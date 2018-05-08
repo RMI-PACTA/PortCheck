@@ -787,12 +787,12 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   
   Exposures$comploc<-Exposures$CarstenMetric_Port*100
   Exposures$complabel <- paste0(round(Exposures$comploc,0),"%")
-  Exposures$comploc<-ifelse(Exposures$comploc >100,100,Exposures$comploc)
-  Exposures$comploc<-ifelse(Exposures$comploc < -100,-100,Exposures$comploc)
+  Exposures$comploc<-ifelse(Exposures$comploc >10,10,Exposures$comploc)
+  Exposures$comploc<-ifelse(Exposures$comploc < -10,-10,Exposures$comploc)
   
   
-  Exposures$minlabel<- -100 #round(PlotData$LowLim*100,0)
-  Exposures$maxlabel<- 100 #round(PlotData$UppLim*100,0) 
+  Exposures$minlabel<- -10 #round(PlotData$LowLim*100,0)
+  Exposures$maxlabel<- 10 #round(PlotData$UppLim*100,0) 
   Exposures$minlabel <- paste0(Exposures$minlabel, " %")
   Exposures$maxlabel <- paste0(Exposures$maxlabel, " %")
   
