@@ -608,9 +608,9 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
     
     # Ranking box and label
     
-    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=rel(3),colour=textcolor,fontface = "bold")+ # Rank Heading
+    annotate("text", label = GT["RankTitle"][[1]], x= 1.3,y = max(locations)+ 0.5, size=10,colour=textcolor,fontface = "bold")+ # Rank Heading
     
-    annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.3,hjust=0.5, y = locations,size=rel(3),colour=textcolor)+ # Company Ranking
+    annotate("text", label = paste0(Exposures$my_ranks," ",GT["RankOF"][[1]]," ",Exposures$mx), x= 1.3,hjust=0.5, y = locations,size=10,colour=textcolor)+ # Company Ranking
     
     theme(panel.background = element_rect(fill="transparent"),
           panel.grid.major.x = element_blank() ,
@@ -633,7 +633,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
   #                                     "Electric", "Hybrid","Renewables", "Hydro", "Nuclear"))) {
   outputplot<-    outputplot+
     labs(x=NULL,y= NULL)+
-    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=rel(3), hjust=0,colour=textcolor)
+    annotate(geom="text",x=labelloc,y=Exposures$Locations[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],label=wrap.labels(Exposures$TechLabel[Exposures$Technology %in%  c("CoalCap","GasCap","ICE","Oil","Gas","Coal","Electric", "Hybrid","Renewables", "Hydro", "Nuclear")],12), size=10, hjust=0,colour=textcolor)
   
   if ((is.null(a)==FALSE) & (is.null(b)==FALSE) & (is.null(d)==FALSE)){     
     outputplot <- outputplot +
@@ -677,7 +677,7 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 
 # ------------- RANKING CHART - ALIGNMENT USING CarstenMetric_Port ----#
 
-ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
+#ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
   
   if (ChartType == "EQ"){
     Exposures <- EQCombin[which(EQCombin$Year==Startyear+5),]
@@ -968,9 +968,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=12),
-            axis.text.x=element_text(colour=textcolor,size=12),
-            axis.text.y=element_text(colour=textcolor,size=12)) 
+            legend.text=element_text(size=11),
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
     
     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
@@ -985,9 +985,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=12),
-            axis.text.x=element_text(colour=textcolor,size=12),
-            axis.text.y=element_text(colour=textcolor,size=12)) 
+            legend.text=element_text(size=11),
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
    
      portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
      ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1070,9 +1070,9 @@ portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=12),
-            axis.text.x=element_text(colour=textcolor,size=12),
-            axis.text.y=element_text(colour=textcolor,size=12)) 
+            legend.text=element_text(size=11),
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
   }else {
     plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width =0.6) +
@@ -1083,9 +1083,9 @@ portfolio_sector_stack <- function(plotnumber){
       geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=per), fill="white", stat="identity") +
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=12),
-            axis.text.x=element_text(colour=textcolor,size=12),
-            axis.text.y=element_text(colour=textcolor,size=12)) 
+            legend.text=element_text(size=11),
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
   }
   # 
   if(PrintPlot){print(plot)}
@@ -1269,7 +1269,8 @@ analysed_summary <- function(plotnumber){
     guides(fill=guide_legend(nrow=2))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
-          legend.text=element_text(size=textsize))
+          legend.text=element_text(size=11),
+          axis.text.x=element_text(colour=textcolor,size=11))
   
   plot <- plot+
     annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
@@ -1485,11 +1486,11 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       geom_text(data = Companies,
                 aes(x = Name, y = 1),
                 label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
-                hjust = -1, color = textcolor, size=textsize*(5/14))+
+                hjust = -1, color = textcolor, size=12*(5/14))+
       geom_text(data = Companies,
                 aes(x = "", y = 1),
                 label = "Weight",
-                hjust=-0.9,color = textcolor, size=textsize*(5/14))+
+                hjust=-0.9,color = textcolor, size=12*(5/14))+
       xlab("")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
@@ -1938,7 +1939,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=OilCompanies,
                 aes(x = Name, y = 1),
                 label = perc(OilCompanies$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=textsize*(5/14))+
+                hjust = -1, color = textcolor, size=12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
@@ -1946,7 +1947,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
       guides(fill = guide_legend(ncol = 5,keywidth=1))+
       annotation_custom(
-        grob = textGrob(label = "Weight", hjust =0,gp=gpar(fontsize=8.5,col=textcolor)),
+        grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12*(5/14),col=textcolor)),
         xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
     
     
@@ -2051,7 +2052,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=portfolio1,
                 aes(x = Name, y = 1),
                 label = perc(portfolio1$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=textsize*(5/14))+
+                hjust = -1, color = textcolor, size=12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       
@@ -2059,8 +2060,8 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
       annotation_custom(
         grob = textGrob(label = "Weight",
-                        gp=gpar(fontsize=8.5,col=textcolor),
-                        hjust = 0),
+                        gp=gpar(fontsize=12*(5/14),col=textcolor),
+                        hjust = -0.9),
         xmin = n_distinct(portfolio1$Name)+0.5, xmax = n_distinct(portfolio1$Name)+1, ymin = 1, ymax = 1.05)
     
     

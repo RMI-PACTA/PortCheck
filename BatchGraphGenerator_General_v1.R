@@ -149,6 +149,8 @@ CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName == "MetaPort"] <- "MetaPor
 #Add All Lower Case of PortName
 CBBatchTest$portname <- tolower(CBBatchTest$PortName)
 EQBatchTest$portname <- tolower(EQBatchTest$PortName)
+CBBatchTest$portname <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", CBBatchTest$portname, perl=TRUE)
+EQBatchTest$portname <- gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", EQBatchTest$portname, perl=TRUE)
 
 
 ### External Data Read In
