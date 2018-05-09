@@ -534,7 +534,7 @@ SetGraphInputs <- function(){
   LowRisk <<- area_2_4
 
   #text size
-  textsize <<- 8.5
+  textsize <<- 12
   textcolor <<- "#3D3D3C"
   AxisColour <<- "#3D3D3C"
   

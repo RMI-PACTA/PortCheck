@@ -968,7 +968,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=textsize)) 
+            legend.text=element_text(size=12),
+            axis.text.x=element_text(colour=textcolor,size=12),
+            axis.text.y=element_text(colour=textcolor,size=12)) 
     
     portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
@@ -983,7 +985,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=textsize)) 
+            legend.text=element_text(size=12),
+            axis.text.x=element_text(colour=textcolor,size=12),
+            axis.text.y=element_text(colour=textcolor,size=12)) 
    
      portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
      ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1066,7 +1070,9 @@ portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=textsize)) 
+            legend.text=element_text(size=12),
+            axis.text.x=element_text(colour=textcolor,size=12),
+            axis.text.y=element_text(colour=textcolor,size=12)) 
   }else {
     plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width =0.6) +
@@ -1077,7 +1083,9 @@ portfolio_sector_stack <- function(plotnumber){
       geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=per), fill="white", stat="identity") +
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=textsize)) 
+            legend.text=element_text(size=12),
+            axis.text.x=element_text(colour=textcolor,size=12),
+            axis.text.y=element_text(colour=textcolor,size=12)) 
   }
   # 
   if(PrintPlot){print(plot)}

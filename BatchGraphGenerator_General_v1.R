@@ -146,6 +146,11 @@ CBCompProdSnapshots$Type[CBCompProdSnapshots$InvestorName != "California Insurer
 CBCompProdSnapshots$Type[CBCompProdSnapshots$PortName == "MetaPort"] <- "MetaPortfolio"
 
 
+#Add All Lower Case of PortName
+CBBatchTest$portname <- tolower(CBBatchTest$PortName)
+EQBatchTest$portname <- tolower(EQBatchTest$PortName)
+
+
 ### External Data Read In
 setwd(PROC.DATA.PATH)
 AllIEATargets <- read.csv("IEATargets2016_AllRegions.csv", stringsAsFactors=FALSE)
