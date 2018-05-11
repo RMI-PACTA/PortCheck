@@ -302,7 +302,7 @@ for (i in c(326)){
       if (HasEquity) {
         # exposure_summary("06", "EQ")
         exposure_summary_carstens("06", "EQ")
-        sector_techshare("09","EQ","All", Startyear)
+        sector_techshare("09","EQ","All")
         sector_techshare_area("50","EQ","All")
         Fossil_Distribution("11", "EQ")
         
@@ -322,7 +322,7 @@ for (i in c(326)){
       if (HasDebt) {      
         # exposure_summary("07", "CB")
         exposure_summary_carstens("07", "CB")
-        sector_techshare("10","CB","All", Startyear)
+        sector_techshare("10","CB","All")
         sector_techshare_area("51","CB","All")
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
