@@ -25,8 +25,8 @@ CAReportData <- function(){
   
   
   # SizeofPortfolio <- PortfolioBreakdown$comma.PortfolioSize.[PortfolioBreakdown$PortName == PortName]
-  if(PortfolioName == "MetaPort"){SizeofPortfolio <- 4020919115682}
-  else{
+  if(PortfolioName == "MetaPort"){SizeofPortfolio <- 4020919115682
+  } else{
     SizePortfolio <-  Subgroup.Overview %>%
       filter(Portfolio.Name == PortName) %>%
       distinct(Port.ValueUSD)
@@ -91,13 +91,13 @@ CAReportData <- function(){
     c("HasOGEQ",HasOGEQ),
     c("HasCoalEQ",HasCoalEQ),
     c("NoPeers",NoPeers),
-    c("AssetClass", AssetClass),
-    c("FFSectorPortEQ",FFSectorPortEQ),
-    c("PowerSectorPortEQ",PowerSectorPortEQ),
-    c("AutoSectorPortEQ",AutoSectorPortEQ),
-    c("FFSectorPortCB",FFSectorPortCB),
-    c("PowerSectorPortCB",PowerSectorPortCB),
-    c("AutoSectorPortCB",AutoSectorPortCB)
+    c("AssetClass", AssetClass)#,
+    # c("FFSectorPortEQ",FFSectorPortEQ),
+    # c("PowerSectorPortEQ",PowerSectorPortEQ),
+    # c("AutoSectorPortEQ",AutoSectorPortEQ),
+    # c("FFSectorPortCB",FFSectorPortCB),
+    # c("PowerSectorPortCB",PowerSectorPortCB),
+    # c("AutoSectorPortCB",AutoSectorPortCB)
   )
   
   colnames(reportdata) <- as.character(unlist(reportdata[1,]))
@@ -189,10 +189,10 @@ CAReport <- function(){
   }
   
   # Replace Sector Weight Values
-  a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
-  for (j in 1:nrow(a)){
-    text$text <- gsub(as.character(a$SectorList[j]),reportdata[as.character(a$SectorList[j])][[1]],text$text)
-  }  
+  # a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
+  # for (j in 1:nrow(a)){
+  #   text$text <- gsub(as.character(a$SectorList[j]),reportdata[as.character(a$SectorList[j])][[1]],text$text)
+  # }  
   
   # Replace Insurer Name
   # reportdata$InsuranceCompanyName <- gsub("&","\\\\&",reportdata$InsuranceCompanyName)
@@ -230,7 +230,7 @@ CAReport <- function(){
   }  
   
   # Save the template file
-  TemplateNameNew <- paste0("Template_",PortfolioName,"_",Languagechoose)
+  TemplateNameNew <- paste0("Template_",PortfolioName)
   write.table(text, paste0(TemplateNameNew,".Rnw"),col.names = FALSE,row.names = FALSE,quote=FALSE,fileEncoding = "UTF-8")  
   
   # Create the PDF
@@ -246,8 +246,8 @@ CAReport <- function(){
   
   # Rename output file
   if (InvestorName == PortfolioName){
-    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",Languagechoose,".pdf"))}else{
-      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,"_",Languagechoose,".pdf"))}
+    file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,".pdf"))}else{
+      file.rename(paste0(TemplateNameNew,".pdf"),paste0("AlignmentReport_",InvestorName,"_",PortfolioName,".pdf"))}
   
   
   
@@ -1594,7 +1594,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
     Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
     xlabels = c("Your\nPortfolio", "All\nInsurers", "Market\nBenchmark")
     
-    titles = c("Fossil Fuel Production", "Power Capacity", "Vehicle Production")
+    titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
     
     chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
@@ -1626,7 +1626,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
       dat <- subset(Production,Sector=="Automotive")
       if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
         p1 <- plottheme %+% dat +
-          ggtitle("Vehicle Production")
+          ggtitle("Automotive Production")
       } else {
         dat <- rbind(dat, c("Type" = "Portfolio",
                             "Sector" = "Automotive",
@@ -1722,7 +1722,7 @@ sector_techshare_3yr <- function(plotnumber,ChartType,SectorToPlot){
     Combin$Sector <- factor(Combin$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     
     xlabels = c("2018","2019","2020")
-    titles = c("Fossil Fuel Production", "Power Capacity", "Vehicle Production")
+    titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
     
     Combin$Year <- as.factor(Combin$Year)
@@ -1751,7 +1751,7 @@ sector_techshare_3yr <- function(plotnumber,ChartType,SectorToPlot){
       dat <- subset(Combin,Sector=="Automotive" )
       if (nrow(subset(dat)) > 0) {  
         p1 <- plottheme %+% dat +
-          ggtitle("Vehicle Production")
+          ggtitle("Automotive Production")
       } 
       
       
@@ -2250,7 +2250,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
     Combin$Sector <- factor(Combin$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     Combin <- left_join(Combin,colour,by="Technology")
     # xlabels = c("2018","2019","2020")
-    # titles = c("Fossil Fuel Production", "Power Capacity", "Vehicle Production")
+    # titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     # names(titles) <- c("Fossil Fuels", "Power", "Automotive")
     
     #Combin$Year <- as.factor(Combin$Year)
@@ -2278,7 +2278,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
         p1 <- plottheme %+% dat +
           scale_y_continuous(labels = scales::percent)+
           ylab("Share of Sector Production (Vehicles)")+
-          ggtitle("Vehicle Production")
+          ggtitle("Automotive Production")
       } else {
         dat <- data.frame("Sector" = "Automotive", "Technology" = "ICE", "per" = 0, "Year"=2018)
         dat$per <- as.numeric(dat$per)

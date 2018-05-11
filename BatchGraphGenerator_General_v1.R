@@ -300,9 +300,10 @@ for (i in c(326)){
       
       
       if (HasEquity) {
-        exposure_summary("06", "EQ")
-        exposure_summary_carstens("98", "EQ")
-        sector_techshare_area("09","EQ","All")
+        # exposure_summary("06", "EQ")
+        exposure_summary_carstens("06", "EQ")
+        sector_techshare("09","EQ","All", Startyear)
+        sector_techshare_area("50","EQ","All")
         Fossil_Distribution("11", "EQ")
         
         
@@ -319,9 +320,10 @@ for (i in c(326)){
       }
       
       if (HasDebt) {      
-        exposure_summary("07", "CB")
-        exposure_summary_carstens("99", "CB")
-        sector_techshare_area("10","CB","All")
+        # exposure_summary("07", "CB")
+        exposure_summary_carstens("07", "CB")
+        sector_techshare("10","CB","All", Startyear)
+        sector_techshare_area("51","CB","All")
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
         
@@ -383,7 +385,7 @@ for (i in c(326)){
       
       sector_techshare_area(99,"EQ","All")
     
-      dev.off()
+      # dev.off()
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
