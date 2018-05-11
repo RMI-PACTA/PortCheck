@@ -220,7 +220,7 @@ unique(intersect(EQBatchTest$BenchmarkRegion, EQCompProdSnapshots$BenchmarkRegio
 unique(intersect(CBBatchTest$Scenario, CBCompProdSnapshots$Scenario))
 unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 
-
+i=326
 #-------
 # Loop through Portfolios
 #--------
@@ -292,6 +292,7 @@ for (i in c(326)){
       ### CA TEMPLATE #######
       #######################
      
+      SecAnalysis <- SectorDataAnalysis()
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
       Overview_portfolio_sector_stack("02")
@@ -379,6 +380,8 @@ for (i in c(326)){
           HasCarbonBudget <- carboninout("40", 20, "EQ")
         }
       }
+      
+      sector_techshare_area(99,"EQ","All")
     
       dev.off()
       
