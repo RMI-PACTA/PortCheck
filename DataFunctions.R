@@ -325,11 +325,11 @@ filterports <- function(PortData, PortfolioInfo, BrandType){
 RankPortfolios <- function( ChartType, Name){
   a<-Name
   if (ChartType == "EQ"){
-    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear+5),]
+    PortfolioExposures <- EQBatchTest[which(EQBatchTest$Year==Startyear),]
     
     
   }else if (ChartType == "CB"){
-    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear+5),]
+    PortfolioExposures <- CBBatchTest[which(CBBatchTest$Year==Startyear),]
     
   }
 

@@ -301,38 +301,38 @@ for (i in c(326)){
       if (HasEquity) {
         exposure_summary("06", "EQ")
         exposure_summary_carstens("98", "EQ")
-        sector_techshare("09","EQ","All")
+        sector_techshare_area("09","EQ","All")
         Fossil_Distribution("11", "EQ")
         
         
         #5 Year Trajectory
-        Graph246("22", "EQ","CoalCap")
-        Graph246("23", "EQ" ,"RenewablesCap")
-        Graph246("24", "EQ" ,"GasCap")
-        Graph246("25", "EQ", "NuclearCap")
-        Graph246("26","EQ", "Oil")
-        Graph246("27","EQ", "Gas")
-        Graph246("28","EQ", "ICE")
-        Graph246("29","EQ", "Electric")
+        Graph246_new("22", "EQ","CoalCap")
+        Graph246_new("23", "EQ" ,"RenewablesCap")
+        Graph246_new("24", "EQ" ,"GasCap")
+        Graph246_new("25", "EQ", "NuclearCap")
+        Graph246_new("26","EQ", "Oil")
+        Graph246_new("27","EQ", "Gas")
+        Graph246_new("28","EQ", "ICE")
+        Graph246_new("29","EQ", "Electric")
         
       }
       
       if (HasDebt) {      
         exposure_summary("07", "CB")
         exposure_summary_carstens("99", "CB")
-        sector_techshare("10","CB","All")
+        sector_techshare_area("10","CB","All")
         Fossil_Distribution("12", "CB")  
         Risk_Distribution("13", "CB")
         
         #5 Year Trajectory
-        Graph246("14", "CB","CoalCap")
-        Graph246("15", "CB" ,"RenewablesCap")
-        Graph246("16", "CB" ,"GasCap")
-        Graph246("17", "CB", "NuclearCap")
-        Graph246("18","CB", "Oil")
-        Graph246("19","CB", "Gas")
-        Graph246("20","CB", "ICE")
-        Graph246("21","CB", "Electric")
+        Graph246_new("14", "CB","CoalCap")
+        Graph246_new("15", "CB" ,"RenewablesCap")
+        Graph246_new("16", "CB" ,"GasCap")
+        Graph246_new("17", "CB", "NuclearCap")
+        Graph246_new("18","CB", "Oil")
+        Graph246_new("19","CB", "Gas")
+        Graph246_new("20","CB", "ICE")
+        Graph246_new("21","CB", "Electric")
         
       }
   
