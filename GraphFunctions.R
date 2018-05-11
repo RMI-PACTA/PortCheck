@@ -1547,7 +1547,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   }
 }
 
-sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
+sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   
   if (ChartType == "EQ"){
     Combin <- EQCombin
@@ -1558,15 +1558,21 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
   }
   
   #Remove all portfolios other than Market, Average
-  Batch <- subset(Batch, Type != "Portfolio")
+  Batch1 <- subset(Batch, Type != "Portfolio")
+  Batch2 <- Batch %>%
+    filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
+    select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
+    rename(WtProduction=Scen.WtProduction.Market )
   
+  Batch2$Type <-"2° Market"
   #Add our target portfolio back
-  Portfolios <- rbind(Combin,Batch)
+  Portfolios <- rbind(Combin,Batch1)
   
   #Filter and select
-  Production <- subset(Portfolios, Year == Yr &
+  Production <- subset(Portfolios, Year == Startyear &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
+  Production <- rbind(Production,Batch2)
   Production$Sector <- as.factor(Production$Sector)
   levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"Fossil Fuels"
   levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"Fossil Fuels"
@@ -1591,8 +1597,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
     Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     
     Production$Type <- wrap.labels(Production$Type,20)
-    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
-    xlabels = c("Your\nPortfolio", "All\nInsurers", "Market\nBenchmark")
+    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market","2° Market"))
+    xlabels = c("Your\nPortfolio", "All\nInsurers", "Market\nBenchmark","2°\nMarket")
     
     titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
@@ -1676,9 +1682,10 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Yr){
       cmd<-grid.arrange(p2,
                         p3+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")),
                         p1+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")), nrow=1)
-      dev.off()
-      if(PrintPlot){print(cmd)}
-      ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+      #dev.off()
+      # if(PrintPlot){print(cmd)}
+      # ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+
       
     }
   }
