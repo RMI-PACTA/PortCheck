@@ -1655,12 +1655,12 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   
   #Remove all portfolios other than Market, Average
   Batch1 <- subset(Batch, Type != "Portfolio")
-  Batch2 <- Batch %>%
-    filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
-    select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
-    rename(WtProduction=Scen.WtProduction.Market )
-  
-  Batch2$Type <-"2° Market"
+  # Batch2 <- Batch %>%
+  #   filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
+  #   select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
+  #   rename(WtProduction=Scen.WtProduction.Market )
+  # 
+  # Batch2$Type <-"2° Market"
   #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch1)
   
@@ -1668,7 +1668,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   Production <- subset(Portfolios, Year == Startyear &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
-  Production <- rbind(Production,Batch2)
+  #Production <- rbind(Production,Batch2)
   Production$Sector <- as.factor(Production$Sector)
   levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"Fossil Fuels"
   levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"Fossil Fuels"
@@ -1693,8 +1693,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     
     Production$Type <- wrap.labels(Production$Type,20)
-    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market","2° Market"))
-    xlabels = c("Your\nPortfolio", "All\nInsurers", "Market\nBenchmark","2°\nMarket")
+    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","Market"))
+    xlabels = c("Your\nPortfolio", "All\nInsurers", "Market\nBenchmark")
     
     titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
