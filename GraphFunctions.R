@@ -2143,7 +2143,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=oil,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.9, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
@@ -2270,7 +2270,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=port,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.9, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       
