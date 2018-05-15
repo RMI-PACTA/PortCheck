@@ -239,7 +239,7 @@ for (i in c(326)){
   PortfolioName <- gsub(" ", "", PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
-  HasCarbonBudget <- FALSE #Set later
+  HasCarbonBudget <- TRUE #Set later
 
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -340,16 +340,23 @@ for (i in c(326)){
       }
   
       #Exposure to 2D Scenarios
-      if (HasEquity) {
-        ranking_chart_alignment("30", "EQ") #Carstens Metric
-        ranking_chart_alignment_Carstenmetric("96", "EQ")
-      }
-      if (HasDebt) {
-        ranking_chart_alignment("31", "CB") #Carstens Metric
-        ranking_chart_alignment_Carstenmetric("97", "CB")
-      }
+      # if (HasEquity) {
+      #   ranking_chart_alignment("30", "EQ") #Carstens Metric
+      #   ranking_chart_alignment_Carstenmetric("96", "EQ")
+      # }
+      # if (HasDebt) {
+      #   ranking_chart_alignment("31", "CB") #Carstens Metric
+      #   ranking_chart_alignment_Carstenmetric("97", "CB")
+      # }
       
       # As mentioned - these are not EQ and CB - these must be combined somehow. 
+      
+      # company_techshare("32", 10, "Power")
+      # company_techshare("32", 10, "Automotive")
+      # company_techshare("32", 10, "Fossil Fuels")
+      
+      
+      
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
           company_techshare("32", 10, "CB", "Power")
