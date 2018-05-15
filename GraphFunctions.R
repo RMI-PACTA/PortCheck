@@ -2188,11 +2188,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-       guides(fill = guide_legend(ncol = 5,keywidth=1))+
-      annotation_custom(
-        grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=textsize,col=textcolor)),
-        xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
-    
+       guides(fill = guide_legend(ncol = 5,keywidth=1))
+      # annotation_custom(
+      #   grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=textsize,col=textcolor)),
+      #   xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
+      # 
     
     
     gt <- ggplot_gtable(ggplot_build(PortPlot))
@@ -2295,7 +2295,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
       geom_bar(stat = "identity", position = "fill", width = .6)+
-      geom_hline(yintercept = c(.25,.50,.75), color="white")+
+      #geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = paste(carbonorder," "), breaks = (carbonorder))+
       scale_y_continuous(expand=c(0,0),labels=percent)+
       scale_x_discrete(labels = bar_labels)+
