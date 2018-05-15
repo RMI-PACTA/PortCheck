@@ -348,7 +348,7 @@ theme_cdi <- function() {
       plot.title = element_text(
         family="Arial",
         face = "bold",
-        size = textsize,
+        size = 12,
         hjust = 0
       )
     )
@@ -1310,6 +1310,11 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
+  BatchName <- "CA-INS"
+  CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  PortName <- "MetaPort"
+  ChartType <- "CB"
   
   if (ChartType == "CB"){
     port <- CBBatchTest
@@ -1335,19 +1340,33 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     }
   }
   
+  # levels = c("Coal","Oil Production","Gas Production",
+  #            "Coal Capacity", "Gas Capacity","Nuclear Capacity","Hydro Capacity", "Renewables"
+  #            
+  # 
   # port$Type <- port$Sector
+  port$Sector <- ifelse(port$Sector=="Coal" | port$Sector=="Oil&Gas", "Fossil Fuels", port$Sector)
   port$Sector <- factor(port$Sector, levels = c("Fossil Fuels","Power","Automotive"))
+  port <- subset(port, Technology != "OilCap")
+  tech.levels <- c("Coal","Oil","Gas",
+    "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
+    "ICE","Electric","Hybrid")
+  tech.labels <- gsub("Cap","\nCapacity", tech.levels)
+  port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
+  
+  
   
   outputplot <- ggplot(port, aes(x=Technology, y=CarstenMetric_Port, group=PortName, fill=PortName)) +   
     geom_bar(stat="identity", position="dodge") +
-    scale_y_continuous(name="Carsten's Metric 2018", labels=percent, expand=c(0,0)) +
-    scale_fill_manual(name="Portfolio", values=c("#265b9b","gray60", "gray20")) + 
+    scale_x_discrete(breaks=tech.levels, labels=tech.labels) + 
+    scale_y_continuous(name="Percent of Market Value", labels=percent, expand=c(0,0)) +
+    scale_fill_manual(name="", values=c("#265b9b","gray60", "gray30")) + 
     theme_cdi() + 
     theme(legend.position = "bottom")  +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=.5)) +
     theme(axis.ticks.y = element_line()) + 
     theme(axis.line.x = element_line()) + 
-    facet_wrap(~ Type, nrow=1, scales="free_x")
+    facet_wrap(~ Sector, nrow=1, scales="free_x")
   
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
