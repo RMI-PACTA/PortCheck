@@ -2168,7 +2168,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
                        show.guide = TRUE)+
       geom_bar(stat = "identity", position = "fill", width = .6)+
-      geom_hline(yintercept = c(.25,.50,.75), color="white")+
+      #geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
       scale_x_discrete(labels = bar_labels)+
