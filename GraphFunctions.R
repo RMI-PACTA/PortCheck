@@ -19,7 +19,7 @@ CAReportData <- function(){
   
   ### Exec Summary Data ###
   InsuranceCompanyName <- PortfolioNameLong
-  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "CALIFORNIA INSURERS"}
+  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "AGGREGATED CALIFORNIAN INSURER PORTFOLIOS"}
   
   InsuranceCompanyName <- gsub("&","\\\\\\\\&",InsuranceCompanyName)
   
@@ -991,9 +991,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=11),
-            axis.text.x=element_text(colour=textcolor,size=11),
-            axis.text.y=element_text(colour=textcolor,size=11)) 
+            legend.text=element_text(size=textsize),
+            axis.text.x=element_text(colour=textcolor,size=textsize),
+            axis.text.y=element_text(colour=textcolor,size=textsize)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1008,9 +1008,9 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=11),
-            axis.text.x=element_text(colour=textcolor,size=11),
-            axis.text.y=element_text(colour=textcolor,size=11)) 
+            legend.text=element_text(size=textsize),
+            axis.text.x=element_text(colour=textcolor,size=textsize),
+            axis.text.y=element_text(colour=textcolor,size=textsize)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
     ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1037,7 +1037,7 @@ portfolio_sector_stack <- function(plotnumber){
   }
   # over <- Subgroup.Overview
   over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
-  
+  over$Asset.Type <- gsub("Debt", "Fixed Income",over$Asset.Type)
   
   ###### sector categories #####
   Powr <- c("Alternative Electricity","Conventional Electricity","Multiutilities",
@@ -1073,7 +1073,7 @@ portfolio_sector_stack <- function(plotnumber){
     group_by(Valid,Asset.Type) %>%
     mutate(per=ValueUSD/sum(ValueUSD))
   over<- over %>%
-    complete(Asset.Type=c("Debt","Equity"),
+    complete(Asset.Type=c("Fixed Income","Equity"),
              Sector = c("Other Sectors","Fossil Fuels", "Automotive","Power"), #"Climate Relevant No 2° Scenario",
              fill=list(ValueUSD = 0, Valid=1,Portfolio.Name=PortName)) %>%
     unique()
@@ -1248,6 +1248,8 @@ analysed_summary <- function(plotnumber){
     # mutate("Portfolio.Name" = "MetaPort")
   }
   
+  over$Asset.Type <- gsub("Debt", "Fixed Income",over$Asset.Type)
+  
   #names(over) <- gsub("TwoD\\.","",names(over))
   #over$Asset.Type <- ifelse(over$Asset.Type=="Debt", "Bonds", over$Asset.Type)
   
@@ -1280,9 +1282,9 @@ analysed_summary <- function(plotnumber){
   
   over <- over %>%
     group_by(Sector) %>%
-    complete(Asset.Type=c("Debt","Equity","Other"), fill=list(ValueUSD = 0, Sector.All ="Excluded"))
+    complete(Asset.Type=c("Fixed Income","Equity","Other"), fill=list(ValueUSD = 0, Sector.All ="Excluded"))
   over<- as.data.frame(over)
-  orderofchart <- c("Debt","Equity","Other")
+  orderofchart <- c("Fixed Income","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
   
   ## "steelblue" color below should be changed to whatever our Portfolio color is
@@ -1310,11 +1312,11 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  BatchName <- "CA-INS"
-  CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  PortName <- "MetaPort"
-  ChartType <- "CB"
+  # BatchName <- "CA-INS"
+  # # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  # PortName <- "MetaPort"
+  # ChartType <- "CB"
   
   if (ChartType == "CB"){
     port <- CBBatchTest
@@ -1333,10 +1335,10 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     port <- subset(port, Scenario == "450S" & Year==2018)
     if (PortName == "MetaPort"){
       port <- subset(port, port$PortName %in% c("MetaPort","Listed Market"))
-      port$PortName <- factor(port$PortName, levels=c("MetaPort", "Bond Universe"), ordered=TRUE)
+      port$PortName <- factor(port$PortName, levels=c("MetaPort", "Listed Market"), ordered=TRUE)
     }else{
       port <- subset(port, port$PortName %in% c(PortName,"MetaPort","Listed Market"))
-      port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Bond Universe"), ordered=TRUE)
+      port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Listed Market"), ordered=TRUE)
     }
   }
   
