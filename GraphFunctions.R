@@ -1352,19 +1352,22 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     "ICE","Electric","Hybrid")
   tech.labels <- gsub("Cap","\nCapacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  
+  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
   
   
   outputplot <- ggplot(port, aes(x=Technology, y=CarstenMetric_Port, group=PortName, fill=PortName)) +   
-    geom_bar(stat="identity", position="dodge") +
+    geom_bar(stat="identity", position="dodge",aes(width = 0.8*fac)) +
     scale_x_discrete(name="",breaks=tech.levels, labels=tech.labels) + 
-    scale_y_continuous(name="Percent of Market Value", labels=percent, expand=c(0,0)) +
+    scale_y_continuous(name="Percent of Market Value", labels=scales::percent, expand=c(0,0)) +
     scale_fill_manual(name="", labels = c("Portfolio", "All Insurers","Market"),values=c("#265b9b","gray60", "gray30")) + 
     theme_cdi() + 
     theme(legend.position = "bottom")  +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) + 
+    # annotate("text", x = 2, y =  max(port$CarstenMetric_Port)+0.01, label = "Fossil Fuels")+
+    # annotate("text", x = 5.5, y = max(port$CarstenMetric_Port)+0.01,label = "Power")+
+    # annotate("text", x = 10, y = max(port$CarstenMetric_Port)+0.01,label = "Automotive")
     facet_wrap(~ Sector, nrow=1, scales="free_x")
   
   
@@ -2089,8 +2092,20 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     colnames(OilCompanies)[which(names(OilCompanies) == "Resource.Type")] <- "Oil.Type"
     OilCompanies <- subset(OilCompanies,select = c("Oil.Type","Name","OilShare","Classification","PortWeightEQYlvl"))
     
-    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    dummy <- data.frame(c("Oil.Type", NA),
+                        c("Name", ""),
+                        c("OilShare", 0),
+                        c("Classification", NA),
+                        c("PortWeightEQYlvl", NA))
+    colnames(dummy) <- as.character(unlist(dummy[1,]))
+    dummy = dummy[-1, ]
+    dummy$OilShare <- as.numeric(dummy$OilShare)
     
+    OilCompanies <- rbind(OilCompanies,
+                     dummy)
+    
+    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    OilCompanies$PortWeightEQYlvl <- as.numeric(OilCompanies$PortWeightEQYlvl)
     names(colors) <- techorder
     names(tech_labels) <- techorder
     
@@ -2106,10 +2121,9 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels = unique(filter(OilCompanies, Classification == "Companies")$Name)
-    #portfolio_labels =  unique(filter(OilCompanies, Classification == "Portfolio")$Name)
-    
-    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
+    oil<-na.omit(OilCompanies)
+
+    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."),"")
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
@@ -2118,11 +2132,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
-      scale_x_discrete(labels = rev(bar_labels))+
+      scale_x_discrete(labels = bar_labels)+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
-      geom_text(data=OilCompanies,
+      geom_text(data=oil,
                 aes(x = Name, y = 1),
                 label = perc(OilCompanies$PortWeightEQYlvl),
                 hjust = -1, color = textcolor, size=textsize*(5/14))+
@@ -2241,6 +2255,9 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     # bar_labels = c(paste0(substr(company_labels, 1, 20),"..."))
     
     port<-na.omit(portfolio1)
+   
+    
+    bar_labels = c(paste0(substr(unique(port$Name), 1, 15),"..."),"")
     PortPlot <- ggplot(data=portfolio1, aes(x=Name, y=value,
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
@@ -2260,6 +2277,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
                 aes(x="",y=1),
                 label = "Weight",
                 hjust = -0.5, color =textcolor, size =textsize*(5/14))+
+
       xlab("")+
       ylab("TechShare")+
       
