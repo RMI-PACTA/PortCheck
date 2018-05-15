@@ -2123,7 +2123,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
     oil<-na.omit(OilCompanies)
 
-    bar_labels = c(paste0(substr(unique(oil$Name), 1, 15),"..."),"")
+    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."),"")
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
