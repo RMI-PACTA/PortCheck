@@ -1352,11 +1352,11 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     "ICE","Electric","Hybrid")
   tech.labels <- gsub("Cap","\nCapacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(0.6,5),rep(0.6,3),rep(0.6,3),rep(0.6,5))
+  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
   
   
   outputplot <- ggplot(port, aes(x=Technology, y=CarstenMetric_Port, group=PortName, fill=PortName)) +   
-    geom_bar(stat="identity", position="dodge",aes(width = fac)) +
+    geom_bar(stat="identity", position="dodge",aes(width = 0.8*fac)) +
     scale_x_discrete(name="",breaks=tech.levels, labels=tech.labels) + 
     scale_y_continuous(name="Percent of Market Value", labels=scales::percent, expand=c(0,0)) +
     scale_fill_manual(name="", labels = c("Portfolio", "All Insurers","Market"),values=c("#265b9b","gray60", "gray30")) + 
@@ -1365,6 +1365,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) + 
+    # annotate("text", x = 2, y =  max(port$CarstenMetric_Port)+0.01, label = "Fossil Fuels")+
+    # annotate("text", x = 5.5, y = max(port$CarstenMetric_Port)+0.01,label = "Power")+
+    # annotate("text", x = 10, y = max(port$CarstenMetric_Port)+0.01,label = "Automotive")
     facet_wrap(~ Sector, nrow=1, scales="free_x")
   
   
