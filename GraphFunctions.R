@@ -1312,14 +1312,48 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
+  ### TAJ Commented Out My Testing - Will remove shortly !!
+  # EQBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # EQBBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  # PortName <- "MetaPort"
+  # ChartType <- "EQ"
+  # 
+  # 
+  # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  # PortName <- "MetaPort"
+  # ChartType <- "CB"
+  # test <- subset(CBBatchTest, PortName=="MetaPort")
+  # test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
+  # 
+  # 
+  # RenewablesColour <<- "#feedde"
+  # HydroColour <<- "#fdbe85"
+  # NuclearColour <<- "#fd8d3c"
+  # GasCapColour <<- "#e6550d"
+  # CoalCapColour <<- "#a63603"
+  # 
+  # # purpleish
+  # ElectricColour <<- "#efedf5"
+  # HybridColour <<- "#bcbddc"
+  # ICEColour <<-"#756bb1"
+  # 
+  # #goldish
+  # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
+  # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
+  # CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
+  # textcolor <<- "#3D3D3C"
+  
+  
   
   if (ChartType == "CB"){
     port <- CBBatchTest
-    port <- subset(port, Scenario == "450S" & Year==2018)
+    #port <- subset(port, Scenario == "450S" & Year==2018)
     
      if (PortName == "MetaPort"){
        port <- subset(port, PortName %in% c("MetaPort","Bond Universe"))
-       port$PortName <- factor(port$PortName, levels=c("MetaPort", "Bond Universe"), ordered=TRUE)
+       port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Bond Universe"), c("Portfolio","Fixed Income Market"))
+       port$PortName <- factor(port$PortName, levels=c("Portfolio", "Fixed Income Market"), ordered=TRUE)
      }else{
        port <- subset(port, PortName %in% c(PortName,"MetaPort","Bond Universe"))
        port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Bond Universe"), ordered=TRUE)
@@ -1327,44 +1361,53 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   
   }else{
     port <- EQBatchTest
-    port <- subset(port, Scenario == "450S" & Year==2018)
+    #port <- subset(port, Scenario == "450S" & Year==2018)
     if (PortName == "MetaPort"){
       port <- subset(port, port$PortName %in% c("MetaPort","Listed Market"))
-      port$PortName <- factor(port$PortName, levels=c("MetaPort", "Listed Market"), ordered=TRUE)
+      port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Listed Market"), c("Portfolio","Listed Equity Market"))
+      port$PortName <- factor(port$PortName, levels=c("Portfolio", "Listed Equity Market"), ordered=TRUE)
     }else{
       port <- subset(port, port$PortName %in% c(PortName,"MetaPort","Listed Market"))
       port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Listed Market"), ordered=TRUE)
     }
   }
   
-  # levels = c("Coal","Oil Production","Gas Production",
-  #            "Coal Capacity", "Gas Capacity","Nuclear Capacity","Hydro Capacity", "Renewables"
-  #            
-  # 
-  # port$Type <- port$Sector
-  port$Sector <- ifelse(port$Sector=="Coal" | port$Sector=="Oil&Gas", "Fossil Fuels", port$Sector)
-  port$Sector <- factor(port$Sector, levels = c("Fossil Fuels","Power","Automotive"))
+  current.port <- subset(port, Year==START.YEAR & PortName=="Portfolio") %>% 
+    mutate(Metric=CarstenMetric_Port) #, PortName2="Portfolio Today") 
+  current.market <- subset(port, Year==START.YEAR & InvestorName=="Market") %>% 
+    mutate(Metric=CarstenMetric_Port) #, PortName2="Market Today")
+  # future.port <- subset(port, Year==(START.YEAR+5) & PortName=="Portfolio") %>% 
+  #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
+
+  port <- bind_rows(current.port, current.market)
+  #port$PortName2 <- factor(port$PortName2, levels=c("Portfolio Today", "Market Today")) #, "Portfolio in 2023\nunder 2° Scenario"))
+  
+  port$Sector <- factor(port$Sector, levels = c("Coal","Oil&Gas", "Power","Automotive"))
   port <- subset(port, Technology != "OilCap")
   tech.levels <- c("Coal","Oil","Gas",
     "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
-    "ICE","Electric","Hybrid")
-  tech.labels <- gsub("Cap","\nCapacity", tech.levels)
+    "ICE","Hybrid","Electric")
+  tech.labels <- gsub("Cap","Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
   
   
+  tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
+  tots <- port %>% group_by(PortName, Sector, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
   
-  outputplot <- ggplot(port, aes(x=Technology, y=CarstenMetric_Port, group=PortName, fill=PortName)) +   
-    geom_bar(stat="identity", position="dodge") +
-    scale_x_discrete(name="",breaks=tech.levels, labels=tech.labels) + 
-    scale_y_continuous(name="Percent of Market Value", labels=percent, expand=c(0,0)) +
-    scale_fill_manual(name="", labels = c("Portfolio", "All Insurers","Market"),values=c("#265b9b","gray60", "gray30")) + 
-    theme_cdi() + 
-    theme(legend.position = "bottom")  +
-    theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
+  
+  outputplot <- ggplot(port, aes(x=PortName, y=Metric, group=Technology, fill=Technology)) +   
+    geom_bar(stat="identity", position="stack") +
+    #geom_text(data=tots, aes(x=PortName, y=Metric, label=percent(Metric))) +
+    scale_x_discrete(name="") + 
+    scale_y_continuous(name="Weight of issuers exposed to the\ntechnologies in your portfolio", labels=percent, expand=c(0,0),
+                       limits=c(0, max(tots$Metric) + .01)) +
+    scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
+    theme_cdi() +
+    facet_wrap(~ Sector, nrow=1, scales="free_x") +
+    theme(axis.text.x = element_text(angle = 90,colour=textcolor, hjust=1, vjust=.5)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
-    theme(axis.line.x = element_line()) + 
-    facet_wrap(~ Sector, nrow=1, scales="free_x")
-  
+    theme(axis.line.x = element_line()) 
+    
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
          bg="transparent",height=3,width=10,dpi=ppi)
