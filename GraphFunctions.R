@@ -1312,11 +1312,6 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  # BatchName <- "CA-INS"
-  # # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
-  # ChartType <- "CB"
   
   if (ChartType == "CB"){
     port <- CBBatchTest
@@ -1360,13 +1355,13 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   
   outputplot <- ggplot(port, aes(x=Technology, y=CarstenMetric_Port, group=PortName, fill=PortName)) +   
     geom_bar(stat="identity", position="dodge") +
-    scale_x_discrete(breaks=tech.levels, labels=tech.labels) + 
+    scale_x_discrete(name="",breaks=tech.levels, labels=tech.labels) + 
     scale_y_continuous(name="Percent of Market Value", labels=percent, expand=c(0,0)) +
-    scale_fill_manual(name="", values=c("#265b9b","gray60", "gray30")) + 
+    scale_fill_manual(name="", labels = c("Portfolio", "All Insurers","Market"),values=c("#265b9b","gray60", "gray30")) + 
     theme_cdi() + 
     theme(legend.position = "bottom")  +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=.5)) +
-    theme(axis.ticks.y = element_line()) + 
+    theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
+    theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) + 
     facet_wrap(~ Sector, nrow=1, scales="free_x")
   
