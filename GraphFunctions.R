@@ -19,7 +19,7 @@ CAReportData <- function(){
   
   ### Exec Summary Data ###
   InsuranceCompanyName <- PortfolioNameLong
-  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "AGGREGATED CALIFORNIAN INSURER PORTFOLIOS"}
+  if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "AGGREGATED CALIFORNIA INSURANCE PORTFOLIOS"}
   
   InsuranceCompanyName <- gsub("&","\\\\\\\\&",InsuranceCompanyName)
   
