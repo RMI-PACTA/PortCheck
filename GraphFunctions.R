@@ -2230,10 +2230,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels = unique(portfolio1$Name)
-    
-    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
     port<-na.omit(portfolio1)
+   
+    
+    bar_labels = c(paste0(substr(unique(port$Name), 1, 15),"..."),"")
     PortPlot <- ggplot(data=portfolio1, aes(x=Name, y=value,
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
@@ -2252,7 +2252,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=port,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -1, color =textcolor, size =12*(5/14))+
+                hjust = -0.9, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       
