@@ -323,7 +323,7 @@ for (i in c(326)){
         sector_techshare("10","CB","All")
         sector_techshare_area("51","CB","All")
         Fossil_Distribution("12", "CB")  
-        Risk_Distribution("13", "CB")
+        # Risk_Distribution("13", "CB")
         
         #5 Year Trajectory
         Graph246_new("14", "CB","CoalCap")
@@ -388,7 +388,7 @@ for (i in c(326)){
         }
       }
       
-      sector_techshare_area(99,"EQ","All")
+      # sector_techshare_area(99,"EQ","All")
     
       # dev.off()
       

@@ -2178,20 +2178,20 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=oil,
                 aes(x = Name, y = 1),
                 label = perc(oil$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=12*(5/14))+
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
       geom_text(data=oil,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.5, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =textsize*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-       guides(fill = guide_legend(ncol = 5,keywidth=1))
-      # annotation_custom(
-      #   grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
-      #   xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
+       guides(fill = guide_legend(ncol = 5,keywidth=1))+
+      annotation_custom(
+        grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=textsize,col=textcolor)),
+        xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
     
     
     
