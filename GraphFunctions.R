@@ -1480,7 +1480,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Portfolio (Weighted by the AUM)
     Portfoliomix <- subset(combin, select=c("Technology","WtProduction"))
     Portfoliomix$Classification <- "Portfolio"
-    Portfoliomix$Name <- "Your Portfolio"
+    Portfoliomix$Name <- "Portfolio"
     Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","WtProduction"))
     Portfoliomix$WtProduction <- Portfoliomix$WtProduction
     colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
