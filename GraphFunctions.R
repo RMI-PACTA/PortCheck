@@ -2295,7 +2295,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
       geom_bar(stat = "identity", position = "fill", width = .6)+
-      geom_hline(yintercept = c(.25,.50,.75), color="white")+
+      #geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = paste(carbonorder," "), breaks = (carbonorder))+
       scale_y_continuous(expand=c(0,0),labels=percent)+
       scale_x_discrete(labels = bar_labels)+
