@@ -951,8 +951,10 @@ SectorDataAnalysis <- function(){
   # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2° Scenario" & over$Valid == 1 , "Climate Relevant No 2° Scenario",over$Sector.All)
   # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
   
-  ClimateRelevant <<- round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1)
+  
   AnalysisCoverage <<-  round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1)
+  ClimateRelevant <<- round(AnalysisCoverage/100 * sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1)
+  
   
   return(over)
 }
@@ -1319,10 +1321,10 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   # ChartType <- "EQ"
   # 
   # 
-  # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
-  # ChartType <- "CB"
+  CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  PortName <- "MetaPort"
+  ChartType <- "CB"
   # test <- subset(CBBatchTest, PortName=="MetaPort")
   # test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
@@ -1389,17 +1391,16 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     "ICE","Hybrid","Electric")
   tech.labels <- gsub("Cap","Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  
+  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
   
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
   tots <- port %>% group_by(PortName, Sector, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
-  
   
   outputplot <- ggplot(port, aes(x=PortName, y=Metric, group=Technology, fill=Technology)) +   
     geom_bar(stat="identity", position="stack") +
     #geom_text(data=tots, aes(x=PortName, y=Metric, label=percent(Metric))) +
     scale_x_discrete(name="") + 
-    scale_y_continuous(name="Weight of issuers exposed to the\ntechnologies in your portfolio", labels=percent, expand=c(0,0),
+    scale_y_continuous(name="Weight of issuers exposed to the\ntechnologies in the portfolio", labels=percent, expand=c(0,0),
                        limits=c(0, max(tots$Metric) + .01)) +
     scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
     theme_cdi() +
@@ -1523,7 +1524,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Portfolio (Weighted by the AUM)
     Portfoliomix <- subset(combin, select=c("Technology","WtProduction"))
     Portfoliomix$Classification <- "Portfolio"
-    Portfoliomix$Name <- "Your Portfolio"
+    Portfoliomix$Name <- "Portfolio"
     Portfoliomix <- subset(Portfoliomix, select =c("Name","Classification","Technology","WtProduction"))
     Portfoliomix$WtProduction <- Portfoliomix$WtProduction
     colnames(Portfoliomix) <- c("Name","Classification","Technology","TechShare")
@@ -2130,8 +2131,20 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     colnames(OilCompanies)[which(names(OilCompanies) == "Resource.Type")] <- "Oil.Type"
     OilCompanies <- subset(OilCompanies,select = c("Oil.Type","Name","OilShare","Classification","PortWeightEQYlvl"))
     
-    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    dummy <- data.frame(c("Oil.Type", NA),
+                        c("Name", ""),
+                        c("OilShare", 0),
+                        c("Classification", NA),
+                        c("PortWeightEQYlvl", NA))
+    colnames(dummy) <- as.character(unlist(dummy[1,]))
+    dummy = dummy[-1, ]
+    dummy$OilShare <- as.numeric(dummy$OilShare)
     
+    OilCompanies <- rbind(OilCompanies,
+                     dummy)
+    
+    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    OilCompanies$PortWeightEQYlvl <- as.numeric(OilCompanies$PortWeightEQYlvl)
     names(colors) <- techorder
     names(tech_labels) <- techorder
     
@@ -2147,10 +2160,9 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels = unique(filter(OilCompanies, Classification == "Companies")$Name)
-    #portfolio_labels =  unique(filter(OilCompanies, Classification == "Portfolio")$Name)
-    
-    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
+    oil<-na.omit(OilCompanies)
+
+    bar_labels = c(paste0(substr(unique(oil$Name), 1, 15),"..."),"")
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
@@ -2159,23 +2171,27 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
-      scale_x_discrete(labels = rev(bar_labels))+
+      scale_x_discrete(labels = bar_labels)+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
-      geom_text(data=OilCompanies,
+      geom_text(data=oil,
                 aes(x = Name, y = 1),
-                label = perc(OilCompanies$PortWeightEQYlvl),
+                label = perc(oil$PortWeightEQYlvl),
                 hjust = -1, color = textcolor, size=12*(5/14))+
+      geom_text(data=oil,
+                aes(x="",y=1),
+                label = "Weight",
+                hjust = -0.5, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-      guides(fill = guide_legend(ncol = 5,keywidth=1))+
-      annotation_custom(
-        grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
-        xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
+       guides(fill = guide_legend(ncol = 5,keywidth=1))
+      # annotation_custom(
+      #   grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
+      #   xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
     
     
     
@@ -2271,10 +2287,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels = unique(portfolio1$Name)
-    
-    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
     port<-na.omit(portfolio1)
+   
+    
+    bar_labels = c(paste0(substr(unique(port$Name), 1, 15),"..."),"")
     PortPlot <- ggplot(data=portfolio1, aes(x=Name, y=value,
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
@@ -2293,7 +2309,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=port,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -1, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       
@@ -2516,7 +2532,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == "MetaPort"] <- 268.9853
         
         
-        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD450$Year != 2018,]
+        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == "MetaPort"] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == "MetaPort"] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
@@ -2532,7 +2548,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == "MetaPort"] <- 149.1076
         
         
-        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD450$Year != 2018,]
+        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == "MetaPort"] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == "MetaPort"] <- c(77423.17, 76571.52,75332.74,74326.24,73784.28,73242.32)
@@ -2545,15 +2561,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       ALD2 <- bind_rows(ALD2,ALD.temp)
     }
  
- 
-  
-  
-  
-
-  ylims <- ALD2 %>%
-    summarise(min=min(Production), max=max(Production))
-  
-  ### SEPARATE AGAIN
+  ### Normalisation of market to Portfolio
   ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
   
   var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
@@ -2567,11 +2575,13 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
   
+  ALD2 <- bind_rows(ALD.cp, ALD.sc)
+  
+   ylims <- ALD2 %>%
+      filter( InvestorName != "Market" | Line.Type != "Scenario") %>%
+      summarise(min=min(Production), max=max(Production))
   
   
-  
-  # ylims <- ALD2 %>%
-  #   summarise(min=min(Production), max=max(Production))
    
   ### Units
   unitscaleval <- max(ylims$max, ALD.cp$Production)   
@@ -2596,7 +2606,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "GasCap"="GW",
                     "Oil" ="Mbbl",
                     "Gas" = "1000 m3",
-                    "ICE" ="Vehicles")
+                    "ICE" ="1000 Vehicles")
     
     
   } 
@@ -2610,7 +2620,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "GasCap"="TW",
                     "Oil" ="MMbbl",
                     "Gas" = "million m3",
-                    "ICE" ="Vehicles")
+                    "ICE" ="million Vehicles")
   } 
   if (unitscaleval > 1e9){
     unitscalefactor <- 1e9
@@ -2622,13 +2632,18 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "GasCap"="PW",
                     "Oil" ="Gbbl",
                     "Gas" = "billion m3",
-                    "ICE" ="Vehicles")
+                    "ICE" ="billion Vehicles")
   }
   
   ALD2$Production <- ALD2$Production/unitscalefactor  
  
+  ylims <- ALD2 %>%
+    filter( InvestorName != "Market" | Line.Type != "Scenario") %>%
+    summarise(min=min(Production), max=max(Production))
   
   ### GET SCENARIOS INTO RIBBON FORMAT
+  ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
+  ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
   
   ALD.sc.wide <- ALD.sc %>%
     ungroup() %>%
@@ -2644,75 +2659,32 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                                         Line2=NPS,
                                         Line3=ifelse(Green == 1 , `450S`, CPS)) #Line4=MAX.Y)
   
-  
 
   ### IDENTIFY LIMITS of the Y axis
   
-  ymin<- min(ylims$min, ALD.cp$Production)   
+  ymin<- min(ylims$min)
+  ymax<- max(ylims$max)
   
-  ymax<- max(ylims$max, ALD.cp$Production)   
   
-  y18ln3 <- min(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line3"))
-  y23ln3 <- max(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line3"))
   
-  y18ln1 <- min(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line1"))
-  y23ln1 <- max(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line1"))
   
-  calbreak <- function(ymin, ymax,y18ln3,y23ln3,y18ln1,y23ln1,TechToPlot){
-    step <- (ymax-ymin)/10
-    
-    if ((ymax-ymin)<5){
-      unit <- 1     
-    }else if ((ymax-ymin)>5 & (ymax-ymin)<50){
-      unit <- 5
-    }else if ((ymax-ymin)>=50 & (ymax-ymin)<150){
-      unit <- 10
-    }else if ((ymax-ymin)>=150 & (ymax-ymin)<1000){
-      unit <- 50
-    }else if ((ymax-ymin)>=1000 & (ymax-ymin)<3000){
-      unit <-500
-    }else if ((ymax-ymin)>=3000 & (ymax-ymin)<20000){
-      unit <-1000
-    }
-    
-    if (ymax < 10){
-      roundmax <- round(((ymax/unit)+step)*unit,2)
-      roundmin <- round(((ymin/unit)-step)*unit,2)
-    }else {
-      roundmax <- round(((ymax/unit)+step)*unit,0)
-      roundmin <- round(((ymin/unit)-step)*unit,0)
-    }
-   
-    breaks <- sort(unique(seq(roundmin, roundmax , (roundmax-roundmin)/5)))
-    
-    if((TechToPlot !="ICE") & (TechToPlot !="Electric")){
-      
-      if ((y18ln3<y23ln3) &(y18ln1<y23ln1)) {
-        mx<- y23ln3 + unit
-        mn<- y18ln1 - unit
-        
-      }else if ((y18ln3>y23ln3)&(y18ln1<y23ln1)){
-        mx<- y18ln3 + unit
-        mn<- y18ln1 - unit
-      } else if ((y18ln3<y23ln3)&(y18ln1>y23ln1)){
-        mx<- y23ln3 + unit
-        mn<- y23ln1 - unit
-      }else if ((y18ln3>y23ln3)&(y18ln1>y23ln1)){
-        mx<- y18ln3 + unit
-        mn<- y23ln1 - unit
-      }
-      
-      breaks <-breaks[breaks<(mx) & breaks>(mn)]
-      breaks<-seq(breaks[1],tail(breaks,n=1),length.out = 5)
-    } else{
-      breaks <-breaks
-    }
-    return(breaks)
+  if ((ymax-ymin)<1){
+    unit <- .1
+  }else if ((ymax-ymin)>1 & (ymax-ymin)<10){
+    unit <- 1
+  }else if ((ymax-ymin)>=10 & (ymax-ymin)<100){
+    unit <- 10
+  }else if ((ymax-ymin)>=100 & (ymax-ymin)<1000){
+    unit <- 100
+  }else if ((ymax-ymin)>=1000 & (ymax-ymin)<10000){
+    unit <-1000
+  }else if ((ymax-ymin)>=10000 & (ymax-ymin)<100000){
+    unit <-10000
   }
   
-  breaks_out <- calbreak(ymin,ymax,y18ln3,y23ln3,y18ln1,y23ln1,TechToPlot)
-  MAX.Y <- max(breaks_out)
-  MIN.Y<- min(breaks_out)
+  MAX.Y <- ceiling(ymax/unit)*unit
+  MIN.Y <- floor(ymin/unit)*unit
+  
   
   
   ALD.sc.wide$Line4 <- MAX.Y
@@ -2754,6 +2726,10 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "Line1"="2D")
   
   a<-PortName
+  # 
+  # MIN.Y <- ceiling(ymax/10)*10
+  # MAX.Y <- floor(ymin/10)*10
+  
   outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == a )) +
     geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
     scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
