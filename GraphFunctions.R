@@ -355,7 +355,7 @@ theme_cdi <- function() {
 }
 
 theme_246 <- function() {
-  theme_minimal(base_size=11, base_family="Calibri") + 
+  theme_minimal(base_size=textsize, base_family="Calibri") + 
     theme(
       panel.background  = element_rect(fill="white", color="white"),
       panel.border = element_blank(),
@@ -366,8 +366,8 @@ theme_246 <- function() {
       axis.line.x = element_blank(),
       axis.line.y = element_blank(),
       axis.ticks.y = element_blank(),
-      axis.text = element_text(size=11.5, color="#3D3D3C"),
-      axis.title = element_text(size=11, color="#3D3D3C"),
+      axis.text = element_text(size=textsize, color="#3D3D3C"),
+      axis.title = element_text(size=textsize, color="#3D3D3C"),
       plot.title = element_text(size = 12, 
                                 hjust = 0))
 }                             
@@ -1095,9 +1095,9 @@ portfolio_sector_stack <- function(plotnumber){
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=11),
-            axis.text.x=element_text(colour=textcolor,size=11),
-            axis.text.y=element_text(colour=textcolor,size=11)) 
+            legend.text=element_text(size=textsize),
+            axis.text.x=element_text(colour=textcolor,size=textsize),
+            axis.text.y=element_text(colour=textcolor,size=textsize)) 
   }else {
     plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width =0.6) +
@@ -1108,9 +1108,9 @@ portfolio_sector_stack <- function(plotnumber){
       geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=per), fill="white", stat="identity") +
       theme_barcharts() +
       theme(legend.position = "bottom",
-            legend.text=element_text(size=11),
-            axis.text.x=element_text(colour=textcolor,size=11),
-            axis.text.y=element_text(colour=textcolor,size=11)) 
+            legend.text=element_text(size=textsize),
+            axis.text.x=element_text(colour=textcolor,size=textsize),
+            axis.text.y=element_text(colour=textcolor,size=textsize)) 
   }
   # 
   if(PrintPlot){print(plot)}
@@ -1298,9 +1298,9 @@ analysed_summary <- function(plotnumber){
     guides(fill=guide_legend(nrow=2))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
-          legend.text=element_text(size=11),
-          axis.text.x=element_text(colour=textcolor,size=11),
-          axis.text.y=element_text(colour=textcolor,size=11))
+          legend.text=element_text(size=textsize),
+          axis.text.x=element_text(colour=textcolor,size=textsize),
+          axis.text.y=element_text(colour=textcolor,size=textsize))
   
   # plot <- plot+
   #   annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
@@ -1668,7 +1668,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
     
     plottheme<- stacked_bar_chart(Production, colours, xlabels, labels)+
       ylab("Share of Sector Production")+
-      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=11,margin = unit(c(0,0,1,0),"lines")),
+      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=textsize,margin = unit(c(0,0,1,0),"lines")),
             legend.position = "bottom",
             legend.title = element_blank())
     
@@ -1794,7 +1794,7 @@ sector_techshare_3yr <- function(plotnumber,ChartType,SectorToPlot){
     
     plottheme<- stacked_bar_chart(Combin, colours, xlabels, labels)+
       ylab("Share of Sector Production")+
-      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=11,margin = unit(c(0,0,1,0),"lines")),
+      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=textsize,margin = unit(c(0,0,1,0),"lines")),
             legend.position = "bottom",
             legend.title = element_blank())
     
@@ -2138,21 +2138,17 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       
       geom_text(data=oil,
                 aes(x = Name, y = 1),
-                label = perc(oil$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=12*(5/14))+
-      geom_text(data=oil,
-                aes(x="",y=1),
-                label = "Weight",
-                hjust = -0.9, color =textcolor, size =12*(5/14))+
+                label = perc(OilCompanies$PortWeightEQYlvl),
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-       guides(fill = guide_legend(ncol = 5,keywidth=1))
-      # annotation_custom(
-      #   grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
-      #   xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
+      guides(fill = guide_legend(ncol = 5,keywidth=1))+
+      annotation_custom(
+        grob = textGrob(label = "Weight", hjust =0,gp=gpar(fontsize=textsize,col=textcolor )),
+        xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
     
     
     
@@ -2169,8 +2165,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     }else{h=3}
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
-           bg="transparent",height=h,width=10,dpi=ppi)}
-  else {
+           bg="transparent",height=h,width=10,dpi=ppi)
+    }  else {
     print("No oil data to plot.")
   }
 }
@@ -2248,6 +2244,16 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
+    company_labels = unique(portfolio1$Name[portfolio1$Name != ""])
+    # company_labels <- company_labels[company_labels != ""]
+    
+    bar_labels <- as.data.frame(company_labels)
+    bar_labels$long <- apply(bar_labels,2,nchar)[,1]
+    bar_labels$short[bar_labels$long >= 20] <- substr(bar_labels$company_labels[bar_labels$long >= 20],1,17)
+    bar_labels$short[bar_labels$long >= 20] <- paste0(bar_labels$short[bar_labels$long >= 20],"...")
+    
+    # bar_labels = c(paste0(substr(company_labels, 1, 20),"..."))
+    
     port<-na.omit(portfolio1)
    
     
@@ -2266,11 +2272,12 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       geom_text(data=port,
                 aes(x = Name, y = 1),
                 label = perc(port$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=12*(5/14))+
+                hjust = -1, color = textcolor, size=textsize*(5/14))+
       geom_text(data=port,
                 aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.9, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =textsize*(5/14))+
+
       xlab("")+
       ylab("TechShare")+
       
@@ -2361,7 +2368,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
       geom_area( position = 'stack')+
       scale_fill_manual(name="",values = colours,labels=labels)+
       theme_barcharts()+
-      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=11,margin = unit(c(0,0,1,0),"lines")),
+      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=textsize,margin = unit(c(0,0,1,0),"lines")),
             legend.position = "bottom",
             legend.title = element_blank())
     
