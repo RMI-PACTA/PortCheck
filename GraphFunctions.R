@@ -1321,10 +1321,10 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   # ChartType <- "EQ"
   # 
   # 
-  CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  PortName <- "MetaPort"
-  ChartType <- "CB"
+  # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
+  # PortName <- "MetaPort"
+  # ChartType <- "CB"
   # test <- subset(CBBatchTest, PortName=="MetaPort")
   # test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
@@ -1374,9 +1374,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     }
   }
   
-  current.port <- subset(port, Year==START.YEAR & PortName=="Portfolio") %>% 
+  current.port <- subset(port, Year==Startyear & PortName=="Portfolio") %>% 
     mutate(Metric=CarstenMetric_Port) #, PortName2="Portfolio Today") 
-  current.market <- subset(port, Year==START.YEAR & InvestorName=="Market") %>% 
+  current.market <- subset(port, Year==Startyear & InvestorName=="Market") %>% 
     mutate(Metric=CarstenMetric_Port) #, PortName2="Market Today")
   # future.port <- subset(port, Year==(START.YEAR+5) & PortName=="Portfolio") %>% 
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
@@ -1405,7 +1405,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
     theme_cdi() +
     facet_wrap(~ Sector, nrow=1, scales="free_x") +
-    theme(axis.text.x = element_text(angle = 90,colour=textcolor, hjust=1, vjust=.5)) +
+    theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) 
     
@@ -2168,7 +2168,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
                        show.guide = TRUE)+
       geom_bar(stat = "identity", position = "fill", width = .6)+
-      geom_hline(yintercept = c(.25,.50,.75), color="white")+
+      #geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
       scale_x_discrete(labels = bar_labels)+
