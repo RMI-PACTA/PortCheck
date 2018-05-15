@@ -2089,8 +2089,20 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     colnames(OilCompanies)[which(names(OilCompanies) == "Resource.Type")] <- "Oil.Type"
     OilCompanies <- subset(OilCompanies,select = c("Oil.Type","Name","OilShare","Classification","PortWeightEQYlvl"))
     
-    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    dummy <- data.frame(c("Oil.Type", NA),
+                        c("Name", ""),
+                        c("OilShare", 0),
+                        c("Classification", NA),
+                        c("PortWeightEQYlvl", NA))
+    colnames(dummy) <- as.character(unlist(dummy[1,]))
+    dummy = dummy[-1, ]
+    dummy$OilShare <- as.numeric(dummy$OilShare)
     
+    OilCompanies <- rbind(OilCompanies,
+                     dummy)
+    
+    OilCompanies$Oil.Type <- factor(OilCompanies$Oil.Type, levels=techorder)
+    OilCompanies$PortWeightEQYlvl <- as.numeric(OilCompanies$PortWeightEQYlvl)
     names(colors) <- techorder
     names(tech_labels) <- techorder
     
@@ -2106,10 +2118,9 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels = unique(filter(OilCompanies, Classification == "Companies")$Name)
-    #portfolio_labels =  unique(filter(OilCompanies, Classification == "Portfolio")$Name)
-    
-    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."))
+    oil<-na.omit(OilCompanies)
+
+    bar_labels = c(paste0(substr(company_labels, 1, 15),"..."),"")
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
@@ -2118,23 +2129,27 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
-      scale_x_discrete(labels = rev(bar_labels))+
+      scale_x_discrete(labels = bar_labels)+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
-      geom_text(data=OilCompanies,
+      geom_text(data=oil,
                 aes(x = Name, y = 1),
-                label = perc(OilCompanies$PortWeightEQYlvl),
+                label = perc(oil$PortWeightEQYlvl),
                 hjust = -1, color = textcolor, size=12*(5/14))+
+      geom_text(data=oil,
+                aes(x="",y=1),
+                label = "Weight",
+                hjust = -0.9, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))+
-      guides(fill = guide_legend(ncol = 5,keywidth=1))+
-      annotation_custom(
-        grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
-        xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
+       guides(fill = guide_legend(ncol = 5,keywidth=1))
+      # annotation_custom(
+      #   grob = textGrob(label = "Weight", hjust =-0.9,gp=gpar(fontsize=12,col=textcolor)),
+      #   xmin = n_distinct(OilCompanies$Name)+0.5, xmax = n_distinct(OilCompanies$Name)+1, ymin = 1, ymax = 1.05)
     
     
     
