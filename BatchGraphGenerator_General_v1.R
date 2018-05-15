@@ -295,13 +295,12 @@ for (i in c(326)){
       SecAnalysis <- SectorDataAnalysis()
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
-      Overview_portfolio_sector_stack("02")
       portfolio_sector_stack("03")     #newly added graphs
       
       
       if (HasEquity) {
-        # exposure_summary("06", "EQ")
-        exposure_summary_carstens("06", "EQ")
+        # exposure_summary_carstens("06", "EQ")
+        carsten_metric_chart("04", "EQ")
         sector_techshare("09","EQ","All")
         sector_techshare_area("50","EQ","All")
         Fossil_Distribution("11", "EQ")
@@ -321,7 +320,8 @@ for (i in c(326)){
       
       if (HasDebt) {      
         # exposure_summary("07", "CB")
-        exposure_summary_carstens("07", "CB")
+        # exposure_summary_carstens("07", "CB")
+        carsten_metric_chart("05", "CB")
         sector_techshare("10","CB","All")
         sector_techshare_area("51","CB","All")
         Fossil_Distribution("12", "CB")  
