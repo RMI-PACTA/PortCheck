@@ -2486,10 +2486,36 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       ALD2 <- bind_rows(ALD2,ALD.temp)
     }
  
+ 
+  
+  
+  
+
   ylims <- ALD2 %>%
     summarise(min=min(Production), max=max(Production))
   
-  unitscaleval <- max(ylims$max)   
+  ### SEPARATE AGAIN
+  ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
+  
+  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
+                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+  
+  #ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ifelse(var ==0,0,ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var)
+  if (var ==0){
+    ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<-0
+  }else{
+    ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
+  
+  ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
+  
+  
+  
+  
+  # ylims <- ALD2 %>%
+  #   summarise(min=min(Production), max=max(Production))
+   
+  ### Units
+  unitscaleval <- max(ylims$max, ALD.cp$Production)   
   unitscalefactor <- 1
   green.unit <- c("Electric" = "Vehicles",
                   "RenewablesCap"="MW",
@@ -2541,24 +2567,6 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   }
   
   ALD2$Production <- ALD2$Production/unitscalefactor  
-  ylims <- ALD2 %>%
-    summarise(min=min(Production), max=max(Production))
-  
-  ### SEPARATE AGAIN
-  ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
-  
-  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
-                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
-  
-  #ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ifelse(var ==0,0,ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var)
-  if (var ==0){
-    ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<-0
-  }else{
-    ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
-  
-  ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
-  
-  
  
   
   ### GET SCENARIOS INTO RIBBON FORMAT
@@ -2581,9 +2589,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
 
   ### IDENTIFY LIMITS of the Y axis
   
-  ymin<- min(subset(ylims, select="min"))
+  ymin<- min(ylims$min, ALD.cp$Production)   
   
-  ymax<- max(subset(ylims, select="max"))
+  ymax<- max(ylims$max, ALD.cp$Production)   
   
   y18ln3 <- min(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line3"))
   y23ln3 <- max(subset(ALD.sc.wide, PortName =="MetaPort" &Technology==TechToPlot, select="Line3"))
@@ -2616,7 +2624,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       roundmin <- round(((ymin/unit)-step)*unit,0)
     }
    
-    breaks <- sort(unique(seq(roundmin, roundmax , unit)))
+    breaks <- sort(unique(seq(roundmin, roundmax , (roundmax-roundmin)/5)))
     
     if((TechToPlot !="ICE") & (TechToPlot !="Electric")){
       
