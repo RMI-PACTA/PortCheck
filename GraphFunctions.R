@@ -1314,20 +1314,21 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  ### TAJ Commented Out My Testing - Will remove shortly !!
+  # ### TAJ Commented Out My Testing - Will remove shortly !!
   # EQBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
   # EQBBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
   # ChartType <- "EQ"
   # 
   # 
   # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
   # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
   # ChartType <- "CB"
-  # test <- subset(CBBatchTest, PortName=="MetaPort")
-  # test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
+  # PortName <- "AETNA LIFE INSURANCE COMPANY"
+  # 
+  # 
+  # #test <- subset(CBBatchTest, PortName=="STATE COMPENSATION INSURANCE FUND")
+  # #test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
   # RenewablesColour <<- "#feedde"
   # HydroColour <<- "#fdbe85"
@@ -1345,8 +1346,13 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
   # CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
   # textcolor <<- "#3D3D3C"
+  # 
+  # Startyear <- 2018  
   
+  ### END TAJ COMMENTS TO DELETE
   
+  ### This needs to havea  variable name different from "portName" else the subset below does not work
+  PortName_IN <- PortName
   
   if (ChartType == "CB"){
     port <- CBBatchTest
@@ -1357,8 +1363,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
        port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Bond Universe"), c("Portfolio","Fixed Income Market"))
        port$PortName <- factor(port$PortName, levels=c("Portfolio", "Fixed Income Market"), ordered=TRUE)
      }else{
-       port <- subset(port, PortName %in% c(PortName,"MetaPort","Bond Universe"))
-       port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Bond Universe"), ordered=TRUE)
+       port <- subset(port, PortName %in% c(PortName_IN,"Bond Universe"))
+       port$PortName <- plyr::mapvalues(port$PortName, c(PortName_IN, "Bond Universe"), c("Portfolio", "Fixed Income Market"))
+       port$PortName <- factor(port$PortName, levels=c("Portfolio","Fixed Income Market"), ordered=TRUE)
      }
   
   }else{
@@ -1369,8 +1376,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
       port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Listed Market"), c("Portfolio","Listed Equity Market"))
       port$PortName <- factor(port$PortName, levels=c("Portfolio", "Listed Equity Market"), ordered=TRUE)
     }else{
-      port <- subset(port, port$PortName %in% c(PortName,"MetaPort","Listed Market"))
-      port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Listed Market"), ordered=TRUE)
+      port <- subset(port, PortName %in% c(PortName_IN,"Listed Market"))
+      port$PortName <- plyr::mapvalues(port$PortName, c(PortName_IN,"Listed Market"), c("Portfolio","Listed Equity Market"))
+      port$PortName <- factor(port$PortName, levels=c("Portfolio", "Listed Equity Market"), ordered=TRUE)
     }
   }
   
@@ -1382,8 +1390,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
 
   port <- bind_rows(current.port, current.market)
-  #port$PortName2 <- factor(port$PortName2, levels=c("Portfolio Today", "Market Today")) #, "Portfolio in 2023\nunder 2° Scenario"))
-  
+
   port$Sector <- factor(port$Sector, levels = c("Coal","Oil&Gas", "Power","Automotive"))
   port <- subset(port, Technology != "OilCap")
   tech.levels <- c("Coal","Oil","Gas",
@@ -1403,7 +1410,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
                        limits=c(0, max(tots$Metric) + .01)) +
     scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
     theme_cdi() +
-    facet_wrap(~ Sector, nrow=1, scales="free_x") +
+    facet_wrap(~ Sector, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) 
@@ -1500,7 +1507,25 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   
 }
 
+
+
+
+# company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
+#   
+#   BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/CA-INS/2016Q4/")
+#   BatchName <- "CA-INS"
+#   BenchmarkRegionchoose <- "GlobalAggregate"
+#   Scenariochoose <- "450S"
+#   
+#   EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
+#   EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
+# 
+#   
+#     
+# }  
+
 # ------------- TECH SHARE CHARTS ----------- #
+
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
   
