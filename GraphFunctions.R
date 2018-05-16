@@ -994,8 +994,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize),
-            axis.text.x=element_text(colour=textcolor,size=textsize),
-            axis.text.y=element_text(colour=textcolor,size=textsize)) 
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1011,8 +1011,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize),
-            axis.text.x=element_text(colour=textcolor,size=10),
-            axis.text.y=element_text(colour=textcolor,size=10)) 
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
     ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
