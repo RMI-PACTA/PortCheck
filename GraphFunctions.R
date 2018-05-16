@@ -1665,7 +1665,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   Portfolios <- rbind(Combin,Batch1)
   
   #Filter and select
-  Production <- subset(Portfolios, Year == Startyear &
+  Production <- subset(Portfolios, Year == Startyear +5 &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
   #Production <- rbind(Production,Batch2)
