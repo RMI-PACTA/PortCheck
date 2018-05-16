@@ -302,7 +302,7 @@ for (i in c(326)){
       if (HasEquity) {
         carsten_metric_chart("04", "EQ")
         sector_techshare("09","EQ","All")
-        sector_techshare_area("50","EQ","All")
+        # sector_techshare_area("50","EQ","All")
         Fossil_Distribution("11", "EQ")
         
         
@@ -321,7 +321,7 @@ for (i in c(326)){
       if (HasDebt) {      
         carsten_metric_chart("05", "CB")
         sector_techshare("10","CB","All")
-        sector_techshare_area("51","CB","All")
+        # sector_techshare_area("51","CB","All")
         Fossil_Distribution("12", "CB")  
         # Risk_Distribution("13", "CB")
         
