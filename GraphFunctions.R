@@ -1391,7 +1391,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     "ICE","Hybrid","Electric")
   tech.labels <- gsub("Cap","Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
+  #port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
   
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
   tots <- port %>% group_by(PortName, Sector, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
