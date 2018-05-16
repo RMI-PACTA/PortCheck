@@ -2512,7 +2512,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
     ALD$Asset.Type <- "Bonds"
     Combin <- CBCombin
   }
-  if ((TechToPlot %in% c("Electric","ICE"))& ChartType=="CB"){
+  if ((TechToPlot %in% c("Electric","ICE"))& (ChartType=="CB")){
     ALD<-subset(ALD,ALD$PortName!=PortNames & ALD$Scenario!="450s")
     
   }
