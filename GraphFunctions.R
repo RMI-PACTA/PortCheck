@@ -2473,7 +2473,8 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
 
 Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
-  filternames <- c("Listed Market", "Bond Universe",PortName)
+  filternames <- c("Listed Market", "Bond Universe",PortName,"MetaPort")
+  PortNames<- PortName
   ### EQUITY PRODUCTION
   if (ChartType =="EQ") {
     ALD <- EQALDAggProd[EQALDAggProd$PortName %in% filternames & EQALDAggProd$Technology %in% TechToPlot,]
@@ -2485,7 +2486,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD$Asset.Type <- "Bonds"
     Combin <- CBCombin
   }
-  
+  if (is.null(nrow(ALD$PortName ==PortNames))){PortNames<-"MetaPort"}
   ### PORT PRODUCTION
   #ALD <- bind_rows(Aldprod1, Aldprod2)
   table(ALD$Asset.Type, useNA="always")
@@ -2520,24 +2521,25 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   ALD2 <- bind_rows(ALD.cp, ALD.sc)
   
+      
   ### Add in Car Data
   if (TechToPlot %in% c("Electric","ICE")){
     ALD.temp <- ALD.sc %>% 
       select(-Production) %>%
-      filter(PortName == "MetaPort")
+      filter(PortName ==PortNames)
       if (ChartType =="EQ") {
         ALD.temp1 <- ALD.temp
-        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == "MetaPort"] <- "CPS"
-        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == "MetaPort"] <- 60987.94
-        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == "MetaPort"] <- 268.9853
+        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == PortNames] <- "CPS"
+        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == PortNames] <- 60987.94
+        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- 268.9853
         
         
-        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
+        ALD450 <- ALD.sc[ALD.sc$PortName == PortNames & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
-        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == "MetaPort"] <- "NPS"
-        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == "MetaPort"] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year == "2018"] <- 268.9853
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
+        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
+        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- 268.9853
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
         
   
         ALD.temp <- rbind(ALD.temp1,ALD.temp2)
@@ -2564,8 +2566,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   ### Normalisation of market to Portfolio
   ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
   
-  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
-                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
+                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
   
   #ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ifelse(var ==0,0,ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var)
   if (var ==0){
@@ -2725,12 +2727,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "Line2"="2D-4D",
                     "Line1"="2D")
   
-  a<-PortName
+  
   # 
   # MIN.Y <- ceiling(ymax/10)*10
   # MAX.Y <- floor(ymin/10)*10
   
-  outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == a )) +
+  outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == PortNames )) +
     geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
     scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
     scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
