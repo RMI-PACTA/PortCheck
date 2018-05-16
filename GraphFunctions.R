@@ -947,8 +947,8 @@ SectorDataAnalysis <- function(){
   over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
   over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Other Sectors",over$Sector)
   
-  # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2Â° Scenario")
-  # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2Â° Scenario" & over$Valid == 1 , "Climate Relevant No 2Â° Scenario",over$Sector.All)
+  # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2Ã‚° Scenario")
+  # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2Ã‚° Scenario" & over$Valid == 1 , "Climate Relevant No 2Ã‚° Scenario",over$Sector.All)
   # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
   
   
@@ -969,8 +969,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
     over$Portfolio.Name <- "MetaPort"
   }
  
-  # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2Â° Scenario")
-  # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2Â° Scenario" & over$Valid == 1 , "Climate Relevant No 2Â° Scenario",over$Sector.All)
+  # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2Ã‚° Scenario")
+  # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2Ã‚° Scenario" & over$Valid == 1 , "Climate Relevant No 2Ã‚° Scenario",over$Sector.All)
   # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
   over$Sector[is.na(over$Sector) & over$Sector== "<NA>"]<- "Other Sectors"
   over$Sector <- factor(over$Sector, levels = c("Other Sectors","Fossil Fuels","Power", "Automotive"), ordered=TRUE)
@@ -981,8 +981,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over1<- subset(over, Valid==1 & Portfolio.Name ==PortName & Asset.Type %in% c("Equity","Debt"))
   over1$Asset.Type <- gsub("Debt", "Fixed Income",over1$Asset.Type)
   over1$Asset.Type <- factor(over1$Asset.Type,levels=c("Fixed Income","Equity")) 
-  over1$Sector <- factor(over1$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2Â° Scenario",
-  # over1$Sector.All <- factor(over1$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2Â° Scenario","Climate Relevant w/ 2Â° Scenario"), ordered=TRUE)
+  over1$Sector <- factor(over1$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2Ã‚° Scenario",
+  # over1$Sector.All <- factor(over1$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2Ã‚° Scenario","Climate Relevant w/ 2Ã‚° Scenario"), ordered=TRUE)
   
   if (PortName!="MetaPort"){
     plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
@@ -994,8 +994,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize),
-            axis.text.x=element_text(colour=textcolor,size=textsize),
-            axis.text.y=element_text(colour=textcolor,size=textsize)) 
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1011,8 +1011,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
       theme_barcharts() +
       theme(legend.position = "bottom",
             legend.text=element_text(size=textsize),
-            axis.text.x=element_text(colour=textcolor,size=textsize),
-            axis.text.y=element_text(colour=textcolor,size=textsize)) 
+            axis.text.x=element_text(colour=textcolor,size=11),
+            axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
     ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
@@ -1055,14 +1055,14 @@ portfolio_sector_stack <- function(plotnumber){
   over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","Other Sectors")
   over$Sector <-ifelse (over$Subgroup %in% OilGasCoal,"Fossil Fuels",over$Sector)
   over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
-  # over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2Â° Scenario",over$Sector)
+  # over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2Ã‚° Scenario",over$Sector)
   
-  over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Climate Relevant w/ 2Â° Scenario")
-  over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2Â° Scenario" & over$Valid==1 , "Climate Relevant No 2Â° Scenario",over$Sector.All)
+  over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Climate Relevant w/ 2Ã‚° Scenario")
+  over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2Ã‚° Scenario" & over$Valid==1 , "Climate Relevant No 2Ã‚° Scenario",over$Sector.All)
   over$Sector.All <- ifelse(over$Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
   
-  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #,"Climate Relevant No 2Â° Scenario",
-  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2Â° Scenario","Climate Relevant w/ 2Â° Scenario"), ordered=TRUE)
+  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #,"Climate Relevant No 2Ã‚° Scenario",
+  over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2Ã‚° Scenario","Climate Relevant w/ 2Ã‚° Scenario"), ordered=TRUE)
   
   portfolio_label = paste0(round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
@@ -1076,20 +1076,20 @@ portfolio_sector_stack <- function(plotnumber){
     mutate(per=ValueUSD/sum(ValueUSD))
   over<- over %>%
     complete(Asset.Type=c("Fixed Income","Equity"),
-             Sector = c("Other Sectors","Fossil Fuels", "Automotive","Power"), #"Climate Relevant No 2Â° Scenario",
+             Sector = c("Other Sectors","Fossil Fuels", "Automotive","Power"), #"Climate Relevant No 2Ã‚° Scenario",
              fill=list(ValueUSD = 0, Valid=1,Portfolio.Name=PortName)) %>%
     unique()
   over<-as.data.frame(over)
   orderofchart <- c("Debt","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
-  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2Â° Scenario",
+  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2Ã‚° Scenario",
   
   temp <-max(sum(filter(over,Portfolio.Name==PortName&Valid==1)$per))
   
   if (PortName!="MetaPort"){
     plot <- ggplot(data=subset(over, Portfolio.Name==PortName&Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width =0.6) +
-      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +   #"Climate Relevant No 2Â° Scenario", "#90b6e4",
+      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +   #"Climate Relevant No 2Ã‚° Scenario", "#90b6e4",
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="", labels = scales::percent, expand=c(0,0),limits = c(0,temp+0.005)) +
       guides(fill=guide_legend(nrow=2))+
@@ -1101,7 +1101,7 @@ portfolio_sector_stack <- function(plotnumber){
   }else {
     plot <- ggplot(data=subset(over, Valid==1), aes(x=Asset.Type, y=per, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width =0.6) +
-      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) + #"Climate Relevant No 2Â° Scenario", "#90b6e4",
+      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) + #"Climate Relevant No 2Ã‚° Scenario", "#90b6e4",
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="", labels=scales::percent, expand=c(0,0),limits = c(0,1)) +
       guides(fill=guide_legend(nrow=2))+
@@ -1165,7 +1165,7 @@ exposure_summary <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-1,1),expand = c(0.08,0.08))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio with 2Â° Market Benchmark")+
+    ylab("Alignment of Portfolio with 2Ã‚° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1223,7 +1223,7 @@ exposure_summary_carstens <- function(plotnumber,ChartType){
     geom_hline(yintercept = 0, size = 1, color = textcolor)+
     scale_y_continuous(labels=percent, limits = c(-.02,.02),expand = c(0,0))+
     scale_x_discrete(labels=TechLabels,expand=c(0,0))+
-    ylab("Alignment of Portfolio with 2Â° Market Benchmark")+
+    ylab("Alignment of Portfolio with 2Ã‚° Market Benchmark")+
     theme_barcharts()+
     theme(panel.spacing.x = unit(.5,"cm"),
           strip.text = element_text(size=textsize,colour=textcolor),
@@ -1271,13 +1271,13 @@ analysed_summary <- function(plotnumber){
   # over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","Other Sectors")
   # over$Sector <-ifelse (over$Subgroup %in% OilGasCoal,"Fossil Fuels",over$Sector)
   # over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
-  # over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2Â° Scenario",over$Sector)
+  # over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Climate Relevant No 2Ã‚° Scenario",over$Sector)
   # 
   over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Scope of the Analysis")
-  # #over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2Â° Scenario" & over$Valid==1 , "Climate Relevant No 2Â° Scenario",over$Sector.All)
+  # #over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2Ã‚° Scenario" & over$Valid==1 , "Climate Relevant No 2Ã‚° Scenario",over$Sector.All)
   over$Sector.All <- ifelse(over$Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
   # 
-  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2Â° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2Ã‚° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
   over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Scope of the Analysis"), ordered=TRUE)
   
   # portfolio_label = paste0("Analysed: ", round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
@@ -1314,20 +1314,21 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  ### TAJ Commented Out My Testing - Will remove shortly !!
+  # ### TAJ Commented Out My Testing - Will remove shortly !!
   # EQBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
   # EQBBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
   # ChartType <- "EQ"
   # 
   # 
   # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
   # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # PortName <- "MetaPort"
   # ChartType <- "CB"
-  # test <- subset(CBBatchTest, PortName=="MetaPort")
-  # test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
+  # PortName <- "AETNA LIFE INSURANCE COMPANY"
+  # 
+  # 
+  # #test <- subset(CBBatchTest, PortName=="STATE COMPENSATION INSURANCE FUND")
+  # #test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
   # 
   # RenewablesColour <<- "#feedde"
   # HydroColour <<- "#fdbe85"
@@ -1345,8 +1346,13 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
   # CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
   # textcolor <<- "#3D3D3C"
+  # 
+  # Startyear <- 2018  
   
+  ### END TAJ COMMENTS TO DELETE
   
+  ### This needs to havea  variable name different from "portName" else the subset below does not work
+  PortName_IN <- PortName
   
   if (ChartType == "CB"){
     port <- CBBatchTest
@@ -1357,8 +1363,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
        port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Bond Universe"), c("Portfolio","Fixed Income Market"))
        port$PortName <- factor(port$PortName, levels=c("Portfolio", "Fixed Income Market"), ordered=TRUE)
      }else{
-       port <- subset(port, PortName %in% c(PortName,"MetaPort","Bond Universe"))
-       port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Bond Universe"), ordered=TRUE)
+       port <- subset(port, PortName %in% c(PortName_IN,"Bond Universe"))
+       port$PortName <- plyr::mapvalues(port$PortName, c(PortName_IN, "Bond Universe"), c("Portfolio", "Fixed Income Market"))
+       port$PortName <- factor(port$PortName, levels=c("Portfolio","Fixed Income Market"), ordered=TRUE)
      }
   
   }else{
@@ -1369,8 +1376,9 @@ carsten_metric_chart <- function(plotnumber, ChartType){
       port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Listed Market"), c("Portfolio","Listed Equity Market"))
       port$PortName <- factor(port$PortName, levels=c("Portfolio", "Listed Equity Market"), ordered=TRUE)
     }else{
-      port <- subset(port, port$PortName %in% c(PortName,"MetaPort","Listed Market"))
-      port$PortName <- factor(port$PortName, levels=c(PortName,"MetaPort", "Listed Market"), ordered=TRUE)
+      port <- subset(port, PortName %in% c(PortName_IN,"Listed Market"))
+      port$PortName <- plyr::mapvalues(port$PortName, c(PortName_IN,"Listed Market"), c("Portfolio","Listed Equity Market"))
+      port$PortName <- factor(port$PortName, levels=c("Portfolio", "Listed Equity Market"), ordered=TRUE)
     }
   }
   
@@ -1382,8 +1390,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
 
   port <- bind_rows(current.port, current.market)
-  #port$PortName2 <- factor(port$PortName2, levels=c("Portfolio Today", "Market Today")) #, "Portfolio in 2023\nunder 2° Scenario"))
-  
+
   port$Sector <- factor(port$Sector, levels = c("Coal","Oil&Gas", "Power","Automotive"))
   port <- subset(port, Technology != "OilCap")
   tech.levels <- c("Coal","Oil","Gas",
@@ -1391,8 +1398,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     "ICE","Hybrid","Electric")
   tech.labels <- gsub("Cap","Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  port$fac<-c(rep(0.6,3),rep(0.6,3),rep(1,5),rep(0.6,3),rep(0.6,3),rep(1,5))
-  
+
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
   tots <- port %>% group_by(PortName, Sector, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
   
@@ -1404,14 +1410,14 @@ carsten_metric_chart <- function(plotnumber, ChartType){
                        limits=c(0, max(tots$Metric) + .01)) +
     scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
     theme_cdi() +
-    facet_wrap(~ Sector, nrow=1, scales="free_x") +
+    facet_wrap(~ Sector, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) 
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
-         bg="transparent",height=3,width=10,dpi=ppi)
+         bg="transparent",height=3,width=10,dpi=ppi*0.8)
 }
 
 
@@ -1501,7 +1507,25 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   
 }
 
+
+
+
+# company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
+#   
+#   BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/CA-INS/2016Q4/")
+#   BatchName <- "CA-INS"
+#   BenchmarkRegionchoose <- "GlobalAggregate"
+#   Scenariochoose <- "450S"
+#   
+#   EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
+#   EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
+# 
+#   
+#     
+# }  
+
 # ------------- TECH SHARE CHARTS ----------- #
+
 
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
   
@@ -1654,13 +1678,13 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   }
   
   #Remove all portfolios other than Market, Average
-  # Batch1 <- subset(Batch, Type != "Portfolio")
-  Batch2 <- Batch %>%
-    filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
-    select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
-    rename(WtProduction=Scen.WtProduction.Market )
-
-  Batch2$Type <-"2° Market"
+  Batch1 <- subset(Batch, Type != "Portfolio")
+  # Batch2 <- Batch %>%
+  #   filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
+  #   select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
+  #   rename(WtProduction=Scen.WtProduction.Market )
+  # 
+  # Batch2$Type <-"2Ã‚° Market"
   #Add our target portfolio back
   # Portfolios <- rbind(Combin,Batch1)
   
@@ -2035,7 +2059,7 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
                        breaks=calbreak(a,b)*unit) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
-    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2ÃƒÂƒÂ‚ÃƒÂ‚Â°, 4ÃƒÂƒÂ‚ÃƒÂ‚Â°, 6ÃƒÂƒÂ‚ÃƒÂ‚Â° Degree Scenarios") +
+    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2ÃƒƒÃ‚ƒÃ‚‚ÃƒƒÃ‚‚Ã‚°, 4ÃƒƒÃ‚ƒÃ‚‚ÃƒƒÃ‚‚Ã‚°, 6ÃƒƒÃ‚ƒÃ‚‚ÃƒƒÃ‚‚Ã‚° Degree Scenarios") +
     coord_cartesian(ylim=c(calbreak(a,b)[1]*unit, calbreak(a,b)[length(calbreak(a,b))]*unit))
   
   if (ChartType =="CB"){
@@ -2472,9 +2496,12 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
   }
 }
 
-Graph246_new <- function(plotnumber,ChartType,TechToPlot){
+
   
-  filternames <- c("Listed Market", "Bond Universe",PortName)
+ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
+  
+  filternames <- c("Listed Market", "Bond Universe",PortName,"MetaPort")
+  PortNames <-PortName
   ### EQUITY PRODUCTION
   if (ChartType =="EQ") {
     ALD <- EQALDAggProd[EQALDAggProd$PortName %in% filternames & EQALDAggProd$Technology %in% TechToPlot,]
@@ -2486,7 +2513,16 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD$Asset.Type <- "Bonds"
     Combin <- CBCombin
   }
-  
+  # if ((TechToPlot %in% c("Electric","ICE"))& (ChartType=="CB")){
+  #   ALD<-subset(ALD,ALD$PortName!=PortNames & ALD$Scenario!="450s")
+  #   
+  # }
+  # if ((nrow(ALD[which(ALD$PortName==PortNames),])>0) ){
+  #   PortNames<-PortName
+  # }else if ((nrow(ALD[which(ALD$PortName==PortNames),])==0)) {
+  #     PortNames<-"MetaPort"
+  # }
+ 
   ### PORT PRODUCTION
   #ALD <- bind_rows(Aldprod1, Aldprod2)
   table(ALD$Asset.Type, useNA="always")
@@ -2521,40 +2557,41 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   ALD2 <- bind_rows(ALD.cp, ALD.sc)
   
+      
   ### Add in Car Data
   if (TechToPlot %in% c("Electric","ICE")){
     ALD.temp <- ALD.sc %>% 
       select(-Production) %>%
-      filter(PortName == "MetaPort")
+      filter(PortName ==PortNames)
       if (ChartType =="EQ") {
         ALD.temp1 <- ALD.temp
-        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == "MetaPort"] <- "CPS"
-        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == "MetaPort"] <- 60987.94
-        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == "MetaPort"] <- 268.9853
+        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == PortNames] <- "CPS"
+        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == PortNames] <- 60987.94
+        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- 268.9853
         
         
-        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
+        ALD450 <- ALD.sc[ALD.sc$PortName == PortNames & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
-        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == "MetaPort"] <- "NPS"
-        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == "MetaPort"] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year == "2018"] <- 268.9853
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
+        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
+        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- 268.9853
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
         
   
         ALD.temp <- rbind(ALD.temp1,ALD.temp2)
       }else{
         ALD.temp1 <- ALD.temp
-        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == "MetaPort"] <- "CPS"
-        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == "MetaPort"] <- 77423.17
-        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == "MetaPort"] <- 149.1076
+        ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == PortNames] <- "CPS"
+        ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == PortNames] <- 77423.17
+        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- 149.1076
         
         
         ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
-        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == "MetaPort"] <- "NPS"
-        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == "MetaPort"] <- c(77423.17, 76571.52,75332.74,74326.24,73784.28,73242.32)
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year == "2018"] <- 149.1076
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == "MetaPort" & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
+        ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
+        ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(77423.17, 76571.52,75332.74,74326.24,73784.28,73242.32)
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- 149.1076
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
         
         
         ALD.temp <- rbind(ALD.temp1,ALD.temp2)
@@ -2565,8 +2602,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   ### Normalisation of market to Portfolio
   ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
   
-  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
-                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+  var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
+                ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
   
   #ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ifelse(var ==0,0,ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var)
   if (var ==0){
@@ -2726,12 +2763,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                     "Line2"="2D-4D",
                     "Line1"="2D")
   
-  a<-PortName
+  
   # 
   # MIN.Y <- ceiling(ymax/10)*10
   # MAX.Y <- floor(ymin/10)*10
   
-  outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == a )) +
+  outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == PortNames )) +
     geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
     scale_fill_manual(labels=eval(parse(text = paste(GoodBad,".labels",sep = ""))), values=eval(parse(text = paste(GoodBad,".fill",sep = "")))) +
     scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
@@ -2740,7 +2777,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                        breaks=seq(MIN.Y,MAX.Y,length.out = 5)) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
-    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2ÃƒÂƒÂ‚ÃƒÂ‚Â°, 4ÃƒÂƒÂ‚ÃƒÂ‚Â°, 6ÃƒÂƒÂ‚ÃƒÂ‚Â° Degree Scenarios") +
+    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2ÃƒƒÃ‚ƒÃƒ‚Ã‚ƒÃƒ‚Ã‚‚ÃƒƒÃ‚ƒÃƒ‚Ã‚‚Ãƒ‚Ã‚°, 4ÃƒƒÃ‚ƒÃƒ‚Ã‚ƒÃƒ‚Ã‚‚ÃƒƒÃ‚ƒÃƒ‚Ã‚‚Ãƒ‚Ã‚°, 6ÃƒƒÃ‚ƒÃƒ‚Ã‚ƒÃƒ‚Ã‚‚ÃƒƒÃ‚ƒÃƒ‚Ã‚‚Ãƒ‚Ã‚° Degree Scenarios") +
     coord_cartesian(ylim=c(MIN.Y, MAX.Y))
   
   if (ChartType =="CB"){
