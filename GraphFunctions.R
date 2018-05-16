@@ -1417,7 +1417,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
-         bg="transparent",height=3,width=10,dpi=ppi)
+         bg="transparent",height=3,width=10,dpi=ppi*0.8)
 }
 
 
@@ -2512,15 +2512,15 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
     ALD$Asset.Type <- "Bonds"
     Combin <- CBCombin
   }
-  if ((TechToPlot %in% c("Electric","ICE"))& (ChartType=="CB")){
-    ALD<-subset(ALD,ALD$PortName!=PortNames & ALD$Scenario!="450s")
-    
-  }
-  if ((nrow(ALD[which(ALD$PortName==PortNames),])>0) ){
-    PortNames<-PortName
-  }else if ((nrow(ALD[which(ALD$PortName==PortNames),])==0)) {
-      PortNames<-"MetaPort"
-  }
+  # if ((TechToPlot %in% c("Electric","ICE"))& (ChartType=="CB")){
+  #   ALD<-subset(ALD,ALD$PortName!=PortNames & ALD$Scenario!="450s")
+  #   
+  # }
+  # if ((nrow(ALD[which(ALD$PortName==PortNames),])>0) ){
+  #   PortNames<-PortName
+  # }else if ((nrow(ALD[which(ALD$PortName==PortNames),])==0)) {
+  #     PortNames<-"MetaPort"
+  # }
  
   ### PORT PRODUCTION
   #ALD <- bind_rows(Aldprod1, Aldprod2)
