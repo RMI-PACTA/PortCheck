@@ -417,9 +417,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     theme_distribution()+
     expand_limits(0,0)+
     ylab(Title)+
-    xlab(paste0("All CA Insurer ",
-                ifelse(ChartType == "EQ", "Equity", "Fixed Income"),
-                " Portfolios"))
+    xlab("Insurers Operating in California")
   #arrowlength <- ylimval/5
   
   if (PortName %in% dfagg$Name) {
