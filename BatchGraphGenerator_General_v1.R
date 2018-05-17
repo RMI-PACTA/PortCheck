@@ -236,7 +236,7 @@ i=326
 # Loop through Portfolios
 #--------
 
-for (i in c(326, 490, 500:510)){
+for (i in c(326, 490)){#, 500:510)){
 
   ### Specify the Names from the Test List
   
