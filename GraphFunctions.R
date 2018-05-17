@@ -1606,7 +1606,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
  
- h <- max(2,nrow(comp)*.2)
+ h <- max(2,nrow(comp)*.3)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
          bg="transparent",height=h,width=10,dpi=ppi)
@@ -1746,10 +1746,10 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    height <- nrow(Companies)*0.2
+    height <- max(3,nrow(Companies)*.2)
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=2+height,width=10,dpi=ppi)
+           bg="transparent",height=height,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
@@ -2301,9 +2301,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    if(length(unique(OilCompanies$Name))<3){
-      h=length(unique(OilCompanies$Name))
-    }else{h=3}
+    h <- max(3, length(unique(OilCompanies$Name)))
+    
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)}
@@ -2428,9 +2427,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    if(length(unique(portfolio1$Name))<=3){
-      h=length(unique(portfolio1$Name))*.5
-    }else{h=3}
+    h <- max(3, length(unique(OilCompanies$Name)))
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)

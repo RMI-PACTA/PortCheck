@@ -372,7 +372,7 @@ for (i in c(326, 490, 500:510)){
           company_og_buildout("37", 10, "EQ")
           }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          HasCarbonBudget <- carboninout("40", 20, "EQ")
+          HasCarbonBudget <- carboninout("40", 10, "EQ")
         }
       }
       
