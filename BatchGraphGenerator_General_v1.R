@@ -239,8 +239,8 @@ for (i in c(326)){
   PortfolioName <- gsub(" ", "", PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
-  HasCarbonBudget <- TRUE #Set later
-
+  HasCarbonBudget <- FALSE 
+  
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
   PortName <- PortfolioNameLong
@@ -362,9 +362,9 @@ for (i in c(326)){
         if (PortSummary$HasAuto.CB) {
           company_techshare("34", 10, "CB", "Automotive")
         }
-        # if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-        #   company_techshare("36", 10, "CB", "Fossil Fuels")
-        # }
+        if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
+          company_techshare("36", 10, "CB", "Fossil Fuels")
+        }
         if (PortSummary$HasOilGas.CB) {
           Oilshare("38", 10, "CB")
         }
@@ -377,9 +377,9 @@ for (i in c(326)){
         if (PortSummary$HasAuto.EQ) {
           company_techshare("35", 10, "EQ", "Automotive")
         }
-        # if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-        #   company_techshare("37", 10, "EQ", "Fossil Fuels")
-        # }
+        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
+          company_techshare("37", 10, "EQ", "Fossil Fuels")
+        }
         if (PortSummary$HasOilGas.EQ) {
           Oilshare("39", 10, "EQ")
         }
