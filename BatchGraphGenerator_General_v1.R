@@ -236,7 +236,7 @@ i=326
 # Loop through Portfolios
 #--------
 
-for (i in c(326, 490)){
+for (i in c(326, 490, 500:510)){
 
   ### Specify the Names from the Test List
   
@@ -375,6 +375,8 @@ for (i in c(326, 490)){
           HasCarbonBudget <- carboninout("40", 20, "EQ")
         }
       }
+      
+      # template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")

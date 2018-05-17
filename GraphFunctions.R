@@ -155,7 +155,7 @@ CAReport <- function(){
   }
   
   if(!HasAuto){
-    text <- removetextlines("AutoSector")
+    text <- removetextlines("AutoSector_ALL")
   } else {
     if(!HasAutoCB){
       text <- removetextlines("AutoSector_CB")
@@ -165,7 +165,7 @@ CAReport <- function(){
     }
   }
   if(!HasPower){
-    text <- removetextlines("PowerSector")
+    text <- removetextlines("PowerSector_ALL")
   } else {
     if(!HasPowerCB){
       text <- removetextlines("PowerSector_CB")
@@ -175,7 +175,7 @@ CAReport <- function(){
     }
   }
   if(!HasOG){
-    text <- removetextlines("FossilFuelSector")
+    text <- removetextlines("FossilFuelSector_ALL")
   } else {
     if(!HasOGCB){
       text <- removetextlines("FossilFuelSector_CB")
@@ -193,16 +193,8 @@ CAReport <- function(){
   }else{
     text <- removetextlines("CompanyCharts")
   }
-  
-  
-  # Replace Sector Weight Values
-  # a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
-  # for (j in 1:nrow(a)){
-  #   text$text <- gsub(as.character(a$SectorList[j]),reportdata[as.character(a$SectorList[j])][[1]],text$text)
-  # }  
-  
+
   # Replace Insurer Name
-  # reportdata$InsuranceCompanyName <- gsub("&","\\\\&",reportdata$InsuranceCompanyName)
   text$text <- gsub("InsuranceCompanyName",reportdata$InsuranceCompanyName,text$text)
   text$text <- gsub("SizeofPortfolio",paste0("\\\\$",reportdata$SizeofPortfolio),text$text)
   text$text <- gsub("TodaysDate",reportdata$TodaysDate,text$text)
@@ -389,7 +381,6 @@ comprss <- function(tx) {
 }
 
 #----------- Distribution Chart ------------- #
-
 distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                                portfolio_label, Title, Labels, BarColors){
   
@@ -450,7 +441,6 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
 }
 
 # -------------STACKED BAR CHARTS ---------- #
-
 stacked_bar_chart <- function(dat, colors, bar_labels, legend_labels){
   # "item", "family", "score", "value"
   colnames <- colnames(dat)
@@ -469,7 +459,6 @@ stacked_bar_chart <- function(dat, colors, bar_labels, legend_labels){
 }
 
 # ------------- RANKING CHART - ALIGNMENT ----#
-
 ranking_chart_alignment <- function(plotnumber,ChartType){
   
   if (ChartType == "EQ"){
@@ -700,7 +689,6 @@ ranking_chart_alignment <- function(plotnumber,ChartType){
 }
 
 # ------------- RANKING CHART - ALIGNMENT USING CarstenMetric_Port ----#
-
 ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
   
   if (ChartType == "EQ"){
@@ -1480,7 +1468,7 @@ Risk_Distribution <- function(plotnumber, ChartType){
 }
 
 Fossil_Distribution <- function(plotnumber, ChartType){
-  Title <- paste0("Percent of ", ifelse(ChartType=="CB","Debt","Equity")," Portfolio Value")
+  Title <- paste0("Percent of ", ifelse(ChartType=="CB","Fixed Income","Equity")," Portfolio Value")
   if (ChartType == "EQ"){
     Batch <- EQBatchTest
     ylim = 1
@@ -1604,10 +1592,12 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   
  outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
     geom_bar(stat="identity") + 
-    geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="Pct. Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)")) + 
+    geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
+    geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
     scale_x_discrete(name = "") + 
-    scale_y_continuous(name = "Pct. Change in Planned Portfolio Production (2018-2023)", labels=percent) + 
-    scale_linetype_manual(name="", values=c("dashed")) +
+    scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent) + 
+    scale_color_manual(values=area_2)+
+    # scale_linetype_manual(name="", values=c("dashed")) +
     scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = guide_legend(reverse = TRUE)) +
     facet_wrap(~Technology, ncol=1) +
     theme_cdi() + 
@@ -1615,9 +1605,11 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.line=element_line()) +
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
+ 
+ h <- max(2,nrow(comp)*.2)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
-         bg="transparent",height=4*(1.4),width=10,dpi=ppi)
+         bg="transparent",height=h,width=10,dpi=ppi)
     
 }
 
@@ -1754,9 +1746,10 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
+    height <- nrow(Companies)*0.2
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
-           bg="transparent",height=4*(1.4),width=10,dpi=ppi)
+           bg="transparent",height=2+height,width=10,dpi=ppi)
   } else {
     print(paste0("No ", SectorToPlot, " data to plot."))
   }
@@ -1779,7 +1772,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
     select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
     rename(WtProduction=Scen.WtProduction.Market )
 
-  Batch2$Type <-"2° Market"
+  Batch2$Type <-"2° Target Exposure"
   #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch1)
   
@@ -1814,8 +1807,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
     Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
     
     Production$Type <- wrap.labels(Production$Type,20)
-    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2° Market"))
-    xlabels = c("Portfolio", "All\nInsurers", "2°\nTarget")
+    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2° Target Exposure"))
+    xlabels = c("Portfolio", "All\nInsurers", "2° Target\nExposure")
     
     titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
     names(titles) <- c("Fossil Fuels", "Power", "Automotive")
@@ -2200,13 +2193,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
   }
   
-  
-  # ------------ Oil Chart -------------------- #
-  
-  
-  ####Oil
-  #OilCompProdSS$EQY_FUND_TICKER <- gsub(" US","",as.character(OilCompProdSS$EQY_FUND_TICKER))
-  
   OilCompanies <- right_join(OilOG,OilCompProdSS, by=c("Technology","Ticker"))
   OilCompanies <- subset(OilCompanies, select=c("Production","PortWeightEQYlvl","Resource.Type","Name"))
   OilCompanies1 <- OilCompanies %>%
@@ -2247,8 +2233,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     OilCompanies <- OilCompanies %>%
       filter(Name %in% unique(OilCompanies$Name)[1:min(companiestoprint,length(unique(OilCompanies$Name)))])
     
-    
-    
     colnames(OilCompanies)[which(names(OilCompanies) == "Resource.Type")] <- "Oil.Type"
     OilCompanies <- subset(OilCompanies,select = c("Oil.Type","Name","OilShare","Classification","PortWeightEQYlvl"))
     
@@ -2268,13 +2252,6 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     OilCompanies$PortWeightEQYlvl <- as.numeric(OilCompanies$PortWeightEQYlvl)
     names(colors) <- techorder
     names(tech_labels) <- techorder
-    
-    # scaleFUN <- function(x) {
-    #   x <- round(x, digits = 1)
-    #   x<-as.numeric(x)
-    #   x[x<10] <- paste0("  ",x[x<10])
-    #   return(x)
-    # }
     perc <- function(x, digits = 1, format = "f", ...) {
       x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
       
@@ -2451,12 +2428,12 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    if(length(unique(portfolio1$Name))<=6){
-      h=length(unique(portfolio1$Name))
-    }else{h=6.5}
+    if(length(unique(portfolio1$Name))<=3){
+      h=length(unique(portfolio1$Name))*.5
+    }else{h=3}
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-           bg="transparent",height=h,width=11,dpi=ppi)
+           bg="transparent",height=h,width=10,dpi=ppi)
     return(TRUE)
   } else {
     print("No Carbon Budget data to plot.")
