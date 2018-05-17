@@ -1498,7 +1498,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   if(PrintPlot){print(plot)}
   ggsave(plot=plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
          height=3,width=7,dpi=ppi, bg="transparent")
-  
+    
 }
 
 
@@ -1531,7 +1531,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   # 
   # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
   # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
-  textsize <<- 8.5
+  # textsize <<- 8.5
   
   
   ### NEW HERE
@@ -1540,8 +1540,8 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
   
-  PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
-  ChartType <- "CB"
+  #PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
+  #ChartType <- "CB"
   PortName_IN <- PortName
   
   if (ChartType == "CB"){
