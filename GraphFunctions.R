@@ -1388,13 +1388,14 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
 
   port <- bind_rows(current.port, current.market)
-
-  port$Sector <- factor(port$Sector, levels = c("Coal","Oil&Gas", "Power","Automotive"))
+ 
+  port$Sector <- ifelse(port$Sector == "Oil&Gas","Oil and Gas", port$Sector)
+  port$Sector <- factor(port$Sector, levels = c("Coal","Oil and Gas", "Power","Automotive"))
   port <- subset(port, Technology != "OilCap")
   tech.levels <- c("Coal","Oil","Gas",
     "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
     "ICE","Hybrid","Electric")
-  tech.labels <- gsub("Cap","Capacity", tech.levels)
+  tech.labels <- gsub("Cap"," Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
 
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
@@ -1411,6 +1412,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     facet_wrap(~ Sector, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
+    theme(axis.title.y = element_text(colour = textcolor))+
     theme(axis.line.x = element_line()) 
     
   
@@ -1753,7 +1755,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    height <- max(2,nrow(Companies)*.3)
+    height <- max(2,1+ + nrow(Companies)*.4)
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2306,7 +2308,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(2, length(unique(OilCompanies$Name))*.3)
+    h <- max(2, .8+ length(unique(OilCompanies$Name))*.4)
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2432,7 +2434,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(2, length(unique(port$Name)))
+    h <- max(1, length(unique(port$Name))*.5)
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)

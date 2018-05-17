@@ -232,11 +232,12 @@ unique(intersect(CBBatchTest$Scenario, CBCompProdSnapshots$Scenario))
 unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 
 i=326
+i=490
 #-------
 # Loop through Portfolios
 #--------
 
-for (i in c(326, 490)){#, 500:510)){
+for (i in c(490)){#, 500:510)){
 
   ### Specify the Names from the Test List
   
@@ -253,7 +254,7 @@ for (i in c(326, 490)){#, 500:510)){
   HasCarbonBudget <- FALSE 
   
   ### Handle to switch between showing Company Info and Not. 
-  WithCompanyCharts <- TRUE
+  WithCompanyCharts <- FALSE #TRUE
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -298,7 +299,8 @@ for (i in c(326, 490)){#, 500:510)){
   ### Loops through graphs and report generation
   
   PrintPlot = FALSE
-  
+   SecAnalysis <- SectorDataAnalysis()
+   
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
       
@@ -306,7 +308,7 @@ for (i in c(326, 490)){#, 500:510)){
       ### CA TEMPLATE #######
       #######################
      
-      SecAnalysis <- SectorDataAnalysis()
+     
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
       Overview_portfolio_sector_stack("02")
