@@ -236,7 +236,7 @@ i=326
 # Loop through Portfolios
 #--------
 
-for (i in c(326)){
+for (i in c(326, 490)){
 
   ### Specify the Names from the Test List
   
@@ -251,6 +251,9 @@ for (i in c(326)){
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
   HasCarbonBudget <- FALSE 
+  
+  ### Handle to switch between showing Company Info and Not. 
+  WithCompanyCharts <- TRUE
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -307,13 +310,11 @@ for (i in c(326)){
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
       Overview_portfolio_sector_stack("02")
-      # portfolio_sector_stack("03")     #newly added graphs
       
       
       if (HasEquity) {
         carsten_metric_chart("04", "EQ")
-        sector_techshare("09","EQ","All")
-        # sector_techshare_area("50","EQ","All")
+        sector_techshare("09","EQ","All", Startyear+5)
         Fossil_Distribution("11", "EQ")
         
         
@@ -331,8 +332,7 @@ for (i in c(326)){
       
       if (HasDebt) {      
         carsten_metric_chart("05", "CB")
-        sector_techshare("10","CB","All")
-        # sector_techshare_area("51","CB","All")
+        sector_techshare("10","CB","All", Startyear+5)
         Fossil_Distribution("12", "CB")  
         # Risk_Distribution("13", "CB")
         
@@ -345,27 +345,8 @@ for (i in c(326)){
         Graph246_new("19","CB", "Gas")
         Graph246_new("20","CB", "ICE")
         Graph246_new("21","CB", "Electric")
-        
       }
   
-      #Exposure to 2D Scenarios
-      # if (HasEquity) {
-      #   ranking_chart_alignment("30", "EQ") #Carstens Metric
-      #   ranking_chart_alignment_Carstenmetric("96", "EQ")
-      # }
-      # if (HasDebt) {
-      #   ranking_chart_alignment("31", "CB") #Carstens Metric
-      #   ranking_chart_alignment_Carstenmetric("97", "CB")
-      # }
-      
-      # As mentioned - these are not EQ and CB - these must be combined somehow. 
-      
-      # company_techshare("32", 10, "Power")
-      # company_techshare("32", 10, "Automotive")
-      # company_techshare("32", 10, "Fossil Fuels")
-      
-      
-      
       if (HasDebt ) {
         if (PortSummary$HasPower.CB){
           company_techshare("32", 10, "CB", "Power")
@@ -373,11 +354,9 @@ for (i in c(326)){
         if (PortSummary$HasAuto.CB) {
           company_techshare("34", 10, "CB", "Automotive")
         }
-        if (PortSummary$HasCoal.CB || PortSummary$HasOilGas.CB) {
-          company_techshare("36", 10, "CB", "Fossil Fuels")
-        }
         if (PortSummary$HasOilGas.CB) {
           Oilshare("38", 10, "CB")
+          company_og_buildout("36", 10, "CB")
         }
       }
       
@@ -388,31 +367,20 @@ for (i in c(326)){
         if (PortSummary$HasAuto.EQ) {
           company_techshare("35", 10, "EQ", "Automotive")
         }
-        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          company_techshare("37", 10, "EQ", "Fossil Fuels")
-        }
         if (PortSummary$HasOilGas.EQ) {
           Oilshare("39", 10, "EQ")
-        }
+          company_og_buildout("37", 10, "EQ")
+          }
         if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
           HasCarbonBudget <- carboninout("40", 20, "EQ")
         }
       }
       
-      # sector_techshare_area(99,"EQ","All")
-    
-      # dev.off()
-      
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
-      
-      
      
-      # Creates the report for California
-      system.time(
-        CAReport()
-      )
-      
+      # Report Generation
+      CAReport()
       
     },error=function(e){cat("ERROR :",conditionMessage(e), "\n")}) }else{
       print (paste0(PortfolioNameLong," has no Equity and Bond Data"))

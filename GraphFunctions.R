@@ -188,6 +188,13 @@ CAReport <- function(){
     }
   }
   
+  if(WithCompanyCharts){
+    text <- removetextlines("CompanyPlaceholder")
+  }else{
+    text <- removetextlines("CompanyCharts")
+  }
+  
+  
   # Replace Sector Weight Values
   # a<-data.frame("SectorList"=paste0(rep(c("FF","Power","Auto"),1,each=2),"Sector","Port",rep(c("EQ","CB"),3)))
   # for (j in 1:nrow(a)){
@@ -1422,7 +1429,6 @@ carsten_metric_chart <- function(plotnumber, ChartType){
 
 
 # ------------- DISTRIBUTIONS --------------- #
-
 Risk_Distribution <- function(plotnumber, ChartType){
   Title <- "Percent of Fixed Income Portfolio Value"
   MetricCol <- c("Risk1", "Risk2", "Risk3")
@@ -1509,9 +1515,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
 
 
 # ------------- COMPANY EXPOSURE CHART ----------- #
-
-
-company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
+company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
 
   ### !! TAJ REMOVE THESE
   ### LOADED ELSEWHERE
@@ -1547,8 +1551,8 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorT
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
   
-  PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
-  ChartType <- "EQ"
+  # PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
+  # ChartType <- "EQ"
   PortName_IN <- PortName
   
   if (ChartType == "CB"){
@@ -1598,7 +1602,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorT
   comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
   comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=Port.Sec.ClimateWt, n=10)
   
-  ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
+ outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
     geom_bar(stat="identity") + 
     geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="Pct. Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)")) + 
     scale_x_discrete(name = "") + 
@@ -1611,12 +1615,13 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorT
     theme(axis.line=element_line()) +
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
+  
+  ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
+         bg="transparent",height=4*(1.4),width=10,dpi=ppi)
     
 }
 
 # ------------- TECH SHARE CHARTS ----------- #
-
-
 company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
   
   if (ChartType == "EQ"){
@@ -1757,7 +1762,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
   }
 }
 
-sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
+sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
   
   if (ChartType == "EQ"){
     Combin <- EQCombin
@@ -1769,17 +1774,18 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
   
   #Remove all portfolios other than Market, Average
   Batch1 <- subset(Batch, Type != "Portfolio")
-  # Batch2 <- Batch %>%
-  #   filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
-  #   select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
-  #   rename(WtProduction=Scen.WtProduction.Market )
-  # 
-  # Batch2$Type <-"2Ãƒ‚° Market"
+  Batch2 <- Batch %>%
+    filter(Year == Startyear & Technology != "OilCap" & Type =="Portfolio") %>%
+    select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
+    rename(WtProduction=Scen.WtProduction.Market )
+
+  Batch2$Type <-"2° Market"
   #Add our target portfolio back
-  # Portfolios <- rbind(Combin,Batch1)
+  Portfolios <- rbind(Combin,Batch1)
+  
   
   #Filter and select
-  Production <- subset(Portfolios, Year == Startyear +5 &
+  Production <- subset(Portfolios, Year == Plotyear &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
   Production <- rbind(Production,Batch2)
@@ -1895,7 +1901,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot){
                         p1+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")), nrow=1)
       dev.off()
       if(PrintPlot){print(cmd)}
-      ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+      ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,"_",Plotyear,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
       
       
     }
@@ -2586,7 +2592,6 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
   }
 }
 
-
 Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   filternames <- c("Listed Market", "Bond Universe",PortName,"MetaPort")
@@ -2889,8 +2894,6 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   #return(outputplot)
 }
   
- 
-
 # --------------- newly added graphs--------------------------------------#
 bar_246 <- function(plotnumber,ChartType) {
   filternames <- c("Listed Market", "Bond Universe",PortName)
@@ -3000,7 +3003,6 @@ bar_246 <- function(plotnumber,ChartType) {
           strip.background = element_blank(),
           plot.margin = (unit(c(0, 0, 0.1, 0), "lines")))
 }
-
 
 
 # ---------------table data frame ----------------------------------------#
