@@ -128,6 +128,17 @@ print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), 
 
 EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
 
+### FOR THE NEW COMPANY EXPOSURE
+
+EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
+EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
+eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
+
+CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
+CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
+cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names.csv"),stringsAsFactors = FALSE,strip.white = T)
+
+
 # Comparison Flags
 EQBatchTest$Type <- "Portfolio"
 EQBatchTest$Type[EQBatchTest$InvestorName != "California Insurers"] <- "Market"

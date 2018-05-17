@@ -1508,21 +1508,111 @@ Fossil_Distribution <- function(plotnumber, ChartType){
 }
 
 
+# ------------- COMPANY EXPOSURE CHART ----------- #
 
 
-# company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
-#   
-#   BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/CA-INS/2016Q4/")
-#   BatchName <- "CA-INS"
-#   BenchmarkRegionchoose <- "GlobalAggregate"
-#   Scenariochoose <- "450S"
-#   
-#   EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
-#   EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
-# 
-#   
-#     
-# }  
+company_og_buildout <- function(plotnumber, companiestoprint, ChartType, SectorToPlot){
+
+  ### !! TAJ REMOVE THESE
+  ### LOADED ELSEWHERE
+
+  # BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/CA-INS/2016Q4/")
+  # BatchName <- "CA-INS"
+  # BenchmarkRegionchoose <- "GlobalAggregate"
+  # Scenariochoose <- "450S"
+  # 
+  # CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
+  # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
+  # 
+  # EQBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
+  # EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
+  # EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
+  # 
+  # EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
+  # EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
+  # eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names.csv"),stringsAsFactors = FALSE,strip.white = T)
+  # 
+  # CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
+  # CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
+  # cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names.csv"),stringsAsFactors = FALSE,strip.white = T)
+  # 
+  # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
+  # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
+  
+  
+  ### NEW HERE
+  
+  GLOBAL.OIL.2D <- -.02
+  GLOBAL.GAS.2D <- .05
+  global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
+  
+  PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
+  ChartType <- "EQ"
+  PortName_IN <- PortName
+  
+  if (ChartType == "CB"){
+    comp <- subset(CBCompALD, Portfolio.Name == PortName_IN & Sector=="Oil&Gas")
+    comp <- left_join(comp, cbnames, by=("COMPANY_CORP_TICKER"))
+    comp$Company <- comp$COMPANY_CORP_TICKER
+    port.targets <- CBCombin %>% filter(Sector=="Oil&Gas") %>% 
+      select(Scenario, BenchmarkRegion, Sector, Technology, Scen.WtProduction, Year) %>%
+      arrange(Year) %>% 
+      group_by(Scenario, BenchmarkRegion, Sector, Technology) %>% 
+      summarise(Port.Scen.Diff=last(Scen.WtProduction) - first(Scen.WtProduction),
+                Port.Scen.Pct=Port.Scen.Diff/first(Scen.WtProduction)) %>%
+      ungroup() %>% select(-Scenario, -BenchmarkRegion, -Sector)
+    
+    
+  } else if(ChartType == "EQ"){
+    comp <- subset(EQCompALD, PortName == PortName_IN & Sector=="Oil&Gas")
+    comp <- left_join(comp, eqnames, by=("EQY_FUND_TICKER"))
+    comp$Company <- comp$EQY_FUND_TICKER
+    comp$Plan.WtTechProd <- comp$WtProduction
+    comp$Scen.WtTechProd <- comp$Scen.WtProduction
+    comp$Port.Sec.ClimateWt <- comp$PortWeightEQYlvl
+  
+    port.targets <- EQCombin %>% filter(Sector=="Oil&Gas") %>% 
+      select(Scenario, BenchmarkRegion, Sector, Technology, Scen.WtProduction, Year) %>%
+      arrange(Year) %>% 
+      group_by(Scenario, BenchmarkRegion, Sector, Technology) %>% 
+      summarise(Port.Scen.Diff=last(Scen.WtProduction) - first(Scen.WtProduction),
+                Port.Scen.Pct=Port.Scen.Diff/first(Scen.WtProduction)) %>%
+      ungroup() %>% select(-Scenario, -BenchmarkRegion, -Sector)
+  }
+  
+  comp <- comp %>% filter(Sector=="Oil&Gas") %>%
+    select(Scenario, Company, Final.Name, Sector, Port.Sec.ClimateWt, Technology, 
+                          Plan.WtTechProd, Scen.WtTechProd, Year) %>% 
+    arrange(Scenario, Company, Final.Name, Sector, Port.Sec.ClimateWt, Technology, Year) %>%
+    group_by(Scenario, Company, Final.Name, Sector, Port.Sec.ClimateWt, Technology) %>% 
+    summarise(first(Plan.WtTechProd), last(Plan.WtTechProd),
+              Plan.Diff=last(Plan.WtTechProd) - first(Plan.WtTechProd),
+              Scen.Diff=last(Scen.WtTechProd) - first(Scen.WtTechProd),
+              Plan.Pct=(last(Plan.WtTechProd) - first(Plan.WtTechProd))/first(Plan.WtTechProd))
+  
+  comp <- left_join(comp, port.targets %>% ungroup() %>% as.data.frame() , by="Technology")
+  comp$Global.Scen.Pct <- ifelse(comp$Technology=="Gas", GLOBAL.GAS.2D, GLOBAL.OIL.2D)
+  comp <- comp %>% ungroup() %>% arrange(desc(`first(Plan.WtTechProd)`))
+  comp$Final.Name <- factor(comp$Final.Name, levels=rev(unique(comp$Final.Name)), ordered=TRUE)
+  comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
+  comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=Port.Sec.ClimateWt, n=10)
+  
+  ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
+    geom_bar(stat="identity") + 
+    geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="Pct. Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)")) + 
+    scale_x_discrete(name = "") + 
+    scale_y_continuous(name = "Pct. Change in Planned Portfolio Production (2018-2023)", labels=percent) + 
+    scale_linetype_manual(name="", values=c("dashed")) +
+    scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = guide_legend(reverse = TRUE)) +
+    facet_wrap(~Technology, ncol=1) +
+    theme_cdi() + 
+    theme(legend.position = "bottom") +
+    theme(axis.line=element_line()) +
+    theme(axis.ticks.x=element_line()) + 
+    coord_flip()
+    
+}
 
 # ------------- TECH SHARE CHARTS ----------- #
 
