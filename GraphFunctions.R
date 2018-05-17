@@ -922,6 +922,11 @@ ranking_chart_alignment_Carstenmetric <- function(plotnumber,ChartType){
 # ------------- Sector Classification ------ #
 SectorDataAnalysis <- function(){
   over <- Subgroup.Overview
+  
+  if (PortName != "MetaPort"){
+    over <- subset(over, over$Portfolio.Name == PortName)
+  }
+  
   over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
   
   
@@ -946,7 +951,7 @@ SectorDataAnalysis <- function(){
   # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2Ãƒ‚° Scenario" & over$Valid == 1 , "Climate Relevant No 2Ãƒ‚° Scenario",over$Sector.All)
   # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
   
-  
+
   AnalysisCoverage <<-  round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1)
   ClimateRelevant <<- round(AnalysisCoverage/100 * sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1)
   
@@ -1750,7 +1755,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    height <- max(3,nrow(Companies)*.2)
+    height <- max(2,nrow(Companies)*.3)
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2151,8 +2156,6 @@ Graph246 <- function(plotnumber,ChartType,TechToPlot){
                        expand=c(0,0),
                        breaks=calbreak(a,b)*unit) +
     theme_246() + theme(legend.position = "none") +
-    #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
-    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2ÃƒƒƒÃƒ‚ƒÃƒ‚‚ÃƒƒƒÃƒ‚‚Ãƒ‚°, 4ÃƒƒƒÃƒ‚ƒÃƒ‚‚ÃƒƒƒÃƒ‚‚Ãƒ‚°, 6ÃƒƒƒÃƒ‚ƒÃƒ‚‚ÃƒƒƒÃƒ‚‚Ãƒ‚° Degree Scenarios") +
     coord_cartesian(ylim=c(calbreak(a,b)[1]*unit, calbreak(a,b)[length(calbreak(a,b))]*unit))
   
   if (ChartType =="CB"){
@@ -2305,7 +2308,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(3, length(unique(OilCompanies$Name)))
+    h <- max(2, length(unique(OilCompanies$Name))*.3)
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2431,7 +2434,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(3, length(unique(OilCompanies$Name)))
+    h <- max(2, length(unique(port$Name)))
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)
