@@ -1531,6 +1531,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   # 
   # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
   # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
+  textsize <<- 8.5
   
   
   ### NEW HERE
@@ -1539,8 +1540,8 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
   
-  # PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
-  # ChartType <- "EQ"
+  PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
+  ChartType <- "CB"
   PortName_IN <- PortName
   
   if (ChartType == "CB"){
@@ -1590,14 +1591,17 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
   comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=Port.Sec.ClimateWt, n=10)
   
+  ##!!! hard coded breaks and limits - need to change
+  breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
+  
  outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
     geom_bar(stat="identity") + 
     geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
     geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
     scale_x_discrete(name = "") + 
-    scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent) + 
+    scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
     scale_color_manual(values=area_2)+
-    # scale_linetype_manual(name="", values=c("dashed")) +
+    scale_linetype_manual(name="", values=c("solid")) +
     scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = guide_legend(reverse = TRUE)) +
     facet_wrap(~Technology, ncol=1) +
     theme_cdi() + 
