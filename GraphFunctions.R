@@ -1290,10 +1290,10 @@ analysed_summary <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=Sector.All)) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Scope of the Analysis"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
+    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuels, Automotive and Power"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
-    guides(fill=guide_legend(nrow=2))+
+    guides(fill=guide_legend(nrow=3))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
           legend.text=element_text(size=11),
