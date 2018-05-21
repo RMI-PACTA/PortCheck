@@ -48,9 +48,9 @@ CAReportData <- function(){
   
   NoPeers <- nrow(TestList)-1
   
-  if(HasEquity & HasDebt){AssetClass <- "Listed Equity; Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"
+  if(HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers and Listed Equity"
   }else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"
-  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"}
+  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers "}
   
   ### Sector Check
   SectorCheck <- TestList[TestList$PortName == PortName,]
@@ -1290,7 +1290,7 @@ analysed_summary <- function(plotnumber){
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=Sector.All)) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuels, Automotive and Power"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
+    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuels, Automotive and Power Sectors"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
     guides(fill=guide_legend(nrow=3))+
@@ -1394,7 +1394,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   tech.levels <- c("Coal","Oil","Gas",
     "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
     "ICE","Hybrid","Electric")
-  tech.labels <- gsub("Cap"," Capacity", tech.levels)
+  tech.labels <- gsub("Cap","Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
 
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
