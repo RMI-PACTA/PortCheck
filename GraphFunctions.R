@@ -48,9 +48,9 @@ CAReportData <- function(){
   
   NoPeers <- nrow(TestList)-1
   
-  if(HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers and Listed Equity"
+  if(HasEquity & HasDebt){AssetClass <- "Listed Equity; Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"
   }else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"
-  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds plus Bonds of Largest Government/Municipal Power Producers "}
+  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"}
   
   ### Sector Check
   SectorCheck <- TestList[TestList$PortName == PortName,]
@@ -1394,7 +1394,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   tech.levels <- c("Coal","Oil","Gas",
     "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
     "ICE","Hybrid","Electric")
-  tech.labels <- gsub("Cap","Capacity", tech.levels)
+  tech.labels <- gsub("Cap"," Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
 
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
