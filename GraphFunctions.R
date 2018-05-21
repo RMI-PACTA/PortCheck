@@ -1293,7 +1293,7 @@ analysed_summary <- function(plotnumber){
     scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuel, Automotive and Power Sectors"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
     scale_x_discrete(name="Asset Type") +
     scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
-    guides(fill=guide_legend(nrow=3))+
+    guides(fill=guide_legend(nrow=2,byrow = TRUE))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
           legend.text=element_text(size=11),
@@ -1307,7 +1307,7 @@ analysed_summary <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3,width=5,dpi=ppi)   #linewidth_in*.9
 }
 
 carsten_metric_chart <- function(plotnumber, ChartType){
