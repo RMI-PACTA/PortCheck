@@ -1389,16 +1389,19 @@ carsten_metric_chart <- function(plotnumber, ChartType){
 
   port <- bind_rows(current.port, current.market)
 
-  port$Sector <- factor(port$Sector, levels = c("Coal","Oil&Gas", "Power","Automotive"))
+  port$Sector2 <- paste0(port$Sector, " Production")
+  port$Sector2 <- ifelse(port$Sector=="Power", "Power Capacity", port$Sector2)
+  
+  port$Sector2 <- factor(port$Sector2, levels = c("Coal Production","Oil&Gas Production", "Power Capacity","Automotive Production"))
   port <- subset(port, Technology != "OilCap")
-  tech.levels <- c("Coal","Oil","Gas",
-    "CoalCap", "GasCap","NuclearCap","HydroCap", "RenewablesCap",
-    "ICE","Hybrid","Electric")
+  tech.levels <- c("Coal","Gas","Oil",
+    "RenewablesCap", "HydroCap","NuclearCap", "GasCap", "CoalCap",
+    "Electric", "Hybrid", "ICE")
   tech.labels <- gsub("Cap"," Capacity", tech.levels)
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
 
   tech.colors <- c(CoalProdColour, OilProdColour, GasProdColour, CoalCapColour, GasCapColour, NuclearColour, HydroColour, RenewablesColour, ICEColour, HybridColour, ElectricColour)
-  tots <- port %>% group_by(PortName, Sector, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
+  tots <- port %>% group_by(PortName, Sector2, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
   
   outputplot <- ggplot(port, aes(x=PortName, y=Metric, group=Technology, fill=Technology)) +   
     geom_bar(stat="identity", position="stack") +
@@ -1408,7 +1411,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
                        limits=c(0, max(tots$Metric) + .01)) +
     scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
     theme_cdi() +
-    facet_wrap(~ Sector, nrow=1) +
+    facet_wrap(~ Sector2, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
     theme(axis.line.x = element_line()) 
