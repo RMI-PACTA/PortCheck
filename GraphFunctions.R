@@ -996,7 +996,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   if (PortName!="MetaPort"){
     plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
-      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
+      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type",drop=F) +
       scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
       guides(fill=guide_legend(nrow=2))+
@@ -1012,7 +1012,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   }else {
     plot <- ggplot(data=subset(over1,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity") +
-      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
+      scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
       # geom_bar(data=subset(over, Valid==0 & Asset.Type=="Other"), aes(x=Asset.Type, y=ValueUSD), fill="white", stat="identity") +
