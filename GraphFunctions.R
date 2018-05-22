@@ -1307,7 +1307,7 @@ analysed_summary <- function(plotnumber){
     guides(fill=guide_legend(nrow=2,byrow = TRUE))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
-          legend.text=element_text(size=11),
+          legend.text=element_text(size=textsize),
           axis.text.x=element_text(colour=textcolor,size=11),
           axis.text.y=element_text(colour=textcolor,size=11))
   
