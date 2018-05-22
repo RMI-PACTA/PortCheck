@@ -2586,6 +2586,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
 }
 
 
+
 Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   filternames <- c("Listed Market", "Bond Universe","MetaPort")
@@ -2656,14 +2657,14 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (TechToPlot %in% c("Electric","ICE")){
     PortNames<-"MetaPort"
   }else {
-    PortNames<-PortName
+    if(PortName != "MetaPort"){
+      if (nrow(ALD_P)>0){
+        PortNames<-PortName
+      }else{
+        PortNames<-"MetaPort"
+      }}
   } 
-  if(PortName != "MetaPort"){
-    if (nrow(ALD_P)>0){
-      PortNames<-PortName
-    }else{
-      PortNames<-"MetaPort"
-    }}
+  
   ### Add in Car Data
   if (TechToPlot %in% c("Electric","ICE")){
     ALD.temp <- ALD.sc %>% 
@@ -2718,13 +2719,22 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
   
   if (TechToPlot %in% c("Electric","ICE")){
-    var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
-                  ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+    var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
+                  ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$PortName ==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+    var2<- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
+                  ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$InvestorName =="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+    
+    
+    if(var2==0){
+      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production<-0
+    }else{
+      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$InvestorName=="Market" &ALD.cp$Technology ==TechToPlot),]$Production/var2}
     
     if(var1==0){
-      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortName &ALD.cp$Technology ==TechToPlot),]$Production<-0
+      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production<-0
     }else{
-      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$InvestorName=="Market" &ALD.cp$Technology ==TechToPlot),]$Production/var1}
+      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production/var1}
+    
   
   }
   ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
@@ -2981,6 +2991,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   #return(outputplot)
 }
+  
   
   
 # --------------- newly added graphs--------------------------------------#
