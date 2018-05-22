@@ -2607,7 +2607,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ### BOND PRODUCTION
     ALD <- CBALDAggProd[CBALDAggProd$PortName %in% filternames & CBALDAggProd$Technology %in% TechToPlot,]
     if (PortName != "MetaPort"){
-      ALD_P <- CBALDAggProd[CBALDAggProd$PortName %in% filt & CBALDAggProd$Technology %in% TechToPlot,]
+      ALD_P <- CBALDAggProd[CBALDAggProd$PortName %in% PortNames & CBALDAggProd$Technology %in% TechToPlot,]
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Bonds"
       }
