@@ -435,7 +435,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   
   x_coord = which(order$Name == "MetaPort")
   is_left = x_coord/x_length < .50
-  meta_label <- paste0("Average Portfolio: ", round(100*sum(filter(df,PortName=='MetaPort')$Value),1), "%")
+  meta_label <- paste0("Aggregated Portfolio: ", round(100*sum(filter(df,PortName=='MetaPort')$Value),1), "%")
   
   distribution_plot <- distribution_plot +
     geom_vline(xintercept = x_coord, linetype = 2)+
