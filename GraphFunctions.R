@@ -2719,21 +2719,13 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
   
   if (TechToPlot %in% c("Electric","ICE")){
-    var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
-                  ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$PortName ==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
-    var2<- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
-                  ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$InvestorName =="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
-    
-    
-    if(var2==0){
-      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production<-0
-    }else{
-      ALD.cp[which(ALD.cp$InvestorName=="Market" &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$InvestorName=="Market" &ALD.cp$Technology ==TechToPlot),]$Production/var2}
-    
+    var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
+                  ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$PortName ==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+  
     if(var1==0){
-      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production<-0
+      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <-0
     }else{
-      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortNames &ALD.cp$Technology ==TechToPlot),]$Production/var1}
+      ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortName &ALD.cp$Technology ==TechToPlot),]$Production/var1}
     
   
   }
