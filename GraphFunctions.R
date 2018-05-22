@@ -420,7 +420,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     xlab("Insurers Operating in California")
   #arrowlength <- ylimval/5
   
-  if (PortName %in% dfagg$Name) {
+  if (PortName %in% dfagg$Name & PortName != "MetaPort") {
     x_coord = which(order$Name == PortName)
     is_left = x_coord/x_length < .50
     
@@ -431,8 +431,19 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
                hjust = ifelse(is_left, -.05, 1.05),
                vjust = 1,
                size = textsize*(5/14))
-    
   }
+  
+  x_coord = which(order$Name == "MetaPort")
+  is_left = x_coord/x_length < .50
+  meta_label <- paste0("Average Portfolio: ", round(100*sum(filter(df,PortName=='MetaPort')$Value),1), "%")
+  
+  distribution_plot <- distribution_plot +
+    geom_vline(xintercept = x_coord, linetype = 2)+
+    annotate("text", x = "MetaPort", y = ylim,
+             label = meta_label,
+             hjust = ifelse(is_left, -.05, 1.05),
+             vjust = 2,
+             size = textsize*(5/14))
   
   return(distribution_plot)
   
@@ -1494,7 +1505,7 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   names(BarColors) <- c(MetricCol)
   Labels <- c("Fossil Fuels")
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
-  portfolio_label = paste0("Fossil Fuel Share: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
+  portfolio_label = paste0("This Portfolio: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
   
   plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
                              portfolio_label, Title, Labels, BarColors) +
