@@ -300,7 +300,7 @@ for (i in c(326)){#, 500:510)){
   ### Loops through graphs and report generation
   
   PrintPlot = FALSE
-   SecAnalysis <- SectorDataAnalysis()
+  SecAnalysis <- SectorDataAnalysis()
    
   if (nrow(EQCombin)+nrow(CBCombin) >0){ 
     tryCatch({
