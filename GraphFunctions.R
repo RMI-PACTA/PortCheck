@@ -442,7 +442,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     annotate("text", x = "MetaPort", y = ylim,
              label = meta_label,
              hjust = ifelse(is_left, -.05, 1.05),
-             vjust = 2,
+             vjust = 2.5,
              size = textsize*(5/14))
   
   return(distribution_plot)
