@@ -1768,7 +1768,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    bar_size = 10/15
+    bar_size = 5/15
     height <- min(15,n_distinct(AllData$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
@@ -2322,7 +2322,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    bar_size = 10/15
+    bar_size = 4/15
     height <- min(11,n_distinct(OilCompanies$Name)+1)*bar_size
     
     
@@ -2449,7 +2449,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    bar_size = 10/15
+    bar_size = 4/15
     height <- min(11,n_distinct(portfolio1$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
