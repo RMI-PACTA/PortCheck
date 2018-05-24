@@ -2450,7 +2450,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 10/15
-    height <- min(11,n_distinct(AllData$Name)+1)*bar_size
+    height <- min(11,n_distinct(portfolio1$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
