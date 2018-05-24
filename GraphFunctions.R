@@ -1737,7 +1737,19 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     Companies <- unique(select(Companies, Name, PortWeight))
     PortfolioData <- unique(select(PortfolioData, Name))
     
-    bar_labels = c(PortfolioData$Name,"",paste0(substr(Companies$Name, 1, 15),"..."))
+    company_labels <- trim(Companies$Name)
+    for (i in 1:length(company_labels)) {
+      if (str_length(company_labels[i]) > 15) {
+        new_name = strtrim(company_labels[i],15)
+        company_labels[i] <- paste0(new_name,'...')
+      } else if (str_length(company_labels[i]) < 15) {
+        for (j in 1:(18-str_length(company_labels[i]))) {
+          company_labels[i] <- paste0(' ',company_labels[i])
+        }
+      }
+    }
+    
+    bar_labels = c(PortfolioData$Name,"",company_labels)
     
     scaleFUN <- function(x) {
       x <- sprintf("%.1f", x)
@@ -1758,7 +1770,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       xlab("")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
-            plot.margin = unit(c(1, 6, 0, 0), "lines"))
+            plot.margin = unit(c(1, 8, 0, 0), "lines"))
     
     gt <- ggplot_gtable(ggplot_build(PortPlot))
     gt$layout$clip[gt$layout$name == "panel"] <- "off"
@@ -2280,8 +2292,20 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     }
     
     oil<-na.omit(OilCompanies)
-
-    bar_labels = c(paste0(substr(unique(oil$Name), 1, 15),"..."),"")
+    
+    company_labels <- trim(unique(oil$Name))
+    for (i in 1:length(company_labels)) {
+      if (str_length(company_labels[i]) > 15) {
+        new_name = strtrim(company_labels[i],15)
+        company_labels[i] <- paste0(new_name,'...')
+      } else if (str_length(company_labels[i]) < 15) {
+        for (j in 1:(18-str_length(company_labels[i]))) {
+          company_labels[i] <- paste0(' ',company_labels[i])
+        }
+      }
+    }
+    
+    bar_labels <- company_labels
     
     PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
                                               fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
@@ -2406,10 +2430,20 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    port<-na.omit(portfolio1)
-   
+    company_labels <- trim(unique(portfolio1$Name))
+    for (i in 1:length(company_labels)) {
+      if (str_length(company_labels[i]) > 15) {
+        new_name = strtrim(company_labels[i],15)
+        company_labels[i] <- paste0(new_name,'...')
+      } else if (str_length(company_labels[i]) < 15) {
+        for (j in 1:(18-str_length(company_labels[i]))) {
+          company_labels[i] <- paste0(' ',company_labels[i])
+        }
+      }
+    }
     
-    bar_labels = c(paste0(substr(unique(port$Name), 1, 15),"..."),"")
+    bar_labels <- company_labels
+    
     PortPlot <- ggplot(data=portfolio1, aes(x=Name, y=value,
                                             fill=factor(CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget" ))),
                        show.guide = TRUE)+
