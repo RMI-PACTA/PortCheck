@@ -1647,6 +1647,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     market <- CBBatchTest[CBBatchTest$Type == "Market",]
   }
   
+  
   if (nrow(combin) > 0) {
     
     CompProdSS <- subset(CompProdSS, Year == (Startyear+5))
@@ -1767,7 +1768,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     }
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
-    height <- max(2,nrow(Companies)*.3)
+    bar_size = 10/15
+    height <- min(15,n_distinct(AllData$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2320,7 +2322,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(2, length(unique(OilCompanies$Name))*.3)
+    bar_size = 10/15
+    height <- min(11,n_distinct(OilCompanies$Name)+1)*bar_size
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2446,7 +2449,8 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       grid.draw(gt)
     }
     
-    h <- max(2, length(unique(port$Name)))
+    bar_size = 10/15
+    height <- min(11,n_distinct(AllData$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)
