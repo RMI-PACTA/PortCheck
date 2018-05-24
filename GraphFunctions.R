@@ -2327,7 +2327,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
-           bg="transparent",height=h,width=10,dpi=ppi)}
+           bg="transparent",height=height,width=10,dpi=ppi)}
   else {
     print("No oil data to plot.")
   }
@@ -2453,7 +2453,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     height <- min(11,n_distinct(AllData$Name)+1)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
-           bg="transparent",height=h,width=10,dpi=ppi)
+           bg="transparent",height=height,width=10,dpi=ppi)
     return(TRUE)
   } else {
     print("No Carbon Budget data to plot.")
