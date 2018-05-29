@@ -189,7 +189,7 @@ CAReport <- function(){
   }
   
   if(WithCompanyCharts){
-    text <- removetextlines("CompanyPlaceholder")
+    #text <- removetextlines("CompanyPlaceholder")
   }else{
     text <- removetextlines("CompanyCharts")
   }
