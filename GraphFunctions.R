@@ -293,22 +293,17 @@ theme_linecharts <- function(base_size = textsize, base_family = "") {
         axis.line.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        #panel.background = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA),
-        # legend.position=c(0.5,0),#legend.position = "none",
         legend.position = "none",
         legend.direction="horizontal",
         legend.text = element_text(size=textsize,colour=textcolor),
         legend.background = element_rect(fill = "transparent",colour = NA),
         legend.key.size=unit(0.4,"cm"),
-        #legend.title=element_blank(),
         legend.title = element_text(colour = textcolor, size = textsize),
         legend.key = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA),
         plot.margin = unit(c(1,1, 0, 0), "lines"),
         plot.title = element_blank(),
         text=element_text(family="Arial")
-        #plot.margin = unit(c(1,1, 5, 2), "lines")
   )
 }    
 
@@ -340,16 +335,25 @@ theme_cdi <- function() {
       panel.border = element_blank(),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
-      plot.background = element_blank(),
       axis.line.x = element_line(),
       axis.line.y = element_blank(),
       axis.ticks.y = element_line(),
-      plot.title = element_text(
-        family="Arial",
-        face = "bold",
-        size = 12,
-        hjust = 0
-      )
+      axis.text.x=element_text(colour=textcolor,size=textsize),
+      axis.text.y=element_text(colour=textcolor,size=textsize),
+      axis.title.x=element_text(colour=textcolor,size=textsize),
+      axis.title.y=element_text(colour=textcolor,size=textsize),
+      legend.position = "none",
+      legend.direction="horizontal",
+      legend.text = element_text(size=textsize,colour=textcolor),
+      legend.background = element_rect(fill = "transparent",colour = NA),
+      legend.key.size=unit(0.4,"cm"),
+      legend.title = element_text(colour = textcolor, size = textsize),
+      legend.key = element_blank(),
+      plot.background = element_rect(fill = "transparent",colour = NA),
+      plot.margin = unit(c(1,1, 0, 0), "lines"),
+      plot.title = element_blank(),
+      text=element_text(family="Arial")
+      
     )
 }
 
@@ -1611,11 +1615,23 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   ##!!! hard coded breaks and limits - need to change
   breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
   
- outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
+  company_labels <- trim(unique(comp$Final.Name))
+  for (i in 1:length(company_labels)) {
+    if (str_length(company_labels[i]) > 15) {
+      new_name = strtrim(company_labels[i],15)
+      company_labels[i] <- paste0(new_name,'...')
+    } else if (str_length(company_labels[i]) < 15) {
+      for (j in 1:(18-str_length(company_labels[i]))) {
+        company_labels[i] <- paste0(' ',company_labels[i])
+      }
+    }
+  }
+  
+  outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
     geom_bar(stat="identity") + 
     geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
     geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
-    scale_x_discrete(name = "") + 
+    scale_x_discrete(name = "", labels=company_labels) + 
     scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
     scale_color_manual(values=area_2)+
     scale_linetype_manual(name="", values=c("solid")) +
@@ -1626,7 +1642,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.line=element_line()) +
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
- 
+
  h <- max(2,nrow(comp)*.25)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
@@ -2291,9 +2307,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    oil<-na.omit(OilCompanies)
-    
-    company_labels <- trim(unique(oil$Name))
+    Oil <- na.omit(OilCompanies[,c("Name","PortWeightEQYlvl")])
+    company_labels <- trim(unique(OilCompanies$Name))
     for (i in 1:length(company_labels)) {
       if (str_length(company_labels[i]) > 15) {
         new_name = strtrim(company_labels[i],15)
@@ -2302,15 +2317,18 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
         for (j in 1:(18-str_length(company_labels[i]))) {
           company_labels[i] <- paste0(' ',company_labels[i])
         }
+      } else if (is.na(company_labels[i])){
+        company_labels[i] <- ''
       }
     }
     
     bar_labels <- company_labels
     
-    PortPlot <- ggplot(data=OilCompanies, aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
-                                              fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
+    PortPlot <- ggplot(data=OilCompanies,
                        show.guide = TRUE)+
-      geom_bar(stat = "identity", position = "fill", width = .6)+
+      geom_bar(aes(x=reorder(Name,PortWeightEQYlvl), y=OilShare,
+                    fill=factor(Oil.Type,levels=c("Oil Sands","Heavy Oil","Conventional Oil","Unconventional Oil","Other & Unknown"))),
+                    stat = "identity", position = "fill", width = .6)+
       #geom_hline(yintercept = c(.25,.50,.75), color="white")+
       scale_fill_manual(values=colors,labels = rev(paste(tech_labels, " ")), breaks = rev(techorder))+
       scale_y_continuous(expand=c(0,0), labels=percent)+
@@ -2318,14 +2336,13 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
       
-      geom_text(data=oil,
+      geom_text(data = Oil,
                 aes(x = Name, y = 1),
-                label = perc(oil$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=textsize*(5/14))+
-      geom_text(data=oil,
-                aes(x="",y=1),
+                label = perc(Oil$PortWeightEQYlvl),
+                hjust = -1, color = textcolor, size=12*(5/14))+
+      geom_text(aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.5, color =textcolor, size =textsize*(5/14))+
+                hjust = -0.5, color = textcolor, size=12*(5/14))+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
@@ -2456,7 +2473,6 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       scale_x_discrete(labels = bar_labels)+
       guides(fill=guide_legend(nrow = 1))+
       theme_barcharts()+
-      coord_flip()+
       geom_text(aes(x = Name, y = 1),
                 label = perc(portfolio1$PortWeightEQYlvl),
                 hjust = -1, color = textcolor, size=12*(5/14))+
@@ -2465,7 +2481,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
                 hjust = -0.5, color =textcolor, size =12*(5/14))+
       xlab("")+
       ylab("TechShare")+
-      
+      coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
             plot.margin = unit(c(1, 6, 0, 0), "lines"), axis.line.x = element_line(colour = textcolor,size=0.5))
     #annotation_custom(
