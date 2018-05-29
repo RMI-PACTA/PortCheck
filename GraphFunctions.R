@@ -1627,7 +1627,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
  
- h <- max(2,nrow(comp)*.3)
+ h <- max(2,nrow(comp)*.25)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
          bg="transparent",height=h,width=10,dpi=ppi)
