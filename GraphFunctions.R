@@ -2773,6 +2773,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
   
   if (TechToPlot %in% c("Electric","ICE")){
+    if (nrow(ALD_P)>0){
     var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
                   ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$PortName ==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
   
@@ -2780,7 +2781,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <-0
     }else{
       ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortName &ALD.cp$Technology ==TechToPlot),]$Production/var1}
-    
+    }else{
+      ALD.cp<-ALD.cp
+      }
   
   }
   ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
