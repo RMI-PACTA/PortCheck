@@ -342,13 +342,14 @@ theme_cdi <- function() {
       axis.text.y=element_text(colour=textcolor,size=textsize),
       axis.title.x=element_text(colour=textcolor,size=textsize),
       axis.title.y=element_text(colour=textcolor,size=textsize),
-      legend.position = "none",
-      legend.direction="horizontal",
-      legend.text = element_text(size=textsize,colour=textcolor),
-      legend.background = element_rect(fill = "transparent",colour = NA),
-      legend.key.size=unit(0.4,"cm"),
-      legend.title = element_text(colour = textcolor, size = textsize),
-      legend.key = element_blank(),
+      #legend.position = "bottom",
+      #legend.direction="horizontal",
+      #legend.box = "horizontal",
+      #legend.text = element_text(size=textsize,colour=textcolor),
+      #legend.background = element_rect(fill = "transparent",colour = NA),
+      #legend.key.size=unit(0.4,"cm"),
+      #legend.title = element_text(colour = textcolor, size = textsize),
+      #legend.key = element_blank(),
       plot.background = element_rect(fill = "transparent",colour = NA),
       plot.margin = unit(c(1,1, 0, 0), "lines"),
       plot.title = element_blank(),
@@ -446,7 +447,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     annotate("text", x = "MetaPort", y = ylim,
              label = meta_label,
              hjust = ifelse(is_left, -.05, 1.05),
-             vjust = 2.5,
+             vjust = 3,
              size = textsize*(5/14))
   
   return(distribution_plot)
@@ -1327,43 +1328,6 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  # ### TAJ Commented Out My Testing - Will remove shortly !!
-  # EQBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # EQBBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # ChartType <- "EQ"
-  # 
-  # 
-  # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # ChartType <- "CB"
-  # 
-  # PortName <- "AETNA LIFE INSURANCE COMPANY"
-  # 
-  # 
-  # #test <- subset(CBBatchTest, PortName=="STATE COMPENSATION INSURANCE FUND")
-  # #test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
-  # 
-  # RenewablesColour <<- "#feedde"
-  # HydroColour <<- "#fdbe85"
-  # NuclearColour <<- "#fd8d3c"
-  # GasCapColour <<- "#e6550d"
-  # CoalCapColour <<- "#a63603"
-  # 
-  # # purpleish
-  # ElectricColour <<- "#efedf5"
-  # HybridColour <<- "#bcbddc"
-  # ICEColour <<-"#756bb1"
-  # 
-  # #goldish
-  # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
-  # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
-  # CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
-  # textcolor <<- "#3D3D3C"
-  # 
-  # Startyear <- 2018  
-  
-  ### END TAJ COMMENTS TO DELETE
-  
   ### This needs to havea  variable name different from "portName" else the subset below does not work
   PortName_IN <- PortName
   
@@ -1429,7 +1393,8 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     facet_wrap(~ Sector2, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
-    theme(axis.line.x = element_line()) 
+    theme(axis.line.x = element_line())
+  
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
@@ -2500,6 +2465,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 4/15
+
     height <- min(11,n_distinct(portfolio1$Name))*bar_size+1
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
@@ -2812,11 +2778,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval >1e3){
     unitscalefactor <- 1e3
     green.unit <- c("Electric" = "1000 Vehicles",
-                    "RenewablesCap"="GW",
-                    "NuclearCap" ="GW")
+                    "RenewablesCap"="10^3 MW",
+                    "NuclearCap" ="10^3 MW")
     
-    brown.unit <- c("CoalCap" = "GW",
-                    "GasCap"="GW",
+    brown.unit <- c("CoalCap" = "10^3 MW",
+                    "GasCap"="10^3 MW",
                     "Oil" ="Mbbl",
                     "Gas" = "1000 m3",
                     "ICE" ="1000 Vehicles")
@@ -2826,11 +2792,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval > 1e6){
     unitscalefactor <- 1e6
     green.unit <- c("Electric" = "million Vehicles",
-                    "RenewablesCap"="TW",
-                    "NuclearCap" ="TW")
+                    "RenewablesCap"="10^6 MW",
+                    "NuclearCap" ="10^6 MW")
     
-    brown.unit <- c("CoalCap" = "TW",
-                    "GasCap"="TW",
+    brown.unit <- c("CoalCap" = "10^6 MW",
+                    "GasCap"="10^6 MW",
                     "Oil" ="MMbbl",
                     "Gas" = "million m3",
                     "ICE" ="million Vehicles")
@@ -2838,11 +2804,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval > 1e9){
     unitscalefactor <- 1e9
     green.unit <- c("Electric" = "billion Vehicles",
-                    "RenewablesCap"="PW",
-                    "NuclearCap" ="PW")
+                    "RenewablesCap"="10^9 MW",
+                    "NuclearCap" ="10^9 MW")
     
-    brown.unit <- c("CoalCap" = "PW",
-                    "GasCap"="PW",
+    brown.unit <- c("CoalCap" = "10^9 MW",
+                    "GasCap"="10^9 MW",
                     "Oil" ="Gbbl",
                     "Gas" = "billion m3",
                     "ICE" ="billion Vehicles")
@@ -2897,6 +2863,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   MAX.Y <- ceiling(ymax/unit)*unit
   MIN.Y <- floor(ymin/unit)*unit
+
+  
   
   
   
@@ -2979,7 +2947,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   }else if (TechToPlot %in% c("NuclearCap")){
     tempmax<-max(tempmax,max(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line3"),]$Value))
     tempmin<-min(tempmin,min(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line1"),]$Value))
-    if (PortNames == "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"){
+    if (PortNames == "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA" & ChartType =="EQ"){
       tempmax<-1.5
     }
     if (MAX.Y > tempmax){
@@ -3004,7 +2972,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
     if (MAX.Y >tempmax){
       MAX.Y <- min(MAX.Y,tempmax*1.05)
-      ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-round(MAX.Y,digit=1)
+      if (MAX.Y>1){
+        ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-round(MAX.Y,digit=1)
+      }else {
+        ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-MAX.Y
+        
+      }
     }else {
       MAX.Y <-MAX.Y
     }
@@ -3022,6 +2995,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     MAX.Y <- MAX.Y
   }
   
+  if (MAX.Y >1 & MIN.Y>1){
+    br<- round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)
+  }else if (MAX.Y<1 & MIN.Y<1){
+    br<- seq(MIN.Y,MAX.Y,length.out = 5)
+  }
+  
   
   outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == PortNames )) +
     geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
@@ -3029,7 +3008,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
     scale_y_continuous(name=paste0("Weighted Production ","(",eval(parse(text = paste(GoodBad,".unit",sep = "")))[TechToPlot],")"),
                        expand=c(0,0),
-                       breaks=round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)) +
+                       breaks=br) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
     #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
