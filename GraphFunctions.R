@@ -2862,6 +2862,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   MAX.Y <- ceiling(ymax/unit)*unit
   MIN.Y <- floor(ymin/unit)*unit
+
+  
   
   
   
@@ -2969,7 +2971,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
     if (MAX.Y >tempmax){
       MAX.Y <- min(MAX.Y,tempmax*1.05)
-      ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-round(MAX.Y,digit=1)
+      if (MAX.Y>1){
+        ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-round(MAX.Y,digit=1)
+      }else {
+        ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value <-MAX.Y
+        
+      }
     }else {
       MAX.Y <-MAX.Y
     }
