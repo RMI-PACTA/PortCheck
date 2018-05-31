@@ -342,13 +342,14 @@ theme_cdi <- function() {
       axis.text.y=element_text(colour=textcolor,size=textsize),
       axis.title.x=element_text(colour=textcolor,size=textsize),
       axis.title.y=element_text(colour=textcolor,size=textsize),
-      legend.position = "none",
-      legend.direction="horizontal",
-      legend.text = element_text(size=textsize,colour=textcolor),
-      legend.background = element_rect(fill = "transparent",colour = NA),
-      legend.key.size=unit(0.4,"cm"),
-      legend.title = element_text(colour = textcolor, size = textsize),
-      legend.key = element_blank(),
+      legend.position = "bottom",
+      #legend.direction="horizontal",
+      #legend.box = "horizontal",
+      #legend.text = element_text(size=textsize,colour=textcolor),
+      #legend.background = element_rect(fill = "transparent",colour = NA),
+      #legend.key.size=unit(0.4,"cm"),
+      #legend.title = element_text(colour = textcolor, size = textsize),
+      #legend.key = element_blank(),
       plot.background = element_rect(fill = "transparent",colour = NA),
       plot.margin = unit(c(1,1, 0, 0), "lines"),
       plot.title = element_blank(),
@@ -446,7 +447,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     annotate("text", x = "MetaPort", y = ylim,
              label = meta_label,
              hjust = ifelse(is_left, -.05, 1.05),
-             vjust = 2.5,
+             vjust = 3,
              size = textsize*(5/14))
   
   return(distribution_plot)
@@ -1327,43 +1328,6 @@ analysed_summary <- function(plotnumber){
 
 carsten_metric_chart <- function(plotnumber, ChartType){
   
-  # ### TAJ Commented Out My Testing - Will remove shortly !!
-  # EQBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # EQBBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # ChartType <- "EQ"
-  # 
-  # 
-  # CBBatchTest <- read.csv(paste0(PROJ.RESULTS.PATH,"CA-INS", "_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == "GlobalAggregate")
-  # ChartType <- "CB"
-  # 
-  # PortName <- "AETNA LIFE INSURANCE COMPANY"
-  # 
-  # 
-  # #test <- subset(CBBatchTest, PortName=="STATE COMPENSATION INSURANCE FUND")
-  # #test %>% filter(Sector=="Power") %>% group_by(PortName, Sector, Year, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(sum(CarstenMetric_Port), sum(Scen.CarstenMetric_Port))
-  # 
-  # RenewablesColour <<- "#feedde"
-  # HydroColour <<- "#fdbe85"
-  # NuclearColour <<- "#fd8d3c"
-  # GasCapColour <<- "#e6550d"
-  # CoalCapColour <<- "#a63603"
-  # 
-  # # purpleish
-  # ElectricColour <<- "#efedf5"
-  # HybridColour <<- "#bcbddc"
-  # ICEColour <<-"#756bb1"
-  # 
-  # #goldish
-  # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
-  # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
-  # CoalProdColour <<-  "#8B7E66" # "#8C510A" #8B7E66
-  # textcolor <<- "#3D3D3C"
-  # 
-  # Startyear <- 2018  
-  
-  ### END TAJ COMMENTS TO DELETE
-  
   ### This needs to havea  variable name different from "portName" else the subset below does not work
   PortName_IN <- PortName
   
@@ -1429,7 +1393,8 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     facet_wrap(~ Sector2, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
     theme(axis.ticks.y = element_line(colour=textcolor)) + 
-    theme(axis.line.x = element_line()) 
+    theme(axis.line.x = element_line())
+  
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
@@ -1643,7 +1608,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
 
- h <- max(2,nrow(comp)*.25)
+ h <- max(2,nrow(comp)*.5)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
          bg="transparent",height=h,width=10,dpi=ppi)
