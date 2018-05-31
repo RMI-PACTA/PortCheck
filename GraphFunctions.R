@@ -2902,13 +2902,13 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
   ALD.sc.wide$Line4 <- MAX.Y
   
-  ALD.sc.tall <- ALD.sc.wide %>%
+  ALD.sc.tall<-ALD.sc.wide %>%
     select(-`450S`, -NPS, -CPS) %>%
     gather(key="Target", value="Value",-InvestorName, -PortName, -Sector,-Technology,-Green, -Line.Type,-Year)   #-Tech.Type
   
   
   
-  ALD.sc.tall <- ALD.sc.tall %>%
+  ALD.sc.tall<- ALD.sc.tall %>%
     group_by(InvestorName, PortName, Sector, Technology, Line.Type, Green, Year) %>%   #Tech.Type
     mutate(lower=lag(Value),
            lower=ifelse(is.na(lower), MIN.Y, lower))
@@ -2962,8 +2962,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   tempmin<-min(tempormin,tempmarmin)
   
   if (TechToPlot %in% c("RenewablesCap","Electric")){
-    tempmax<-max(tempmax,max(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line4"),]$Value))
+    tempmax<-max(tempmax,max(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line3"),]$Value))
     tempmin<-min(tempmin,min(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line1"),]$Value))
+    
     if (MAX.Y > tempmax){
       MAX.Y <- min(MAX.Y,tempmax*1.05)
       
@@ -2978,6 +2979,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   }else if (TechToPlot %in% c("NuclearCap")){
     tempmax<-max(tempmax,max(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line3"),]$Value))
     tempmin<-min(tempmin,min(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line1"),]$Value))
+    if (PortNames == "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"){
+      tempmax<-1.5
+    }
     if (MAX.Y > tempmax){
       MAX.Y <- min(MAX.Y,tempmax*1.05)
       
@@ -3006,6 +3010,17 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     }
   }
   
+  if (MIN.Y>1){
+    MIN.Y <- round(MIN.Y,digits = 1)
+  } else{
+    MIN.Y <- MIN.Y
+  }
+  
+  if (MAX.Y>1){
+    MAX.Y <- round(MAX.Y,digits = 1)
+  } else{
+    MAX.Y <- MAX.Y
+  }
   
   
   outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == PortNames )) +
@@ -3014,11 +3029,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
     scale_y_continuous(name=paste0("Weighted Production ","(",eval(parse(text = paste(GoodBad,".unit",sep = "")))[TechToPlot],")"),
                        expand=c(0,0),
-                       breaks=round(seq(round(MIN.Y,digits = 1),round(MAX.Y,digits = 1),length.out = 5),digits = 1)) +
+                       breaks=round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
-    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
-    coord_cartesian(ylim=c(round(MIN.Y,digits = 1), round(MAX.Y,digits = 1)))
+    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
+    coord_cartesian(ylim=c(MIN.Y,MAX.Y))
   
   if (ChartType =="CB"){
     outputplot <- outputplot +
