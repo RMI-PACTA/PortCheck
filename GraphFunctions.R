@@ -342,7 +342,7 @@ theme_cdi <- function() {
       axis.text.y=element_text(colour=textcolor,size=textsize),
       axis.title.x=element_text(colour=textcolor,size=textsize),
       axis.title.y=element_text(colour=textcolor,size=textsize),
-      legend.position = "bottom",
+      #legend.position = "bottom",
       #legend.direction="horizontal",
       #legend.box = "horizontal",
       #legend.text = element_text(size=textsize,colour=textcolor),
@@ -1608,7 +1608,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
 
- h <- max(2,nrow(comp)*.5)
+ h <- max(2,nrow(comp)*.25)
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
          bg="transparent",height=h,width=10,dpi=ppi)
