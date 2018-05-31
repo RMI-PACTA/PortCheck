@@ -2465,7 +2465,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 4/15
-    height <- min(11,n_distinct(portfolio1$Name)+1)*bar_size
+    height <- min(11,n_distinct(portfolio1$Name)+2)*bar_size
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2777,11 +2777,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval >1e3){
     unitscalefactor <- 1e3
     green.unit <- c("Electric" = "1000 Vehicles",
-                    "RenewablesCap"="GW",
-                    "NuclearCap" ="GW")
+                    "RenewablesCap"="10^3 MW",
+                    "NuclearCap" ="10^3 MW")
     
-    brown.unit <- c("CoalCap" = "GW",
-                    "GasCap"="GW",
+    brown.unit <- c("CoalCap" = "10^3 MW",
+                    "GasCap"="10^3 MW",
                     "Oil" ="Mbbl",
                     "Gas" = "1000 m3",
                     "ICE" ="1000 Vehicles")
@@ -2791,11 +2791,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval > 1e6){
     unitscalefactor <- 1e6
     green.unit <- c("Electric" = "million Vehicles",
-                    "RenewablesCap"="TW",
-                    "NuclearCap" ="TW")
+                    "RenewablesCap"="10^6 MW",
+                    "NuclearCap" ="10^6 MW")
     
-    brown.unit <- c("CoalCap" = "TW",
-                    "GasCap"="TW",
+    brown.unit <- c("CoalCap" = "10^6 MW",
+                    "GasCap"="10^6 MW",
                     "Oil" ="MMbbl",
                     "Gas" = "million m3",
                     "ICE" ="million Vehicles")
@@ -2803,11 +2803,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (unitscaleval > 1e9){
     unitscalefactor <- 1e9
     green.unit <- c("Electric" = "billion Vehicles",
-                    "RenewablesCap"="PW",
-                    "NuclearCap" ="PW")
+                    "RenewablesCap"="10^9 MW",
+                    "NuclearCap" ="10^9 MW")
     
-    brown.unit <- c("CoalCap" = "PW",
-                    "GasCap"="PW",
+    brown.unit <- c("CoalCap" = "10^9 MW",
+                    "GasCap"="10^9 MW",
                     "Oil" ="Gbbl",
                     "Gas" = "billion m3",
                     "ICE" ="billion Vehicles")
