@@ -206,8 +206,8 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
 #template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
-#template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-Insurer.tex"),encoding="UTF-8"))
-template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-MetaPort.tex"),encoding="UTF-8"))
+template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-Insurer.tex"),encoding="UTF-8"))
+#template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-MetaPort.tex"),encoding="UTF-8"))
 
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
@@ -255,7 +255,7 @@ for (i in c(326)){#, 500:510)){
   HasCarbonBudget <- FALSE 
   
   ### Handle to switch between showing Company Info and Not. 
-  WithCompanyCharts <- FALSE #TRUE
+  WithCompanyCharts <- TRUE #TRUE
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
