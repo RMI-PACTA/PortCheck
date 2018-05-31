@@ -2994,6 +2994,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     MAX.Y <- MAX.Y
   }
   
+  if (MAX.Y >1 & MIN.Y>1){
+    br<- round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)
+  }else if (MAX.Y<1 & MIN.Y<1){
+    br<- seq(MIN.Y,MAX.Y,length.out = 5)
+  }
+  
   
   outputplot <- ggplot(data = subset(ALD.sc.tall, Technology == TechToPlot & ALD.sc.tall$PortName == PortNames )) +
     geom_ribbon(aes(ymin=lower, ymax=Value, x=Year,fill=Target),alpha=0.75) +
@@ -3001,7 +3007,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     scale_x_continuous(name="Year", expand=c(0,0),limits=c(2018, 2023.6)) +
     scale_y_continuous(name=paste0("Weighted Production ","(",eval(parse(text = paste(GoodBad,".unit",sep = "")))[TechToPlot],")"),
                        expand=c(0,0),
-                       breaks=round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)) +
+                       breaks=br) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
     #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
