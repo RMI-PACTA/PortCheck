@@ -203,11 +203,9 @@ figuredirectory <- paste0(GIT.PATH,"Templates/ReportGraphics/Icons/")
 # ------
 # Translation and Report Inputs
 # ---------
-template <- (readLines(paste0(GIT.PATH,"Templates/",ReportTemplate,".tex"),encoding="UTF-8"))
 
-#template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
-template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-Insurer.tex"),encoding="UTF-8"))
-#template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-MetaPort.tex"),encoding="UTF-8"))
+insurer_template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-Insurer.tex"),encoding="UTF-8"))
+meta_template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2-MetaPort.tex"),encoding="UTF-8"))
 
 
 GraphTranslation <- read.csv(paste0(TEMPLATE.PATH,"/GraphTranslation_V4.csv"), stringsAsFactors = FALSE)
@@ -252,10 +250,7 @@ for (i in c(326)){#, 500:510)){
   PortfolioName <- gsub(" ", "", PortfolioName)
   HasEquity <- TestList[i,"HasEquity"]
   HasDebt <- TestList[i,"HasDebt"]
-  HasCarbonBudget <- FALSE 
-  
-  ### Handle to switch between showing Company Info and Not. 
-  WithCompanyCharts <- TRUE #TRUE
+  HasCarbonBudget <- FALSE #Initially set to FALSE, but will be updated if a carbon budget chart is successfully created
   
   print(paste0(PortfolioNameLong, "; ",InvestorNameLong,"; ",i, " of ",nrow(TestList)))
 
@@ -272,11 +267,14 @@ for (i in c(326)){#, 500:510)){
     EQCombin$Type <- "Portfolio"
     EQCompProdSnapshot$Type <- "Portfolio"
     CBCombin$Type <- "Portfolio"
-    
+    template <- meta_template
+    WithCompanyCharts <- FALSE
     # PortName <- "Meta Portfolio"
   }else if (TestType == "Portfolio") {
     ReportName <- paste0(InvestorNameLong,": ",PortfolioNameLong)
     # PortName <- "Your Portfolio"
+    template <- insurer_template
+    WithCompanyCharts <- TRUE
   }else {
     return()
   }
