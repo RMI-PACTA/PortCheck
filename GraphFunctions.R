@@ -2944,7 +2944,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   }else if (TechToPlot %in% c("NuclearCap")){
     tempmax<-max(tempmax,max(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line3"),]$Value))
     tempmin<-min(tempmin,min(ALD.sc.tall[which(ALD.sc.tall$PortName ==PortNames & ALD.sc.tall$Target =="Line1"),]$Value))
-    if (PortNames == "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"){
+    if (PortNames == "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA" & ChartType =="EQ"){
       tempmax<-1.5
     }
     if (MAX.Y > tempmax){
