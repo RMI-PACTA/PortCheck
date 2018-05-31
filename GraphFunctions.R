@@ -1797,7 +1797,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     if(SectorToPlot == "Fossil Fuels"){SectorToPlot <- "FossilFuels"}
     
     bar_size = 5/15
-    height <- min(15,n_distinct(AllData$Name)+1)*bar_size
+    height <- min(15,n_distinct(AllData$Name))*bar_size+1
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_CompanyTechShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2364,7 +2364,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 4/15
-    height <- min(11,n_distinct(OilCompanies$Name)+1)*bar_size
+    height <- min(11,n_distinct(OilCompanies$Name))*bar_size+1
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2500,7 +2500,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 4/15
-    height <- min(11,n_distinct(portfolio1$Name)+1)*bar_size
+    height <- min(11,n_distinct(portfolio1$Name))*bar_size+1
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -3032,7 +3032,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
                        breaks=round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)) +
     theme_246() + theme(legend.position = "none") +
     #labs(title=paste0("Growth of ", "names[x]", " Allocated to Portfolio, 2018-2023"),
-    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2°, 4°, 6° Degree Scenarios") +
+    #     subtitle = "Trajectory of Portfolio's Current Plans compared to IEA 2Â°, 4Â°, 6Â° Degree Scenarios") +
     coord_cartesian(ylim=c(MIN.Y,MAX.Y))
   
   if (ChartType =="CB"){
