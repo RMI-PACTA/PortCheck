@@ -2330,10 +2330,10 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     
     bar_size = 4/15
     height <- min(11,n_distinct(OilCompanies$Name))*bar_size
-    if (height >1){
+    if (height >1.2){
       height<-height
     }else{
-      height<-height+1.5
+      height<-height+1
     }
     
     
@@ -2472,10 +2472,10 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     bar_size = 4/15
 
     height <- min(11,n_distinct(portfolio1$Name))*bar_size
-    if (height > 1){
+    if (height > 1.2){
       height<-height
     }else{
-      height<-height+1.5
+      height<-height+1
     }
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2995,17 +2995,19 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   if (MIN.Y>1){
     MIN.Y <- round(MIN.Y,digits = 1)
   } else{
-    MIN.Y <- MIN.Y
+    MIN.Y <- as.numeric(sprintf('%.4f',MIN.Y))
   }
   
   if (MAX.Y>1){
     MAX.Y <- round(MAX.Y,digits = 1)
   } else{
-    MAX.Y <- MAX.Y
+    MAX.Y <- as.numeric(sprintf('%.4f',MAX.Y))
   }
   
   if (MAX.Y<1 & MIN.Y<1){
-    br<- seq(MIN.Y,MAX.Y,length.out = 5)
+    
+    br<- seq(as.numeric(sprintf('%.4f',MIN.Y)),as.numeric(sprintf('%.4f',MAX.Y)),length.out = 5)
+    br<- as.numeric(sprintf('%.4f',br))
   }else{
     br<- round(seq(MIN.Y,MAX.Y,length.out = 5),digits = 1)
   }
