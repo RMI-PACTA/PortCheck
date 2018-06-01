@@ -2329,7 +2329,12 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     }
     
     bar_size = 4/15
-    height <- min(11,n_distinct(OilCompanies$Name))*bar_size+1
+    height <- min(11,n_distinct(OilCompanies$Name))*bar_size
+    if (height >1){
+      height<-height
+    }else{
+      height<-height+1
+    }
     
     
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2466,8 +2471,12 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     
     bar_size = 4/15
 
-    height <- min(11,n_distinct(portfolio1$Name))*bar_size+1
-    
+    height <- min(11,n_distinct(portfolio1$Name))*bar_size
+    if (height > 1){
+      height<-height
+    }else{
+      height<-height+1
+    }
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
     return(TRUE)
