@@ -236,7 +236,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(326)){#, 500:510)){
+for (i in c(327)){#, 500:510)){
 
   ### Specify the Names from the Test List
   
