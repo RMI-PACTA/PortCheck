@@ -329,7 +329,7 @@ theme_distribution <- function(base_size = textsize, base_family = "") {
 }
 
 theme_cdi <- function() {
-  theme_minimal(base_size = 11, base_family = "Calibri") +
+  theme_minimal(base_size = 12, base_family = "Calibri") +
     theme(
       panel.background = element_rect(fill = "white", color = "white"),
       panel.border = element_blank(),
@@ -1398,7 +1398,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
-         bg="transparent",height=3,width=12,dpi=ppi*0.8)
+         bg="transparent",height=3,width=11,dpi=ppi*0.8)
 }
 
 
@@ -2333,7 +2333,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     if (height >1){
       height<-height
     }else{
-      height<-height+1
+      height<-height+1.5
     }
     
     
@@ -2475,7 +2475,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     if (height > 1){
       height<-height
     }else{
-      height<-height+1
+      height<-height+1.5
     }
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
