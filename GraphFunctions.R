@@ -1341,7 +1341,7 @@ analysed_summary <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3,width=4.2,dpi=ppi)   #linewidth_in*.9
 }
 
 carsten_metric_chart <- function(plotnumber, ChartType){
@@ -1394,7 +1394,14 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   tech.levels <- c("Coal","Gas","Oil",
     "RenewablesCap", "HydroCap","NuclearCap", "GasCap", "CoalCap",
     "Electric", "Hybrid", "ICE")
-  tech.labels <- gsub("Cap"," Capacity", tech.levels)
+  
+  tech.labels <- c("Coal Production","Gas Production","Oil Production",
+                   "Renewables Capacity", "Hydro Capacity","Nuclear Capacity", "Gas Capacity", "Coal Capacity",
+                   "Electric Vehicle", "Hybrid Vehicle", "ICE Vehicle")
+  
+  
+  
+  
   port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
 
   tech.colors <- c(CoalProdColour, GasProdColour, OilProdColour, RenewablesColour, HydroColour,NuclearColour, GasCapColour, CoalCapColour, ElectricColour, HybridColour,ICEColour)
