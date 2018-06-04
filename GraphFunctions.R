@@ -401,12 +401,30 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     select_(ID.COLS,"Metric","Value") %>%
     rbind(dfagg)
   
+
   dfagg <- rename(dfagg, "Name" = PortName)
   order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
+  
+  
+  if (all(dfagg$Name %in% PortName) ==FALSE){
+    temp<- data.frame(Name =PortName, Metric="CarstenMetric_Port",Value=0)
+    dfagg<-rbind(dfagg,temp)
+  } else{
+    dfagg<-dfagg
+  }
+  
+  
+  
+  if (all(order$Name %in% PortName) ==FALSE){
+    temp<-  data.frame(Name =PortName,Metric="Unexposed",Value =0)
+    order<-rbind(order,temp)
+  } else{
+    order<-order
+  }
+  
   dfagg$Name <- factor(dfagg$Name, levels=unique(order$Name))
   dfagg <- filter(dfagg, Metric != "Unexposed")
   dfagg$Metric <- factor(dfagg$Metric, levels=c(MetricCol))
-  
   x_length <- length(unique(order$Name))
   
   #arrow <- sum(filter(dfagg, Name == PortName)$Value)
