@@ -2625,6 +2625,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD <- EQALDAggProd[EQALDAggProd$PortName %in% filternames & EQALDAggProd$Technology %in% TechToPlot,]
     if (PortName != "MetaPort"){
       ALD_P <- EQALDAggProd[EQALDAggProd$PortName %in% PortNames & EQALDAggProd$Technology %in% TechToPlot,]
+      ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Equity"
       }
@@ -2637,6 +2638,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD <- CBALDAggProd[CBALDAggProd$PortName %in% filternames & CBALDAggProd$Technology %in% TechToPlot,]
     if (PortName != "MetaPort"){
       ALD_P <- CBALDAggProd[CBALDAggProd$PortName %in% PortNames & CBALDAggProd$Technology %in% TechToPlot,]
+      ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
+      
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Bonds"
       }
