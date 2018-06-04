@@ -1397,7 +1397,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   
   tech.labels <- c("Coal Production","Gas Production","Oil Production",
                    "Renewables Capacity", "Hydro Capacity","Nuclear Capacity", "Gas Capacity", "Coal Capacity",
-                   "Electric Vehicle", "Hybrid Vehicle", "ICE Vehicle")
+                   "Electric Vehicles", "Hybrid Vehicles", "ICE Vehicles")
   
   
   
