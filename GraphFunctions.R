@@ -406,7 +406,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   order <- dfagg %>% filter(Metric == "Unexposed") %>% arrange(Value)
   
   
-  if (all(dfagg$Name %in% PortName) ==FALSE){
+  if (all(dfagg$Name %in% PortName ==FALSE)){
     temp<- data.frame(Name =PortName, Metric="CarstenMetric_Port",Value=0)
     dfagg<-rbind(dfagg,temp)
   } else{
@@ -415,7 +415,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   
   
   
-  if (all(order$Name %in% PortName) ==FALSE){
+  if (all(order$Name %in% PortName ==FALSE)){
     temp<-  data.frame(Name =PortName,Metric="Unexposed",Value =0)
     order<-rbind(order,temp)
   } else{
@@ -1018,7 +1018,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   
   if (PortName!="MetaPort"){
     plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
-      geom_bar(position="stack", stat="identity") +
+      geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type",drop=F) +
       scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
@@ -1034,7 +1034,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
     
   }else {
     plot <- ggplot(data=subset(over1,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
-      geom_bar(position="stack", stat="identity") +
+      geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
       scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
