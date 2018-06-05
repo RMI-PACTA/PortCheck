@@ -1413,7 +1413,8 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     scale_x_discrete(name="") + 
     scale_y_continuous(name="Weight of issuers exposed to the\ntechnologies in the portfolio", labels=percent, expand=c(0,0),
                        limits=c(0, max(tots$Metric) + .01)) +
-    scale_fill_manual(name="", labels=tech.labels, values=tech.colors) + 
+    scale_fill_manual(name="Technology", labels=tech.labels, values=tech.colors) + 
+    guides(fill=guide_legend(ncol=2))+
     theme_cdi() +
     facet_wrap(~ Sector2, nrow=1) +
     theme(axis.text.x = element_text(angle = 0,colour=textcolor)) +
@@ -1423,7 +1424,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
-         bg="transparent",height=3,width=11,dpi=ppi*0.8)
+         bg="transparent",height=3,width=13,dpi=ppi*0.8)
 }
 
 
@@ -1516,35 +1517,6 @@ Fossil_Distribution <- function(plotnumber, ChartType){
 # ------------- COMPANY EXPOSURE CHART ----------- #
 company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
 
-  ### !! TAJ REMOVE THESE
-  ### LOADED ELSEWHERE
-
-  # BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/CA-INS/2016Q4/")
-  # BatchName <- "CA-INS"
-  # BenchmarkRegionchoose <- "GlobalAggregate"
-  # Scenariochoose <- "450S"
-  # 
-  # CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
-  # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
-  # 
-  # EQBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
-  # EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
-  # EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
-  # 
-  # EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
-  # EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
-  # eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names.csv"),stringsAsFactors = FALSE,strip.white = T)
-  # 
-  # CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
-  # CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
-  # cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names.csv"),stringsAsFactors = FALSE,strip.white = T)
-  # 
-  # GasProdColour <<- "#D9DDD4" #"#F5F5F5" #D9DDD4
-  # OilProdColour <<- "#BEBCAE"       #"#BEA07B" #BEBCAE
-  # textsize <<- 8.5
-  
-  
   ### NEW HERE
   
   GLOBAL.OIL.2D <- -.02
@@ -1602,6 +1574,8 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
   comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=Port.Sec.ClimateWt, n=10)
   
+  comp <- comp %>%
+    filter(Final.Name %in% unique(comp$Final.Name)[1:min(companiestoprint,length(unique(comp$Final.Name)))])
   ##!!! hard coded breaks and limits - need to change
   breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
   
@@ -1619,21 +1593,21 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   
   outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
     geom_bar(stat="identity") + 
-    geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production\nSpecified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
+    geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in\nPortfolio Production\nSpecified by 2° Scenario\n(2018-2023)"), color = area_2,size = 1.5) + 
     geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
     scale_x_discrete(name = "", labels=company_labels) + 
     scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
     scale_color_manual(values=area_2)+
     scale_linetype_manual(name="", values=c("solid")) +
-    scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = guide_legend(reverse = TRUE)) +
+    scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = FALSE) + #guide_legend(reverse = TRUE)
     facet_wrap(~Technology, ncol=1) +
     theme_cdi() + 
-    theme(legend.position = "bottom") +
+    theme(legend.position = "right") +
     theme(axis.line=element_line()) +
     theme(axis.ticks.x=element_line()) + 
     coord_flip()
 
- h <- nrow(comp)*.25 + 2
+ h <- nrow(comp)*.25 + 1.5
   
   ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
          bg="transparent",height=h,width=10,dpi=ppi)
