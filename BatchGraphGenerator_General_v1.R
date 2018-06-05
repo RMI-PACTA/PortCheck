@@ -355,11 +355,9 @@ for (i in c(327)){#, 500:510)){
         if (PortSummary$HasAuto.CB) {
           company_techshare("34", 10, "CB", "Automotive")
         }
-        if (PortSummary$HasOilGas.CB) {
-          Oilshare("38", 10, "CB")
-          company_og_buildout("36", 10, "CB")
-        }
       }
+      Oilshare("38", 10, "CB")
+      company_og_buildout("36", 10, "CB")
       
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
@@ -368,16 +366,10 @@ for (i in c(327)){#, 500:510)){
         if (PortSummary$HasAuto.EQ) {
           company_techshare("35", 10, "EQ", "Automotive")
         }
-        if (PortSummary$HasOilGas.EQ) {
-          Oilshare("39", 10, "EQ")
-          company_og_buildout("37", 10, "EQ")
-          }
-        if (PortSummary$HasCoal.EQ || PortSummary$HasOilGas.EQ) {
-          HasCarbonBudget <- carboninout("40", 10, "EQ")
-        }
       }
-      
-      # template <- (readLines(paste0(GIT.PATH,"Templates/","CATemplateInput_v2.tex"),encoding="UTF-8"))
+      Oilshare("39", 10, "EQ")
+      company_og_buildout("37", 10, "EQ")
+      HasCarbonBudget <- carboninout("40", 10, "EQ")
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")

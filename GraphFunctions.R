@@ -174,19 +174,19 @@ CAReport <- function(){
       text <- removetextlines("PowerSector_EQ")
     }
   }
-  if(!HasOG){
-    text <- removetextlines("FossilFuelSector_ALL")
-  } else {
-    if(!HasOGCB){
-      text <- removetextlines("FossilFuelSector_CB")
-    }
-    if(!HasOGEQ){
-      text <- removetextlines("FossilFuelSector_EQ")
-    }
-    if(!HasCarbonBudget){
-      text <- removetextlines("CarbonBudget")
-    }
-  }
+  # if(!HasOG){
+  #   text <- removetextlines("FossilFuelSector_ALL")
+  # } else {
+  #   if(!HasOGCB){
+  #     text <- removetextlines("FossilFuelSector_CB")
+  #   }
+  #   if(!HasOGEQ){
+  #     text <- removetextlines("FossilFuelSector_EQ")
+  #   }
+  #   if(!HasCarbonBudget){
+  #     text <- removetextlines("CarbonBudget")
+  #   }
+  # }
   
   if(WithCompanyCharts){
     #text <- removetextlines("CompanyPlaceholder")
