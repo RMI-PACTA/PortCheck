@@ -370,7 +370,7 @@ if (!is.null(nrow(FundsInPort))){
 }
 
 # Temp save for bonds
-bondlocation <- paste0("C:/Users/",USER.NAME,"/Dropbox (2° Investing)/2° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
+bondlocation <- paste0("C:/Users/",USER.NAME,"/Dropbox (2Â° Investing)/2Â° Investing Team/1. RESEARCH/1. Studies (projects)/2DPORTFOLIO/PortfolioCheck/Data/Finance Reg Data/PortfolioData/")
 write.csv(TotalPortfolio_Bonds,paste0(bondlocation,BatchName,"Port_Bonds.csv"),row.names = FALSE, na = "")
 
 
