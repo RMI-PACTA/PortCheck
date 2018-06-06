@@ -357,7 +357,7 @@ for (i in c(327)){#, 500:510)){
         }
       }
       Oilshare("38", 10, "CB")
-      company_og_buildout("36", 10, "CB")
+      company_og_buildout("36", 7, "CB")
       
       if (HasEquity) {
         if (PortSummary$HasPower.EQ){
@@ -368,7 +368,7 @@ for (i in c(327)){#, 500:510)){
         }
       }
       Oilshare("39", 10, "EQ")
-      company_og_buildout("37", 10, "EQ")
+      company_og_buildout("37", 7, "EQ")
       HasCarbonBudget <- carboninout("40", 10, "EQ")
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
