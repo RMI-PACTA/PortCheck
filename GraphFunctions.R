@@ -1701,7 +1701,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Add Benchmark / Global Market
     Marketmix <- subset(market, select=c("Technology","WtProduction"))
     Marketmix$Classification <- "Portfolio"
-    Marketmix$Name <- "      Market Benchmark"
+    Marketmix$Name <- "        Market Benchmark"
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
     Marketmix$WtProduction <- Marketmix$WtProduction
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
@@ -2334,7 +2334,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
           new_name = strtrim(company_labels[i],15)
           company_labels[i] <- paste0(new_name,'...')
         } else if (is.na(company_labels[i])){
-          company_labels[i] <- '                    '
+          company_labels[i] <- '                          '
         }
       }
       
@@ -2483,7 +2483,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
         new_name = strtrim(company_labels[i],15)
         company_labels[i] <- paste0(new_name,'...')
       } else if (is.na(company_labels[i])) {
-        company_labels[i] <- '                    '
+        company_labels[i] <- '                          '
       }
     }
     
