@@ -48,9 +48,9 @@ CAReportData <- function(){
   
   NoPeers <- nrow(TestList)-1
   
-  if(HasEquity & HasDebt){AssetClass <- "Listed Equity; Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"
-  }else if(HasEquity & !HasDebt){AssetClass <- "Listed Equity"
-  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate Bonds and Bonds of the Largest Government and Municipal Power Producers"}
+  if(HasEquity & HasDebt){AssetClass <- "Listed equity; Corporate bonds and bonds of the largest government and municipal power producers"
+  }else if(HasEquity & !HasDebt){AssetClass <- "Listed equity"
+  }else if(!HasEquity & HasDebt){AssetClass <- "Corporate bonds and bonds of the largest government and municipal power producers"}
   
   ### Sector Check
   SectorCheck <- TestList[TestList$PortName == PortName,]
