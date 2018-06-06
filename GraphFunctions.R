@@ -1563,18 +1563,18 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
   
-  BATCH.RES.PATH <- "C:/Users/trici/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/CA-INS/2016Q4/"
-  PortName <- "STATE COMPENSATION INSURANCE FUND" 
-  PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
-  ChartType <- "CB"
-  ChartType <- "EQ"
-  Scenariochoose <- "450S"
-  BenchmarkRegionchoose <- "GlobalAggregate"
-  companiestoprint <- 10
-  
-  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
-  CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-  
+  # BATCH.RES.PATH <- "C:/Users/trici/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/CA-INS/2016Q4/"
+  # PortName <- "STATE COMPENSATION INSURANCE FUND" 
+  # PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
+  # ChartType <- "CB"
+  # ChartType <- "EQ"
+  # Scenariochoose <- "450S"
+  # BenchmarkRegionchoose <- "GlobalAggregate"
+  # companiestoprint <- 10
+  # 
+  # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
+  # CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
+  # 
   
   PortName_IN <- PortName
   
@@ -1626,27 +1626,28 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     
     breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
     
-    company_labels <- trim(unique(comp$Final.Name))
-    for (i in 1:length(company_labels)) {
-      if (str_length(company_labels[i]) > 15) {
-        new_name = strtrim(company_labels[i],15)
-        company_labels[i] <- paste0(new_name,'...')
-      } else if (str_length(company_labels[i]) < 15) {
-        for (j in 1:(18-str_length(company_labels[i]))) {
-          company_labels[i] <- paste0(' ',company_labels[i])
-        }
-      }
-    }
+    # company_labels <- trim(unique(comp$Final.Name))
+    # for (i in 1:length(company_labels)) {
+    #   if (str_length(company_labels[i]) > 15) {
+    #     new_name = strtrim(company_labels[i],15)
+    #     company_labels[i] <- paste0(new_name,'...')
+    #   } else if (str_length(company_labels[i]) < 15) {
+    #     for (j in 1:(18-str_length(company_labels[i]))) {
+    #       company_labels[i] <- paste0(' ',company_labels[i])
+    #     }
+    #   }
+    # }
+    
     comp$Ord.Var <- paste0(comp$Final.Name, comp$Technology)
     comp <- comp %>% ungroup() %>% arrange(desc(`first(Plan.WtTechProd)`)) 
     comp$Ord.Var <- factor(comp$Ord.Var, levels=comp$Ord.Var, ordered=TRUE)    
     
-    
-    ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
-      geom_bar(stat="identity") +
-      facet_wrap(~Technology, ncol=1, scales = "free_y")+   
-      scale_x_discrete(labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
-      coord_flip()
+    # 
+    # ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
+    #   geom_bar(stat="identity") +
+    #   facet_wrap(~Technology, ncol=1, scales = "free_y")+   
+    #   scale_x_discrete(labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
+    #   coord_flip()
     
     outputplot <- ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
       geom_bar(stat="identity") + 
