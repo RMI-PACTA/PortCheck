@@ -37,7 +37,7 @@ CAReportData <- function(){
     tx[is.na(tx)] <- 0
     div <- findInterval(tx, c(1, 1e3, 1e6, 1e9, 1e12))
     div[div==0] <- 1
-    labels <- paste(round(tx/10^(3*(div-1)), 3),
+    labels <- paste(round(tx/10^(3*(div-1)), 1),
                     c("","Thousand","Million","Billion","Trillion")[div])
     return(labels)
   }
