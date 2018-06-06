@@ -1651,7 +1651,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)
   } else {
-    Label <- "No companies with exposure to either Oil or Gas production in your portfolio"
+    Label <- "No companies with exposure to either oil or gas production in your portfolio"
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
     h <-3.25
@@ -1701,7 +1701,7 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
     # Add Benchmark / Global Market
     Marketmix <- subset(market, select=c("Technology","WtProduction"))
     Marketmix$Classification <- "Portfolio"
-    Marketmix$Name <- "Market Benchmark"
+    Marketmix$Name <- "      Market Benchmark"
     Marketmix <- subset(Marketmix, select=c("Name","Classification","Technology","WtProduction"))
     Marketmix$WtProduction <- Marketmix$WtProduction
     colnames(Marketmix) <- c("Name","Classification","Technology","TechShare")
@@ -2334,7 +2334,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
           new_name = strtrim(company_labels[i],15)
           company_labels[i] <- paste0(new_name,'...')
         } else if (is.na(company_labels[i])){
-          company_labels[i] <- ''
+          company_labels[i] <- '                    '
         }
       }
       
@@ -2388,7 +2388,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
              bg="transparent",height=height,width=10,dpi=ppi)
     }else {
-      Label <- paste0("No Oil Production Breakdown in your ",Type," Portfolio")
+      Label <- paste0("No oil production breakdown in your ",Type," Portfolio")
       outputplot <- no_chart(Label) #+
         #theme(panel.background = element_rect(fill = "white", colour = "grey50"))
       ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2483,7 +2483,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
         new_name = strtrim(company_labels[i],15)
         company_labels[i] <- paste0(new_name,'...')
       } else if (is.na(company_labels[i])) {
-        company_labels[i] <- ''
+        company_labels[i] <- '                    '
       }
     }
     
