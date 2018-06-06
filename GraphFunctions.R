@@ -1039,11 +1039,13 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   # over1$Sector.All <- factor(over1$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
   if (PortName!="MetaPort"){
+    ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
+    
     plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type",drop=F) +
-      scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
+      scale_y_continuous(name="Market Value (USD)", labels=comprss, breaks = seq(0, ymax, length.out = 6), expand=c(0,0)) +
       guides(fill=guide_legend(nrow=2))+
       theme_barcharts() +
       theme(legend.position = "bottom",
@@ -1052,9 +1054,11 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over1,!Sector %in% c("Other Sectors", "Excluded"))$ValueUSD)/sum(over1$ValueUSD)*100,1),"%")
-    ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
+    
     
   }else {
+    ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
+    
     plot <- ggplot(data=subset(over1,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
       geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
@@ -1069,7 +1073,6 @@ Overview_portfolio_sector_stack <- function(plotnumber){
             axis.text.y=element_text(colour=textcolor,size=11)) 
     
     # portfolio_label = paste0("Climate Relevant: ", round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
-    ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
   }
   
   
@@ -1080,7 +1083,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
-         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=2.97,width=4,dpi=ppi)   #linewidth_in*.9
 }
 
 portfolio_sector_stack <- function(plotnumber){
@@ -1342,19 +1345,23 @@ analysed_summary <- function(plotnumber){
   over<- as.data.frame(over)
   orderofchart <- c("Fixed Income","Equity","Other")
   over$Asset.Type <- factor(over$Asset.Type,levels=orderofchart)
+  tot<- over %>%
+    group_by(Asset.Type) %>%
+    summarise(s= sum(ValueUSD))
   
   ## "steelblue" color below should be changed to whatever our Portfolio color is
   plot <- ggplot(over, aes(x=Asset.Type, y=ValueUSD, fill=Sector.All)) +
     geom_bar(position="stack", stat="identity") +
-    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuel, Automotive and Power Sectors"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
+    scale_fill_manual(name="", labels=c("Excluded", "Other Sectors","Fossil Fuel, Automotive\nand Power Sectors"), values=c("grey80", "#deebf7","#265b9b"),drop = FALSE) +
     scale_x_discrete(name="Asset Type") +
-    scale_y_continuous(name="Market Value (USD)", labels=comprss, expand=c(0,0)) +
+    scale_y_continuous(name="Market Value (USD)", labels=comprss,breaks = seq(0, max(tot$s), length.out = 6), expand=c(0,0)) +
     guides(fill=guide_legend(nrow=2,byrow = TRUE))+
     theme_barcharts() + 
     theme(legend.position = "bottom",
-          legend.text=element_text(size=textsize),
+          legend.text=element_text(size=9.5),
           axis.text.x=element_text(colour=textcolor,size=11),
-          axis.text.y=element_text(colour=textcolor,size=11))
+          axis.text.y=element_text(colour=textcolor,size=11),
+          axis.title.y = element_text(size = 9.5))
   
   # plot <- plot+
   #   annotate("text", x = "Equity", y = max(aggregate(over["ValueUSD"],by=over["Asset.Type"],FUN=sum)$ValueUSD),
@@ -1363,7 +1370,7 @@ analysed_summary <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3,width=4.2,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3.17,width=4.5,dpi=ppi)   #linewidth_in*.9
 }
 
 carsten_metric_chart <- function(plotnumber, ChartType){
@@ -1445,12 +1452,12 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     guides(fill=guide_legend(ncol=2))+
     theme_cdi() +
     facet_wrap(~ Sector2, nrow=1) +
-    theme(legend.title=element_text(size=11))+
-    theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 11),
-          axis.text.y=element_text(size=11),
-          axis.title.y=element_text(size=11),
-          strip.text = element_text(size = 11)) +
-    theme(axis.ticks.y = element_line(colour=textcolor,size =11)) + 
+    theme(legend.title=element_text(size=13),legend.text = element_text(size = 13))+
+    theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 12.5),
+          axis.text.y=element_text(size=13),
+          axis.title.y=element_text(size=13),
+          strip.text = element_text(size = 13)) +
+    theme(axis.ticks.y = element_line(colour=textcolor,size =13)) + 
     theme(axis.line.x = element_line())
   
   
@@ -1783,11 +1790,13 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       geom_text(data = Companies,
                 aes(x = Name, y = 1),
                 label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
-                hjust = -1, color = textcolor, size=12*(5/14))+
+                hjust = -1, color = textcolor, size=10*(5/14),
+                family = "Arial")+
       geom_text(data = Companies,
                 aes(x = "", y = 1),
                 label = "Weight",
-                hjust=-0.9,color = textcolor, size=12*(5/14))+
+                hjust=-0.9,color = textcolor, size=10*(5/14),
+                family = "Arial")+
       xlab("")+
       coord_flip()+
       theme(legend.position = "bottom",legend.title = element_blank(),
@@ -2356,10 +2365,12 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
         geom_text(data = Oil,
                   aes(x = Name, y = 1),
                   label = perc(Oil$PortWeightEQYlvl),
-                  hjust = -1, color = textcolor, size=12*(5/14))+
+                  hjust = -1, color = textcolor, size=10*(5/14),
+                  family = "Arial")+
         geom_text(aes(x="",y=1),
                   label = "Weight",
-                  hjust = -0.5, color = textcolor, size=12*(5/14))+
+                  hjust = -0.5, color = textcolor, size=10*(5/14),
+                  family = "Arial")+
         xlab("")+
         ylab("TechShare")+
         coord_flip()+
@@ -2509,10 +2520,12 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       theme_barcharts()+
       geom_text(aes(x = Name, y = 1),
                 label = perc(portfolio1$PortWeightEQYlvl),
-                hjust = -1, color = textcolor, size=12*(5/14))+
+                hjust = -1, color = textcolor, size=10*(5/14),
+                family = "Arial")+
       geom_text(aes(x="",y=1),
                 label = "Weight",
-                hjust = -0.5, color =textcolor, size =12*(5/14))+
+                hjust = -0.5, color =textcolor, size =10*(5/14),
+                family = "Arial")+
       xlab("")+
       ylab("TechShare")+
       coord_flip()+
@@ -2539,7 +2552,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     if (height > 1.65){
       height<-height
     }else{
-      height<-height+0.5
+      height<-height+0.8
     }
     ggsave(gt,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
            bg="transparent",height=height,width=10,dpi=ppi)
@@ -2852,7 +2865,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     brown.unit <- c("CoalCap" = "MW",
                     "GasCap"="MW",
                     "Oil" ="bbl",
-                    "Gas" = "m3",
+                    "Gas" = "m^3",
                     "ICE" ="Vehicles")
     
     if (unitscaleval >1e3){
@@ -2864,7 +2877,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^3 MW",
                       "GasCap"="10^3 MW",
                       "Oil" ="Mbbl",
-                      "Gas" = "1000 m3",
+                      "Gas" = "1000 m^3",
                       "ICE" ="1000 Vehicles")
       
       
@@ -2878,7 +2891,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^6 MW",
                       "GasCap"="10^6 MW",
                       "Oil" ="MMbbl",
-                      "Gas" = "million m3",
+                      "Gas" = "million m^3",
                       "ICE" ="million Vehicles")
     } 
     if (unitscaleval > 1e9){
@@ -2890,7 +2903,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^9 MW",
                       "GasCap"="10^9 MW",
                       "Oil" ="Gbbl",
-                      "Gas" = "billion m3",
+                      "Gas" = "billion m^3",
                       "ICE" ="billion Vehicles")
     }
     
