@@ -392,7 +392,7 @@ no_chart <- function(Label){
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
   outputplot <- ggplot()+
-    annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,25), size=5)+
+    annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=5)+
     geom_blank()+
     theme(
       axis.title.x=element_blank(),
