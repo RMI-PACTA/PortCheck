@@ -1562,15 +1562,20 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   GLOBAL.OIL.2D <- -.02
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
-  
+  # 
   # BATCH.RES.PATH <- "C:/Users/trici/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/CA-INS/2016Q4/"
-  # PortName <- "STATE COMPENSATION INSURANCE FUND" 
+  # PortName <- "STATE COMPENSATION INSURANCE FUND"
   # PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
+  # PortName <- "METROPOLITAN LIFE INSURANCE COMPANY"
+  # 
   # ChartType <- "CB"
   # ChartType <- "EQ"
   # Scenariochoose <- "450S"
   # BenchmarkRegionchoose <- "GlobalAggregate"
   # companiestoprint <- 10
+  # OilProdColour <- "black" 
+  # GasProdColour <- "red"
+  # area2 <- "green"
   # 
   # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
   # CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
@@ -1626,21 +1631,23 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     
     breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
     
-    # company_labels <- trim(unique(comp$Final.Name))
-    # for (i in 1:length(company_labels)) {
-    #   if (str_length(company_labels[i]) > 15) {
-    #     new_name = strtrim(company_labels[i],15)
-    #     company_labels[i] <- paste0(new_name,'...')
-    #   } else if (str_length(company_labels[i]) < 15) {
-    #     for (j in 1:(18-str_length(company_labels[i]))) {
-    #       company_labels[i] <- paste0(' ',company_labels[i])
-    #     }
-    #   }
-    # }
     
     comp$Ord.Var <- paste0(comp$Final.Name, comp$Technology)
-    comp <- comp %>% ungroup() %>% arrange(desc(`first(Plan.WtTechProd)`)) 
+    comp <- comp %>% ungroup() %>% arrange(`first(Plan.WtTechProd)`) 
     comp$Ord.Var <- factor(comp$Ord.Var, levels=comp$Ord.Var, ordered=TRUE)    
+    
+    company_labels <- comp$Final.Name
+    for (i in 1:length(company_labels)) {
+      if (str_length(company_labels[i]) > 15) {
+        new_name = strtrim(company_labels[i],15)
+        company_labels[i] <- paste0(new_name,'...')
+      } else if (str_length(company_labels[i]) < 15) {
+        for (j in 1:(18-str_length(company_labels[i]))) {
+          company_labels[i] <- paste0(' ',company_labels[i])
+        }
+      }
+    }
+    comp$Final.Name <- company_labels
     
     # 
     # ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
@@ -1652,13 +1659,13 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     outputplot <- ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
       geom_bar(stat="identity") + 
       geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
-      geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
+      #geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
       scale_x_discrete(name="", labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
       scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
       scale_color_manual(values=area_2)+
       scale_linetype_manual(name="", values=c("solid")) +
       scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = FALSE) + #guide_legend(reverse = TRUE)
-      facet_wrap(~Technology, ncol=1) +
+      facet_wrap(~Technology, ncol=1, scales="free_y") +
       theme_cdi() + 
       theme(legend.position = "none") +
       theme(axis.line=element_line()) +
