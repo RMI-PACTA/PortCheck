@@ -1370,7 +1370,7 @@ analysed_summary <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3.17,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3.12,width=4,dpi=ppi)   #linewidth_in*.9
 }
 
 carsten_metric_chart <- function(plotnumber, ChartType){
@@ -1453,7 +1453,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     theme_cdi() +
     facet_wrap(~ Sector2, nrow=1) +
     theme(legend.title=element_text(size=13),legend.text = element_text(size = 13))+
-    theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 12.5),
+    theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 12),
           axis.text.y=element_text(size=13),
           axis.title.y=element_text(size=13),
           strip.text = element_text(size = 13)) +
