@@ -1563,8 +1563,19 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   GLOBAL.GAS.2D <- .05
   global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
   
-  #PortName <- "STATE COMPENSATION INSURANCE FUND" #STATE COMPENSATION INSURANCE FUND BOSTON MUTUAL LIFE INSURANCE COMPANY
-  #ChartType <- "CB"
+  BATCH.RES.PATH <- "C:/Users/trici/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/CA-INS/2016Q4/"
+  PortName <- "STATE COMPENSATION INSURANCE FUND" 
+  PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
+  ChartType <- "CB"
+  ChartType <- "EQ"
+  Scenariochoose <- "450S"
+  BenchmarkRegionchoose <- "GlobalAggregate"
+  companiestoprint <- 10
+  
+  CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
+  CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
+  
+  
   PortName_IN <- PortName
   
   if (ChartType == "CB"){
@@ -1609,14 +1620,10 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   if (nrow(comp)>0){
     comp <- left_join(comp, port.targets %>% ungroup() %>% as.data.frame() , by="Technology")
     comp$Global.Scen.Pct <- ifelse(comp$Technology=="Gas", GLOBAL.GAS.2D, GLOBAL.OIL.2D)
-    comp <- comp %>% ungroup() %>% arrange(desc(`first(Plan.WtTechProd)`))
-    comp$Final.Name <- factor(comp$Final.Name, levels=rev(unique(comp$Final.Name)), ordered=TRUE)
+    #comp$Final.Name <- factor(comp$Final.Name, levels=rev(unique(comp$Final.Name)), ordered=TRUE)
     comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
-    comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=Port.Sec.ClimateWt, n=10)
+    comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=`first(Plan.WtTechProd)`, n=companiestoprint) 
     
-    comp <- comp %>%
-      filter(Final.Name %in% unique(comp$Final.Name)[1:min(companiestoprint,length(unique(comp$Final.Name)))])
-    ##!!! hard coded breaks and limits - need to change
     breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
     
     company_labels <- trim(unique(comp$Final.Name))
@@ -1630,12 +1637,22 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
         }
       }
     }
+    comp$Ord.Var <- paste0(comp$Final.Name, comp$Technology)
+    comp <- comp %>% ungroup() %>% arrange(desc(`first(Plan.WtTechProd)`)) 
+    comp$Ord.Var <- factor(comp$Ord.Var, levels=comp$Ord.Var, ordered=TRUE)    
     
-    outputplot <- ggplot(comp, aes(x=Final.Name, y=Plan.Pct, fill=Technology)) + 
+    
+    ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
+      geom_bar(stat="identity") +
+      facet_wrap(~Technology, ncol=1, scales = "free_y")+   
+      scale_x_discrete(labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
+      coord_flip()
+    
+    outputplot <- ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
       geom_bar(stat="identity") + 
       geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2? Scenario (2018-2023)"), color = area_2,size = 1.5) + 
       geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
-      scale_x_discrete(name = "", labels=company_labels) + 
+      scale_x_discrete(name="", labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
       scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
       scale_color_manual(values=area_2)+
       scale_linetype_manual(name="", values=c("solid")) +
@@ -3125,7 +3142,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     
     if(PrintPlot){print(outputplot)}
   }else{
-    Label <- paste0("The Portfolio has no data in the ", TechToPlot," technology")
+    Label <- paste0("No production or capacity data.")
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
   }  
