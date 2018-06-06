@@ -1651,7 +1651,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_OilGasBuildOut.png", sep=""),
            bg="transparent",height=h,width=10,dpi=ppi)
   } else {
-    Label <- "No companies with exposure to either oil or gas production in your portfolio"
+    Label <- "No companies with exposure to either oil or gas production in your portfolio."
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
     h <-3.25
@@ -1771,8 +1771,8 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
         new_name = strtrim(company_labels[i],15)
         company_labels[i] <- paste0(new_name,'...')
       } 
-      }
     }
+    
     
     bar_labels = c(PortfolioData$Name,"",company_labels)
     
@@ -2252,11 +2252,11 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
     colnames(OilCompProdSS)[which(names(OilCompProdSS) == "COMPANY_CORP_TICKER")] <- "Ticker"
     
     OilOG<- subset(OGData,Year ==(Startyear+5)& (Technology %in% "Oil") &(RollUpType %in% "Debt"))
-    Type <- "fix income"
+    Type <- "fixed income"
   }
   
   if (nrow(OilCompProdSS)==0){
-    Label <- paste0("No companies with exposure to oil production in your ",Type," portfolio")
+    Label <- paste0("No companies with exposure to oil production in your ",Type," portfolio.")
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
     ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_OilShare.png', sep=""),
@@ -2436,7 +2436,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
   portfolio1 <- subset(portfolio1, !is.na(value))
   
   if (nrow(CompProdSS)==0){
-    Label <- "No companies with data from Carbon Tracker in your equity portfolio"
+    Label <- "No companies with data from Carbon Tracker in your equity portfolio."
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
     ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
