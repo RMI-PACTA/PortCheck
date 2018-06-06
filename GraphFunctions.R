@@ -1083,7 +1083,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(filename=paste0(plotnumber,"_",PortfolioName,'_SectorBarChart.png',sep=""),
-         bg="transparent",height=2.97,width=4,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3,width=4,dpi=ppi)   #linewidth_in*.9
 }
 
 portfolio_sector_stack <- function(plotnumber){
@@ -1370,7 +1370,7 @@ analysed_summary <- function(plotnumber){
   if(PrintPlot){print(plot)}
   
   ggsave(plot,filename=paste0(plotnumber,"_",PortfolioName,'_AnalysedSummary.png', sep=""),
-         bg="transparent",height=3.17,width=4.5,dpi=ppi)   #linewidth_in*.9
+         bg="transparent",height=3.17,width=4,dpi=ppi)   #linewidth_in*.9
 }
 
 carsten_metric_chart <- function(plotnumber, ChartType){
