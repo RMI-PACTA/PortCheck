@@ -2537,7 +2537,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
            bg="transparent",height=height,width=10,dpi=ppi)
     #return(TRUE)
   } else if (nrow(portfolio1)==0) {
-    Label <- "No Carbon Tracker data for Companies in your Equity Portfolio"
+    Label <- "No Carbon Tracker data for companies in your Equity Portfolio"
     outputplot <- no_chart(Label)+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
     ggsave(filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CarboninnoutShare.png', sep=""),
