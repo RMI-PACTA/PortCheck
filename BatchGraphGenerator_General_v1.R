@@ -99,6 +99,10 @@ BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTe
 # names(Ports.Overview) <- gsub("TwoD\\.", "", names(Ports.Overview))
 # length(unique(Ports.Overview$Portfolio.Name)) ## Number of Insurers
 
+eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
+#any(duplicated(eqnames$EQY_FUND_TICKER)) 
+cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
+#any(duplicated(cbnames$COMPANY_CORP_TICKER)) 
 
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Subgroup.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
@@ -112,6 +116,8 @@ print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " rows."))
+CBCompProdSnapshots <- left_join(CBCompProdSnapshots, cbnames, by="COMPANY_CORP_TICKER")
+CBCompProdSnapshots <- CBCompProdSnapshots %>% select(-Name) %>% rename(Name=Final.Name)
 
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
@@ -125,6 +131,9 @@ print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
 print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), " rows."))
+EQCompProdSnapshots <- left_join(EQCompProdSnapshots, eqnames, by="EQY_FUND_TICKER")
+EQCompProdSnapshots <- EQCompProdSnapshots %>% select(-Name) %>% rename(Name=Final.Name)
+
 
 EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
 
@@ -132,11 +141,9 @@ EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildO
 
 EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
-eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation=="GlobalAggregate")
-cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 
 # Comparison Flags
