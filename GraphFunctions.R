@@ -1557,30 +1557,19 @@ Fossil_Distribution <- function(plotnumber, ChartType){
 # ------------- COMPANY EXPOSURE CHART ----------- #
 company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   
-  ### NEW HERE
-  
-  GLOBAL.OIL.2D <- -.02
-  GLOBAL.GAS.2D <- .05
-  global.targets <- data.frame(Technology=c("Oil","Gas"), Target=c(GLOBAL.OIL.2D, GLOBAL.GAS.2D))
-  # 
-  # BATCH.RES.PATH <- "C:/Users/trici/Dropbox (2° Investing)/PortCheck/03_Results/01_BatchResults/CA-INS/2016Q4/"
+
   # PortName <- "STATE COMPENSATION INSURANCE FUND"
-  # PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
-  # PortName <- "METROPOLITAN LIFE INSURANCE COMPANY"
-  # 
+  # # PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
+  # # PortName <- "METROPOLITAN LIFE INSURANCE COMPANY"
+  # #PortName <- "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"
+  # PortName <- "MASSACHUSETTS MUTUAL LIFE INSURANCE COMPANY"
   # ChartType <- "CB"
   # ChartType <- "EQ"
-  # Scenariochoose <- "450S"
-  # BenchmarkRegionchoose <- "GlobalAggregate"
-  # companiestoprint <- 10
-  # OilProdColour <- "black" 
-  # GasProdColour <- "red"
-  # area2 <- "green"
-  # 
   # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
   # CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-  # 
-  
+  # EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
+  # EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
+
   PortName_IN <- PortName
   
   if (ChartType == "CB"){
@@ -1621,36 +1610,44 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     summarise(first(Plan.WtTechProd), last(Plan.WtTechProd),
               Plan.Diff=last(Plan.WtTechProd) - first(Plan.WtTechProd),
               Scen.Diff=last(Scen.WtTechProd) - first(Scen.WtTechProd),
-              Plan.Pct=(last(Plan.WtTechProd) - first(Plan.WtTechProd))/first(Plan.WtTechProd))
+              Plan.Pct=ifelse(Plan.Diff ==0, 0, (last(Plan.WtTechProd) - first(Plan.WtTechProd))/first(Plan.WtTechProd)))
   if (nrow(comp)>0){
     comp <- left_join(comp, port.targets %>% ungroup() %>% as.data.frame() , by="Technology")
-    comp$Global.Scen.Pct <- ifelse(comp$Technology=="Gas", GLOBAL.GAS.2D, GLOBAL.OIL.2D)
-    #comp$Final.Name <- factor(comp$Final.Name, levels=rev(unique(comp$Final.Name)), ordered=TRUE)
     comp$Technology <- factor(comp$Technology, levels=c("Oil","Gas"), ordered=TRUE)
     comp <- comp %>% group_by(Scenario, Technology) %>% top_n(wt=`first(Plan.WtTechProd)`, n=companiestoprint) 
-    
+ 
+    ### A bit of hack - based on largest absolute value just move the scale out on both ends.  
+    ### even if largest value differs for fixed income vs equity, this keeps things symmetrical, so zero
+    ### should still be in the middle even if end vals are different
 
-    comp <- comp %>%
-      filter(Final.Name %in% unique(comp$Final.Name)[1:min(companiestoprint,length(unique(comp$Final.Name)))])
-    ##!!! hard coded breaks and limits - need to change
-    # breaks <- c(-.35,-0.30,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
+    ## default
+    MAX.VAL <- .35
+    breaks <- c(-.35,-0.30,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25,.30,.35)
+    ## adjust if need be for this data
+    data.maxval <- max(abs(comp$Plan.Pct)) 
+    if (data.maxval > MAX.VAL) {
+      breaks <- c(-data.maxval, breaks[c(-1, -length(breaks))], data.maxval)
+    }
+    limits <- c(min(breaks), max(breaks))
     
-    plot.limit <- 0.5
-    comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct > plot.limit,plot.limit,comp$Plan.Pct)
-    comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct < -plot.limit,-plot.limit,comp$Plan.Pct.Limit)
-    
-    min.perc <- min(comp$Plan.Pct.Limit,na.rm = T)
-    max.perc <- max(comp$Plan.Pct.Limit,na.rm = T)
-    
-    round.val <- 0.05
-    min.perc <- max(round.val * round(min.perc/round.val),-plot.limit)
-    max.perc <- min(round.val * round(max.perc/round.val),plot.limit)
-    
-    no.breaks <- (max.perc-min.perc)/round.val
-    if (no.breaks > 10) {no.breaks <- round.val <- round.val *2}
-    
-    breaks  <- seq(min.perc,max.perc,round.val) 
-
+    ##!!! TAJ - I decided to comment this out for now until we figure out how to line up the zeros
+    ## across the two charts - but I think we should add back in
+    # plot.limit <- 0.5
+    # comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct > plot.limit,plot.limit,comp$Plan.Pct)
+    # comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct < -plot.limit,-plot.limit,comp$Plan.Pct.Limit)
+    # 
+    # min.perc <- min(comp$Plan.Pct.Limit,na.rm = T)
+    # max.perc <- max(comp$Plan.Pct.Limit,na.rm = T)
+    # 
+    # round.val <- 0.05
+    # min.perc <- max(round.val * round(min.perc/round.val),-plot.limit)
+    # max.perc <- min(round.val * round(max.perc/round.val),plot.limit)
+    # 
+    # no.breaks <- (max.perc-min.perc)/round.val
+    # if (no.breaks > 10) {no.breaks <- round.val <- round.val *2}
+    # 
+    # breaks  <- seq(min.perc,max.perc,round.val) 
+    # 
     
     
     comp$Ord.Var <- paste0(comp$Final.Name, comp$Technology)
@@ -1670,19 +1667,12 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     }
     comp$Final.Name <- company_labels
     
-    # 
-    # ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
-    #   geom_bar(stat="identity") +
-    #   facet_wrap(~Technology, ncol=1, scales = "free_y")+   
-    #   scale_x_discrete(labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
-    #   coord_flip()
-    
     outputplot <- ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
       geom_bar(stat="identity") + 
-      geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2° Scenario (2018-2023)"), color = area_2,size = 1.5) + 
+      geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2� Scenario from 2018-2023"), color = area_2,size = 1.5) + 
       #geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
       scale_x_discrete(name="", labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
-      scale_y_continuous(name = "% Change in Planned Portfolio Production (2018-2023)", labels=percent, limits=c(-.35,.25), breaks=breaks) + 
+      scale_y_continuous(name = "% Change in Planned Portfolio Production from 2018 to 2023", labels=percent, breaks = breaks, limits=limits) + 
       scale_color_manual(values=area_2)+
       scale_linetype_manual(name="", values=c("solid")) +
       scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = FALSE) + #guide_legend(reverse = TRUE)
