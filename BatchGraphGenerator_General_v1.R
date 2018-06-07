@@ -243,7 +243,7 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 # Loop through Portfolios
 #--------
 
-for (i in c(327)){#, 500:510)){
+for (i in c(327,389,494,39,355,379,42,20)){#, 500:510)){
 
   ### Specify the Names from the Test List
   
@@ -363,7 +363,7 @@ for (i in c(327)){#, 500:510)){
           company_techshare("34", 10, "CB", "Automotive")
         }
       }
-      Oilshare("38", 10, "CB")
+      Oilshare("38", 7, "CB")
       company_og_buildout("36", 7, "CB")
       
       if (HasEquity) {
@@ -374,9 +374,9 @@ for (i in c(327)){#, 500:510)){
           company_techshare("35", 10, "EQ", "Automotive")
         }
       }
-      Oilshare("39", 10, "EQ")
+      Oilshare("39", 7, "EQ")
       company_og_buildout("37", 7, "EQ")
-      HasCarbonBudget <- carboninout("40", 10, "EQ")
+      HasCarbonBudget <- carboninout("40", 7, "EQ")
       
       figurelist <- list.files(getwd(),pattern=c("\\.png$"), full.names = FALSE)
       writeLines(figurelist,"FigureList.txt")
