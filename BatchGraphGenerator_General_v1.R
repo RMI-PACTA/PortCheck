@@ -242,8 +242,8 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-
-for (i in c(327,389,494,39,355,379,42,20)){#, 500:510)){
+TOP<-c(501, 327,389, 494, 39, 355,379,318,42,20)
+for (i in TOP){#, 500:510)){
 
   ### Specify the Names from the Test List
   
