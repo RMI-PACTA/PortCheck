@@ -2366,8 +2366,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       Oil <- na.omit(OilCompanies[,c("Name","PortWeightEQYlvl")])
       OilCompanies <- OilCompanies %>% 
         arrange(PortWeightEQYlvl)
-      OilCompanies[!is.na(OilCompanies$Oil.Type),]$Name
-      
+
       company_labels <- trim(unique(OilCompanies[!is.na(OilCompanies$Oil.Type),]$Name))
       for (i in 1:length(company_labels)) {
         if (str_length(company_labels[i]) > 15) {
