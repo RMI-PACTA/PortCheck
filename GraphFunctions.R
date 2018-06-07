@@ -1561,14 +1561,14 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
   # PortName <- "STATE COMPENSATION INSURANCE FUND"
   # # PortName <- "BOSTON MUTUAL LIFE INSURANCE COMPANY"
   # # PortName <- "METROPOLITAN LIFE INSURANCE COMPANY"
-  # #PortName <- "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"
-  # PortName <- "MASSACHUSETTS MUTUAL LIFE INSURANCE COMPANY"
-  # ChartType <- "CB"
-  # ChartType <- "EQ"
-  # CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
-  # CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
-  # EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
-  # EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
+  #PortName <- "TEACHERS INSURANCE AND ANNUITY ASSOCIATION OF AMERICA"
+  #PortName <- "MASSACHUSETTS MUTUAL LIFE INSURANCE COMPANY"
+  #ChartType <- "CB"
+  #ChartType <- "EQ"
+  #CBCombin <- CBBatchTest[CBBatchTest$PortName == PortName,]
+  #CBCompProdSnapshot <- CBCompProdSnapshots[CBCompProdSnapshots$PortName == PortName,]
+  #EQCombin <- EQBatchTest[EQBatchTest$PortName == PortName,]
+  #EQCompProdSnapshot <- EQCompProdSnapshots[EQCompProdSnapshots$PortName == PortName,]
 
   PortName_IN <- PortName
   
@@ -1672,7 +1672,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
       geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2° Scenario from 2018-2023"), color = area_2,size = 1.5) + 
       #geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
       scale_x_discrete(name="", labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
-      scale_y_continuous(name = "% Change in Planned Portfolio Production from 2018 to 2023", labels=percent, breaks = breaks, limits=limits) + 
+      scale_y_continuous(name = "% Change in Planned Production from 2018 to 2023", labels=percent, breaks = breaks, limits=limits) + 
       scale_color_manual(values=area_2)+
       scale_linetype_manual(name="", values=c("solid")) +
       scale_fill_manual(name="", values=c(OilProdColour, GasProdColour), guide = FALSE) + #guide_legend(reverse = TRUE)
