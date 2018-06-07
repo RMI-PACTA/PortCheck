@@ -173,10 +173,12 @@ CompanylvlBBGEquityData$FFperc[is.na(CompanylvlBBGEquityData$FFperc)] <- 1
 # d) Read in financial data (Data retrieved from BBG PORT function)
 # ------
 BBG_Data <- read.csv(paste0(FIN.DATA.PATH,ParameterFile$DateofFinancialData,"/",ParameterFile$SourceFinancialData,"/FinancialData_20180131.csv"),stringsAsFactors=FALSE,strip.white=TRUE)
-BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
+# BBG_Data <- rename(BBG_Data, c( "Mkt.Val..P." = "SharePrice"))
+BBG_Data <- BBG_Data %>% rename(SharePrice = Mkt.Val..P.)
 BBGPORTOutput <- BBG_Data
 CompNames <- unique(subset(BBGPORTOutput, select = c("Ticker","Issuer")))
-CompNames <- rename(CompNames, c("Issuer" = "Name"))
+# CompNames <- rename(CompNames, c("Issuer" = "Name"))
+CompNames <- CompNames %>% rename(Name = Issuer)
 
 # ------
 # e) Read in portfolio holdings (Portfolio holdings data given by Regulator or Instituion)
@@ -196,10 +198,12 @@ MarketSizeData <- subset(MarketSizeData, MarketRegion != "", select = c("MarketR
 # Create a List of all existing Benchmark-Region and all assessed CompanyLocation-Regions
 BenchRegionLists <- read.csv(paste0(PROC.DATA.PATH,"BenchRegions.csv"))
 BenchRegionLists[is.na(BenchRegionLists)] <- ""
-BenchRegionLists <- rename(BenchRegionLists, c("BenchRegions" = "BenchmarkRegions", "BenchRegions_ISO_colnames" = "BenchmarkRegions_ISO_colnames"))
+# BenchRegionLists <- rename(BenchRegionLists, c("BenchRegions" = "BenchmarkRegions", "BenchRegions_ISO_colnames" = "BenchmarkRegions_ISO_colnames"))
+BenchRegionLists <- BenchRegionLists %>% rename(BenchmarkRegions = BenchRegions, BenchmarkRegions_ISO_colnames = BenchRegions_ISO_colnames)
 BenchmarkRegionList <- data.frame(BenchmarkRegion = BenchRegionLists$BenchmarkRegions[!is.na(BenchRegionLists$BenchmarkRegions) & BenchRegionLists$BenchmarkRegions != ""], BenchmarkRegionColname = BenchRegionLists$BenchmarkRegions_ISO_colnames[!is.na(BenchRegionLists$BenchmarkRegions_ISO_colnames) & BenchRegionLists$BenchmarkRegions_ISO_colnames != ""])
 CompanyDomicileRegion <- read.csv(paste0(PROC.DATA.PATH,"IndexRegions.csv"))
-CompanyDomicileRegion <- rename(CompanyDomicileRegion, c("IndexUniverse" = "CompanyDomicileRegion", "IndexUniverseColname" = "CompanyDomicileRegionColname")) 
+# CompanyDomicileRegion <- rename(CompanyDomicileRegion, c("IndexUniverse" = "CompanyDomicileRegion", "IndexUniverseColname" = "CompanyDomicileRegionColname")) 
+CompanyDomicileRegion <- CompanyDomicileRegion %>% rename(CompanyDomicileRegion = IndexUniverse, CompanyDomicileRegionColname = IndexUniverseColname)
 #if(any(is.na(CompanyDomicileRegion))) {CompanyDomicileRegion[is.na(CompanyDomicileRegion)] <- ""}
 CompanyDomicileRegionList <- data.frame(CompanyDomicileRegion = CompanyDomicileRegion$CompanyDomicileRegion[!is.na(CompanyDomicileRegion$CompanyDomicileRegion) & CompanyDomicileRegion$CompanyDomicileRegion != ""], CompanyDomicileRegionColname = CompanyDomicileRegion$CompanyDomicileRegionColname[!is.na(CompanyDomicileRegion$CompanyDomicileRegionColname) & CompanyDomicileRegion$CompanyDomicileRegionColname != ""])
 
@@ -251,7 +255,8 @@ if (ParameterFile$CalculateMarketData == TRUE){
   EconomyData <- EconomyData[,!names(EconomyData) %in% drops]
   EconomyDataSmall <- subset(EconomyData, Technology %in% AllLists$TechList)
   EconomyDataSmall <- merge(EconomyDataSmall, CountryISOList, by.x = "PlantLocation", by.y = "GDPlantLocation", all.x = TRUE)
-  EconomyDataSmall <- rename(EconomyDataSmall, c("COUNTRY_ISO" = "PlantLocation_ISO"))
+  # EconomyDataSmall <- rename(EconomyDataSmall, c("COUNTRY_ISO" = "PlantLocation_ISO"))
+  EconomyDataSmall <- EconomyDataSmall %>% rename(PlantLocation_ISO = COUNTRY_ISO)
   EconomyDataSmall$PlantLocation_ISO[EconomyDataSmall$Technology == "Coal"] <- "Global"
   
   for (j in 1:length(BenchmarkRegionList$BenchmarkRegion)){
@@ -334,7 +339,8 @@ if (ParameterFile$CalculateMarketData == TRUE){
   
   MarketSectorref <- ddply(subset(MarketData, Year == Startyear),.(BenchmarkRegion, Sector, CompanyDomicileRegion),summarize, RefProdMarketSector = sum(Production,na.rm=TRUE))
   MarketTechref <- subset(MarketData, Year == Startyear, select = -c(Year))
-  MarketTechref <- rename(MarketTechref, c("Production" = "RefProdMarketTech"))
+  # MarketTechref <- rename(MarketTechref, c("Production" = "RefProdMarketTech"))
+  MarketTechref <- MarketTechref %>% rename(RefProdMarketTech = Production)
   
   MarketData <- merge(MarketData,MarketSectorref, by = c("BenchmarkRegion", "Sector", "CompanyDomicileRegion"), all.x=TRUE, all.y=FALSE)
   MarketData <- merge(MarketData,MarketTechref, by = c("BenchmarkRegion", "Sector", "CompanyDomicileRegion", "Technology" ), all.x=TRUE, all.y=FALSE)
@@ -411,12 +417,14 @@ if (ParameterFile$CalculateIEATArgets == TRUE){
   
   # Get the reference value in the starting year of the analysis to calculate percentage additions based on this 
   refvalIEApre <- subset(IEATargets,Year == Startyear)
-  refvalIEApre <- rename(refvalIEApre, c("AnnualvalIEAtech" = "refvalIEAtech"))
+  # refvalIEApre <- rename(refvalIEApre, c("AnnualvalIEAtech" = "refvalIEAtech"))
+  refvalIEApre <- refvalIEApre %>% rename(refvalIEAtech = AnnualvalIEAtech)
   
   # Set evaluation method (declining technologies use the technology approach, while increasing technologies are assessed with the sector-approach)
   EndRefValIEA <- subset(IEATargets,Year == Startyear+5)
   EndRefValIEA <- subset(EndRefValIEA, select = c("Technology","Region","Scenario","Sector","Units","AnnualvalIEAtech"))
-  EndRefValIEA<- rename(EndRefValIEA , c("AnnualvalIEAtech" = "EndRefValIEA"))
+  # EndRefValIEA<- rename(EndRefValIEA , c("AnnualvalIEAtech" = "EndRefValIEA"))
+  EndRefValIEA <- EndRefValIEA %>% rename(EndRefValIEA = AnnualvalIEAtech)
   MethodChoose <- merge(subset(refvalIEApre,select = c("Technology","Region","Scenario","Sector","Units","refvalIEAtech")),EndRefValIEA, by = c("Technology","Region","Scenario","Sector","Units"))
   MethodChoose$Direction <- "increasing"
   MethodChoose$Direction[MethodChoose$refvalIEAtech >= MethodChoose$EndRefValIEA] <- "declining" 
@@ -448,7 +456,8 @@ if (ParameterFile$CalculateIEATArgets == TRUE){
   IEATargets$FairSharePerc<-IEATargets$mktFSRatio
   IEATargets$FairSharePerc[IEATargets$Direction == "declining"] <- IEATargets$techFSRatio[IEATargets$Direction == "declining"]
   
-  IEATargets <- rename(IEATargets, c("Region" ="BenchmarkRegion"))
+  # IEATargets <- rename(IEATargets, c("Region" ="BenchmarkRegion"))
+  IEATargets <- IEATargets %>% rename(BenchmarkRegion = Region)
   IEATargetssub <- subset(IEATargets, Year <= (Startyear + 10), select = c("Sector","Technology","Year","BenchmarkRegion","FairSharePerc","Scenario","Direction")) # select scenario 450 if problems with the results otherwise!
   
   if(file.exists(paste0(PROC.DATA.PATH,"IEATargets",ParameterFile$IEAScenarioYear,"_AllRegions.csv"))){
@@ -473,9 +482,11 @@ saveAllPorts <- PortfolioAllPorts
 PortfolioAllPorts <- saveAllPorts
 
 if("Cnty.of.Dom" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
-  BBGPORTOutput <- rename(BBGPORTOutput, c("Cnty.of.Dom" = "CNTRY_OF_DOMICILE"))
+  # BBGPORTOutput <- rename(BBGPORTOutput, c("Cnty.of.Dom" = "CNTRY_OF_DOMICILE"))
+  BBGPORTOutput <- BBGPORTOutput %>% rename(CNTRY_OF_DOMICILE = Cnty.of.Dom)
 }else if("Country.ISO.Code" %in% colnames(BBGPORTOutput) & !"CNTRY_OF_DOMICILE" %in% colnames(BBGPORTOutput)) {
-  BBGPORTOutput <- rename(BBGPORTOutput, c("Country.ISO.Code" = "CNTRY_OF_DOMICILE"))
+  # BBGPORTOutput <- rename(BBGPORTOutput, c("Country.ISO.Code" = "CNTRY_OF_DOMICILE"))
+  BBGPORTOutput <- BBGPORTOutput %>% rename(CNTRY_OF_DOMICILE = Country.ISO.Code)
 }
 
 #Merge Funds with BBG Data, ADR data (for foreign companies issued in the US through ADRs)
@@ -655,7 +666,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
         # Minimise data frame size by restricti results to only a 10 year forcast
         ReducedList <- subset (ReducedList, Year <= (Startyear + 10))
         ReducedList <- merge(ReducedList, CountryISOList, by.x = "PlantLocation", by.y = "GDPlantLocation", all.x = TRUE)
-        ReducedList <- rename(ReducedList, c("COUNTRY_ISO" = "PlantLocation_ISO"))
+        # ReducedList <- rename(ReducedList, c("COUNTRY_ISO" = "PlantLocation_ISO"))
+        ReducedList <- ReducedList %>% rename(PlantLocation_ISO = COUNTRY_ISO)
         # If there is no plant location for the fossil fuel production the production is considered to have come the country of doimicle of the owner
         ReducedList$PlantLocation_ISO[is.na(ReducedList$PlantLocation_ISO) & ReducedList$Sector == "Fossil Fuels"] <-ReducedList$CNTRY_OF_DOMICILE[is.na(ReducedList$PlantLocation_ISO) & ReducedList$Sector == "Fossil Fuels"]
         
@@ -706,7 +718,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     ## if you are assessing the market then use the MarketData as the porfolio, and create the market AUMmix as the total AUM of the market
     if(ListAllPorts$InvestorName[i] == "ListedMarket"){
       Portmix <- subset(MarketData, select = -c(RefProdMarketTech, RefProdMarketSector))
-      AUMmix <- rename(MarketSizeData, c("MarketRegion" = "Region", "MarketSize" = "AUM"))
+      # AUMmix <- rename(MarketSizeData, c("MarketRegion" = "Region", "MarketSize" = "AUM"))
+      AUMmix <- AUMmix %>% rename(Region = MarketRegion, AUM = MarketSize)
       }
     
     if(sum(Portfolio$Position[Portfolio$SharePrice != 0 & !is.na(Portfolio$SharePrice)] & dim(ReducedList)[1]>0 , na.rm = TRUE) != 0 | ListAllPorts$InvestorName[i] == "ListedMarket"){
@@ -717,7 +730,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       Sectorref <- merge(Sectorref,techlist2, by = "Sector", all.x = TRUE, all.y = TRUE)
       Portmix <- merge(Portmix,Sectorref, by = c("BenchmarkRegion", "CompanyDomicileRegion", "Sector", "Technology"), all.x=TRUE, all.y=FALSE)
       RefTechProd <- subset(Portmix, Year == Startyear, select = c("BenchmarkRegion", "CompanyDomicileRegion", "Sector", "Technology","Production"))
-      RefTechProd <- rename(RefTechProd, c("Production" = "RefTechProd"))
+      # RefTechProd <- rename(RefTechProd, c("Production" = "RefTechProd"))
+      RefTechProd <- RefTechProd %>% rename(RefTechProd = Production)
       Portmix <- merge(Portmix,RefTechProd, by = c("BenchmarkRegion", "CompanyDomicileRegion", "Sector", "Technology"), all.x=TRUE, all.y=FALSE)
       Portmix$RefSectorProd[Portmix$Sector == "Fossil Fuels"] <- Portmix$RefTechProd[Portmix$Sector == "Fossil Fuels"]
       
@@ -783,7 +797,8 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       
       #Sum production
       GlobalAggregate <- ddply(AggregatedResults,.(Sector, Technology, Scenario, Year, CompanyDomicileRegion, PortAUM, BenchmarkRegion2), summarize, Production = sum(Production, na.rm = TRUE), TargetProductionAlignment= sum(TargetProductionAlignment, na.rm = TRUE),TargetProductionAUMIntensity = sum(TargetProductionAUMIntensity, na.rm = TRUE), ScenarioTrajectoryProd = sum(ScenarioTrajectoryProd, na.rm = TRUE))
-      GlobalAggregate <- rename(GlobalAggregate, c("BenchmarkRegion2" = "BenchmarkRegion"))
+      # GlobalAggregate <- rename(GlobalAggregate, c("BenchmarkRegion2" = "BenchmarkRegion"))
+      GlobalAggregate <- GlobalAggregate %>% rename(BenchmarkRegion = BenchmarkRegion2)
       GlobalAggregateSave <- GlobalAggregate
       
       # #Check if it makes sense!
