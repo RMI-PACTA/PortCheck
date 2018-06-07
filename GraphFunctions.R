@@ -1423,8 +1423,8 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   
   port$Sector2 <- paste0(port$Sector, " Production")
   port$Sector2 <- ifelse(port$Sector=="Power", "Power Capacity", port$Sector2)
-  port$Sector2 <- ifelse(port$Sector =="Automotive","Automotive",port$Sector2)
-  port$Sector2 <- factor(port$Sector2, levels = c("Oil&Gas Production","Coal Production", "Power Capacity","Automotive"))
+  #port$Sector2 <- ifelse(port$Sector =="Automotive","Automotive",port$Sector2)
+  port$Sector2 <- factor(port$Sector2, levels = c("Oil&Gas Production","Coal Production", "Power Capacity","Automotive Production"))
   port <- subset(port, Technology != "OilCap")
   tech.levels <- c("Gas","Oil","Coal",
                    "RenewablesCap", "HydroCap","NuclearCap", "GasCap", "CoalCap",
@@ -1451,7 +1451,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     scale_fill_manual(name="Technology", labels=tech.labels, values=tech.colors) + 
     guides(fill=guide_legend(ncol=2))+
     theme_cdi() +
-    facet_wrap(~ Sector2, nrow=1) +
+    facet_wrap(~ Sector2, nrow=1,labeller = label_wrap_gen(width=10)) +
     theme(legend.title=element_text(size=14),legend.text = element_text(size = 13))+
     theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 13),
           axis.text.y=element_text(size=13),
