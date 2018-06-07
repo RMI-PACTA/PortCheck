@@ -1669,7 +1669,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     
     outputplot <- ggplot(comp, aes(x=Ord.Var, y=Plan.Pct, fill=Technology)) + 
       geom_bar(stat="identity") + 
-      geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2° Scenario from 2018-2023"), color = area_2,size = 1.5) + 
+      geom_hline(data=port.targets, aes(yintercept=Port.Scen.Pct, linetype="% Change in Portfolio Production Specified by 2? Scenario from 2018-2023"), color = area_2,size = 1.5) + 
       #geom_vline(data = comp, aes(xintercept = (sum(comp$Technology == "Oil")+.99))) +
       scale_x_discrete(name="", labels=setNames(comp$Final.Name, as.character(comp$Ord.Var))) + 
       scale_y_continuous(name = "% Change in Planned Production from 2018 to 2023", labels=percent, breaks = breaks, limits=limits) + 
@@ -2364,17 +2364,19 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       }
       
       Oil <- na.omit(OilCompanies[,c("Name","PortWeightEQYlvl")])
-      company_labels <- trim(unique(OilCompanies$Name))
+      OilCompanies <- OilCompanies %>% 
+        arrange(PortWeightEQYlvl)
+      OilCompanies[!is.na(OilCompanies$Oil.Type),]$Name
+      
+      company_labels <- trim(unique(OilCompanies[!is.na(OilCompanies$Oil.Type),]$Name))
       for (i in 1:length(company_labels)) {
         if (str_length(company_labels[i]) > 15) {
           new_name = strtrim(company_labels[i],15)
           company_labels[i] <- paste0(new_name,'...')
-        } else if (is.na(company_labels[i])){
-          company_labels[i] <- '                          '
-        }
+        } 
       }
       
-      bar_labels <- company_labels
+      bar_labels <- c(company_labels,'                          ')
       
       PortPlot <- ggplot(data=OilCompanies,
                          show.guide = TRUE)+
