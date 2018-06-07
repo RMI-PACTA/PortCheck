@@ -2514,19 +2514,21 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
       return(x)
     }
     
-    company_labels <- trim(unique(portfolio1$Name))
+    portfolio1 <- portfolio1 %>% 
+      arrange(PortWeightEQYlvl)
+
+
+    company_labels <- trim(unique(portfolio1[!is.na(portfolio1$CarbonBudget),]$Name))
     for (i in 1:length(company_labels)) {
       if (str_length(company_labels[i]) > 15) {
         new_name = strtrim(company_labels[i],15)
         company_labels[i] <- paste0(new_name,'...')
-      } else if (is.na(company_labels[i])) {
-        company_labels[i] <- '                          '
-      }
+      } 
     }
     
     portfolio1$CarbonBudget <- factor(portfolio1$CarbonBudget,levels=c("Outside Carbon Budget","Inside Carbon Budget"))
     
-    bar_labels <- company_labels
+    bar_labels <- c(company_labels,'                          ')
     
     PortPlot <- ggplot(data=portfolio1, aes(x=Name, y=value,
                                             fill=CarbonBudget),
