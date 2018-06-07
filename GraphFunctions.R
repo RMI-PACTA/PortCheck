@@ -451,7 +451,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
   
   #arrow <- sum(filter(dfagg, Name == PortName)$Value)
   
-  ylimval <- ylim
+  ylimval <- ylim <- max(dfagg$Value, na.rm=TRUE)
   
   distribution_plot <- ggplot(dfagg)+
     geom_bar(aes(x=Name, y=Value, fill=Metric),
@@ -1520,13 +1520,12 @@ Risk_Distribution <- function(plotnumber, ChartType){
 }
 
 Fossil_Distribution <- function(plotnumber, ChartType){
+  
   Title <- paste0("Percent of ", ifelse(ChartType=="CB","Fixed Income","Equity")," Portfolio Value")
   if (ChartType == "EQ"){
     Batch <- EQBatchTest
-    ylim = 1
   }else if (ChartType == "CB"){
     Batch <- CBBatchTest
-    ylim = .25
   }
   
   #Tag Target portfolio, benchmark
@@ -1542,7 +1541,8 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
   portfolio_label = paste0("This Portfolio: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
   
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, ylim,
+  ### !!! For now passed the value 1 for the ylim - in reality function does this dynamically 
+  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, 1,
                              portfolio_label, Title, Labels, BarColors) +
     theme(legend.position = "none")
   
