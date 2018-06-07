@@ -392,7 +392,7 @@ no_chart <- function(Label){
   wrap.labels <- function(x, len){if (is.list(x)){lapply(x, wrap.it, len)} else {wrap.it(x, len)}}
   
   outputplot <- ggplot()+
-    annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=5)+
+    annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=5, colour = textcolor)+
     geom_blank()+
     theme(
       axis.title.x=element_blank(),
@@ -1610,7 +1610,23 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     comp <- comp %>%
       filter(Final.Name %in% unique(comp$Final.Name)[1:min(companiestoprint,length(unique(comp$Final.Name)))])
     ##!!! hard coded breaks and limits - need to change
-    breaks <- c(-.35,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
+    # breaks <- c(-.35,-0.30,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25)
+    
+    plot.limit <- 0.5
+    comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct > plot.limit,plot.limit,comp$Plan.Pct)
+    comp$Plan.Pct.Limit <- ifelse(comp$Plan.Pct < -plot.limit,-plot.limit,comp$Plan.Pct.Limit)
+    
+    min.perc <- min(comp$Plan.Pct.Limit,na.rm = T)
+    max.perc <- max(comp$Plan.Pct.Limit,na.rm = T)
+    
+    round.val <- 0.05
+    min.perc <- max(round.val * round(min.perc/round.val),-plot.limit)
+    max.perc <- min(round.val * round(max.perc/round.val),plot.limit)
+    
+    no.breaks <- (max.perc-min.perc)/round.val
+    if (no.breaks > 10) {no.breaks <- round.val <- round.val *2}
+    
+    breaks  <- seq(min.perc,max.perc,round.val) 
     
     company_labels <- trim(unique(comp$Final.Name))
     for (i in 1:length(company_labels)) {
@@ -2852,7 +2868,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     brown.unit <- c("CoalCap" = "MW",
                     "GasCap"="MW",
                     "Oil" ="bbl",
-                    "Gas" = "m3",
+                    "Gas" = "m^3",
                     "ICE" ="Vehicles")
     
     if (unitscaleval >1e3){
@@ -2864,7 +2880,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^3 MW",
                       "GasCap"="10^3 MW",
                       "Oil" ="Mbbl",
-                      "Gas" = "1000 m3",
+                      "Gas" = "1000 m^3",
                       "ICE" ="1000 Vehicles")
       
       
@@ -2878,7 +2894,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^6 MW",
                       "GasCap"="10^6 MW",
                       "Oil" ="MMbbl",
-                      "Gas" = "million m3",
+                      "Gas" = "million m^3",
                       "ICE" ="million Vehicles")
     } 
     if (unitscaleval > 1e9){
@@ -2890,7 +2906,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       brown.unit <- c("CoalCap" = "10^9 MW",
                       "GasCap"="10^9 MW",
                       "Oil" ="Gbbl",
-                      "Gas" = "billion m3",
+                      "Gas" = "billion m^3",
                       "ICE" ="billion Vehicles")
     }
     

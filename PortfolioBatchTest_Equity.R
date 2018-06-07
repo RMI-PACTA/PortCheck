@@ -181,8 +181,8 @@ CompNames <- rename(CompNames, c("Issuer" = "Name"))
 # ------
 # e) Read in portfolio holdings (Portfolio holdings data given by Regulator or Instituion)
 # ------
-PortfolioAllPorts <- read.csv(paste0(PORTS.PATH,ParameterFile$ProjektName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
-# PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjektName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
+PortfolioAllPorts <- read.csv(paste0(PORTS.PATH,ParameterFile$ProjectName,"/",BatchName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
+# PortfolioAllPorts <- read.csv(paste0(PortfolioDataFolder,ParameterFile$ProjectName,"/",BatchName,"Port_EQY.csv"),stringsAsFactors=FALSE, strip.white = TRUE)
 # PortfolioAllPorts <- subset(PortfolioAllPorts, InvestorName == "GEPABU")
 
 # ------
