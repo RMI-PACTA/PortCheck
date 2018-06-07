@@ -1446,7 +1446,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     geom_bar(stat="identity", position="stack") +
     #geom_text(data=tots, aes(x=PortName, y=Metric, label=percent(Metric))) +
     scale_x_discrete(name="",labels=c("Portfolio",lab)) + 
-    scale_y_continuous(name="Weight of issuers exposed to the\ntechnologies in the portfolio", labels=percent, expand=c(0,0),
+    scale_y_continuous(name="Weight (by market value) of\nissuers exposed to the technology", labels=percent, expand=c(0,0),
                        limits=c(0, max(tots$Metric) + .01)) +
     scale_fill_manual(name="Technology", labels=tech.labels, values=tech.colors) + 
     guides(fill=guide_legend(ncol=2))+
