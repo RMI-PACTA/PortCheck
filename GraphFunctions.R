@@ -2702,7 +2702,7 @@ sector_techshare_area <- function(plotnumber,ChartType,SectorToPlot){
 
 Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   
-  filternames <- c("Listed Market", "Bond Universe","MetaPort")
+  filternames <- c("Listed Market", "Bond Universe")
   PortNames <-PortName
   ### EQUITY PRODUCTION
   if (ChartType =="EQ") {
@@ -2771,16 +2771,16 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     
     ALD2 <- bind_rows(ALD.cp, ALD.sc)
     
-    if (TechToPlot %in% c("Electric","ICE")){
-      PortNames<-"MetaPort"
-    }else {
-      if(PortName != "MetaPort"){
-        if (nrow(ALD_P)>0){
-          PortNames<-PortName
-        }else{
-          PortNames<-"MetaPort"
-        }}
-    } 
+    # if (TechToPlot %in% c("Electric","ICE")){
+    #   PortNames<-PortName
+    # }else {
+    #   if(PortName != "MetaPort"){
+    #     if (nrow(ALD_P)>0){
+    #       PortNames<-PortName
+    #     }else{
+    #       PortNames<-"MetaPort"
+    #     }}
+    # } 
     
     ### Add in Car Data
     if (TechToPlot %in% c("Electric","ICE")){
@@ -2791,14 +2791,14 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp1 <- ALD.temp
         ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == PortNames] <- "CPS"
         ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == PortNames] <- 60987.94
-        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- 268.9853
+        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
         
         
         ALD450 <- ALD.sc[ALD.sc$PortName == PortNames & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- 268.9853
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
         ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
         
         
@@ -2807,14 +2807,14 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp1 <- ALD.temp
         ALD.temp1$Scenario[ALD.temp1$Technology  %in% c("ICE","Electric") & ALD.temp1$PortName == PortNames] <- "CPS"
         ALD.temp1$Production[ALD.temp1$Technology == "ICE" & ALD.temp1$PortName == PortNames] <- 77423.17
-        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <- 149.1076
+        ALD.temp1$Production[ALD.temp1$Technology == "Electric" & ALD.temp1$PortName == PortNames] <-ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
         
         
-        ALD450 <- ALD.sc[ALD.sc$PortName == "MetaPort" & ALD.sc$Year != 2018,]
+        ALD450 <- ALD.sc[ALD.sc$PortName == PortNames & ALD.sc$Year != 2018,]
         ALD.temp2 <- ALD.temp
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(77423.17, 76571.52,75332.74,74326.24,73784.28,73242.32)
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- 149.1076
+        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
         ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
         
         
@@ -2827,30 +2827,37 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     ALD.cp <- ALD2 %>% filter(Line.Type=="CurrentPlan")
     
     var <- ifelse(ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production ==0,0,
-                  ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
+                  ALD.cp[which(ALD.cp$PortName==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
     
     #ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ifelse(var ==0,0,ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var)
     if (var ==0){
       ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<-0
     }else{
-      ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production/var}
+      ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production<- ALD.cp[which(ALD.cp$InvestorName=="Market" & ALD.cp$Technology ==TechToPlot),]$Production*var}
     
+     
+    ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
     if (TechToPlot %in% c("Electric","ICE")){
       if (nrow(ALD_P)>0){
-        var1<- ifelse(ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production==0,0,
-                      ALD.cp[which(ALD.cp$PortName==PortName & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production/ALD.cp[which(ALD.cp$PortName ==PortNames & ALD.cp$Year=="2018"  & ALD.cp$Technology ==TechToPlot),]$Production)
-        
+        var1<- ifelse(ALD.sc[which(ALD.sc$PortName==PortName & ALD.sc$Year=="2018"  & ALD.sc$Technology ==TechToPlot & ALD.sc$Scenario=="450S"),]$Production==0,0,
+                      ALD.sc[which(ALD.sc$PortName==PortName & ALD.sc$Year=="2018"  & ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="CPS"),]$Production/ALD.cp[which(ALD.cp$PortName ==PortNames & ALD.sc$Year=="2018"  & ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="450S"),]$Production)
+        var2 <- ifelse(ALD.sc[which(ALD.sc$PortName==PortName & ALD.sc$Year=="2018"  & ALD.sc$Technology ==TechToPlot & ALD.sc$Scenario=="450S"),]$Production==0,0,
+                       ALD.sc[which(ALD.sc$PortName==PortName & ALD.sc$Year=="2018"  & ALD.cp$Technology ==TechToPlot& ALD.sc$Scenario=="NPS"),]$Production/ALD.cp[which(ALD.sc$PortName ==PortNames & ALD.sc$Year=="2018"  & ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="450S"),]$Production)
         if(var1==0){
-          ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <-0
+          ALD.sc[which(ALD.sc$PortName ==PortName &  ALD.sc$Technology ==TechToPlot),]$Production <-0
         }else{
-          ALD.cp[which(ALD.cp$PortName ==PortName &  ALD.cp$Technology ==TechToPlot),]$Production <- ALD.cp[which(ALD.cp$PortName==PortName &ALD.cp$Technology ==TechToPlot),]$Production/var1}
+          ALD.sc[which(ALD.sc$PortName ==PortName &  ALD.cp$Technology ==TechToPlot& ALD.sc$Scenario=="CPS"),]$Production <- ALD.sc[which(ALD.sc$PortName==PortName &ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="CPS"),]$Production/var1}
+      
+        
+        if(var2==0){
+          ALD.sc[which(ALD.sc$PortName ==PortName &  ALD.sc$Technology ==TechToPlot),]$Production <-0
+        }else{
+          ALD.sc[which(ALD.sc$PortName ==PortName &  ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="NPS"),]$Production <- ALD.sc[which(ALD.sc$PortName==PortName &ALD.sc$Technology ==TechToPlot& ALD.sc$Scenario=="NPS"),]$Production/var2}
       }else{
         ALD.cp<-ALD.cp
       }
       
     }
-    ALD.sc <- ALD2 %>% filter(Line.Type=="Scenario")
-    
     ALD2 <- bind_rows(ALD.cp, ALD.sc)
     
     ylims <- ALD2 %>%
