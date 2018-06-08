@@ -1,7 +1,7 @@
 
 #Load packages
 library(grid)
-library(plyr)
+library(dplyr)
 library(reshape2)
 library(gridExtra)
 library(scales)
@@ -650,7 +650,12 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
       
       Portfolio$piesector[Portfolio$ICB.Subsector.Name %in% FuturesecsICB] <- Portfolio$ICB.Subsector.Name[Portfolio$ICB.Subsector.Name %in% FuturesecsICB]
       
-      PortfolioSub <- ddply(Portfolio,.(EQY_FUND_TICKER,CNTRY_OF_DOMICILE),summarize, Position = sum(Position))
+      # PortfolioSub <- ddply(Portfolio,.(EQY_FUND_TICKER,CNTRY_OF_DOMICILE),summarize, Position = sum(Position))
+      PortfolioSub <- Portfolio %>%
+        group_by(EQY_FUND_TICKER,CNTRY_OF_DOMICILE) %>%
+        summarise(Position = sum(Position)) %>%
+        ungroup()
+      
       
       # Merge with Asset level Data
       ReducedList <- merge(MasterData, PortfolioSub, by.x = c("EQY_FUND_TICKER","CNTRY_OF_DOMICILE"), by.y = c("EQY_FUND_TICKER","CNTRY_OF_DOMICILE"), all.x=FALSE, all.y=FALSE)
@@ -725,7 +730,11 @@ for (i in  1:length(ListAllPorts$PortfolioName)) {
     if(sum(Portfolio$Position[Portfolio$SharePrice != 0 & !is.na(Portfolio$SharePrice)] & dim(ReducedList)[1]>0 , na.rm = TRUE) != 0 | ListAllPorts$InvestorName[i] == "ListedMarket"){
       
       # Calculate the reference values (for the technology as well as for the sector in the start year/initial year) and merge it with the portfolio production mix data
-      Sectorref <- ddply(subset(Portmix, Year == Startyear & Sector %in% c("Automotive","Power")),.(BenchmarkRegion, CompanyDomicileRegion,Sector),summarize,RefSectorProd = sum(Production,na.rm=TRUE))
+      # Sectorref <- ddply(subset(Portmix, Year == Startyear & Sector %in% c("Automotive","Power")),.(BenchmarkRegion, CompanyDomicileRegion,Sector),summarize,RefSectorProd = sum(Production,na.rm=TRUE))
+      Sectorref <- Portmix %>%
+        filter(Year == Startyear& Sector %in% c("Automotive","Power")) %>%
+        group_by(BenchmarkRegion, CompanyDomicileRegion,Sector) %>%
+        summarize(RefSectorProd = sum(Production,na.rm=TRUE))
       techlist2 <- unique(subset(Portmix, Year == Startyear & Sector %in% c("Automotive","Power"), select = c("Sector","Technology")))
       Sectorref <- merge(Sectorref,techlist2, by = "Sector", all.x = TRUE, all.y = TRUE)
       Portmix <- merge(Portmix,Sectorref, by = c("BenchmarkRegion", "CompanyDomicileRegion", "Sector", "Technology"), all.x=TRUE, all.y=FALSE)
