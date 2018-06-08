@@ -981,33 +981,27 @@ SectorDataAnalysis <- function(){
     over <- subset(over, over$Portfolio.Name == PortName)
   }
   
-  over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
+  #over$Asset.Type <- ifelse(over$Asset.Type=="Other Holdings", "Other", over$Asset.Type)
   
   
   ###### sector categories #####
-  Powr <- c("Alternative Electricity","Conventional Electricity","Multiutilities",
-            "Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
-  OilGasCoal <- c("Integrated Oil & Gas","Oil Equipment & Services","Coal", "General Mining", "Exploration & Production","Coal", "General Mining",
-                  "Oil Comp-Explor&Prodtn", "Oil Comp-Integrated","Oil&Gas Drilling" ,"Exploration...Production","Integrated.Oils","Coal","Metal-Diversified",  "Coal.Operations", "Metals...Mining", "Diversified Minerals")
-  Futuresecs <- c("Building Materials & Fixtures","Iron & Steel","Aluminum","Airlines","Marine Transportation",
-                  "Bldg Prod-Cement/Aggreg","Steel-Producers", "Metal-Iron","Metal-Aluminum","Transport-Air Freight", "Transport-Marine")
-  Auto <- c("Automobiles","Commercial Vehicles & Trucks",
-            "Auto-Cars/Light Trucks", "Automobiles.Manufacturing")
-  
+  #Powr <- c("Alternative Electricity","Conventional Electricity","Multiutilities",
+  #          "Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
+  #OilGasCoal <- c("Integrated Oil & Gas","Oil Equipment & Services","Coal", "General Mining", "Exploration & Production","Coal", "General Mining",
+  #                 "Oil Comp-Explor&Prodtn", "Oil Comp-Integrated","Oil&Gas Drilling" ,"Exploration...Production","Integrated.Oils","Coal","Metal-Diversified",  "Coal.Operations", "Metals...Mining", "Diversified Minerals")
+  # Futuresecs <- c("Building Materials & Fixtures","Iron & Steel","Aluminum","Airlines","Marine Transportation",
+  #                 "Bldg Prod-Cement/Aggreg","Steel-Producers", "Metal-Iron","Metal-Aluminum","Transport-Air Freight", "Transport-Marine")
+  # Auto <- c("Automobiles","Commercial Vehicles & Trucks",
+  #           "Auto-Cars/Light Trucks", "Automobiles.Manufacturing")
+  # 
   # round(sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1),"%")
   
-  over$Sector <-ifelse (over$Subgroup %in% Powr,"Power","Other Sectors")
-  over$Sector <-ifelse (over$Subgroup %in% OilGasCoal,"Fossil Fuels",over$Sector)
-  over$Sector <-ifelse (over$Subgroup %in% Auto,"Automotive",over$Sector)
-  over$Sector <-ifelse (over$Subgroup %in% Futuresecs,"Other Sectors",over$Sector)
-  
-  # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2° Scenario")
-  # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2° Scenario" & over$Valid == 1 , "Climate Relevant No 2° Scenario",over$Sector.All)
-  # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
+  over$Fin.Sector <-ifelse (over$Fin.Sector %in% c("Coal","Oil&Gas"),"Fossil Fuels",over$Fin.Sector)
+  over$Fin.Sector <-ifelse (over$Fin.Sector %in% c("Other"),"Other Sectors",over$Fin.Sector)
   
 
   AnalysisCoverage <<-  round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1)
-  ClimateRelevant <<- round(AnalysisCoverage/100 * sum(filter(over,!Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1)
+  ClimateRelevant <<- round(AnalysisCoverage/100 * sum(filter(over,!Fin.Sector %in% c("Other Sectors", "Excluded") &Valid==1)$ValueUSD)/sum(over[which(over$Valid==1),]$ValueUSD)*100,1)
   
   
   return(over)
@@ -1026,8 +1020,8 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   # over$Sector.All <- ifelse(over$Valid == 0, "Excluded", "Climate Relevant w/ 2° Scenario")
   # over$Sector.All <- ifelse(over$Sector == "Climate Relevant No 2° Scenario" & over$Valid == 1 , "Climate Relevant No 2° Scenario",over$Sector.All)
   # over$Sector.All <- ifelse(over$Sector == "Other Sectors" & over$Valid==1, "Other Sectors", over$Sector.All)
-  over$Sector[is.na(over$Sector) & over$Sector== "<NA>"]<- "Other Sectors"
-  over$Sector <- factor(over$Sector, levels = c("Other Sectors","Fossil Fuels","Power", "Automotive"), ordered=TRUE)
+  #over$Sector[is.na(over$Sector) & over$Sector== "<NA>"]<- "Other Sectors"
+  over$Fin.Sector <- factor(over$Fin.Sector, levels = c("Other Sectors","Fossil Fuels","Power", "Automotive"), ordered=TRUE)
  
   over<- as.data.frame(over)
   
@@ -1035,13 +1029,13 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   over1<- subset(over, Valid==1 & Portfolio.Name ==PortName & Asset.Type %in% c("Equity","Debt"))
   over1$Asset.Type <- gsub("Debt", "Fixed Income",over1$Asset.Type)
   over1$Asset.Type <- factor(over1$Asset.Type,levels=c("Fixed Income","Equity")) 
-  over1$Sector <- factor(over1$Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2° Scenario",
+  over1$Fin.Sector <- factor(over1$Fin.Sector, levels=c("Other Sectors","Fossil Fuels", "Automotive","Power"), ordered=TRUE) #"Climate Relevant No 2° Scenario",
   # over1$Sector.All <- factor(over1$Sector.All, levels=c("Excluded","Other Sectors","Climate Relevant No 2° Scenario","Climate Relevant w/ 2° Scenario"), ordered=TRUE)
   
   if (PortName!="MetaPort"){
     ymax<-max(aggregate(over1["ValueUSD"],by=over1["Asset.Type"],FUN=sum)$ValueUSD)
     
-    plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=over1, aes(x=Asset.Type, y=ValueUSD, fill=Fin.Sector)) +
       geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type",drop=F) +
@@ -1332,15 +1326,15 @@ analysed_summary <- function(plotnumber){
   # 
   over$Sector.All <- ifelse(over$Valid==0, "Excluded", "Scope of the Analysis")
   # #over$Sector.All <- ifelse(over$Sector== "Climate Relevant No 2° Scenario" & over$Valid==1 , "Climate Relevant No 2° Scenario",over$Sector.All)
-  over$Sector.All <- ifelse(over$Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
+  over$Sector.All <- ifelse(over$Fin.Sector =="Other Sectors" & over$Valid==1, "Other Sectors",over$Sector.All)
   # 
-  over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
+  #over$Sector <- factor(over$Sector, levels=c("Other Sectors","Climate Relevant No 2° Scenario","Fossil Fuels", "Automotive","Power"), ordered=TRUE)
   over$Sector.All <- factor(over$Sector.All, levels=c("Excluded","Other Sectors","Scope of the Analysis"), ordered=TRUE)
   
   # portfolio_label = paste0("Analysed: ", round(sum(filter(over,Valid==1)$ValueUSD)/sum(over$ValueUSD)*100,1),"%")
   
   over <- over %>%
-    group_by(Sector) %>%
+    group_by(Fin.Sector) %>%
     complete(Asset.Type=c("Fixed Income","Equity","Other"), fill=list(ValueUSD = 0, Sector.All ="Excluded"))
   over<- as.data.frame(over)
   orderofchart <- c("Fixed Income","Equity","Other")

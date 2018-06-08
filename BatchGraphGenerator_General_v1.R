@@ -104,7 +104,7 @@ eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Upda
 cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 #any(duplicated(cbnames$COMPANY_CORP_TICKER)) 
 
-Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Subgroup.csv"),stringsAsFactors=FALSE,strip.white = T)
+Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Fin-Sector.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
 length(unique(Subgroup.Overview$Portfolio.Name)) ## Number of Insurers   672
 
