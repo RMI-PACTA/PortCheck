@@ -103,6 +103,7 @@ eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Upda
 #any(duplicated(eqnames$EQY_FUND_TICKER)) 
 cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 #any(duplicated(cbnames$COMPANY_CORP_TICKER)) 
+insurer.names <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Names-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Fin-Sector.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
@@ -112,6 +113,9 @@ length(unique(Subgroup.Overview$Portfolio.Name)) ## Number of Insurers   672
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
+CBBatchTest <- left_join(CBBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
+CBBatchTest <- CBBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
+
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompProdSnapshots <- subset(CBCompProdSnapshots, Type == "Portfolio" & Aggregation == BenchmarkRegionchoose & Scenario == Scenariochoose)
@@ -127,6 +131,9 @@ Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAs
 EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
+EQBatchTest <- left_join(EQBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
+EQBatchTest <- EQBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
+
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompProdSnapshots <- subset(EQCompProdSnapshots, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose & Scenario == Scenariochoose)
