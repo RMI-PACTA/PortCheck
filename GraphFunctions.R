@@ -1818,12 +1818,20 @@ company_techshare <- function(plotnumber, companiestoprint, ChartType, SectorToP
       return(x)
     }
     
+    perc <- function(x, format = "f", ...) {
+      x<-ifelse(x*100 >=10,
+                paste0(" ",formatC(100 * x, format = format, digits = 0, ...), "%"),
+                paste0(formatC(100 * x, format = format, digits = 1, ...), "%"))
+      return(x)
+    }
+    
+    
     
     PortPlot <- stacked_bar_chart(AllData, colors, rev(bar_labels), tech_labels)+
       geom_text(data = Companies,
                 aes(x = Name, y = 1),
-                label = paste0(scaleFUN(100*Companies$PortWeight),"%"),
-                hjust = -1, color = textcolor, size=10*(5/14),
+                label = perc(Companies$PortWeight),
+                hjust = -1.4, color = textcolor, size=10*(5/14),
                 family = "Arial")+
       geom_text(data = Companies,
                 aes(x = "", y = 1),
