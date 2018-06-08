@@ -2732,6 +2732,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     if (PortName != "MetaPort"){
       ALD_P <- EQALDAggProd[EQALDAggProd$PortName %in% PortNames & EQALDAggProd$Technology %in% TechToPlot,]
       ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
+      if (all(ALD_P[which(ALD_P$Year== 2018:2023),]$Scen.WtProduction==0)){
+        ALD_P<-data.frame(Date=as.Date(character()),
+                          File=character(), 
+                          User=character(), 
+                          stringsAsFactors=FALSE)
+      }
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Equity"
       }
