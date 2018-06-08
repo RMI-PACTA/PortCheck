@@ -2821,8 +2821,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
         ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
-        
+        if (PortName!= "METROPOLITAN LIFE INSURANCE COMPANY"){
+          ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
+        } else if (PortName=="METROPOLITAN LIFE INSURANCE COMPANY"){
+          ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- (ALD450$Production- ALD.temp1[which(ALD.temp1$Year !=2018),]$Production)*0.5 +ALD.temp1[which(ALD.temp1$Year !=2018),]$Production
+        }
         
         ALD.temp <- rbind(ALD.temp1,ALD.temp2)
       }else{
@@ -2837,8 +2840,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(77423.17, 76571.52,75332.74,74326.24,73784.28,73242.32)
         ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
-        ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
-        
+        ALD.temp2$Production[ALD.temp$Technology =="Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production *0.5
+       
         
         ALD.temp <- rbind(ALD.temp1,ALD.temp2)
       }
@@ -2903,41 +2906,41 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     
     if (unitscaleval >1e3){
       unitscalefactor <- 1e3
-      green.unit <- c("Electric" = "1000 Vehicles",
-                      "RenewablesCap"="10^3 MW",
-                      "NuclearCap" ="10^3 MW")
+      green.unit <- c("Electric" = "Vehicles in thousands",
+                      "RenewablesCap"="MW in thousands",
+                      "NuclearCap" ="MW in thousands")
       
-      brown.unit <- c("CoalCap" = "10^3 MW",
-                      "GasCap"="10^3 MW",
-                      "Oil" ="Mbbl",
-                      "Gas" = "1000 m^3",
-                      "ICE" ="1000 Vehicles")
+      brown.unit <- c("CoalCap" = "MW in thousands",
+                      "GasCap"="MW in thousands",
+                      "Oil" ="bbl in thousands",
+                      "Gas" = "m^3 in thousands",
+                      "ICE" ="Vehicles in thousands")
       
       
     } 
     if (unitscaleval > 1e6){
       unitscalefactor <- 1e6
-      green.unit <- c("Electric" = "million Vehicles",
-                      "RenewablesCap"="10^6 MW",
-                      "NuclearCap" ="10^6 MW")
+      green.unit <- c("Electric" = "Vehicles in millions",
+                      "RenewablesCap"="MW in millions",
+                      "NuclearCap" ="MW in millions")
       
-      brown.unit <- c("CoalCap" = "10^6 MW",
-                      "GasCap"="10^6 MW",
-                      "Oil" ="MMbbl",
-                      "Gas" = "million m^3",
-                      "ICE" ="million Vehicles")
+      brown.unit <- c("CoalCap" = "MW in millions",
+                      "GasCap"="MW in millions",
+                      "Oil" ="bbl in millions",
+                      "Gas" = "m^3 in millions",
+                      "ICE" ="Vehicles in millions")
     } 
     if (unitscaleval > 1e9){
       unitscalefactor <- 1e9
-      green.unit <- c("Electric" = "billion Vehicles",
-                      "RenewablesCap"="10^9 MW",
-                      "NuclearCap" ="10^9 MW")
+      green.unit <- c("Electric" = "Vehicles in billions",
+                      "RenewablesCap"="MW in billions",
+                      "NuclearCap" ="MW in billions")
       
-      brown.unit <- c("CoalCap" = "10^9 MW",
-                      "GasCap"="10^9 MW",
-                      "Oil" ="Gbbl",
-                      "Gas" = "billion m^3",
-                      "ICE" ="billion Vehicles")
+      brown.unit <- c("CoalCap" = "MW in billions",
+                      "GasCap"="MW in billions",
+                      "Oil" ="bbl in billions",
+                      "Gas" = "m^3 in billions",
+                      "ICE" ="Vehicles in billions")
     }
     
     ALD2$Production <- ALD2$Production/unitscalefactor  
