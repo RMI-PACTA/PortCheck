@@ -18,7 +18,7 @@ CAReportData <- function(){
   # Output is a dataframe with the values for the text
   
   ### Exec Summary Data ###
-  InsuranceCompanyName <- PortfolioNameLong
+  InsuranceCompanyName <- TITLE
   if(PortfolioName == "MetaPort"){InsuranceCompanyName <- "INSURANCE COMPANIES OPERATING IN CALIFORNIA"}
   
   InsuranceCompanyName <- gsub("&","\\\\\\\\&",InsuranceCompanyName)
@@ -1455,15 +1455,29 @@ carsten_metric_chart <- function(plotnumber, ChartType){
             strip.text = element_text(size = 15)) +
       theme(axis.ticks.y = element_line(colour=textcolor,size =15)) + 
       theme(axis.line.x = element_line())
+    
+    ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
+           bg="transparent",height=4,width=13,dpi=ppi*0.8)
   }else {
     Label <- paste("No data in the",Type,"portfolio.")
-    outputplot <- no_chart(Label)+
+    outputplot <- ggplot()+
+      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=8.5, colour = textcolor)+
+      geom_blank()+
+      theme(
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA))+
       theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+    ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),height=4,width=13,dpi=ppi*0.8)
   }
   
   
-  ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
-         bg="transparent",height=4,width=13,dpi=ppi*0.8)
+  
 }
 
 
@@ -1524,8 +1538,10 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   Title <- paste0("Percent of ", ifelse(ChartType=="CB","Fixed Income","Equity")," Portfolio Value")
   if (ChartType == "EQ"){
     Batch <- EQBatchTest
+    Type<-"equity"
   }else if (ChartType == "CB"){
     Batch <- CBBatchTest
+    Type<-"fixed income"
   }
   
   #Tag Target portfolio, benchmark
@@ -1541,15 +1557,23 @@ Fossil_Distribution <- function(plotnumber, ChartType){
   df <- unique(subset(Batch, select = c(ID.COLS,MetricCol)))
   portfolio_label = paste0("This Portfolio: ", round(100*sum(filter(df,PortName==name)$CarstenMetric_Port),1), "%")
   
+  if (nrow(filter(df,PortName==name))>0){
   ### !!! For now passed the value 1 for the ylim - in reality function does this dynamically 
-  plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, 1,
-                             portfolio_label, Title, Labels, BarColors) +
-    theme(legend.position = "none")
-  
-  
-  if(PrintPlot){print(plot)}
-  ggsave(plot=plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
-         height=3,width=7,dpi=ppi, bg="transparent")
+    plot <- distribution_chart(plotnumber, ChartType, df, ID.COLS, MetricCol, 1,
+                               portfolio_label, Title, Labels, BarColors) +
+      theme(legend.position = "none")
+    
+    
+    if(PrintPlot){print(plot)}
+    ggsave(plot=plot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
+           height=3,width=7,dpi=ppi, bg="transparent")
+  }else{
+    Label <- paste("No data in the",Type,"portfolio.")
+    outputplot <- no_chart(Label)+
+      theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+    ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",'Fossil_Distribution.png', sep=""),
+           height=3,width=7,dpi=ppi)
+  }
     
 }
 
@@ -1868,9 +1892,12 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
   if (ChartType == "EQ"){
     Combin <- EQCombin
     Batch <- EQBatchTest
+    Type<-"equity"
   }else if (ChartType == "CB"){
     Combin <- CBCombin
     Batch <- CBBatchTest
+    Type<-"fixed income"
+    
   }
   
   #Remove all portfolios other than Market, Average
@@ -1889,125 +1916,133 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
   Production <- subset(Portfolios, Year == Plotyear &
                          Technology != "OilCap",
                        select=c("PortName","Sector","Technology","WtProduction","Type"))
-  Production <- rbind(Production,Batch2)
-  Production$Sector <- as.factor(Production$Sector)
-  levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"Fossil Fuels"
-  levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"Fossil Fuels"
-  # Aggregate and rename CarstenMetric_Port
-  ID.COLS = c("Sector","Technology","Type")
-  Production <- Production %>% gather(key=Metric, value=Value, "WtProduction")
-  Production <- aggregate(Production["Value"],by=Production[c(ID.COLS)],FUN=sum)
-  #Created an average for the peers (or even just use fill!)
-  
-  Production <- subset(Production, Production$Type != "Market")
-  
-  
-  if(nrow(Production)>0){
+  if (nrow(Combin)>0){
+    Production <- rbind(Production,Batch2)
+    Production$Sector <- as.factor(Production$Sector)
+    levels(Production$Sector)[levels(Production$Sector)=="Coal"] <-"Fossil Fuels"
+    levels(Production$Sector)[levels(Production$Sector)=="Oil&Gas"] <-"Fossil Fuels"
+    # Aggregate and rename CarstenMetric_Port
+    ID.COLS = c("Sector","Technology","Type")
+    Production <- Production %>% gather(key=Metric, value=Value, "WtProduction")
+    Production <- aggregate(Production["Value"],by=Production[c(ID.COLS)],FUN=sum)
+    #Created an average for the peers (or even just use fill!)
     
-    technologyorder <- technology_order
-    colours <- as.vector(ColourPalette[["Colours"]])
-    names(colours) <- technologyorder
-    labels <- c("Renewables","Hydro","Nuclear","Gas","Coal","Electric","Hybrid","ICE","Gas","Oil","Coal")
-    names(labels) <- technologyorder
-    
-    
-    Production$Technology <- factor(Production$Technology, levels = technologyorder)
-    Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
-    
-    Production$Type <- wrap.labels(Production$Type,20)
-    Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2°Market Benchmark"))
-    xlabels = c("Portfolio", "All\nInsurers", "2°Maket\nBenchmark")
-    
-    titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
-    names(titles) <- c("Fossil Fuels", "Power", "Automotive")
-    
-    chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
-    chartorder <- as.factor(chartorder)
-    #Production$Type <- factor(Production$Type)
-    
-    Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
-    
-    plottheme<- stacked_bar_chart(Production, colours, xlabels, labels)+
-      ylab("Share of Sector Production")+
-      theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=11,margin = unit(c(0,0,1,0),"lines")),
-            legend.position = "bottom",
-            legend.title = element_blank())
-    
-    
-    if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
-      dat <- subset(Production, Sector == SectorToPlot)
-      p1 <- template %+% dat +
-        ggtitle(titles[names(titles) == SectorToPlot])
+    Production <- subset(Production, Production$Type != "Market")
+
       
-      # print(p1)
-      
-      if (SectorToPlot == "Fossil Fuels"){
-        SectorToPlot <- "FossilFuels"
-      }
-      ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
-      
-    } else if (SectorToPlot == "All"){
-      dat <- subset(Production,Sector=="Automotive")
-      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
-        p1 <- plottheme %+% dat +
-          ggtitle("Automotive Production")
-      } else {
-        dat <- rbind(dat, c("Type" = "Portfolio",
-                            "Sector" = "Automotive",
-                            "Technology" = "ICE",
-                            "Value" = 0))
-        dat$Value <- as.numeric(dat$Value)
-        p1 <- plottheme %+% dat +
-          ggtitle("Automotive Production") +
-          geom_text(data = subset(dat,Type=="Portfolio"),
-                    aes(Type, y = .5, angle = 90, label = "No Automotive Production"))
-      }
+      technologyorder <- technology_order
+      colours <- as.vector(ColourPalette[["Colours"]])
+      names(colours) <- technologyorder
+      labels <- c("Renewables","Hydro","Nuclear","Gas","Coal","Electric","Hybrid","ICE","Gas","Oil","Coal")
+      names(labels) <- technologyorder
       
       
-      dat <- subset(Production,Sector=="Fossil Fuels")
-      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
-        p2 <- plottheme %+% dat +
-          ggtitle("Fossil Fuel Production")
+      Production$Technology <- factor(Production$Technology, levels = technologyorder)
+      Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
+      
+      Production$Type <- wrap.labels(Production$Type,20)
+      Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2°Market Benchmark"))
+      xlabels = c("Portfolio", "All\nInsurers", "2°Maket\nBenchmark")
+      
+      titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
+      names(titles) <- c("Fossil Fuels", "Power", "Automotive")
+      
+      chartorder <- c(PortfolioNameLong,GT["AveragePort"][[1]],GT["X2Target"][[1]])
+      chartorder <- as.factor(chartorder)
+      #Production$Type <- factor(Production$Type)
+      
+      Production <- subset(Production, select = c("Type", "Sector", "Technology", "Value"))
+      
+      plottheme<- stacked_bar_chart(Production, colours, xlabels, labels)+
+        ylab("Share of Sector Production")+
+        theme(plot.title = element_text(hjust =0.5,colour=textcolor,size=11,margin = unit(c(0,0,1,0),"lines")),
+              legend.position = "bottom",
+              legend.title = element_blank())
+      
+      
+      if (SectorToPlot %in% c("Automotive","Power","Fossil Fuels")){
+        dat <- subset(Production, Sector == SectorToPlot)
+        p1 <- template %+% dat +
+          ggtitle(titles[names(titles) == SectorToPlot])
         
-      } else {
-        dat <- rbind(dat, c("Type" = "Portfolio",
-                            "Sector" = "Fossil Fuels",
-                            "Technology" = "OilProd",
-                            "Value" = 0))
-        dat$Value <- as.numeric(dat$Value)
-        p2 <- plottheme %+% dat +
-          ggtitle("Fossil Fuel Production") +
-          geom_text(data = subset(dat,Type=="Portfolio"),
-                    aes(Type, y = 0.5, angle = 90, label = "No Fossil Fuel Production"))
+        # print(p1)
+        
+        if (SectorToPlot == "Fossil Fuels"){
+          SectorToPlot <- "FossilFuels"
+        }
+        ggsave(p1,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,'_Stackedbar.png', sep=""),bg="transparent",height=3,width=3,dpi=ppi)
+        
+      } else if (SectorToPlot == "All"){
+        dat <- subset(Production,Sector=="Automotive")
+        if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
+          p1 <- plottheme %+% dat +
+            ggtitle("Automotive Production")
+        } else {
+          dat <- rbind(dat, c("Type" = "Portfolio",
+                              "Sector" = "Automotive",
+                              "Technology" = "ICE",
+                              "Value" = 0))
+          dat$Value <- as.numeric(dat$Value)
+          p1 <- plottheme %+% dat +
+            ggtitle("Automotive Production") +
+            geom_text(data = subset(dat,Type=="Portfolio"),
+                      aes(Type, y = .5, angle = 90, label = "No Automotive Production"))
+        }
+        
+        
+        dat <- subset(Production,Sector=="Fossil Fuels")
+        if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
+          p2 <- plottheme %+% dat +
+            ggtitle("Fossil Fuel Production")
+          
+        } else {
+          dat <- rbind(dat, c("Type" = "Portfolio",
+                              "Sector" = "Fossil Fuels",
+                              "Technology" = "OilProd",
+                              "Value" = 0))
+          dat$Value <- as.numeric(dat$Value)
+          p2 <- plottheme %+% dat +
+            ggtitle("Fossil Fuel Production") +
+            geom_text(data = subset(dat,Type=="Portfolio"),
+                      aes(Type, y = 0.5, angle = 90, label = "No Fossil Fuel Production"))
+        }
+        
+        dat <- subset(Production,Sector=="Power")
+        if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
+          p3 <- plottheme %+% dat +
+            ggtitle("Power Capacity")
+        } else {
+          dat <- rbind(dat, c("Type" = "Portfolio",
+                              "Sector" = "Power",
+                              "Technology" = "CoalCap",
+                              "Value" = 0))
+          dat$Value <- as.numeric(dat$Value)
+          p3 <- plottheme %+% dat +
+            ggtitle("Power Capacity") +
+            geom_text(data = subset(dat,Type=="Portfolio"),
+                      aes(Type, y = .5, angle = 90, label = "No Power Capacity"))
+        }
+        
+        cmd<-grid.arrange(p2,
+                          p3+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")),
+                          p1+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")), nrow=1)
+        dev.off()
+        if(PrintPlot){print(cmd)}
+        ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,"_",Plotyear,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
+        
+        
+      
       }
-      
-      dat <- subset(Production,Sector=="Power")
-      if (nrow(subset(dat, Type=="Portfolio")) > 0) {  
-        p3 <- plottheme %+% dat +
-          ggtitle("Power Capacity")
-      } else {
-        dat <- rbind(dat, c("Type" = "Portfolio",
-                            "Sector" = "Power",
-                            "Technology" = "CoalCap",
-                            "Value" = 0))
-        dat$Value <- as.numeric(dat$Value)
-        p3 <- plottheme %+% dat +
-          ggtitle("Power Capacity") +
-          geom_text(data = subset(dat,Type=="Portfolio"),
-                    aes(Type, y = .5, angle = 90, label = "No Power Capacity"))
-      }
-      
-      cmd<-grid.arrange(p2,
-                        p3+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")),
-                        p1+theme(axis.text.y = element_text(color="white"), axis.title.y = element_text(color="white")), nrow=1)
-      dev.off()
-      if(PrintPlot){print(cmd)}
-      ggsave(cmd,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,"_",Plotyear,'_Stackedbar.png', sep=""),bg="transparent",height=3.2,width=9.7,dpi=ppi)
-      
-      
-    }
+  }else{
+    Label <- paste("No data in the",Type,"portfolio.")
+    outputplot <- no_chart(Label)+
+      theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+    ggsave(outputplot,filename=paste0(plotnumber,"_",PortfolioName,"_",ChartType,"_",SectorToPlot,"_",Plotyear,'_Stackedbar.png', sep=""),height=3.2,width=9.7,dpi=ppi)
+    
   }
 }
+  
+
 
 sector_techshare_3yr <- function(plotnumber,ChartType,SectorToPlot){
   

@@ -103,7 +103,7 @@ eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Upda
 #any(duplicated(eqnames$EQY_FUND_TICKER)) 
 cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 #any(duplicated(cbnames$COMPANY_CORP_TICKER)) 
-#insurer.names <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Names-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
+insurer.names <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Names-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Fin-Sector.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
@@ -254,14 +254,15 @@ TOP1<-c(441,378,306,493,284,427,280,98, 504,512)
 TOP2<-c(37,406,333,139,79,241,559,218,491,81)
 TOP3<-c(27,368,544,230,438,565,184,500,554,297)
 TOP4 <-c(564,370,452,288,28,422,551,585,228,490)
-for (i in TOP2){#, 500:510)){
+for (i in c(280,427,512)){#, 500:510)){
 
   ### Specify the Names from the Test List
-  
+  TestList<-left_join(TestList,insurer.names,by=c("PortName"="Portfolio.Name"))
   PortSummary <- TestList[i,]
   
   TestType <- TestList[i,"Type"]
   PortfolioNameLong <- TestList[i,"PortName"]
+  TITLE <-TestList[i,"Port.Disp.Name"]
   InvestorNameLong <-  TestList[i,"InvestorName"]
   InvestorName <-  gsub(" ", "", TestList[i,"InvestorName"])
   PortfolioName <- gsub("[[:punct:]]", "", TestList[i,"PortName"])
@@ -329,12 +330,14 @@ for (i in TOP2){#, 500:510)){
       #Introduction
       analysed_summary("01") #trish's overview "pie chart"
       Overview_portfolio_sector_stack("02")
-      
+      carsten_metric_chart("04", "EQ")
+      sector_techshare("09","EQ","All", Startyear+5)
+      Fossil_Distribution("11", "EQ")
       
       if (HasEquity) {
-        carsten_metric_chart("04", "EQ")
-        sector_techshare("09","EQ","All", Startyear+5)
-        Fossil_Distribution("11", "EQ")
+        #carsten_metric_chart("04", "EQ")
+        #sector_techshare("09","EQ","All", Startyear+5)
+        #Fossil_Distribution("11", "EQ")
         
         
         #5 Year Trajectory
@@ -348,11 +351,13 @@ for (i in TOP2){#, 500:510)){
         Graph246_new("29","EQ", "Electric")
         
       }
-      
+      carsten_metric_chart("05", "CB")
+      sector_techshare("10","CB","All", Startyear+5)
+      Fossil_Distribution("12", "CB")
       if (HasDebt) {      
-        carsten_metric_chart("05", "CB")
-        sector_techshare("10","CB","All", Startyear+5)
-        Fossil_Distribution("12", "CB")  
+        #carsten_metric_chart("05", "CB")
+        #sector_techshare("10","CB","All", Startyear+5)
+        #Fossil_Distribution("12", "CB")  
         # Risk_Distribution("13", "CB")
         
         #5 Year Trajectory
