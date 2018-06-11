@@ -103,7 +103,7 @@ eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Upda
 #any(duplicated(eqnames$EQY_FUND_TICKER)) 
 cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 #any(duplicated(cbnames$COMPANY_CORP_TICKER)) 
-insurer.names <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Names-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
+#insurer.names <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Names-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Fin-Sector.csv"),stringsAsFactors=FALSE,strip.white = T)
 names(Subgroup.Overview) <- gsub("TwoD\\.", "", names(Subgroup.Overview))
@@ -113,8 +113,8 @@ length(unique(Subgroup.Overview$Portfolio.Name)) ## Number of Insurers   672
 CBBatchTest <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-Results-450S.csv"),stringsAsFactors=FALSE,strip.white = T)
 CBBatchTest <- subset(CBBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Debt Analysis Results: ", nrow(CBBatchTest), " rows."))
-CBBatchTest <- left_join(CBBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
-CBBatchTest <- CBBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
+#CBBatchTest <- left_join(CBBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
+#CBBatchTest <- CBBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
 
 
 CBCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
@@ -131,8 +131,8 @@ Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAs
 EQBatchTest <- read.csv(paste(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-Results-450S.csv",sep=""),stringsAsFactors=FALSE,strip.white = T)
 EQBatchTest <- subset(EQBatchTest, Type == "Portfolio" & BenchmarkRegion == BenchmarkRegionchoose)
 print(paste0("Equity Analysis Results: ", nrow(EQBatchTest), " rows."))
-EQBatchTest <- left_join(EQBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
-EQBatchTest <- EQBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
+#EQBatchTest <- left_join(EQBatchTest, insurer.names, by=c("PortName"="Portfolio.Name"))
+#EQBatchTest <- EQBatchTest %>% select(-PortName) %>% rename(PortName=Port.Disp.Name)
 
 
 EQCompProdSnapshots <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
@@ -249,8 +249,12 @@ unique(intersect(EQBatchTest$Scenario, EQCompProdSnapshots$Scenario))
 #-------
 # Loop through Portfolios
 #--------
-TOP<-c(501, 327,389, 494, 39, 355,379,318,42,20)
-for (i in TOP){#, 500:510)){
+#TOP<-c(501, 327,389, 494, 39, 355,379,318,42,20)
+TOP1<-c(441,378,306,493,284,427,280,98, 504,512)
+TOP2<-c(37,406,333,139,79,241,559,218,491,81)
+TOP3<-c(27,368,544,230,438,565,184,500,554,297)
+TOP4 <-c(564,370,452,288,28,422,551,585,228,490)
+for (i in TOP2){#, 500:510)){
 
   ### Specify the Names from the Test List
   
