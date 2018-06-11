@@ -2359,9 +2359,10 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       OilCompanies$PortWeightEQYlvl <- as.numeric(OilCompanies$PortWeightEQYlvl)
       names(colors) <- techorder
       names(tech_labels) <- techorder
-      perc <- function(x, digits = 1, format = "f", ...) {
-        x<-paste0(formatC(100 * x, format = format, digits = digits, ...), "%")
-        
+      perc <- function(x, format = "f", ...) {
+        x<-ifelse(x*100 >=10,
+                  paste0(" ",formatC(100 * x, format = format, digits = 0, ...), "%"),
+                  paste0(formatC(100 * x, format = format, digits = 1, ...), "%"))
         return(x)
       }
       
@@ -2511,7 +2512,7 @@ carboninout <- function(plotnumber, companiestoprint, ChartType){
     
     perc <- function(x, format = "f", ...) {
       x<-ifelse(x*100 >=10,
-                paste0(formatC(100 * x, format = format, digits = 0, ...), "%"),
+                paste0(" ",formatC(100 * x, format = format, digits = 0, ...), "%"),
                 paste0(formatC(100 * x, format = format, digits = 1, ...), "%"))
       return(x)
     }
