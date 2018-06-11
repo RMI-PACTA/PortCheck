@@ -1375,7 +1375,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   if (ChartType == "CB"){
     port <- CBBatchTest
     #port <- subset(port, Scenario == "450S" & Year==2018)
-    
+    Type<-"fixed income"
     if (PortName == "MetaPort"){
       port <- subset(port, PortName %in% c("MetaPort","Bond Universe"))
       port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Bond Universe"), c("Portfolio","Fixed Income Market"))
@@ -1391,6 +1391,8 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     #xlabel <-""
   }else{
     port <- EQBatchTest
+    Type<-"equity"
+    
     #port <- subset(port, Scenario == "450S" & Year==2018)
     if (PortName == "MetaPort"){
       port <- subset(port, port$PortName %in% c("MetaPort","Listed Market"))
@@ -1412,48 +1414,52 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     mutate(Metric=CarstenMetric_Port) #, PortName2="Market Today")
   # future.port <- subset(port, Year==(START.YEAR+5) & PortName=="Portfolio") %>% 
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
-  
-  port <- bind_rows(current.port, current.market)
-  
-  port$Sector2 <- paste0(port$Sector, " Production")
-  port$Sector2 <- ifelse(port$Sector=="Power", "Power Capacity", port$Sector2)
-  #port$Sector2 <- ifelse(port$Sector =="Automotive","Automotive",port$Sector2)
-  port$Sector2 <- factor(port$Sector2, levels = c("Oil&Gas Production","Coal Production", "Power Capacity","Automotive Production"))
-  port <- subset(port, Technology != "OilCap")
-  tech.levels <- c("Gas","Oil","Coal",
-                   "RenewablesCap", "HydroCap","NuclearCap", "GasCap", "CoalCap",
-                   "Electric", "Hybrid", "ICE")
-  
-  tech.labels <- c("Gas Production","Oil Production","Coal Production",
-                   "Renewables Capacity", "Hydro Capacity","Nuclear Capacity", "Gas Capacity", "Coal Capacity",
-                   "Electric Vehicles", "Hybrid Vehicles", "ICE Vehicles")
-  
-  
-  
-  
-  port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
-  
-  tech.colors <- c( GasProdColour, OilProdColour, CoalProdColour,RenewablesColour, HydroColour,NuclearColour, GasCapColour, CoalCapColour, ElectricColour, HybridColour,ICEColour)
-  tots <- port %>% group_by(PortName, Sector2, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
-  
-  outputplot <- ggplot(port, aes(x=PortName, y=Metric, group=Technology, fill=Technology)) +   
-    geom_bar(stat="identity", position="stack") +
-    #geom_text(data=tots, aes(x=PortName, y=Metric, label=percent(Metric))) +
-    scale_x_discrete(name="",labels=c("Portfolio",lab)) + 
-    scale_y_continuous(name="Weight (by market value) of\nissuers exposed to the technology", labels=percent, expand=c(0,0),
-                       limits=c(0, max(tots$Metric) + .01)) +
-    scale_fill_manual(name="Technology", labels=tech.labels, values=tech.colors) + 
-    guides(fill=guide_legend(ncol=2))+
-    theme_cdi() +
-    facet_wrap(~ Sector2, nrow=1,labeller = label_wrap_gen(width=10)) +
-    theme(legend.title=element_text(size=14),legend.text = element_text(size = 13))+
-    theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 13),
-          axis.text.y=element_text(size=13),
-          axis.title.y=element_text(size=15),
-          strip.text = element_text(size = 15)) +
-    theme(axis.ticks.y = element_line(colour=textcolor,size =15)) + 
-    theme(axis.line.x = element_line())
-  
+  if (nrow(current.port)>0){
+    port <- bind_rows(current.port, current.market)
+    
+    port$Sector2 <- paste0(port$Sector, " Production")
+    port$Sector2 <- ifelse(port$Sector=="Power", "Power Capacity", port$Sector2)
+    #port$Sector2 <- ifelse(port$Sector =="Automotive","Automotive",port$Sector2)
+    port$Sector2 <- factor(port$Sector2, levels = c("Oil&Gas Production","Coal Production", "Power Capacity","Automotive Production"))
+    port <- subset(port, Technology != "OilCap")
+    tech.levels <- c("Gas","Oil","Coal",
+                     "RenewablesCap", "HydroCap","NuclearCap", "GasCap", "CoalCap",
+                     "Electric", "Hybrid", "ICE")
+    
+    tech.labels <- c("Gas Production","Oil Production","Coal Production",
+                     "Renewables Capacity", "Hydro Capacity","Nuclear Capacity", "Gas Capacity", "Coal Capacity",
+                     "Electric Vehicles", "Hybrid Vehicles", "ICE Vehicles")
+    
+    
+    
+    
+    port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
+    
+    tech.colors <- c( GasProdColour, OilProdColour, CoalProdColour,RenewablesColour, HydroColour,NuclearColour, GasCapColour, CoalCapColour, ElectricColour, HybridColour,ICEColour)
+    tots <- port %>% group_by(PortName, Sector2, CarstenMetric_PortSec, Scen.CarstenMetric_PortSec) %>% summarise(Metric=sum(Metric))
+    
+    outputplot <- ggplot(port, aes(x=PortName, y=Metric, group=Technology, fill=Technology)) +   
+      geom_bar(stat="identity", position="stack") +
+      #geom_text(data=tots, aes(x=PortName, y=Metric, label=percent(Metric))) +
+      scale_x_discrete(name="",labels=c("Portfolio",lab)) + 
+      scale_y_continuous(name="Weight (by market value) of\nissuers exposed to the technology", labels=percent, expand=c(0,0),
+                         limits=c(0, max(tots$Metric) + .01)) +
+      scale_fill_manual(name="Technology", labels=tech.labels, values=tech.colors) + 
+      guides(fill=guide_legend(ncol=2))+
+      theme_cdi() +
+      facet_wrap(~ Sector2, nrow=1,labeller = label_wrap_gen(width=10)) +
+      theme(legend.title=element_text(size=14),legend.text = element_text(size = 13))+
+      theme(axis.text.x = element_text(angle = 0,colour=textcolor,size = 13),
+            axis.text.y=element_text(size=13),
+            axis.title.y=element_text(size=15),
+            strip.text = element_text(size = 15)) +
+      theme(axis.ticks.y = element_line(colour=textcolor,size =15)) + 
+      theme(axis.line.x = element_line())
+  }else {
+    Label <- paste("No data in the",Type,"portfolio.")
+    outputplot <- no_chart(Label)+
+      theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+  }
   
   
   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
