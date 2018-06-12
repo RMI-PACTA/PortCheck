@@ -190,7 +190,7 @@ CarbonCap <- read.csv(paste0(DATA.PATH,"04_Other/","CarbonCapexUpstream.csv"),st
 ### Batch related Portfolio & Fund-Data Results
 TestList <- CreateTestList(EQBatchTest, CBBatchTest)
 print(paste0("Test List: ", nrow(TestList), " rows."))
-
+TestList<-left_join(TestList,insurer.names,by=c("PortName"="Portfolio.Name"))
 
 # ------
 # Bench Regions and Indicies and Sector Classifications
@@ -254,10 +254,10 @@ TOP1<-c(441,378,306,493,284,427,280,98, 504,512)
 TOP2<-c(37,406,333,139,79,241,559,218,491,81)
 TOP3<-c(27,368,544,230,438,565,184,500,554,297)
 TOP4 <-c(564,370,452,288,28,422,551,585,228,490)
-for (i in c(280,427,512)){#, 500:510)){
+for (i in TOP2){#, 500:510)){
 
   ### Specify the Names from the Test List
-  TestList<-left_join(TestList,insurer.names,by=c("PortName"="Portfolio.Name"))
+  
   PortSummary <- TestList[i,]
   
   TestType <- TestList[i,"Type"]
