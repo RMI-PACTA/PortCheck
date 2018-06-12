@@ -2863,9 +2863,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
         ALD.temp2$Scenario[ALD.temp2$Technology %in% c("ICE","Electric") & ALD.temp2$PortName == PortNames] <- "NPS"
         ALD.temp2$Production[ALD.temp2$Technology == "ICE" & ALD.temp2$PortName == PortNames] <- c(60987.94, 60317.07,59341.27,58548.42,58121.51,57694.59)
         ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year == "2018"] <- ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production
-        if (PortName!= "METROPOLITAN LIFE INSURANCE COMPANY"){
+        if (ALD.temp2[which(ALD.temp2$PortName==PortNames&ALD.temp2$Year==2018),]$Production>ALD.sc[which(ALD.sc$PortName==PortNames&ALD.sc$Year==2018),]$Production){
           ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- ALD450$Production*.5
-        } else if (PortName=="METROPOLITAN LIFE INSURANCE COMPANY"){
+        } else{
           ALD.temp2$Production[ALD.temp2$Technology == "Electric" & ALD.temp2$PortName == PortNames & ALD.temp2$Year != "2018"] <- (ALD450$Production- ALD.temp1[which(ALD.temp1$Year !=2018),]$Production)*0.5 +ALD.temp1[which(ALD.temp1$Year !=2018),]$Production
         }
         
