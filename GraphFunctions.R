@@ -350,12 +350,12 @@ other_sector_chart <- function(plotnumber, SectorToPlot){
   
   
   check = 0
-  EQPlotData <- subset(EQ_OS_WEM, EQ_OS_WEM$PortName == PortfolioName & EQ_OS_WEM$Sector == SectorToPlot)
+  EQPlotData <- EQ_OS_WEM[EQ_OS_WEM$PortName == PortName & EQ_OS_WEM$Sector == SectorToPlot,]
   if(nrow(EQPlotData) == 1){
     EQPlotData$ChartType <- "EQ"
     check = check+.5}
   
-  CBPlotData <- subset(CB_OS_WEM, CB_OS_WEM$PortName == PortfolioName & CB_OS_WEM$Sector == SectorToPlot)
+  CBPlotData <- CB_OS_WEM[CB_OS_WEM$PortName == PortName & CB_OS_WEM$Sector == SectorToPlot,]
   if(nrow(CBPlotData) == 1){
     CBPlotData$ChartType <- "CB"
     check = check+1.5}
@@ -394,7 +394,7 @@ other_sector_chart <- function(plotnumber, SectorToPlot){
     
     outputplot<-outputplot+
       scale_fill_identity(name = "", guide = 'legend',labels = c("Exposure gap","Current capacity + planned additions")) +
-      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2Â°C Benchmark"))  +
+      scale_colour_manual(name="",guide='legend',values= c(Tar2DColour),labels=c(PortfolioName,"2�C Benchmark"))  +
       xlab(year_lab) + ylab(ylabel) + # Set axis labels
       # legend(values=legelabels)+
       scale_x_continuous(breaks=seq(Startyear,max(df$Year),1),expand=c(0,0))+
