@@ -1942,7 +1942,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
       
       Production$Type <- wrap.labels(Production$Type,20)
       Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2°Market Benchmark"))
-      xlabels = c("Portfolio", "All\nInsurers", "2�Market\nBenchmark")
+      xlabels = c("Portfolio", "All\nInsurers", "2°Market\nBenchmark")
       
       titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
       names(titles) <- c("Fossil Fuels", "Power", "Automotive")
@@ -2768,7 +2768,7 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     if (PortName != "MetaPort"){
       ALD_P <- EQALDAggProd[EQALDAggProd$PortName %in% PortNames & EQALDAggProd$Technology %in% TechToPlot,]
       ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
-      if (all(ALD_P[which(ALD_P$Year== 2018:2023),]$Scen.WtProduction==0)){
+      if (all(ALD_P[which(ALD_P$Year== 2018:2023),]$WtProduction==0)){
         ALD_P<-data.frame(Date=as.Date(character()),
                           File=character(), 
                           User=character(), 
@@ -2787,7 +2787,12 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     if (PortName != "MetaPort"){
       ALD_P <- CBALDAggProd[CBALDAggProd$PortName %in% PortNames & CBALDAggProd$Technology %in% TechToPlot,]
       ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
-      
+      if (all(ALD_P[which(ALD_P$Year== 2018:2023),]$WtProduction==0)){
+        ALD_P<-data.frame(Date=as.Date(character()),
+                          File=character(), 
+                          User=character(), 
+                          stringsAsFactors=FALSE)
+      }
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Bonds"
       }
