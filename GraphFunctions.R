@@ -1907,7 +1907,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
     select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
     rename(WtProduction=Scen.WtProduction.Market )
 
-  Batch2$Type <-"2°Market Benchmark"
+  Batch2$Type <-"2�Market Benchmark"
   #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch1)
   
@@ -1941,8 +1941,9 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
       Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
       
       Production$Type <- wrap.labels(Production$Type,20)
-      Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2°Market Benchmark"))
       xlabels = c("Portfolio", "All\nInsurers", "2°Market\nBenchmark")
+      Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2�Market Benchmark"))
+      xlabels = c("Portfolio", "All\nInsurers", "2�Market\nBenchmark")
       
       titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
       names(titles) <- c("Fossil Fuels", "Power", "Automotive")
@@ -2352,6 +2353,7 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       summarise("Oiltotal" =sum(Oilsum))
     
     OilCompanies <- left_join(OilCompanies1,OilCompanies2,by=c("Name"))
+    OilCompanies <- OilCompanies[-which(is.na(OilCompanies$Oilsum)),]
     if (nrow(OilCompanies) > 0) {
       OilCompanies$OilShare <- (OilCompanies$Oilsum/OilCompanies$Oiltotal) 
       OilCompanies$Classification <- "Companies"
