@@ -123,7 +123,6 @@ print(paste0("Debt Company Production Results: ", nrow(CBCompProdSnapshots), " r
 CBCompProdSnapshots <- left_join(CBCompProdSnapshots, cbnames, by="COMPANY_CORP_TICKER")
 CBCompProdSnapshots <- CBCompProdSnapshots %>% select(-Name) %>% rename(Name=Final.Name)
 
-CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
 
 Moodys <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Moodys.csv"),stringsAsFactors=FALSE,strip.white = T)
 
@@ -141,8 +140,23 @@ print(paste0("Equity Company Production Snapshot: ", nrow(EQCompProdSnapshots), 
 EQCompProdSnapshots <- left_join(EQCompProdSnapshots, eqnames, by="EQY_FUND_TICKER")
 EQCompProdSnapshots <- EQCompProdSnapshots %>% select(-Name) %>% rename(Name=Final.Name)
 
+### These files only used for 246.  246 is only place where we want to convert oil and gas back into raw units (barrels and cm3)
+### so added this conversion here.
+### If we decide to implement this fix, comment out the four lines underneath loading each file.
 
 EQALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)   
+# EQALDAggProd$WtProduction <- ifelse(EQALDAggProd$Technology =="Oil", EQALDAggProd$WtProduction * (1/6.12) ,EQALDAggProd$WtProduction)
+# EQALDAggProd$Scen.WtProduction <- ifelse(EQALDAggProd$Technology =="Oil", EQALDAggProd$Scen.WtProduction * (1/6.12) ,EQALDAggProd$Scen.WtProduction)
+# EQALDAggProd$WtProduction <- ifelse(EQALDAggProd$Technology =="Gas", EQALDAggProd$WtProduction * (1/0.0372) ,EQALDAggProd$WtProduction)
+# EQALDAggProd$Scen.WtProduction <- ifelse(EQALDAggProd$Technology =="Gas", EQALDAggProd$Scen.WtProduction * (1/0.0372) ,EQALDAggProd$Scen.WtProduction)
+
+CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T)
+# CBALDAggProd$WtProduction <- ifelse(CBALDAggProd$Technology =="Oil", CBALDAggProd$WtProduction * (1/6.12) ,CBALDAggProd$WtProduction)
+# CBALDAggProd$Scen.WtProduction <- ifelse(CBALDAggProd$Technology =="Oil", CBALDAggProd$Scen.WtProduction * (1/6.12) ,CBALDAggProd$Scen.WtProduction)
+# CBALDAggProd$WtProduction <- ifelse(CBALDAggProd$Technology =="Gas", CBALDAggProd$WtProduction * (1/0.0372) ,CBALDAggProd$WtProduction)
+# CBALDAggProd$Scen.WtProduction <- ifelse(CBALDAggProd$Technology =="Gas", CBALDAggProd$Scen.WtProduction * (1/0.0372) ,CBALDAggProd$Scen.WtProduction)
+
+
 
 ### FOR THE NEW COMPANY EXPOSURE
 
