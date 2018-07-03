@@ -1459,7 +1459,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
            bg="transparent",height=4,width=13,dpi=ppi*0.8)
   }else {
-    Label <- paste("No data in the",Type,"portfolio.")
+    Label <- paste("No",Type,"holdings in the covered sector.")
     outputplot <- ggplot()+
       annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=8.5, colour = textcolor)+
       geom_blank()+
@@ -1907,7 +1907,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
     select("PortName","Sector","Technology","Scen.WtProduction.Market","Type") %>%
     rename(WtProduction=Scen.WtProduction.Market )
 
-  Batch2$Type <-"2ï¿½Market Benchmark"
+  Batch2$Type <-"2°Market Benchmark"
   #Add our target portfolio back
   Portfolios <- rbind(Combin,Batch1)
   
@@ -1941,9 +1941,8 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
       Production$Sector <- factor(Production$Sector, levels = c("Fossil Fuels", "Power", "Automotive"))
       
       Production$Type <- wrap.labels(Production$Type,20)
-      xlabels = c("Portfolio", "All\nInsurers", "2Â°Market\nBenchmark")
-      Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2ï¿½Market Benchmark"))
-      xlabels = c("Portfolio", "All\nInsurers", "2ï¿½Market\nBenchmark")
+      Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2°Market Benchmark"))
+      xlabels = c("Portfolio", "All\nInsurers", "2°Market\nBenchmark")
       
       titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
       names(titles) <- c("Fossil Fuels", "Power", "Automotive")
@@ -2352,8 +2351,8 @@ Oilshare <- function(plotnumber, companiestoprint, ChartType){
       group_by(Name) %>%
       summarise("Oiltotal" =sum(Oilsum))
     
-    OilCompanies <- left_join(OilCompanies1,OilCompanies2,by=c("Name"))
-    OilCompanies <- OilCompanies[-which(is.na(OilCompanies$Oilsum)),]
+    OilCompanies <- right_join(OilCompanies1,OilCompanies2,by=c("Name"))
+    #OilCompanies <- OilCompanies[-which(is.na(OilCompanies$Oilsum)),]
     if (nrow(OilCompanies) > 0) {
       OilCompanies$OilShare <- (OilCompanies$Oilsum/OilCompanies$Oiltotal) 
       OilCompanies$Classification <- "Companies"
@@ -2949,8 +2948,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
     
     brown.unit <- c("CoalCap" = "MW",
                     "GasCap"="MW",
-                    "Oil" ="bbl",
-                    "Gas" = "m^3",
+                    "Oil" ="Gigajoules",
+                    "Gas" = "Gigajoules",
                     "ICE" ="Vehicles")
     
     if (unitscaleval >1e3){
@@ -2961,8 +2960,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in thousands",
                       "GasCap"="MW in thousands",
-                      "Oil" ="bbl in thousands",
-                      "Gas" = "m^3 in thousands",
+                      "Oil" ="Gigajoules in thousands",
+                      "Gas" ="Gigajoules in thousands",
                       "ICE" ="Vehicles in thousands")
       
       
@@ -2975,8 +2974,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in millions",
                       "GasCap"="MW in millions",
-                      "Oil" ="bbl in millions",
-                      "Gas" = "m^3 in millions",
+                      "Oil" ="Gigajoules in millions",
+                      "Gas" ="Gigajoules in millions",
                       "ICE" ="Vehicles in millions")
     } 
     if (unitscaleval > 1e9){
@@ -2987,8 +2986,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in billions",
                       "GasCap"="MW in billions",
-                      "Oil" ="bbl in billions",
-                      "Gas" = "m^3 in billions",
+                      "Oil" ="Gigajoules in billions",
+                      "Gas" ="Gigajoules in billions",
                       "ICE" ="Vehicles in billions")
     }
     
