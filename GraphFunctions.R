@@ -465,7 +465,7 @@ distribution_chart <- function(plotnumber, ChartType, df, ID.COLS, MetricCol, yl
     xlab("Insurers Operating in California")
   #arrowlength <- ylimval/5
   
-  if (PortName %in% dfagg$Name & PortName != "MetaPort") {
+  if (PortName %in% dfagg$Name ) {   #& PortName != "MetaPort"
     x_coord = which(order$Name == PortName)
     is_left = x_coord/x_length < .50
     
@@ -1053,7 +1053,7 @@ Overview_portfolio_sector_stack <- function(plotnumber){
   }else {
     ymax<- max(aggregate(over[which(over$Valid==1),]["ValueUSD"],by=over[which(over$Valid==1),]["Asset.Type"],FUN=sum)$ValueUSD)
     
-    plot <- ggplot(data=subset(over1,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Sector)) +
+    plot <- ggplot(data=subset(over1,Valid==1), aes(x=Asset.Type, y=ValueUSD, fill=Fin.Sector)) +
       geom_bar(position="stack", stat="identity",width = 0.7) +
       scale_fill_manual(name="", labels=c("Other Sectors","Fossil Fuel", "Automotive","Power"), values=c("#deebf7",energy, trans, pow),drop = FALSE) +
       scale_x_discrete(name="Asset Type") +
@@ -2778,6 +2778,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Equity"
       }
+    }else{
+      ALD_P <- EQALDAggProd[EQALDAggProd$PortName %in% PortNames & EQALDAggProd$Technology %in% TechToPlot,]
+      ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
     }
     
     ALD$Asset.Type <- "Equity"
@@ -2797,6 +2800,9 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       if (nrow(ALD_P)>0){
         ALD_P$Asset.Type <-"Bonds"
       }
+    }else{
+      ALD_P <-CBALDAggProd[CBALDAggProd$PortName %in% PortNames & CBALDAggProd$Technology %in% TechToPlot,]
+      ALD_P <- subset(ALD_P,Scenario %in% c("450S","NPS","CPS"))
     }
     ALD$Asset.Type <- "Bonds"
     
@@ -2804,10 +2810,11 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
   }
   
   ### PORT PRODUCTION
-  if (PortName != "MetaPort"){
-    ALD <- bind_rows(ALD, ALD_P)
-  }else{
-    ALD <- ALD}
+  # if (PortName != "MetaPort"){
+  #   ALD <- bind_rows(ALD, ALD_P)
+  # }else{
+  #   ALD <- ALD}
+  ALD <- bind_rows(ALD,ALD_P)
   if (nrow(ALD_P)>0){
     table(ALD$Asset.Type, useNA="always")
     ALD <- subset(ALD, Aggregation=="GlobalAggregate" & BenchmarkRegion=="GlobalAggregate" & Scenario %in% c("450S","NPS","CPS"))
@@ -2960,8 +2967,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in thousands",
                       "GasCap"="MW in thousands",
-                      "Oil" ="Gigajoules in thousands",
-                      "Gas" ="Gigajoules in thousands",
+                      "Oil" ="Gigajoules",
+                      "Gas" ="Gigajoules",
                       "ICE" ="Vehicles in thousands")
       
       
@@ -2974,8 +2981,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in millions",
                       "GasCap"="MW in millions",
-                      "Oil" ="Gigajoules in millions",
-                      "Gas" ="Gigajoules in millions",
+                      "Oil" ="Gigajoules",
+                      "Gas" ="Gigajoules",
                       "ICE" ="Vehicles in millions")
     } 
     if (unitscaleval > 1e9){
@@ -2986,8 +2993,8 @@ Graph246_new <- function(plotnumber,ChartType,TechToPlot){
       
       brown.unit <- c("CoalCap" = "MW in billions",
                       "GasCap"="MW in billions",
-                      "Oil" ="Gigajoules in billions",
-                      "Gas" ="Gigajoules in billions",
+                      "Oil" ="Gigajoules",
+                      "Gas" ="Gigajoules",
                       "ICE" ="Vehicles in billions")
     }
     
