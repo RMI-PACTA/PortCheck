@@ -1375,7 +1375,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   if (ChartType == "CB"){
     port <- CBBatchTest
     #port <- subset(port, Scenario == "450S" & Year==2018)
-    Type<-"fixed income"
+    Type<-"Fixed Income Market"
     if (PortName == "MetaPort"){
       port <- subset(port, PortName %in% c("MetaPort","Bond Universe"))
       port$PortName <- plyr::mapvalues(port$PortName, c("MetaPort","Bond Universe"), c("Portfolio","Fixed Income Market"))
@@ -1391,7 +1391,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     #xlabel <-""
   }else{
     port <- EQBatchTest
-    Type<-"equity"
+    Type<-"Listed Equity Market"
     
     #port <- subset(port, Scenario == "450S" & Year==2018)
     if (PortName == "MetaPort"){
@@ -1417,7 +1417,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
   if (nrow(current.port)==0){
    current.port <- current.market
    current.port$Metric <- 0
-   current.port$PortName <- PortName_IN
+   current.port$PortName <- "Portfolio"
     
   }
     
@@ -1438,7 +1438,7 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     
     
     
-    
+    port$PortName<- factor(port$PortName,levels = c("Portfolio",Type),ordered = TRUE)
     port$Technology <- factor(port$Technology, levels = tech.levels, ordered=TRUE)
     
     tech.colors <- c( GasProdColour, OilProdColour, CoalProdColour,RenewablesColour, HydroColour,NuclearColour, GasCapColour, CoalCapColour, ElectricColour, HybridColour,ICEColour)
@@ -1655,7 +1655,7 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     breaks <- c(-.35,-0.30,-.25,  -.20, -.15, -.10, -.05, 0, .05, .10, .15, .20, .25,.30,.35)
     ## adjust if need be for this data
     data.maxval <- max(abs(comp$Plan.Pct)) 
-    if (data.maxval > MAX.VAL) {
+    if (data.maxval > MAX.VAL  & data.maxval<1) {
       breaks <- c(-data.maxval, breaks[c(-1, -length(breaks))], data.maxval)
     }else if(data.maxval==1){
       breaks <- c(seq(-data.maxval,data.maxval,0.25))
