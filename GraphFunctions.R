@@ -1651,6 +1651,8 @@ company_og_buildout <- function(plotnumber, companiestoprint, ChartType){
     data.maxval <- max(abs(comp$Plan.Pct)) 
     if (data.maxval > MAX.VAL) {
       breaks <- c(-data.maxval, breaks[c(-1, -length(breaks))], data.maxval)
+    }else if(data.maxval==1){
+      breaks <- c(seq(-data.maxval,data.maxval,0.25))
     }
     limits <- c(min(breaks), max(breaks))
     
