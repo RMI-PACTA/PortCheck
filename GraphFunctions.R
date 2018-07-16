@@ -1942,7 +1942,7 @@ sector_techshare <- function(plotnumber,ChartType,SectorToPlot,Plotyear){
       
       Production$Type <- wrap.labels(Production$Type,20)
       Production$Type <- factor(Production$Type, levels=c("Portfolio","MetaPortfolio","2Â°Market Benchmark"))
-      xlabels = c("Portfolio", "All\nInsurers", "2°Market\nBenchmark")
+      xlabels = c("Portfolio", "All\nInsurers", "2° Market\nBenchmark")
       
       titles = c("Fossil Fuel Production", "Power Capacity", "Automotive Production")
       names(titles) <- c("Fossil Fuels", "Power", "Automotive")
