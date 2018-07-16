@@ -1414,7 +1414,13 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     mutate(Metric=CarstenMetric_Port) #, PortName2="Market Today")
   # future.port <- subset(port, Year==(START.YEAR+5) & PortName=="Portfolio") %>% 
   #   mutate(Metric=Scen.CarstenMetric_Port, PortName2="Portfolio in 2023\nunder 2° Scenario")
-  if (nrow(current.port)>0){
+  if (nrow(current.port)==0){
+   current.port <- current.market
+   current.port$Metric <- 0
+   current.port$PortName <- PortName_IN
+    
+  }
+    
     port <- bind_rows(current.port, current.market)
     
     port$Sector2 <- paste0(port$Sector, " Production")
@@ -1458,23 +1464,23 @@ carsten_metric_chart <- function(plotnumber, ChartType){
     
     ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),
            bg="transparent",height=4,width=13,dpi=ppi*0.8)
-  }else {
-    Label <- paste("No",Type,"holdings in the covered sector.")
-    outputplot <- ggplot()+
-      annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=8.5, colour = textcolor)+
-      geom_blank()+
-      theme(
-        axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA))+
-      theme(panel.background = element_rect(fill = "white", colour = "grey50"))
-    ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),height=4,width=13,dpi=ppi*0.8)
-  }
+  # }else {
+  #   Label <- paste("No",Type,"holdings in the covered sector.")
+  #   outputplot <- ggplot()+
+  #     annotate(geom = "text", x=0,y=0, label=wrap.labels(Label,40), size=8.5, colour = textcolor)+
+  #     geom_blank()+
+  #     theme(
+  #       axis.title.x=element_blank(),
+  #       axis.title.y=element_blank(),
+  #       axis.text.x=element_blank(),
+  #       axis.text.y=element_blank(),
+  #       axis.ticks = element_blank(),
+  #       panel.grid.major = element_blank(), 
+  #       panel.grid.minor = element_blank(),
+  #       panel.background = element_rect(fill = "transparent",colour = NA))+
+  #     theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+  #   ggsave(outputplot, filename = paste0(plotnumber,"_",PortfolioName,"_",ChartType,'_CMChart.png',sep=""),height=4,width=13,dpi=ppi*0.8)
+  # }
   
   
   
