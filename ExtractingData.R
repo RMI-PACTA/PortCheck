@@ -21,7 +21,7 @@ print(ParameterFile)
 SamplePortfolio <- FALSE
 InvestorName <- "California Insurers"
 ############ Change Portfolio Name here ##################
-#PortfolioName<-
+PortfolioName<- "VARIABLE ANNUITY LIFE INSURANCE COMPANY (THE)"
 #-------------
 # Set Input / OUtput Locations Based on parameter File Input
 #------------
@@ -60,8 +60,8 @@ CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut
   select(Scenario, PortName, Technology,Sector,Year,WtProduction, Scen.WtProduction)
 CBALDAggProd$Type <-'Fixed Income'
 CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
-CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & PortName == PortfolioName)
-CBCompALD <- select(CBCompALD,EQY_FUND_TICKER,PortName, Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology)
+CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & Portfolio.Name == PortfolioName)
+CBCompALD <- select(CBCompALD,COMPANY_CORP_TICKER,Portfolio.Name, Sector,Plan.WtTechProd,Scen.WtTechProd,Port.Sec.ClimateWt,Technology)
 CBCompALD$Type <-"Fixed Income"
 
 ### Get Equity Batch Results
@@ -83,7 +83,12 @@ EQALDAggProd$Type <-'Equity'
 
 EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & PortName == PortfolioName)
-EQCompALD <- select(EQCompALD,EQY_FUND_TICKER,PortName, Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology)
+EQCompALD <- EQCompALD %>%
+  select(EQY_FUND_TICKER,PortName, Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology) %>%
+  rename("Plan.WtTechProd"=WtProduction,
+         "Scen.WtTechProd"=Scen.WtProduction,
+         "Port.Sec.ClimateWt"=PortWeightEQYlvl)
+
 EQCompALD$Type <-"Equity"
 
 
@@ -92,6 +97,6 @@ Comp<-bind_rows(CBCompProdSnapshots,EQCompProdSnapshots)
 builtout <- bind_rows(CBALDAggProd,EQALDAggProd)
 COMP <- bind_rows(CBCompALD,EQCompALD)
 
-write.csv(port, file = paste0(BATCH.RES.PATH, "CHECKING/Port.csv"),row.names = F)
-write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Comp.csv"),row.names = F)
-write.csv(builout, file = paste0(BATCH.RES.PATH, "CHECKING/buildout.csv"),row.names = F)
+write.csv(port, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_Port.csv"),row.names = F)
+write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_COMP.csv"),row.names = F)
+write.csv(builtout, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_scenario.csv"),row.names = F)
