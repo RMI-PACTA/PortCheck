@@ -21,7 +21,7 @@ print(ParameterFile)
 SamplePortfolio <- FALSE
 InvestorName <- "California Insurers"
 ############ Change Portfolio Name here ##################
-PortfolioName<- "VARIABLE ANNUITY LIFE INSURANCE COMPANY (THE)"
+PortfolioName<- "AMERICAN GENERAL LIFE INSURANCE COMPANY"
 #-------------
 # Set Input / OUtput Locations Based on parameter File Input
 #------------
@@ -61,7 +61,9 @@ CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut
 CBALDAggProd$Type <-'Fixed Income'
 CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & Portfolio.Name == PortfolioName)
-CBCompALD <- select(CBCompALD,COMPANY_CORP_TICKER,Portfolio.Name, Sector,Plan.WtTechProd,Scen.WtTechProd,Port.Sec.ClimateWt,Technology)
+CBCompALD <- CBCompALD %>%
+  select(COMPANY_CORP_TICKER,Portfolio.Name, Sector,Plan.WtTechProd,Scen.WtTechProd,Port.Sec.ClimateWt,Technology) %>%
+  rename("Ticker"=COMPANY_CORP_TICKER)
 CBCompALD$Type <-"Fixed Income"
 
 ### Get Equity Batch Results
@@ -87,7 +89,9 @@ EQCompALD <- EQCompALD %>%
   select(EQY_FUND_TICKER,PortName, Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology) %>%
   rename("Plan.WtTechProd"=WtProduction,
          "Scen.WtTechProd"=Scen.WtProduction,
-         "Port.Sec.ClimateWt"=PortWeightEQYlvl)
+         "Port.Sec.ClimateWt"=PortWeightEQYlvl,
+         "Portfolio.Name"=PortName,
+         "Ticker"=EQY_FUND_TICKER)
 
 EQCompALD$Type <-"Equity"
 
@@ -98,5 +102,5 @@ builtout <- bind_rows(CBALDAggProd,EQALDAggProd)
 COMP <- bind_rows(CBCompALD,EQCompALD)
 
 write.csv(port, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_Port.csv"),row.names = F)
-write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_COMP.csv"),row.names = F)
+write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Americangeneral_COMP.csv"),row.names = F)
 write.csv(builtout, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_scenario.csv"),row.names = F)
