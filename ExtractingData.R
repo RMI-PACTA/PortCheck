@@ -3,6 +3,10 @@ library(reshape2)
 source(paste0(PORTCHECK.CODE.PATH, "proj-init.R"))
 print(show.consts())
 
+
+
+### Set Up File Paths
+
 BatchName <- NA
 BenchmarkRegionchoose <- NA
 CompanyDomicileRegion <- NA
@@ -34,6 +38,8 @@ if(!dir.exists(file.path(BATCH.PATH))){dir.create(file.path(BATCH.PATH), showWar
 BATCH.RES.PATH <- paste0(RESULTS.PATH,"01_BatchResults/",BatchName,"/",BatchToTest,"/")
 
 
+### Extract Data
+
 eqnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 cbnames <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-Names-TAJ-Update.csv"),stringsAsFactors = FALSE,strip.white = T)
 Subgroup.Overview <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Port-Overview-Fin-Sector.csv"),stringsAsFactors=FALSE,strip.white = T)
@@ -54,6 +60,7 @@ CBCompProdSnapshots <- left_join(CBCompProdSnapshots, cbnames, by="COMPANY_CORP_
 CBCompProdSnapshots <- CBCompProdSnapshots %>% select(-Name) %>% rename(Name=Final.Name)
 CBCompProdSnapshots <-select(CBCompProdSnapshots,Year,Name,PortWeightEQYlvl, COMPANY_CORP_TICKER)
 CBCompProdSnapshots$Type <-"Fixed Income"
+
 
 CBALDAggProd<- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Port-ALD-BuildOut.csv"),stringsAsFactors=FALSE,strip.white = T) %>%
   filter(Aggregation=="GlobalAggregate",BenchmarkRegion==BenchmarkRegionchoose,Scenario %in% c("450S","NPS","CPS"),PortName == PortfolioName)%>%
@@ -104,3 +111,49 @@ COMP <- bind_rows(CBCompALD,EQCompALD)
 write.csv(port, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_Port.csv"),row.names = F)
 write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Americangeneral_COMP.csv"),row.names = F)
 write.csv(builtout, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_scenario.csv"),row.names = F)
+
+
+
+### TRISH ADDED
+### I use this code to put data for a specific company if they ask how the holdings relate to the ALD output
+
+### Constants
+
+PORTFOLIO.NAME <- "VARIABLE ANNUITY LIFE INSURANCE COMPANY (THE)"
+SCENARIO <- "450S"
+ASSET.CLASS <- "Bond" # TwoD.Asset.Type
+SECTOR <- c("Oil&Gas", "Coal")
+REPORTS.PATH <- paste0(RESULTS.PATH,"05_Reports/04_Others/CA-INS/CaliforniaInsurers/AIG/")
+
+
+PowerBIC <- c("Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
+OilGasBIC <-c("Oil Comp-Explor&Prodtn", "Oil Comp-Integrated","Oil&Gas Drilling" ,"Exploration...Production","Integrated.Oils") #Metal-Diversified is to get Rio Tinto...
+CoalBIC <-c("Coal","Metal-Diversified",  "Coal.Operations", "Metals...Mining", "Diversified Minerals") #Metal-Diversified is to get Rio Tinto...
+AutoBIC <- c("Auto-Cars/Light Trucks", "Automobiles.Manufacturing")
+
+SUBGROUPS.INCLUDED <- c(PowerBIC, OilGasBIC, CoalBIC, AutoBIC)
+
+### Data
+
+all.port <- read.csv(paste0(BATCH.PATH, "CA-INSPort.csv"), stringsAsFactors = FALSE)
+all.comp.ald <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Debt-Company-ALD-2023.csv"),stringsAsFactors = FALSE,strip.white = T)
+
+port <- all.port %>% filter(Portfolio.Name %in% PORTFOLIO.NAME, TwoD.Valid == 1)
+comp.ald <- all.comp.ald %>% filter(PortName %in% PORTFOLIO.NAME)
+
+
+comp.ald.sec <- comp.ald %>% filter(Scenario %in% SCENARIO, Sector %in% SECTOR)
+comp.ald.sec %>% distinct(COMPANY_CORP_TICKER, Position, .keep_all = TRUE) %>% summarise(comma(sum(Position)), sum(PortWeightEQYlvl))
+
+sec.tickers <- comp.ald.sec %>% distinct(COMPANY_CORP_TICKER)
+combo <- inner_join(port.input %>% filter(TwoD.Valid==1), sec.tickers, by=c("COMPANY_CORP_TICKER"))
+combo %>% filter(Subgroup %in% SUBGROUPS.INCLUDED) %>% summarise(comma(sum(ValueUSD)))
+
+combo.matched <- combo %>% filter(Subgroup %in% SUBGROUPS.INCLUDED) 
+combo.matched %>% summarise(comma(sum(ValueUSD)))
+
+clean.port.name <- gsub(" ","-", PORTFOLIO.NAME)
+clean.port.name <- gsub("-(THE)","", clean.port.name, fixed=TRUE)
+write.csv(combo.matched %>% select(Portfolio.Name, Holding.Name, ISIN, ValueUSD), 
+          file=paste0(REPORTS.PATH, clean.port.name, "-holdings.csv"), row.names=FALSE)
+          
