@@ -25,7 +25,7 @@ print(ParameterFile)
 SamplePortfolio <- FALSE
 InvestorName <- "California Insurers"
 ############ Change Portfolio Name here ##################
-PortfolioName<- "AMERICAN GENERAL LIFE INSURANCE COMPANY"
+PortfolioName<- "STATE COMPENSATION INSURANCE FUND"
 #-------------
 # Set Input / OUtput Locations Based on parameter File Input
 #------------
@@ -69,7 +69,7 @@ CBALDAggProd$Type <-'Fixed Income'
 CBCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"-Debt-Port-Company-ALD-Short-ALL.csv"),stringsAsFactors = FALSE,strip.white = T)
 CBCompALD <- subset(CBCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & Portfolio.Name == PortfolioName)
 CBCompALD <- CBCompALD %>%
-  select(COMPANY_CORP_TICKER,Portfolio.Name, Sector,Plan.WtTechProd,Scen.WtTechProd,Port.Sec.ClimateWt,Technology) %>%
+  select(COMPANY_CORP_TICKER,Portfolio.Name,Year,Sector,Plan.WtTechProd,Scen.WtTechProd,Port.Sec.ClimateWt,Technology) %>%
   rename("Ticker"=COMPANY_CORP_TICKER)
 CBCompALD$Type <-"Fixed Income"
 
@@ -93,7 +93,7 @@ EQALDAggProd$Type <-'Equity'
 EQCompALD <- read.csv(paste0(BATCH.RES.PATH,BatchName,"_Equity-Company-ALD.csv"),stringsAsFactors = FALSE,strip.white = T)
 EQCompALD <- subset(EQCompALD, Scenario == Scenariochoose & Aggregation==BenchmarkRegionchoose & PortName == PortfolioName)
 EQCompALD <- EQCompALD %>%
-  select(EQY_FUND_TICKER,PortName, Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology) %>%
+  select(EQY_FUND_TICKER,PortName,Year,Sector,WtProduction,Scen.WtProduction,PortWeightEQYlvl,Technology) %>%
   rename("Plan.WtTechProd"=WtProduction,
          "Scen.WtTechProd"=Scen.WtProduction,
          "Port.Sec.ClimateWt"=PortWeightEQYlvl,
@@ -111,6 +111,7 @@ COMP <- bind_rows(CBCompALD,EQCompALD)
 write.csv(port, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_Port.csv"),row.names = F)
 write.csv(COMP, file = paste0(BATCH.RES.PATH, "CHECKING/Americangeneral_COMP.csv"),row.names = F)
 write.csv(builtout, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_scenario.csv"),row.names = F)
+write.csv(Subgroup.Overview, file = paste0(BATCH.RES.PATH, "CHECKING/Overview-Fin-Sector.csv"),row.names = F)
 
 
 
@@ -119,11 +120,11 @@ write.csv(builtout, file = paste0(BATCH.RES.PATH, "CHECKING/Variable_scenario.cs
 
 ### Constants
 
-PORTFOLIO.NAME <- "VARIABLE ANNUITY LIFE INSURANCE COMPANY (THE)"
+PORTFOLIO.NAME <- "AIG PROPERTY CASUALTY COMPANY"
 SCENARIO <- "450S"
 ASSET.CLASS <- "Bond" # TwoD.Asset.Type
 SECTOR <- c("Oil&Gas", "Coal")
-REPORTS.PATH <- paste0(RESULTS.PATH,"05_Reports/04_Others/CA-INS/CaliforniaInsurers/AIG/")
+REPORTS.PATH <- paste0(BATCH.RES.PATH,"CHECKING/")
 
 
 PowerBIC <- c("Electric-Generation", "Electric-Integrated", "Independ Power Producer","Energy-Alternate Sources", "Utilities","Power.Generation")
@@ -143,16 +144,16 @@ comp.ald <- all.comp.ald %>% filter(PortName %in% PORTFOLIO.NAME)
 
 
 comp.ald.sec <- comp.ald %>% filter(Scenario %in% SCENARIO, Sector %in% SECTOR)
-comp.ald.sec %>% distinct(COMPANY_CORP_TICKER, Position, .keep_all = TRUE) %>% summarise(comma(sum(Position)), sum(PortWeightEQYlvl))
+comp.ald.sec %>% distinct(COMPANY_CORP_TICKER, Position, .keep_all = TRUE) %>% summarise((sum(Position)), sum(PortWeightEQYlvl))
 
 sec.tickers <- comp.ald.sec %>% distinct(COMPANY_CORP_TICKER)
-combo <- inner_join(port.input %>% filter(TwoD.Valid==1), sec.tickers, by=c("COMPANY_CORP_TICKER"))
-combo %>% filter(Subgroup %in% SUBGROUPS.INCLUDED) %>% summarise(comma(sum(ValueUSD)))
+combo <- inner_join(port %>% filter(TwoD.Valid==1), sec.tickers, by=c("COMPANY_CORP_TICKER"))
+combo %>% filter(Subgroup %in% SUBGROUPS.INCLUDED) %>% summarise((sum(ValueUSD)))
 
 combo.matched <- combo %>% filter(Subgroup %in% SUBGROUPS.INCLUDED) 
-combo.matched %>% summarise(comma(sum(ValueUSD)))
+combo.matched %>% summarise((sum(ValueUSD)))
 
-clean.port.name <- gsub(" ","-", PORTFOLIO.NAME)
+clean.port.name <- gsub(" ","_", PORTFOLIO.NAME)
 clean.port.name <- gsub("-(THE)","", clean.port.name, fixed=TRUE)
 write.csv(combo.matched %>% select(Portfolio.Name, Holding.Name, ISIN, ValueUSD), 
           file=paste0(REPORTS.PATH, clean.port.name, "-holdings.csv"), row.names=FALSE)
