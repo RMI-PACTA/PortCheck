@@ -1,3 +1,4 @@
+#This project was funded by the European Commission through LIFE program under grant: LIFE16 GIC/FR/000061 - PACTA)
 
 ### This file can be used to "override" any of the constants
 ### defined in either 2dii-init.R or a project specific init
