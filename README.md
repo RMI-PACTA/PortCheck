@@ -1,3 +1,5 @@
+**[Deprecated] Note this repo is no longer maintained, and is archived for historical context only.**
+
 ### This project was funded by the European Commission through LIFE program under grant: LIFE16 GIC/FR/000061 - PACTA
 # PortCheck
 
